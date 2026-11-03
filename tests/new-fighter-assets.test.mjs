@@ -88,7 +88,7 @@ test("new fighter kicks show windup, brief contact, planted recovery, then neutr
   assert.match(stripBuilder, /bonviure-kick-3\.png", "bonviure-kick-2\.png", "bonviure-kick-1\.png"/,
     "Bonviure should recoil after the extended kick instead of snapping directly to neutral");
   assert.match(css, /\.arena \.fighter\.motion-rig\.kick:is\(\.borja,\.bacora,\.bonviure,\.elchica,\.ogalla\) \{ --move-duration:760ms; \}/);
-  assert.match(page, /const actionDuration = (?:isSuper \? 1180 : )?level > 0 \? \(level === 2 \? 980 : 820\) : normalMove === "kick" \? \(extendedNewKick \? 760 : 620\) : 480/);
+  assert.match(page, /const (?:baseA|a)ctionDuration = (?:isSuper \? 1180 : )?level > 0 \? \(level === 2 \? 980 : 820\) : normalMove === "kick" \? \(extendedNewKick \? 760 : 620\) : 480/);
 });
 
 test("new fighter walk cycles use walk art and preserve facing", async () => {

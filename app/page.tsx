@@ -141,7 +141,7 @@ const STAGES = [
 
 const GAME_TITLE = "HARDCORE FIGHTERS";
 const GAME_EDITION = "WEB · ARCADE EDITION";
-const GAME_VERSION = "V2.20.0";
+const GAME_VERSION = "V2.21.0";
 
 const ROUND_SECONDS = 99;
 const SUPER_MAX = 100;
@@ -411,6 +411,7 @@ export default function Home() {
   const [superFlash, setSuperFlash] = useState<SuperFlash>(null);
   const [superFx, setSuperFx] = useState<SuperFx>(null);
   const [stunned, setStunned] = useState<Record<Side, boolean>>({ player: false, cpu: false });
+  const [passiveBadge, setPassiveBadge] = useState<Record<Side, { text: string; id: number } | null>>({ player: null, cpu: null });
   const [matchStats, setMatchStats] = useState<MatchStats>(freshMatchStats);
   const [roundEndKind, setRoundEndKind] = useState<"ko" | "perfect" | "time">("ko");
   const cpuSpecialReadyAtRef = useRef(0);
@@ -418,6 +419,9 @@ export default function Home() {
   const superArmorUntilRef = useRef<Record<Side, number>>({ player: 0, cpu: 0 });
   const audioRef = useRef<ArcadeAudio | null>(null);
   const preloadedFramesRef = useRef<HTMLImageElement[]>([]);
+  // Passive-ability counters (reset every round).
+  const passiveHitsRef = useRef<Record<Side, number>>({ player: 0, cpu: 0 });
+  const passiveSpecialsRef = useRef<Record<Side, number>>({ player: 0, cpu: 0 });
   const gameRef = useRef(game);
   const immuneUntilRef = useRef<Record<Side, number>>({ player: 0, cpu: 0 });
   const keysRef = useRef(new Set<string>());
@@ -444,6 +448,7 @@ export default function Home() {
   const attackTokenRef = useRef<Record<Side, number>>({ player: 0, cpu: 0 });
   const guardStartedRef = useRef<Record<Side, number>>({ player: 0, cpu: 0 });
   const performAttackRef = useRef<(side: Side, level?: AttackLevel, normalMove?: NormalMove) => void>(() => undefined);
+  const throwRef = useRef<(side: Side) => void>(() => undefined);
   const comboCountRef = useRef<Record<Side, number>>({ player: 0, cpu: 0 });
   const comboTimerRef = useRef<Record<Side, number | null>>({ player: null, cpu: null });
   const fightCallTimerRef = useRef<number | null>(null);
@@ -819,12 +824,13 @@ export default function Home() {
 
   const addMeter = useCallback((side: Side, amount: number) => {
     const previous = superMeterRef.current[side];
-    const next = Math.min(SUPER_MAX, previous + amount * (trainingMode ? 3 : 1));
+    const fighterPassive = FIGHTER_PROFILES[side === "player" ? selected : opponent].passive.id;
+    const next = Math.min(SUPER_MAX, previous + amount * (trainingMode ? 3 : 1) * (fighterPassive === "prismCharge" ? 1.5 : 1));
     if (next === previous) return;
     superMeterRef.current = { ...superMeterRef.current, [side]: next };
     setSuperMeter(superMeterRef.current);
     if (previous < SUPER_MAX && next >= SUPER_MAX && side === "player") jingle("meter");
-  }, [jingle, trainingMode]);
+  }, [jingle, opponent, selected, trainingMode]);
 
   const popDamage = useCallback((pop: Omit<DamagePop, "id">) => {
     const id = Date.now() + Math.random();
@@ -950,6 +956,47 @@ export default function Home() {
     }
   }, [addMeter, applyExtraHit, later]);
 
+  // Small label above a fighter for passive abilities, so it never fights the combo callouts.
+  const showPassive = useCallback((side: Side, text: string) => {
+    const id = Date.now() + Math.random();
+    setPassiveBadge((current) => ({ ...current, [side]: { text, id } }));
+    window.setTimeout(() => setPassiveBadge((current) => current[side]?.id === id ? { ...current, [side]: null } : current), 1100);
+  }, []);
+
+  type PassiveHit = { attacker: Side; target: Side; passive: string; targetPassive: string; level: AttackLevel; isSuper: boolean; guarded: boolean; perfectGuard: boolean; immune: boolean; armored: boolean; onBeat: boolean; dealt: number };
+  const applyPassiveOnHit = useCallback((hit: PassiveHit) => {
+    const landed = hit.dealt > 0 && !hit.guarded && !hit.immune;
+    if (hit.armored) showPassive(hit.target, "¡ARMADURA!");
+    if (hit.onBeat && landed) showPassive(hit.attacker, "♪ ¡A RITMO! ×1.4");
+    if (hit.passive === "investment" && landed) {
+      passiveHitsRef.current[hit.attacker] += 1;
+      if (passiveHitsRef.current[hit.attacker] % 4 === 0) {
+        setGame((current) => hit.attacker === "player"
+          ? { ...current, playerHealth: Math.min(100, current.playerHealth + 4) }
+          : { ...current, cpuHealth: Math.min(100, current.cpuHealth + 4) });
+        showPassive(hit.attacker, "¡INVERSIÓN! +4 ❤");
+      }
+    }
+    if (hit.passive === "venom" && landed && hit.level > 0 && !hit.isSuper) {
+      for (let tick = 1; tick <= 3; tick += 1) later(() => applyExtraHit(hit.attacker, hit.target, 2, "counter"), 600 * tick);
+      showPassive(hit.target, "☠ ¡ENVENENADO!");
+    }
+    if (hit.passive === "angler" && landed && hit.level > 0) {
+      setGame((current) => {
+        if (current.phase !== "fight") return current;
+        const ownX = hit.attacker === "player" ? current.playerX : current.cpuX;
+        const rivalX = hit.attacker === "player" ? current.cpuX : current.playerX;
+        const pulled = rivalX + Math.sign(ownX - rivalX) * 6;
+        const nextX = clampFighterStep(rivalX, ownX, pulled, minimumCombatGap);
+        return hit.attacker === "player" ? { ...current, cpuX: nextX } : { ...current, playerX: nextX };
+      });
+    }
+    if (hit.targetPassive === "shieldCounter" && hit.perfectGuard) {
+      later(() => applyExtraHit(hit.target, hit.attacker, 6, "counter"), 140);
+      later(() => showPassive(hit.target, "🛡 ¡CONTRA DE ESCUDO!"), 140);
+    }
+  }, [applyExtraHit, later, minimumCombatGap, showPassive]);
+
   const performAttack = useCallback(
     (side: Side, requestedLevel: AttackLevel = 0, normalMove: NormalMove = "punch") => {
       const snapshot = gameRef.current;
@@ -962,6 +1009,11 @@ export default function Home() {
       const ownAction = side === "player" ? snapshot.playerAction : snapshot.cpuAction;
       const airborne = side === "player" ? snapshot.playerAirborne : snapshot.cpuAirborne;
       const now = Date.now();
+      // Guard + punch = throw. It beats a rival who only blocks.
+      if (level === 0 && normalMove === "punch" && ownAction === "block" && !airborne) {
+        throwRef.current(side);
+        return;
+      }
       if (ownAction !== "idle" && ownAction !== "walk" && ownAction !== "dash" && ownAction !== "crouch" && ownAction !== "jump") {
         if (ownAction === "punch" || ownAction === "kick" || ownAction === "special") {
           queuedAttackRef.current[side] = { level, normalMove };
@@ -976,6 +1028,8 @@ export default function Home() {
       // Lucha specials are always available; only the move recovery remains.
       const fighter = side === "player" ? selected : opponent;
       const targetFighter = side === "player" ? opponent : selected;
+      const passive = FIGHTER_PROFILES[fighter].passive.id;
+      const targetPassive = FIGHTER_PROFILES[targetFighter].passive.id;
       const specialMove = level > 0 ? specialFor(fighter, level as Exclude<AttackLevel, 0>) : null;
       const isSuper = superReady && !cpuSpecialLocked;
       const attackVariant = level === 0 ? ((comboCountRef.current[side] % 3) + 1) as Exclude<AttackVariant, 0> : 0;
@@ -999,14 +1053,27 @@ export default function Home() {
       const fighterScale = powerMultiplier(fighter) * defenseMultiplier(targetFighter);
       const superMove = SUPER_MOVES[fighter];
       const superScale = isSuper ? (superMove.bonus === "crush" ? 2.3 : superMove.bonus === "multi" ? 1.45 : 1.75) : 1;
-      const damage = Math.max(1, Math.round(rawDamage * fighterScale * cpuScale * superScale));
+      const ownHealth = side === "player" ? snapshot.playerHealth : snapshot.cpuHealth;
+      const targetHealth = side === "player" ? snapshot.cpuHealth : snapshot.playerHealth;
+      let passiveScale = 1;
+      if (passive === "royalFury" && ownHealth < 30) passiveScale *= 1.2;
+      if (targetPassive === "royalFury" && targetHealth < 30) passiveScale *= .8;
+      if (passive === "liquidCourage") passiveScale *= 1 + Math.min(.3, passiveSpecialsRef.current[side] * .06);
+      const onBeatHit = passive === "onBeat" && getAudio().isOnBeat();
+      if (onBeatHit) passiveScale *= 1.4;
+      const noiseBonus = passive === "noise" && level === 0 && comboCountRef.current[side] >= 2 ? 2 : 0;
+      const damage = Math.max(1, Math.round((rawDamage + noiseBonus) * fighterScale * cpuScale * superScale * passiveScale));
+      if (level > 0 && !isSuper) passiveSpecialsRef.current[side] += 1;
       const attackDirection = side === "player"
         ? directionToOpponent(snapshot.playerX, snapshot.cpuX)
         : directionToOpponent(snapshot.cpuX, snapshot.playerX);
       const extendedNewKick = normalMove === "kick" && ["borja", "bacora", "bonviure", "elchica", "ogalla"].includes(fighter);
-      const actionDuration = isSuper ? 1180 : level > 0 ? (level === 2 ? 980 : 820) : normalMove === "kick" ? (extendedNewKick ? 760 : 620) : 480;
+      const baseActionDuration = isSuper ? 1180 : level > 0 ? (level === 2 ? 980 : 820) : normalMove === "kick" ? (extendedNewKick ? 760 : 620) : 480;
+      const passiveSpeed = (passive === "rhythmRush" && level === 0) ? .8 : (passive === "quickTrigger" && level > 0 && !isSuper) ? .75 : 1;
+      const actionDuration = Math.round(baseActionDuration * passiveSpeed);
       cooldownRef.current[side] = now + actionDuration;
-      const impactDelay = Math.round(actionDuration * (isSuper ? .6 : level > 0 ? .38 : extendedNewKick ? .4 : .48));
+      // Normals connect sooner than before so the controls feel snappy.
+      const impactDelay = Math.round(actionDuration * (isSuper ? .6 : level > 0 ? .38 : extendedNewKick ? .4 : normalMove === "punch" ? .34 : .42));
       const isKnockdownAttack = level === 2 || comboFinisher;
       const knockback = (isSuper ? 24 : level === 2 ? 18 : comboFinisher ? 8.5 : level === 1 ? 4.5 : normalMove === "kick" ? 3.4 : 2.1) + (airborne ? 2.4 : 0);
       swing(level > 0 ? "special" : normalMove === "kick" ? "heavy" : "light");
@@ -1142,6 +1209,10 @@ export default function Home() {
           const perfectGuard = targetGuarded && Date.now() - guardStartedRef.current[targetSide] <= 240;
           const counterHit = liveTargetAction === "punch" || liveTargetAction === "kick" || liveTargetAction === "special" || liveTargetAction === "dash";
           const appliedDamage = damage + (counterHit && !targetGuarded ? 2 : 0);
+          // Heavy fighters keep attacking through normal hits (supers still break the armor).
+          const armored = !isSuper && !targetGuarded && !targetImmune && (
+            (targetPassive === "heavyArmor" && (liveTargetAction === "kick" || liveTargetAction === "special"))
+            || (targetPassive === "berserkArmor" && liveTargetAction === "kick"));
           setGame((current) => {
             if (current.phase !== "fight") return current;
             const next = { ...current };
@@ -1151,15 +1222,15 @@ export default function Home() {
               const away = current.cpuX >= current.playerX ? 1 : -1;
               next.cpuHealth = trainingMode ? 100 : targetImmune || perfectGuard ? current.cpuHealth : Math.max(0, current.cpuHealth - (guarded ? Math.ceil(appliedDamage / (isSuper ? 2 : 3)) : appliedDamage));
               next.cpuEnergy = Math.min(100, current.cpuEnergy + 17);
-              next.cpuAction = targetImmune || guarded ? "block" : isKnockdownAttack ? "launched" : "hit";
-              next.cpuX = targetImmune ? current.cpuX : Math.max(fighterMinX, Math.min(fighterMaxX, current.cpuX + away * (guarded ? 0.8 : knockback)));
+              next.cpuAction = armored ? current.cpuAction : targetImmune || guarded ? "block" : isKnockdownAttack ? "launched" : "hit";
+              next.cpuX = targetImmune || armored ? current.cpuX : Math.max(fighterMinX, Math.min(fighterMaxX, current.cpuX + away * (guarded ? 0.8 : knockback)));
             } else {
               const guarded = current.playerAction === "block";
               const away = current.playerX >= current.cpuX ? 1 : -1;
               next.playerHealth = targetImmune || perfectGuard ? current.playerHealth : Math.max(0, current.playerHealth - (guarded ? Math.ceil(appliedDamage / (isSuper ? 2 : 3)) : appliedDamage));
               next.playerEnergy = Math.min(100, current.playerEnergy + 18);
-              next.playerAction = targetImmune || guarded ? "block" : isKnockdownAttack ? "launched" : "hit";
-              next.playerX = targetImmune ? current.playerX : Math.max(fighterMinX, Math.min(fighterMaxX, current.playerX + away * (guarded ? 0.8 : knockback)));
+              next.playerAction = armored ? current.playerAction : targetImmune || guarded ? "block" : isKnockdownAttack ? "launched" : "hit";
+              next.playerX = targetImmune || armored ? current.playerX : Math.max(fighterMinX, Math.min(fighterMaxX, current.playerX + away * (guarded ? 0.8 : knockback)));
             }
 
             next.impact += 1;
@@ -1176,6 +1247,7 @@ export default function Home() {
             return next;
           });
           const dealtDamage = targetImmune || perfectGuard ? 0 : targetGuarded ? Math.ceil(appliedDamage / (isSuper ? 2 : 3)) : appliedDamage;
+          applyPassiveOnHit({ attacker: side, target: targetSide, passive, targetPassive, level, isSuper, guarded: targetGuarded, perfectGuard, immune: targetImmune, armored, onBeat: onBeatHit, dealt: dealtDamage });
           if (!targetImmune) {
             if (perfectGuard) addMeter(targetSide, SUPER_GAIN.perfect);
             else if (targetGuarded) { addMeter(targetSide, SUPER_GAIN.guarded); addMeter(side, SUPER_GAIN.guarded); }
@@ -1293,8 +1365,75 @@ export default function Home() {
         }
       }, actionDuration);
     },
-    [addMeter, applySuperBonus, battleMode, beep, difficulty, fighterMaxX, fighterMinX, getAudio, haptic, later, minimumCombatGap, opponent, popDamage, progress.crowns, registerCombo, selected, sfx, showFightCall, soundOn, swing, trainingMode],
+    [addMeter, applyPassiveOnHit, applySuperBonus, battleMode, beep, difficulty, fighterMaxX, fighterMinX, getAudio, haptic, later, minimumCombatGap, opponent, popDamage, progress.crowns, registerCombo, selected, sfx, showFightCall, soundOn, swing, trainingMode],
   );
+
+  const throwRival = useCallback((side: Side) => {
+    const snap = gameRef.current;
+    if (snap.phase !== "fight" || pausedRef.current) return;
+    const now = Date.now();
+    if (cooldownRef.current[side] > now) return;
+    const target: Side = side === "player" ? "cpu" : "player";
+    const ownX = side === "player" ? snap.playerX : snap.cpuX;
+    const rivalX = side === "player" ? snap.cpuX : snap.playerX;
+    const targetAction = side === "player" ? snap.cpuAction : snap.playerAction;
+    const targetAirborne = side === "player" ? snap.cpuAirborne : snap.playerAirborne;
+    if (["launched", "knockdown", "getup"].includes(targetAction)) return;
+    cooldownRef.current[side] = now + 760;
+    attackTokenRef.current[side] += 1;
+    const direction = directionToOpponent(ownX, rivalX);
+    setGame((current) => side === "player"
+      ? { ...current, playerAction: "punch", playerAttackVariant: 2, playerPosePhase: 2, playerAttackDirection: direction, playerMove: null }
+      : { ...current, cpuAction: "punch", cpuAttackVariant: 2, cpuPosePhase: 2, cpuAttackDirection: direction, cpuMove: null });
+    swing("heavy");
+    const reset = () => setGame((current) => side === "player"
+      ? (current.playerAction === "punch" ? { ...current, playerAction: "idle", playerAttackVariant: 0, playerPosePhase: 0 } : current)
+      : (current.cpuAction === "punch" ? { ...current, cpuAction: "idle", cpuAttackVariant: 0, cpuPosePhase: 0 } : current));
+    const close = Math.abs(rivalX - ownX) <= minimumCombatGap + 7;
+    const escaped = targetAirborne || now < evadeUntilRef.current[target] || now < immuneUntilRef.current[target] || now < superArmorUntilRef.current[target];
+    if (!close || escaped) {
+      later(reset, 420);
+      return;
+    }
+    const fighter = side === "player" ? selected : opponent;
+    const targetFighter = side === "player" ? opponent : selected;
+    const cpuScale = side === "cpu" && battleMode === "cpu" ? CPU_DAMAGE_SCALE[difficulty] : 1;
+    const damage = Math.max(1, Math.round(12 * powerMultiplier(fighter) * defenseMultiplier(targetFighter) * cpuScale));
+    later(() => {
+      if (gameRef.current.phase !== "fight") return;
+      setGame((current) => {
+        if (current.phase !== "fight") return current;
+        const next = { ...current, impact: current.impact + 1, impactLevel: 3 as const };
+        const bounds = fighterBoundsRef.current;
+        if (target === "cpu") {
+          next.cpuHealth = trainingMode ? 100 : Math.max(0, current.cpuHealth - damage);
+          next.cpuAction = "launched";
+          next.cpuX = Math.max(bounds.min, Math.min(bounds.max, current.cpuX + Math.sign(current.cpuX - current.playerX || 1) * 10));
+        } else {
+          next.playerHealth = Math.max(0, current.playerHealth - damage);
+          next.playerAction = "launched";
+          next.playerX = Math.max(bounds.min, Math.min(bounds.max, current.playerX + Math.sign(current.playerX - current.cpuX || 1) * 10));
+        }
+        if (next.playerHealth <= 0) { next.phase = "ko"; next.winner = "cpu"; }
+        else if (next.cpuHealth <= 0) { next.phase = "ko"; next.winner = "player"; }
+        return next;
+      });
+      popDamage({ side: target, x: rivalX, amount: damage, kind: "counter" });
+      showFightCall("¡AGARRE!", side);
+      sfx("kick");
+      haptic([30, 30, 50]);
+      addMeter(side, 10);
+      addMeter(target, 8);
+      if (side === "player") setMatchStats((stats) => ({ ...stats, hits: stats.hits + 1, damage: stats.damage + damage }));
+      const actionKey = target === "player" ? "playerAction" : "cpuAction";
+      later(() => setGame((current) => current.phase === "fight" && current[actionKey] === "launched" ? { ...current, [actionKey]: "knockdown" } : current), 520);
+      later(() => setGame((current) => current.phase === "fight" && current[actionKey] === "knockdown" ? { ...current, [actionKey]: "getup" } : current), 1120);
+      later(() => setGame((current) => current.phase === "fight" && current[actionKey] === "getup" ? { ...current, [actionKey]: "idle" } : current), 1570);
+    }, 180);
+    later(reset, 520);
+  }, [addMeter, battleMode, difficulty, haptic, later, minimumCombatGap, opponent, popDamage, selected, sfx, showFightCall, swing, trainingMode]);
+
+  useEffect(() => { throwRef.current = throwRival; }, [throwRival]);
 
   useEffect(() => {
     performAttackRef.current = performAttack;
@@ -1518,6 +1657,14 @@ export default function Home() {
     attackTokenRef.current = { player: 0, cpu: 0 };
     comboCountRef.current = { player: 0, cpu: 0 };
     setCombo({ player: 0, cpu: 0 });
+    passiveHitsRef.current = { player: 0, cpu: 0 };
+    passiveSpecialsRef.current = { player: 0, cpu: 0 };
+    (["player", "cpu"] as Side[]).forEach((side) => {
+      if (FIGHTER_PROFILES[side === "player" ? selected : opponent].passive.id === "banner") {
+        superMeterRef.current = { ...superMeterRef.current, [side]: Math.max(superMeterRef.current[side], 30) };
+      }
+    });
+    setSuperMeter(superMeterRef.current);
     guardStartedRef.current = { player: 0, cpu: 0 };
     handledEndRef.current = false;
     setMovementGear({ player: "still", cpu: "still" });
@@ -1549,7 +1696,7 @@ export default function Home() {
       setRoundCall("");
       setGame((current) => ({ ...current, phase: "fight" }));
     }, 1250);
-  }, [clearTransientTimers, fightReady, jingle, later, newFighterMatch]);
+  }, [clearTransientTimers, fightReady, jingle, later, newFighterMatch, opponent, selected]);
 
   const resetMatchMeters = useCallback(() => {
     superMeterRef.current = { player: 0, cpu: 0 };
@@ -1561,7 +1708,26 @@ export default function Home() {
     setSuperFlash(null);
     setSuperFx(null);
     setStunned({ player: false, cpu: false });
+    setPassiveBadge({ player: null, cpu: null });
   }, []);
+
+  useEffect(() => {
+    if (game.phase !== "fight") return;
+    const dogSides = (["player", "cpu"] as Side[]).filter((side) => FIGHTER_PROFILES[side === "player" ? selected : opponent].passive.id === "dogBite");
+    if (!dogSides.length) return;
+    const timer = window.setInterval(() => {
+      const current = gameRef.current;
+      if (current.phase !== "fight" || pausedRef.current) return;
+      if (Math.abs(current.playerX - current.cpuX) > 26) return;
+      dogSides.forEach((side) => {
+        const target: Side = side === "player" ? "cpu" : "player";
+        if (Date.now() < immuneUntilRef.current[target] || Date.now() < evadeUntilRef.current[target]) return;
+        applyExtraHit(side, target, 4, "normal");
+        showPassive(side, "🐕 ¡MORDISCO DEL PERRO!");
+      });
+    }, 6500);
+    return () => window.clearInterval(timer);
+  }, [applyExtraHit, game.phase, opponent, selected, showPassive]);
 
   const startRound = useCallback(() => {
     setTrainingMode(false);
@@ -1950,6 +2116,10 @@ export default function Home() {
         performAttack("cpu", 2);
         return;
       }
+      if (current.playerAction === "block" && distance < minimumCombatGap + 6 && decision > (difficulty === "easy" ? .78 : difficulty === "hard" ? .4 : .55)) {
+        throwRef.current("cpu");
+        return;
+      }
       const playerAttacking = current.playerAction === "punch" || current.playerAction === "kick" || current.playerAction === "special";
       const playerCommitted = current.playerAction === "kick" || current.playerAction === "special";
       const playerFacingCpu = current.playerX <= current.cpuX ? current.playerAttackDirection === "toward-right" : current.playerAttackDirection === "toward-left";
@@ -2001,7 +2171,7 @@ export default function Home() {
       }
     }, AI_TICK[difficulty] + (aiStyle === "aggressive" ? -40 : aiStyle === "defensive" ? 40 : 0));
     return () => window.clearInterval(ai);
-  }, [aiStyle, battleMode, dash, difficulty, fighterMaxX, fighterMinX, jump, later, newFighterMatch, performAttack, trainingMode]);
+  }, [aiStyle, battleMode, dash, difficulty, fighterMaxX, fighterMinX, jump, later, minimumCombatGap, newFighterMatch, performAttack, trainingMode]);
 
   useEffect(() => {
     if (game.phase !== "fight") return;
@@ -2519,6 +2689,7 @@ export default function Home() {
             <div className="fighter-pose">
               <div className={`fighter-art ${selected} ${facing.player}`}>{!(["cesaret", "borja", "bacora", "bonviure", "elchica", "ogalla", "xuso", "bomba", "tonimassama"] as FighterId[]).includes(selected) && <FighterWalkLayers />}</div>
               {stunned.player && <b className="stun-word">★ ¡MAREADO! ★</b>}
+              {passiveBadge.player && <b key={passiveBadge.player.id} className="passive-word">{passiveBadge.player.text}</b>}
               {immuneClock < immuneUntil.player && <b className="immune-word">INMUNE · {Math.max(1, Math.ceil((immuneUntil.player - immuneClock) / 1000))}s</b>}
               {game.playerAirborne && (game.playerAction === "punch" || game.playerAction === "kick" || game.playerAction === "special") && <b className="air-attack-word">¡AÉREO!</b>}
               {(game.playerAction === "hit" || game.playerAction === "launched" || game.playerAction === "knockdown") && <b className="hit-word">{game.playerAction === "launched" ? "¡VUELA!" : game.playerAction === "knockdown" ? "¡AL SUELO!" : "CRASH!"}</b>}
@@ -2529,6 +2700,7 @@ export default function Home() {
             <div className="fighter-pose">
               <div className={`fighter-art ${opponent} ${facing.cpu}`}>{!(["cesaret", "borja", "bacora", "bonviure", "elchica", "ogalla", "xuso", "bomba", "tonimassama"] as FighterId[]).includes(opponent) && <FighterWalkLayers />}</div>
               {stunned.cpu && <b className="stun-word">★ ¡MAREADO! ★</b>}
+              {passiveBadge.cpu && <b key={passiveBadge.cpu.id} className="passive-word">{passiveBadge.cpu.text}</b>}
               {immuneClock < immuneUntil.cpu && <b className="immune-word">INMUNE · {Math.max(1, Math.ceil((immuneUntil.cpu - immuneClock) / 1000))}s</b>}
               {game.cpuAirborne && (game.cpuAction === "punch" || game.cpuAction === "kick" || game.cpuAction === "special") && <b className="air-attack-word">¡AÉREO!</b>}
               {(game.cpuAction === "hit" || game.cpuAction === "launched" || game.cpuAction === "knockdown") && <b className="hit-word">{game.cpuAction === "launched" ? "¡VUELA!" : game.cpuAction === "knockdown" ? "¡AL SUELO!" : "BAM!"}</b>}
@@ -2593,7 +2765,7 @@ export default function Home() {
         )}
 
         {game.phase === "select" && (
-          <div className="modal-layer select-screen lobby-v2168"
+          <div className="modal-layer select-screen lobby-v2168 lobby-v220"
             data-p1-locked={lobbyLocked[0]} data-p2-locked={lobbyLocked[1]}
             data-all-ready={lobbyLocked[0] && (battleMode === "cpu" || lobbyLocked[1])}>
             <header className="lobby-heading">
@@ -2602,7 +2774,7 @@ export default function Home() {
                 <span className="lobby-eyebrow">{FIGHTER_ORDER.length} LUCHADORES DISPONIBLES</span>
               </div>
               <div className="lobby-prison-mark">
-                <Image className="prison-logo" src="/assets/new-fighters/prison-logo.jpg" width={220} height={85} alt="PRISON" unoptimized />
+                <Image className="prison-logo prison-logo-clean" src="/assets/new-fighters/prison-logo-clean.webp" width={1689} height={374} alt="PRISON" unoptimized priority />
                 <span>LUCHA · SUPERVIVENCIA · SIN LÍMITES</span>
               </div>
             </header>
@@ -2637,32 +2809,6 @@ export default function Home() {
                   </button>
                 ))}
               </div>
-              {(() => {
-                const shown = touchSlot === 1 ? opponent : selected;
-                const profile = FIGHTER_PROFILES[shown];
-                const stats: [string, number][] = [["POTENCIA", profile.power], ["VELOCIDAD", profile.speed], ["DEFENSA", profile.defense]];
-                return (
-                  <div className={`fighter-dossier ${shown}`} style={{ "--dossier-color": FIGHTERS[shown].color } as CSSProperties} aria-live="polite">
-                    <div className="dossier-head">
-                      <small>{touchSlot === 1 ? (battleMode === "local" ? "JUGADOR 2" : "RIVAL CPU") : "JUGADOR 1"} · {profile.archetype}</small>
-                      <strong>{FIGHTERS[shown].name}</strong>
-                      <em>{FIGHTERS[shown].title}</em>
-                      <p>{profile.bio}</p>
-                    </div>
-                    <div className="dossier-stats">
-                      {stats.map(([label, value]) => (
-                        <div key={label}><span>{label}</span><i>{Array.from({ length: 5 }, (_, index) => <b key={index} className={index < value ? "on" : ""} />)}</i></div>
-                      ))}
-                    </div>
-                    <div className="dossier-moves">
-                      <span><kbd>K</kbd>{FIGHTERS[shown].specialOne}</span>
-                      <span><kbd>L</kbd>{FIGHTERS[shown].specialTwo}</span>
-                      <span className="dossier-super"><kbd>★</kbd>{SUPER_MOVES[shown].name} · {SUPER_MOVES[shown].description}</span>
-                      <span className="dossier-vs">{FIGHTERS[selected].name} <b>VS</b> {FIGHTERS[opponent].name}</span>
-                    </div>
-                  </div>
-                );
-              })()}
               <div className="lobby-help" aria-live="polite">
                 <strong>{lobbyLocked[0] && (battleMode === "cpu" || lobbyLocked[1]) ? "2 · ELIGE EL MODO DE JUEGO" : "1 · CONFIRMA TU PERSONAJE"}</strong>
                 <span>Los dos jugadores eligen en las imágenes: P1 naranja · P2 azul.</span>
@@ -2670,19 +2816,62 @@ export default function Home() {
                 <button type="button" onClick={() => { setLobbyLocked([true, true]); document.querySelector<HTMLButtonElement>(".mode-start-actions [data-gamepad-default]")?.focus(); }}>IR A LOS JUEGOS →</button>
               </div>
             </div>
+            {(() => {
+              const shown = touchSlot === 1 ? opponent : selected;
+              const profile = FIGHTER_PROFILES[shown];
+              const stats: [string, number][] = [["FUERZA", profile.power], ["VELOCIDAD", profile.speed], ["DEFENSA", profile.defense], ["TÉCNICA", profile.technique]];
+              const tag = touchSlot === 1 ? (battleMode === "local" ? "P2" : "CPU") : "P1";
+              return (
+                <aside className={`fighter-showcase ${shown} ${touchSlot === 1 ? "showcase-rival" : ""}`} style={{ "--dossier-color": FIGHTERS[shown].color } as CSSProperties} aria-live="polite" aria-label={`Ficha de ${FIGHTERS[shown].name}`}>
+                  <div className="showcase-tabs" role="tablist" aria-label="Ver ficha">
+                    <button type="button" role="tab" aria-selected={touchSlot === 0} onClick={() => setTouchSlot(0)}>P1 · {FIGHTERS[selected].name}</button>
+                    <button type="button" role="tab" aria-selected={touchSlot === 1} onClick={() => setTouchSlot(1)}>{battleMode === "local" ? "P2" : "RIVAL"} · {FIGHTERS[opponent].name}</button>
+                  </div>
+                  <div className="showcase-top">
+                    <span className="showcase-tag">{tag}</span>
+                    <div className="showcase-portrait"><span className={`portrait ${shown}`} /></div>
+                    <div className="showcase-identity">
+                      <strong>{FIGHTERS[shown].name}</strong>
+                      <em>{FIGHTERS[shown].title}</em>
+                      <q>{profile.motto}</q>
+                      <div className="showcase-stats">
+                        {stats.map(([label, value]) => (
+                          <div key={label}><span>{label}</span><i><b style={{ width: `${value * 20}%` }} /></i></div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="showcase-bottom">
+                    <div className="showcase-style">
+                      <small>ESTILO DE LUCHA</small>
+                      <strong>{profile.archetype}</strong>
+                      <p>{profile.bio}</p>
+                      <div className="showcase-passive"><small>HABILIDAD ÚNICA</small><b>{profile.passive.name}</b><span>{profile.passive.description}</span></div>
+                    </div>
+                    <div className="showcase-moves">
+                      <small>MOVIMIENTOS DESTACADOS</small>
+                      <span><kbd className="key-k">K</kbd>{FIGHTERS[shown].specialOne}</span>
+                      <span><kbd className="key-l">L</kbd>{FIGHTERS[shown].specialTwo}</span>
+                      <span><kbd className="key-super">★</kbd>SUPER · {SUPER_MOVES[shown].name}</span>
+                      <span><kbd className="key-throw">S+J</kbd>AGARRE</span>
+                    </div>
+                  </div>
+                </aside>
+              );
+            })()}
             <div className="lobby-games">
               <h2>MODOS DE JUEGO <small>ELIGE CÓMO QUIERES JUGAR</small></h2>
               <div className="mode-start-actions">
-                <button className="fight-button" type="button" onClick={startRound} disabled={!fightReady} data-gamepad-default="true">MODO LUCHA <span>↗</span></button>
-                <button className="fight-button coop-mode-button" type="button" onClick={startCoopMode} disabled={!fightersReady}>AVENTURA COOPERATIVA <span>∞</span></button>
-                <button className="fight-button orb-mode-button" type="button" onClick={startOrbMode} disabled={!fightersReady}>MODO ROMPEOBJETOS <span>◆</span></button>
-                <button className="fight-button platform-mode-button" type="button" onClick={startPlatformMode} disabled={!fightersReady}>AVENTURA CENTRAL <span>★</span></button>
-                <button className="fight-button prison-slug-mode-button" type="button" onClick={startPrisonSlugMode} disabled={!fightersReady}>PRISON SLUG <span>▶</span></button>
-                <button className="fight-button campaign-mode-button" type="button" onClick={startCampaign} disabled={!fightReady}>TORNEO DE LA RIBERA <span>♛</span></button>
-                <button className="fight-button training-menu-button" type="button" onClick={startTraining} disabled={!fightReady}>ENTRENAMIENTO <span>∞</span></button>
-                <button className="fight-button ranking-menu-button" type="button" onClick={() => setRankingOpen(true)}>RANKING MUNDIAL</button>
-                <button className="fight-button arcade-tool-button" type="button" onClick={() => setArcadeTool("moves")}>MOVIMIENTOS</button>
-                <button className="fight-button arcade-tool-button" type="button" onClick={() => setArcadeTool("profile")}>PERFIL Y PREMIOS</button>
+                <button className="fight-button" type="button" onClick={startRound} disabled={!fightReady} data-gamepad-default="true">MODO LUCHA <span>↗</span><small className="mode-sub">PARTIDAS RÁPIDAS CONTRA LA IA O UN AMIGO</small></button>
+                <button className="fight-button coop-mode-button" type="button" onClick={startCoopMode} disabled={!fightersReady}>AVENTURA COOPERATIVA <span>∞</span><small className="mode-sub">HASTA 2 JUGADORES</small></button>
+                <button className="fight-button orb-mode-button" type="button" onClick={startOrbMode} disabled={!fightersReady}>MODO ROMPEOBJETOS <span>◆</span><small className="mode-sub">DESTRUYE Y CONSIGUE PUNTOS</small></button>
+                <button className="fight-button platform-mode-button" type="button" onClick={startPlatformMode} disabled={!fightersReady}>AVENTURA CENTRAL <span>★</span><small className="mode-sub">HISTORIA PRINCIPAL</small></button>
+                <button className="fight-button prison-slug-mode-button" type="button" onClick={startPrisonSlugMode} disabled={!fightersReady}>PRISON SLUG <span>▶</span><small className="mode-sub">SUPERVIVENCIA EXTREMA</small></button>
+                <button className="fight-button campaign-mode-button" type="button" onClick={startCampaign} disabled={!fightReady}>TORNEO DE LA RIBERA <span>♛</span><small className="mode-sub">COMPITE Y DEMUESTRA TU VALOR</small></button>
+                <button className="fight-button training-menu-button" type="button" onClick={startTraining} disabled={!fightReady}>ENTRENAMIENTO <span>∞</span><small className="mode-sub">PRACTICA TUS MOVIMIENTOS</small></button>
+                <button className="fight-button ranking-menu-button" type="button" onClick={() => setRankingOpen(true)}>RANKING MUNDIAL<small className="mode-sub">ESCALA POSICIONES EN LÍNEA</small></button>
+                <button className="fight-button arcade-tool-button" type="button" onClick={() => setArcadeTool("moves")}>MOVIMIENTOS<small className="mode-sub">LISTA COMPLETA DE COMBOS</small></button>
+                <button className="fight-button arcade-tool-button" type="button" onClick={() => setArcadeTool("profile")}>PERFIL Y PREMIOS<small className="mode-sub">LOGROS Y RECOMPENSAS</small></button>
               </div>
               <div className="match-settings-heading"><span>⚙</span><div><b>CONFIGURACIÓN DE PARTIDA</b><small>AJUSTA TU COMBATE</small></div></div>
               <button className="control-size-button" type="button" onClick={() => setArcadeTool("controls")}><span>▣</span>TAMAÑO DE BOTONES</button>
@@ -2720,6 +2909,8 @@ export default function Home() {
                   <b>{playerData.specialOne}</b><span>Sin recarga · ESPECIAL 1</span>
                   <b>{playerData.specialTwo}</b><span>Sin recarga · ESPECIAL 2</span>
                   <b>SUPER · {SUPER_MOVES[selected].name}</b><span>{SUPER_MOVES[selected].description}. Llena la barra SUPER golpeando y recibiendo golpes; con la barra llena, ESPECIAL 2 lo lanza</span>
+                  <b>AGARRE</b><span>Mantén bloqueo y pulsa puño cerca del rival: rompe su guardia y lo tira al suelo</span>
+                  <b>HABILIDAD · {FIGHTER_PROFILES[selected].passive.name}</b><span>{FIGHTER_PROFILES[selected].passive.description}</span>
                   <b>ESQUIVA</b><span>Mantén bloqueo y pulsa una dirección</span>
                   <b>BLOQUEO PERFECTO</b><span>Bloquea justo antes del impacto: no recibes daño y cargas mucha barra</span>
                   <b>CONTRAATAQUE</b><span>Golpea al rival mientras ataca para hacer daño extra</span>
@@ -2953,6 +3144,7 @@ export default function Home() {
               <div><kbd>K</kbd><span>{SHORT_SPECIALS[selected][0]}</span></div>
               <div><kbd>L</kbd><span>{SHORT_SPECIALS[selected][1]} · SUPER CON BARRA LLENA</span></div>
               <div><kbd>S + A/D</kbd><span>BLOQUEAR · ESQUIVAR</span></div>
+              <div><kbd>S + J</kbd><span>AGARRE</span></div>
             </>
           )}
         </div>

@@ -79,6 +79,7 @@ export class ArcadeAudio {
   private theme: MusicTheme | null = null;
   private step = 0;
   private nextNoteTime = 0;
+  private musicStart = 0;
 
   ensure(): AudioContext | null {
     if (typeof window === "undefined") return null;
@@ -263,7 +264,17 @@ export class ArcadeAudio {
     this.theme = theme;
     this.step = 0;
     this.nextNoteTime = context.currentTime + 0.06;
+    this.musicStart = this.nextNoteTime;
     this.schedulerTimer = setInterval(() => this.schedule(), 25);
+  }
+
+  /** True when "now" lands on a beat of the music (or of a 168 BPM clock when the music is off). */
+  isOnBeat() {
+    const bpm = this.theme ? PATTERNS[this.theme].bpm : 168;
+    const beat = 60 / bpm;
+    const now = this.context && this.theme ? this.context.currentTime - this.musicStart : performance.now() / 1000;
+    const phase = ((now % beat) + beat) % beat / beat;
+    return phase < 0.2 || phase > 0.86;
   }
 
   stopMusic() {
