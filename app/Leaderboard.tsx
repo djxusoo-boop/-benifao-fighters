@@ -46,7 +46,7 @@ const saveLocalScore = (mode: LeaderboardMode, score: number, fighter: string | 
 export default function Leaderboard({ initialMode = "fight", score, fighter, onClose }: {
   initialMode?: LeaderboardMode;
   score?: number | null;
-  fighter?: "maletilla" | "vanessa" | "josevictor" | "cristian" | "cesaret" | "borja" | "bacora" | "bonviure" | "elchica" | "ogalla";
+  fighter?: string;
   onClose: () => void;
 }) {
   const [mode, setMode] = useState<LeaderboardMode>(initialMode);

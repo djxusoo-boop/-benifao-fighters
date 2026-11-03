@@ -4,10 +4,10 @@ import test from "node:test";
 
 test("new attack poses referenced by the fight exist as transparent PNGs", async () => {
   const css = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
-  const names = new Set([...css.matchAll(/\/assets\/new-fighters\/((?:bacora|borja|bonviure|elchica|ogalla)-(?:punch-[1234]|kick-[1234]|punch-contact-v2|bottle-special-v2|throw-special-v2|staff-special-v2|release-shield-v1)\.png)/g)].map((match) => match[1]));
+  const names = new Set([...css.matchAll(/\/assets\/new-fighters\/((?:bacora|borja|bonviure|elchica|ogalla)-(?:punch-[1234]|kick-[1234]|punch-contact-v2|bottle-special-v2|throw-special-v2|staff-special-v2|release-shield-v1)\.webp)/g)].map((match) => match[1]));
   assert.ok(names.size >= 30, "all five fighters should have their new poses wired in");
   for (const name of names) {
-    const png = await readFile(new URL(`../public/assets/new-fighters/${name}`, import.meta.url));
+    const png = await readFile(new URL(`../public/assets/new-fighters/${name.replace(/\.webp$/, ".png")}`, import.meta.url));
     assert.equal(png.subarray(1, 4).toString(), "PNG", `${name} must be a PNG`);
     assert.ok(png.readUInt32BE(16) > 100 && png.readUInt32BE(20) > 100, `${name} needs enough resolution`);
     assert.ok([4, 6].includes(png[25]), `${name} must have an alpha channel`);
@@ -27,23 +27,23 @@ test("new fighter attacks clear the legacy body layer and use opponent-facing po
   assert.ok(correctedFacing > legacyPunchMirror, "the new poses must override the old direction reversal");
   assert.match(css.slice(cleanAttackLayer), /background:transparent none no-repeat center bottom \/ auto 100%!important/);
   assert.match(css.slice(correctedFacing), /transform:scaleX\(1\)!important/);
-  assert.match(css, /--special-c:url\('\/assets\/new-fighters\/bacora-release-shield-v1\.png'\)/);
+  assert.match(css, /--special-c:url\('\/assets\/new-fighters\/bacora-release-shield-v1\.webp'\)/);
 
   const punchRecovery = css.match(/@keyframes new-punch-sequence-v21828\s*\{([\s\S]*?)\n\}/)?.[1] ?? "";
   assert.match(punchRecovery, /70%\s*\{\s*background-image:var\(--punch-d\)/,
     "punches should recover to the neutral/contact recovery frame, not re-strike backwards");
 
   const bacoraShieldRecovery = css.match(/@keyframes bacora-shield-sequence-v21832\s*\{([\s\S]*?)\n\}/)?.[1] ?? "";
-  assert.match(bacoraShieldRecovery, /36%,78%,100%\s*\{\s*background-image:url\('\/assets\/new-fighters\/bacora-release-shield-v1\.png'\)/,
+  assert.match(bacoraShieldRecovery, /36%,78%,100%\s*\{\s*background-image:url\('\/assets\/new-fighters\/bacora-release-shield-v1\.webp'\)/,
     "the W shield must stay out of Bacora's hand during projectile travel and recovery");
 });
 
 test("weapon specials keep their fighter-specific contact frame", async () => {
   const css = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
   assert.match(css, /\.fighter\.motion-rig\.borja\.special:is\(\.toad,\.venom\)\.pose-phase-2[\s\S]*borja-attack\.webp/);
-  assert.match(css, /\.fighter\.motion-rig\.ogalla\.special\.artichokes\.pose-phase-2[\s\S]*ogalla-punch-3\.png/);
-  assert.match(css, /\.fighter\.motion-rig\.tonimassama\.special\.goldPistol\.pose-phase-2[\s\S]*tonimassama-frames\/pistol\.png/);
-  assert.match(css, /\.fighter\.motion-rig\.tonimassama\.special\.fingerPeinetas\.pose-phase-2[\s\S]*tonimassama-frames\/punch\.png/);
+  assert.match(css, /\.fighter\.motion-rig\.ogalla\.special\.artichokes\.pose-phase-2[\s\S]*ogalla-punch-3\.webp/);
+  assert.match(css, /\.fighter\.motion-rig\.tonimassama\.special\.goldPistol\.pose-phase-2[\s\S]*tonimassama-frames\/pistol\.webp/);
+  assert.match(css, /\.fighter\.motion-rig\.tonimassama\.special\.fingerPeinetas\.pose-phase-2[\s\S]*tonimassama-frames\/punch\.webp/);
 });
 
 test("new fighter kicks show windup, brief contact, planted recovery, then neutral", async () => {
@@ -62,9 +62,9 @@ test("new fighter kicks show windup, brief contact, planted recovery, then neutr
     "the attack must keep a single image loaded while its strip position changes");
 
   for (const fighter of ["borja", "bacora", "bonviure", "elchica", "ogalla"]) {
-    assert.match(css, new RegExp(`\\.arena \\.fighter\\.motion-rig\\.kick\\.${fighter} \\.fighter-art::after \\{ background-image:url\\('/assets/new-fighters/${fighter}-kick-strip-v21836\\.png'\\)!important; animation:new-kick-strip-v21836 760ms`),
+    assert.match(css, new RegExp(`\\.arena \\.fighter\\.motion-rig\\.kick\\.${fighter} \\.fighter-art::after \\{ background-image:url\\('/assets/new-fighters/${fighter}-kick-strip-v21836\\.webp'\\)!important; animation:new-kick-strip-v21836 760ms`),
       `${fighter} needs a stable kick strip and grounded recovery frame`);
-    assert.match(css, new RegExp(`\\.arena \\.fighter\\.motion-rig\\.punch\\.${fighter} \\.fighter-art::after \\{ background-image:url\\('/assets/new-fighters/${fighter}-punch-strip-v21836\\.png'\\)!important; animation:new-punch-strip-v21836 480ms`),
+    assert.match(css, new RegExp(`\\.arena \\.fighter\\.motion-rig\\.punch\\.${fighter} \\.fighter-art::after \\{ background-image:url\\('/assets/new-fighters/${fighter}-punch-strip-v21836\\.webp'\\)!important; animation:new-punch-strip-v21836 480ms`),
       `${fighter} needs a stable punch strip`);
     for (const action of ["punch", "kick"]) {
       const png = await readFile(new URL(`../public/assets/new-fighters/${fighter}-${action}-strip-v21836.png`, import.meta.url));
@@ -88,15 +88,15 @@ test("new fighter kicks show windup, brief contact, planted recovery, then neutr
   assert.match(stripBuilder, /bonviure-kick-3\.png", "bonviure-kick-2\.png", "bonviure-kick-1\.png"/,
     "Bonviure should recoil after the extended kick instead of snapping directly to neutral");
   assert.match(css, /\.arena \.fighter\.motion-rig\.kick:is\(\.borja,\.bacora,\.bonviure,\.elchica,\.ogalla\) \{ --move-duration:760ms; \}/);
-  assert.match(page, /const actionDuration = level > 0 \? \(level === 2 \? 980 : 820\) : normalMove === "kick" \? \(extendedNewKick \? 760 : 620\) : 480/);
+  assert.match(page, /const actionDuration = (?:isSuper \? 1180 : )?level > 0 \? \(level === 2 \? 980 : 820\) : normalMove === "kick" \? \(extendedNewKick \? 760 : 620\) : 480/);
 });
 
 test("new fighter walk cycles use walk art and preserve facing", async () => {
   const css = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
-  assert.match(css, /--weapon-walk-b:url\('\/assets\/new-fighters\/bacora-walk\.png'\)/);
-  assert.match(css, /--weapon-walk-b:url\('\/assets\/new-fighters\/bonviure-walk\.png'\)/);
-  assert.match(css, /background-image:url\('\/assets\/new-fighters\/elchica-atlas\.png'\)!important/);
-  assert.match(css, /background-image:url\('\/assets\/new-fighters\/ogalla-atlas\.png'\)!important/);
+  assert.match(css, /--weapon-walk-b:url\('\/assets\/new-fighters\/bacora-walk\.webp'\)/);
+  assert.match(css, /--weapon-walk-b:url\('\/assets\/new-fighters\/bonviure-walk\.webp'\)/);
+  assert.match(css, /background-image:url\('\/assets\/new-fighters\/elchica-atlas\.webp'\)!important/);
+  assert.match(css, /background-image:url\('\/assets\/new-fighters\/ogalla-atlas\.webp'\)!important/);
   assert.match(css, /@keyframes atlas-walk-v21835\s*\{[\s\S]*?50%,100%\s*\{\s*background-position:100% 0%/);
   assert.doesNotMatch(css, /--clean-walk-[ab]:url\('\/assets\/new-fighters\/(?:elchica|ogalla)-punch-/,
     "walking must not reuse punch poses");

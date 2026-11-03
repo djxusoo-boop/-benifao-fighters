@@ -57,7 +57,7 @@ test("server-renders the accessible game shell", async () => {
   assert.match(html, /SONIDO OFF/);
   assert.match(html, /MÚSICA OFF/);
   assert.match(html, /1P · [^<]*<!-- -->100<!-- -->%/);
-  assert.match(html, /ESPECIALES SIN RECARGA/);
+  assert.match(html, /SUPER 0%/);
   assert.match(html, /1 JUGADOR \+ IA/);
 });
 

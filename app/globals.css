@@ -985,9 +985,9 @@ html.arcade-projector body { width:100%;height:100%;overflow:hidden;background:#
 .crowd-three-pose .arcade-crowd-alt {
   filter: contrast(1.06) saturate(1.05) brightness(1.06) drop-shadow(0 8px 5px rgba(0,0,0,.74));
 }
-.crowd-person-couple .arcade-crowd-art { background-image: url("/assets/mobile/spectator-couple-sprite-v1.png"); }
-.crowd-person-polkadot .arcade-crowd-art { background-image: url("/assets/mobile/spectator-polkadot-couple-sprite-v1.png"); }
-.crowd-person-flagfan .arcade-crowd-art { background-image: url("/assets/mobile/spectator-flagfan-sprite-v1.png"); }
+.crowd-person-couple .arcade-crowd-art { background-image: url("/assets/mobile/spectator-couple-sprite-v1.webp"); }
+.crowd-person-polkadot .arcade-crowd-art { background-image: url("/assets/mobile/spectator-polkadot-couple-sprite-v1.webp"); }
+.crowd-person-flagfan .arcade-crowd-art { background-image: url("/assets/mobile/spectator-flagfan-sprite-v1.webp"); }
 
 .crowd-three-pose .arcade-crowd-art {
   background-position: center bottom;
@@ -1013,36 +1013,36 @@ html.arcade-projector body { width:100%;height:100%;overflow:hidden;background:#
 
 .crowd-four-pose .arcade-crowd-alt.is-active { opacity: 1; }
 
-.crowd-person-hardcorefan .crowd-pose-idle { background-image: url("/assets/mobile/crowd-hardcorefan-idle-v1.png"); }
-.crowd-person-hardcorefan .crowd-pose-point { background-image: url("/assets/mobile/crowd-hardcorefan-point-v1.png"); }
-.crowd-person-hardcorefan .crowd-pose-cheer { background-image: url("/assets/mobile/crowd-hardcorefan-cheer-v1.png"); }
-.crowd-person-blackcouple .crowd-pose-idle { background-image: url("/assets/mobile/crowd-blackcouple-idle-v1.png"); }
-.crowd-person-blackcouple .crowd-pose-point { background-image: url("/assets/mobile/crowd-blackcouple-point-v1.png"); }
-.crowd-person-blackcouple .crowd-pose-cheer { background-image: url("/assets/mobile/crowd-blackcouple-cheer-v1.png"); }
-.crowd-person-rainbow .crowd-pose-idle { background-image: url("/assets/mobile/crowd-rainbow-idle-v1.png"); }
-.crowd-person-rainbow .crowd-pose-point { background-image: url("/assets/mobile/crowd-rainbow-point-v1.png"); }
-.crowd-person-rainbow .crowd-pose-cheer { background-image: url("/assets/mobile/crowd-rainbow-cheer-v1.png"); }
-.crowd-person-lacewoman .crowd-pose-idle { background-image: url("/assets/mobile/crowd-lacewoman-idle-v1.png"); }
-.crowd-person-lacewoman .crowd-pose-point { background-image: url("/assets/mobile/crowd-lacewoman-point-v1.png"); }
-.crowd-person-lacewoman .crowd-pose-cheer { background-image: url("/assets/mobile/crowd-lacewoman-cheer-v1.png"); }
-.crowd-person-blackdress .crowd-pose-idle { background-image: url("/assets/mobile/crowd-blackdress-idle-v1.png"); }
-.crowd-person-blackdress .crowd-pose-point { background-image: url("/assets/mobile/crowd-blackdress-point-v1.png"); }
-.crowd-person-blackdress .crowd-pose-cheer { background-image: url("/assets/mobile/crowd-blackdress-cheer-v1.png"); }
-.crowd-person-motocross .crowd-pose-idle { background-image: url("/assets/mobile/crowd-motocross-idle-v1.png"); }
-.crowd-person-motocross .crowd-pose-point { background-image: url("/assets/mobile/crowd-motocross-point-v1.png"); }
-.crowd-person-motocross .crowd-pose-cheer { background-image: url("/assets/mobile/crowd-motocross-cheer-v1.png"); }
-.crowd-person-baldpuma .crowd-pose-idle { background-image: url("/assets/mobile/crowd-baldpuma-idle-v1.png"); }
-.crowd-person-baldpuma .crowd-pose-point { background-image: url("/assets/mobile/crowd-baldpuma-point-v1.png"); }
-.crowd-person-baldpuma .crowd-pose-cheer { background-image: url("/assets/mobile/crowd-baldpuma-cheer-v1.png"); }
-.crowd-person-hoodiepuma .crowd-pose-idle { background-image: url("/assets/mobile/crowd-hoodiepuma-idle-v1.png"); }
-.crowd-person-hoodiepuma .crowd-pose-point { background-image: url("/assets/mobile/crowd-hoodiepuma-point-v1.png"); }
-.crowd-person-hoodiepuma .crowd-pose-cheer { background-image: url("/assets/mobile/crowd-hoodiepuma-cheer-v1.png"); }
-.crowd-person-dancecouple .crowd-pose-idle { background-image: url("/assets/mobile/crowd-dancecouple-idle-v1.png"); }
-.crowd-person-dancecouple .crowd-pose-point { background-image: url("/assets/mobile/crowd-dancecouple-point-v1.png"); }
-.crowd-person-dancecouple .crowd-pose-cheer { background-image: url("/assets/mobile/crowd-dancecouple-cheer-v1.png"); }
-.crowd-person-backpacker .crowd-pose-idle { background-image: url("/assets/mobile/crowd-backpacker-idle-v1.png"); }
-.crowd-person-backpacker .crowd-pose-point { background-image: url("/assets/mobile/crowd-backpacker-point-v1.png"); }
-.crowd-person-backpacker .crowd-pose-cheer { background-image: url("/assets/mobile/crowd-backpacker-cheer-v1.png"); }
+.crowd-person-hardcorefan .crowd-pose-idle { background-image: url("/assets/mobile/crowd-hardcorefan-idle-v1.webp"); }
+.crowd-person-hardcorefan .crowd-pose-point { background-image: url("/assets/mobile/crowd-hardcorefan-point-v1.webp"); }
+.crowd-person-hardcorefan .crowd-pose-cheer { background-image: url("/assets/mobile/crowd-hardcorefan-cheer-v1.webp"); }
+.crowd-person-blackcouple .crowd-pose-idle { background-image: url("/assets/mobile/crowd-blackcouple-idle-v1.webp"); }
+.crowd-person-blackcouple .crowd-pose-point { background-image: url("/assets/mobile/crowd-blackcouple-point-v1.webp"); }
+.crowd-person-blackcouple .crowd-pose-cheer { background-image: url("/assets/mobile/crowd-blackcouple-cheer-v1.webp"); }
+.crowd-person-rainbow .crowd-pose-idle { background-image: url("/assets/mobile/crowd-rainbow-idle-v1.webp"); }
+.crowd-person-rainbow .crowd-pose-point { background-image: url("/assets/mobile/crowd-rainbow-point-v1.webp"); }
+.crowd-person-rainbow .crowd-pose-cheer { background-image: url("/assets/mobile/crowd-rainbow-cheer-v1.webp"); }
+.crowd-person-lacewoman .crowd-pose-idle { background-image: url("/assets/mobile/crowd-lacewoman-idle-v1.webp"); }
+.crowd-person-lacewoman .crowd-pose-point { background-image: url("/assets/mobile/crowd-lacewoman-point-v1.webp"); }
+.crowd-person-lacewoman .crowd-pose-cheer { background-image: url("/assets/mobile/crowd-lacewoman-cheer-v1.webp"); }
+.crowd-person-blackdress .crowd-pose-idle { background-image: url("/assets/mobile/crowd-blackdress-idle-v1.webp"); }
+.crowd-person-blackdress .crowd-pose-point { background-image: url("/assets/mobile/crowd-blackdress-point-v1.webp"); }
+.crowd-person-blackdress .crowd-pose-cheer { background-image: url("/assets/mobile/crowd-blackdress-cheer-v1.webp"); }
+.crowd-person-motocross .crowd-pose-idle { background-image: url("/assets/mobile/crowd-motocross-idle-v1.webp"); }
+.crowd-person-motocross .crowd-pose-point { background-image: url("/assets/mobile/crowd-motocross-point-v1.webp"); }
+.crowd-person-motocross .crowd-pose-cheer { background-image: url("/assets/mobile/crowd-motocross-cheer-v1.webp"); }
+.crowd-person-baldpuma .crowd-pose-idle { background-image: url("/assets/mobile/crowd-baldpuma-idle-v1.webp"); }
+.crowd-person-baldpuma .crowd-pose-point { background-image: url("/assets/mobile/crowd-baldpuma-point-v1.webp"); }
+.crowd-person-baldpuma .crowd-pose-cheer { background-image: url("/assets/mobile/crowd-baldpuma-cheer-v1.webp"); }
+.crowd-person-hoodiepuma .crowd-pose-idle { background-image: url("/assets/mobile/crowd-hoodiepuma-idle-v1.webp"); }
+.crowd-person-hoodiepuma .crowd-pose-point { background-image: url("/assets/mobile/crowd-hoodiepuma-point-v1.webp"); }
+.crowd-person-hoodiepuma .crowd-pose-cheer { background-image: url("/assets/mobile/crowd-hoodiepuma-cheer-v1.webp"); }
+.crowd-person-dancecouple .crowd-pose-idle { background-image: url("/assets/mobile/crowd-dancecouple-idle-v1.webp"); }
+.crowd-person-dancecouple .crowd-pose-point { background-image: url("/assets/mobile/crowd-dancecouple-point-v1.webp"); }
+.crowd-person-dancecouple .crowd-pose-cheer { background-image: url("/assets/mobile/crowd-dancecouple-cheer-v1.webp"); }
+.crowd-person-backpacker .crowd-pose-idle { background-image: url("/assets/mobile/crowd-backpacker-idle-v1.webp"); }
+.crowd-person-backpacker .crowd-pose-point { background-image: url("/assets/mobile/crowd-backpacker-point-v1.webp"); }
+.crowd-person-backpacker .crowd-pose-cheer { background-image: url("/assets/mobile/crowd-backpacker-cheer-v1.webp"); }
 
 .arcade-crowd .crowd-slot-1 { left: 3%; animation-delay: 0ms, -620ms; z-index: 3; }
 .arcade-crowd .crowd-slot-2 { right: 3%; animation-delay: 100ms, -2380ms; z-index: 3; }
@@ -1409,7 +1409,7 @@ html.arcade-projector body { width:100%;height:100%;overflow:hidden;background:#
 }
 
 .fighter-art.vanessa {
-  background-image: url("/assets/vanessa-3d.png");
+  background-image: url("/assets/vanessa-3d.webp");
   filter: saturate(1.08) contrast(1.04) drop-shadow(2px 0 8px rgba(255, 50, 120, 0.3)) drop-shadow(14px 18px 14px rgba(0, 0, 0, 0.78));
 }
 
@@ -1420,8 +1420,8 @@ html.arcade-projector body { width:100%;height:100%;overflow:hidden;background:#
 
 .fighter.punch .fighter-art.maletilla { background-image: url("/assets/maletilla-punch-3d-v2.webp"); }
 .fighter.kick .fighter-art.maletilla { background-image: url("/assets/maletilla-kick-3d-v2.webp"); }
-.fighter.punch .fighter-art.vanessa { background-image: url("/assets/vanessa-punch-3d.png"); }
-.fighter.kick .fighter-art.vanessa { background-image: url("/assets/vanessa-kick-3d.png"); }
+.fighter.punch .fighter-art.vanessa { background-image: url("/assets/vanessa-punch-3d.webp"); }
+.fighter.kick .fighter-art.vanessa { background-image: url("/assets/vanessa-kick-3d.webp"); }
 .fighter.punch .fighter-art.josevictor { background-image: url("/assets/actions-normalized-v1/josevictor/punch.webp"); }
 .fighter.kick .fighter-art.josevictor { background-image: url("/assets/actions-normalized-v1/josevictor/kick.webp"); }
 .fighter.hit .fighter-art.maletilla,
@@ -1429,9 +1429,9 @@ html.arcade-projector body { width:100%;height:100%;overflow:hidden;background:#
 .fighter.block .fighter-art.maletilla { background-image: url("/assets/maletilla-block-3d-v2.webp"); }
 .fighter.crouch .fighter-art.maletilla { background-image: url("/assets/maletilla-crouch-3d-v2.webp"); }
 .fighter.hit .fighter-art.vanessa,
-.fighter.launched .fighter-art.vanessa { background-image: url("/assets/vanessa-hit-3d.png"); }
-.fighter.block .fighter-art.vanessa { background-image: url("/assets/vanessa-block-3d.png"); }
-.fighter.crouch .fighter-art.vanessa { background-image: url("/assets/vanessa-crouch-3d.png"); }
+.fighter.launched .fighter-art.vanessa { background-image: url("/assets/vanessa-hit-3d.webp"); }
+.fighter.block .fighter-art.vanessa { background-image: url("/assets/vanessa-block-3d.webp"); }
+.fighter.crouch .fighter-art.vanessa { background-image: url("/assets/vanessa-crouch-3d.webp"); }
 .fighter.hit .fighter-art.josevictor,
 .fighter.launched .fighter-art.josevictor { background-image: url("/assets/actions-normalized-v1/josevictor/hit.webp"); }
 .fighter.block .fighter-art.josevictor { background-image: url("/assets/actions-normalized-v1/josevictor/guard.webp"); }
@@ -1665,7 +1665,7 @@ html.arcade-projector body { width:100%;height:100%;overflow:hidden;background:#
 }
 
 .fighter.special.bottles .fighter-art.maletilla { background-image: url("/assets/maletilla-cloretilo-fire-v3.webp"); }
-.fighter.special.microphone .fighter-art.vanessa { background-image: url("/assets/vanessa-orb-fire-3d.png"); }
+.fighter.special.microphone .fighter-art.vanessa { background-image: url("/assets/vanessa-orb-fire-3d.webp"); }
 .fighter.motion-rig.special .fighter-art.maletilla { animation:maletilla-fight-special 1100ms steps(1,end) both; }
 .fighter.motion-rig.special .fighter-art.vanessa { animation:vanessa-fight-special 1100ms steps(1,end) both; }
 .fighter.motion-rig.special.bags .fighter-art.josevictor { background-image:url("/assets/actions-normalized-v1/josevictor/throw-bag.webp"); }
@@ -1688,7 +1688,7 @@ html.arcade-projector body { width:100%;height:100%;overflow:hidden;background:#
 @keyframes vanessa-fight-special {
   0%, 15% { background-image:url("/assets/actions-normalized-v1/vanessa/vanessa-extra-04-special-windup-v2.webp"); }
   16%, 36% { background-image:url("/assets/actions-normalized-v1/vanessa/vanessa-extra-05-special-aim-v2.webp"); }
-  37%, 70% { background-image:url("/assets/vanessa-orb-fire-3d.png"); }
+  37%, 70% { background-image:url("/assets/vanessa-orb-fire-3d.webp"); }
   71%, 100% { background-image:url("/assets/actions-normalized-v1/vanessa/vanessa-extra-06-special-recoil-v2.webp"); }
 }
 
@@ -2238,7 +2238,7 @@ html.arcade-projector body { width:100%;height:100%;overflow:hidden;background:#
 }
 
 .portrait.vanessa {
-  background-image: url("/assets/vanessa-3d.png");
+  background-image: url("/assets/vanessa-3d.webp");
 }
 
 .portrait.josevictor {
@@ -4028,7 +4028,7 @@ html.arcade-projector body { width:100%;height:100%;overflow:hidden;background:#
 }
 
 .orb-hero .fighter-art.vanessa.orb-held {
-  background-image: url("/assets/vanessa-orb-aim-3d.png");
+  background-image: url("/assets/vanessa-orb-aim-3d.webp");
 }
 
 .orb-hero .fighter-art.orb-held.face-right { transform: scaleX(1); }
@@ -4371,10 +4371,10 @@ footer p { margin: 0; }
 }
 
 @keyframes vanessa-walk-cycle {
-  0%, 24% { background-image: url("/assets/vanessa-walk-a-3d.png"); }
-  25%, 49% { background-image: url("/assets/vanessa-3d.png"); }
-  50%, 74% { background-image: url("/assets/vanessa-walk-b-3d.png"); }
-  75%, 100% { background-image: url("/assets/vanessa-3d.png"); }
+  0%, 24% { background-image: url("/assets/vanessa-walk-a-3d.webp"); }
+  25%, 49% { background-image: url("/assets/vanessa-3d.webp"); }
+  50%, 74% { background-image: url("/assets/vanessa-walk-b-3d.webp"); }
+  75%, 100% { background-image: url("/assets/vanessa-3d.webp"); }
 }
 
 @keyframes maletilla-motion-idle {
@@ -5238,8 +5238,8 @@ footer p { margin: 0; }
 }
 
 @keyframes vanessa-orb-ready {
-  0%, 72%, 100% { background-image: url("/assets/vanessa-orb-aim-3d.png"); }
-  73%, 88% { background-image: url("/assets/vanessa-orb-recover-3d.png"); }
+  0%, 72%, 100% { background-image: url("/assets/vanessa-orb-aim-3d.webp"); }
+  73%, 88% { background-image: url("/assets/vanessa-orb-recover-3d.webp"); }
 }
 
 @keyframes maletilla-orb-fire {
@@ -5281,9 +5281,9 @@ footer p { margin: 0; }
 }
 
 @keyframes vanessa-orb-fire {
-  0%, 18% { background-image: url("/assets/vanessa-orb-aim-3d.png"); }
-  19%, 66% { background-image: url("/assets/vanessa-orb-fire-3d.png"); }
-  67%, 100% { background-image: url("/assets/vanessa-orb-recover-3d.png"); }
+  0%, 18% { background-image: url("/assets/vanessa-orb-aim-3d.webp"); }
+  19%, 66% { background-image: url("/assets/vanessa-orb-fire-3d.webp"); }
+  67%, 100% { background-image: url("/assets/vanessa-orb-recover-3d.webp"); }
 }
 
 @media (hover: none) and (pointer: coarse) {
@@ -6545,7 +6545,7 @@ footer p { margin: 0; }
 .fighter.motion-rig.vanessa.walk::before { top:19%;left:16%;width:25%;height:39%;background-image:url("/assets/microphone-attack-mobile.webp"); }
 
 .spectator-lizard .fight-spectator-art,
-.crowd-person-lizard .arcade-crowd-art { background-image:url("/assets/spectator-lizard-sprite-v1.png") !important;background-size:400% 100%; }
+.crowd-person-lizard .arcade-crowd-art { background-image:url("/assets/spectator-lizard-sprite-v1.webp") !important;background-size:400% 100%; }
 
 .fighter.motion-rig.idle .fighter-art.maletilla { animation:none !important;background-image:url("/assets/actions-normalized-v1/maletilla/maletilla-00.webp") !important; }
 .fighter.motion-rig.idle .fighter-art.vanessa { animation:none !important;background-image:url("/assets/actions-normalized-v1/vanessa/vanessa-00.webp") !important; }
@@ -6662,10 +6662,10 @@ footer p { margin: 0; }
   visibility:visible;
 }
 
-.fighter.motion-rig.walk .fighter-art:not(:is(.cesaret,.borja,.bacora,.bonviure,.elchica,.ogalla)),
-.coop-player.walk-forward .coop-player-art,
-.coop-player.walk-retreat .coop-player-art,
-.orb-hero.orb-moving:not(.orb-firing):not(.orb-victory-dance) .fighter-art {
+.fighter.motion-rig.walk .fighter-art:not(:is(.cesaret,.borja,.bacora,.bonviure,.elchica,.ogalla,.nova)),
+.coop-player.walk-forward:not(.nova) .coop-player-art,
+.coop-player.walk-retreat:not(.nova) .coop-player-art,
+.orb-hero.orb-moving:not(.orb-firing):not(.orb-victory-dance):not(.nova) .fighter-art {
   animation:none !important;
   background-image:none !important;
 }
@@ -7819,9 +7819,9 @@ html[data-display-mode=mobile] .select-screen.lobby-v2168 .character-card small 
 .arena .fighter.motion-rig.walk.maletilla .fighter-walk-frame.frame-a { background-image:url("/assets/actions-normalized-v1/maletilla/maletilla-motion-02-walk-contact-v1.webp")!important; }
 .arena .fighter.motion-rig.walk.maletilla .fighter-walk-frame.frame-b { background-image:url("/assets/actions-normalized-v1/maletilla/maletilla-motion-03-walk-pass-v1.webp")!important; }
 .arena .fighter.motion-rig.walk.maletilla .fighter-walk-frame.frame-c { background-image:url("/assets/actions-normalized-v1/maletilla/maletilla-motion-04-walk-push-v1.webp")!important; }
-.arena .fighter.motion-rig.walk.josevictor .fighter-walk-frame.frame-a { background-image:url("/assets/josevictor/josevictor-walk-a-v1.png")!important; }
-.arena .fighter.motion-rig.walk.josevictor .fighter-walk-frame.frame-b { background-image:url("/assets/josevictor/josevictor-walk-b-v1.png")!important; }
-.arena .fighter.motion-rig.walk.josevictor .fighter-walk-frame.frame-c { background-image:url("/assets/josevictor/josevictor-walk-a-v1.png")!important; }
+.arena .fighter.motion-rig.walk.josevictor .fighter-walk-frame.frame-a { background-image:url("/assets/josevictor/josevictor-walk-a-v1.webp")!important; }
+.arena .fighter.motion-rig.walk.josevictor .fighter-walk-frame.frame-b { background-image:url("/assets/josevictor/josevictor-walk-b-v1.webp")!important; }
+.arena .fighter.motion-rig.walk.josevictor .fighter-walk-frame.frame-c { background-image:url("/assets/josevictor/josevictor-walk-a-v1.webp")!important; }
 .arena .fighter.motion-rig.walk .fighter-shadow { animation:none!important; }
 .arena .fighter.motion-rig.walk.gear-start { --walk-cycle:560ms; }
 .arena .fighter.motion-rig.walk.gear-stride { --walk-cycle:440ms; }
@@ -7872,18 +7872,18 @@ html[data-display-mode=mobile] .select-screen.lobby-v2168 .character-card small 
 .arena .fighter.cpu-ai.walk { transition:left 220ms linear, filter 100ms ease; }
 
 /* V2.17.2: identical transparent frame bounds and shared foot baseline per fighter. */
-.arena .fighter.motion-rig.walk.vanessa .fighter-walk-frame.frame-a { background-image:url("/assets/walk-normalized-v1/vanessa/frame-1.png")!important; }
-.arena .fighter.motion-rig.walk.vanessa .fighter-walk-frame.frame-b { background-image:url("/assets/walk-normalized-v1/vanessa/frame-2.png")!important; }
-.arena .fighter.motion-rig.walk.vanessa .fighter-walk-frame.frame-c { background-image:url("/assets/walk-normalized-v1/vanessa/frame-3.png")!important; }
+.arena .fighter.motion-rig.walk.vanessa .fighter-walk-frame.frame-a { background-image:url("/assets/walk-normalized-v1/vanessa/frame-1.webp")!important; }
+.arena .fighter.motion-rig.walk.vanessa .fighter-walk-frame.frame-b { background-image:url("/assets/walk-normalized-v1/vanessa/frame-2.webp")!important; }
+.arena .fighter.motion-rig.walk.vanessa .fighter-walk-frame.frame-c { background-image:url("/assets/walk-normalized-v1/vanessa/frame-3.webp")!important; }
 .arena .fighter.motion-rig.walk.maletilla .fighter-walk-frame.frame-a { background-image:url("/assets/actions-normalized-v1/maletilla/maletilla-01.webp")!important; }
 .arena .fighter.motion-rig.walk.maletilla .fighter-walk-frame.frame-b { background-image:url("/assets/actions-normalized-v1/maletilla/maletilla-00.webp")!important; }
 .arena .fighter.motion-rig.walk.maletilla .fighter-walk-frame.frame-c { background-image:url("/assets/actions-normalized-v1/maletilla/maletilla-02.webp")!important; }
-.arena .fighter.motion-rig.walk.josevictor .fighter-walk-frame.frame-a { background-image:url("/assets/walk-normalized-v1/josevictor/frame-1.png")!important; }
-.arena .fighter.motion-rig.walk.josevictor .fighter-walk-frame.frame-b { background-image:url("/assets/walk-normalized-v1/josevictor/frame-2.png")!important; }
-.arena .fighter.motion-rig.walk.josevictor .fighter-walk-frame.frame-c { background-image:url("/assets/walk-normalized-v1/josevictor/frame-3.png")!important; }
-.arena .fighter.motion-rig.walk.cristian .fighter-walk-frame.frame-a { background-image:url("/assets/walk-normalized-v1/cristian/frame-1.png")!important; }
-.arena .fighter.motion-rig.walk.cristian .fighter-walk-frame.frame-b { background-image:url("/assets/walk-normalized-v1/cristian/frame-2.png")!important; }
-.arena .fighter.motion-rig.walk.cristian .fighter-walk-frame.frame-c { background-image:url("/assets/walk-normalized-v1/cristian/frame-3.png")!important; }
+.arena .fighter.motion-rig.walk.josevictor .fighter-walk-frame.frame-a { background-image:url("/assets/walk-normalized-v1/josevictor/frame-1.webp")!important; }
+.arena .fighter.motion-rig.walk.josevictor .fighter-walk-frame.frame-b { background-image:url("/assets/walk-normalized-v1/josevictor/frame-2.webp")!important; }
+.arena .fighter.motion-rig.walk.josevictor .fighter-walk-frame.frame-c { background-image:url("/assets/walk-normalized-v1/josevictor/frame-3.webp")!important; }
+.arena .fighter.motion-rig.walk.cristian .fighter-walk-frame.frame-a { background-image:url("/assets/walk-normalized-v1/cristian/frame-1.webp")!important; }
+.arena .fighter.motion-rig.walk.cristian .fighter-walk-frame.frame-b { background-image:url("/assets/walk-normalized-v1/cristian/frame-2.webp")!important; }
+.arena .fighter.motion-rig.walk.cristian .fighter-walk-frame.frame-c { background-image:url("/assets/walk-normalized-v1/cristian/frame-3.webp")!important; }
 
 /* New fighters use complete transparent poses on the same canvas. */
 .fighter-art.cesaret,.portrait.cesaret,.result-dancer-art.cesaret,.coop-player.cesaret .coop-player-art { background-image:url('/assets/new-fighters/cesaret-idle.webp'); background-size:contain; background-position:center bottom; background-repeat:no-repeat; }
@@ -8181,64 +8181,64 @@ html[data-display-mode=mobile] .select-screen.lobby-v2168 .character-card small 
 }
 
 /* Bacora and Bonviure: six consistent transparent poses from their reference sheets. */
-.fighter-art.bacora,.portrait.bacora,.result-dancer-art.bacora,.coop-player.bacora .coop-player-art,.orb-hero.bacora .fighter-art {background-image:url('/assets/new-fighters/bacora-idle.png');background-size:contain;background-position:center bottom;background-repeat:no-repeat}
-.fighter-art.bonviure,.portrait.bonviure,.result-dancer-art.bonviure,.coop-player.bonviure .coop-player-art,.orb-hero.bonviure .fighter-art {background-image:url('/assets/new-fighters/bonviure-idle.png');background-size:contain;background-position:center bottom;background-repeat:no-repeat}
+.fighter-art.bacora,.portrait.bacora,.result-dancer-art.bacora,.coop-player.bacora .coop-player-art,.orb-hero.bacora .fighter-art {background-image:url('/assets/new-fighters/bacora-idle.webp');background-size:contain;background-position:center bottom;background-repeat:no-repeat}
+.fighter-art.bonviure,.portrait.bonviure,.result-dancer-art.bonviure,.coop-player.bonviure .coop-player-art,.orb-hero.bonviure .fighter-art {background-image:url('/assets/new-fighters/bonviure-idle.webp');background-size:contain;background-position:center bottom;background-repeat:no-repeat}
 .select-screen .portrait.bacora,.select-screen .portrait.bonviure {background-size:cover;background-position:center 18%}
-.arena .fighter.motion-rig.walk .fighter-art.bacora {background-image:url('/assets/new-fighters/bacora-walk.png')!important}
-.arena .fighter.motion-rig.walk .fighter-art.bonviure {background-image:url('/assets/new-fighters/bonviure-walk.png')!important}
-.arena .fighter.motion-rig.crouch .fighter-art.bacora,.arena .fighter.motion-rig.block .fighter-art.bacora {background-image:url('/assets/new-fighters/bacora-crouch.png')!important}
-.arena .fighter.motion-rig.crouch .fighter-art.bonviure,.arena .fighter.motion-rig.block .fighter-art.bonviure {background-image:url('/assets/new-fighters/bonviure-crouch-v21849.png')!important}
+.arena .fighter.motion-rig.walk .fighter-art.bacora {background-image:url('/assets/new-fighters/bacora-walk.webp')!important}
+.arena .fighter.motion-rig.walk .fighter-art.bonviure {background-image:url('/assets/new-fighters/bonviure-walk.webp')!important}
+.arena .fighter.motion-rig.crouch .fighter-art.bacora,.arena .fighter.motion-rig.block .fighter-art.bacora {background-image:url('/assets/new-fighters/bacora-crouch.webp')!important}
+.arena .fighter.motion-rig.crouch .fighter-art.bonviure,.arena .fighter.motion-rig.block .fighter-art.bonviure {background-image:url('/assets/new-fighters/bonviure-crouch-v21849.webp')!important}
 .arena .fighter.motion-rig.kick .fighter-art.bacora,.arena .fighter.motion-rig.kick .fighter-art.bonviure {animation:none!important}
-.arena .fighter.motion-rig.kick .fighter-art.bacora {background-image:url('/assets/new-fighters/bacora-kick.png')!important}
-.arena .fighter.motion-rig.kick .fighter-art.bonviure {background-image:url('/assets/new-fighters/bonviure-kick-clean.png')!important}
-.coop-player.bacora:is(.fire,.special) .coop-player-art,.orb-hero.orb-firing .fighter-art.bacora {background-image:url('/assets/new-fighters/bacora-shield.png')!important}
-.coop-player.bonviure:is(.fire,.special) .coop-player-art,.orb-hero.orb-firing .fighter-art.bonviure {background-image:url('/assets/new-fighters/bonviure-anchor-v21849.png')!important}
-.arena .fighter.motion-rig.punch .fighter-art.bacora {background-image:url('/assets/new-fighters/bacora-punch-v1.png')!important}
-.arena .fighter.motion-rig.shield .fighter-art.bacora {background-image:url('/assets/new-fighters/bacora-shield.png')!important}
-.arena .fighter.motion-rig.staff .fighter-art.bacora {background-image:url('/assets/new-fighters/bacora-staff-v21849.png')!important}
-.arena .fighter.motion-rig.punch .fighter-art.bonviure {background-image:url('/assets/new-fighters/bonviure-punch-v1.png')!important}
-.arena .fighter.motion-rig.anchor .fighter-art.bonviure {background-image:url('/assets/new-fighters/bonviure-anchor-v21849.png')!important}
-.arena .fighter.motion-rig.chain .fighter-art.bonviure {background-image:url('/assets/new-fighters/bonviure-chain-clean.png')!important}
-.coop-player.bacora.fire .coop-player-art {background-image:url('/assets/new-fighters/bacora-shield.png')!important}
-.coop-player.bacora.special .coop-player-art {background-image:url('/assets/new-fighters/bacora-staff-v21849.png')!important}
-.coop-player.bonviure.fire .coop-player-art {background-image:url('/assets/new-fighters/bonviure-anchor-v21849.png')!important}
-.coop-player.bonviure.special .coop-player-art {background-image:url('/assets/new-fighters/bonviure-chain-clean.png')!important}
-.arena .fighter.motion-rig.punch .fighter-art.bacora {animation:none!important;background-image:url('/assets/new-fighters/bacora-punch-v1.png')!important}
-.arena .fighter.motion-rig.special.shield .fighter-art.bacora {animation:none!important;background-image:url('/assets/new-fighters/bacora-shield.png')!important}
-.arena .fighter.motion-rig.special.staff .fighter-art.bacora {animation:none!important;background-image:url('/assets/new-fighters/bacora-staff-v21849.png')!important}
-.arena .fighter.motion-rig.punch .fighter-art.bonviure {animation:none!important;background-image:url('/assets/new-fighters/bonviure-punch-v1.png')!important}
-.arena .fighter.motion-rig.special.anchor .fighter-art.bonviure {animation:none!important;background-image:url('/assets/new-fighters/bonviure-anchor-v21849.png')!important}
-.arena .fighter.motion-rig.special.chain .fighter-art.bonviure {animation:none!important;background-image:url('/assets/new-fighters/bonviure-chain-clean.png')!important}
-.arena .fighter.motion-rig.block .fighter-art.bacora {animation:none!important;background-image:url('/assets/new-fighters/bacora-crouch.png')!important}
-.arena .fighter.motion-rig.block .fighter-art.bonviure {animation:none!important;background-image:url('/assets/new-fighters/bonviure-guard-v21849.png')!important}
-.arena .fighter.motion-rig.jump .fighter-art.bacora,.arena .fighter.motion-rig.airborne:not(.punch):not(.kick):not(.special) .fighter-art.bacora {background-image:url('/assets/new-fighters/bacora-jump-v1.png')!important}
-.arena .fighter.motion-rig.jump .fighter-art.bonviure,.arena .fighter.motion-rig.airborne:not(.punch):not(.kick):not(.special) .fighter-art.bonviure {background-image:url('/assets/new-fighters/bonviure-jump-v21849.png')!important}
-.arena .fighter.motion-rig:is(.hit,.launched) .fighter-art.bacora {animation:none!important;filter:brightness(.72) saturate(.82);background-image:url('/assets/new-fighters/bacora-crouch.png')!important}
-.arena .fighter.motion-rig:is(.hit,.launched) .fighter-art.bonviure {animation:none!important;background-image:url('/assets/new-fighters/bonviure-hit-v21849.png')!important}
-.arena .fighter.motion-rig:is(.knockdown,.defeated) .fighter-art.bacora {background-image:url('/assets/new-fighters/bacora-crouch.png')!important}
-.arena .fighter.motion-rig:is(.knockdown,.defeated) .fighter-art.bonviure {animation:none!important;background-image:url('/assets/new-fighters/bonviure-down-v21849.png')!important}
-.arena .fighter.motion-rig.getup .fighter-art.bacora {background-image:url('/assets/new-fighters/bacora-crouch.png')!important}
-.arena .fighter.motion-rig.getup .fighter-art.bonviure {animation:none!important;background-image:url('/assets/new-fighters/bonviure-rise.png')!important}
-.coop-player.bacora.jump .coop-player-art {background-image:url('/assets/new-fighters/bacora-jump-v1.png')!important}
-.coop-player.bonviure.jump .coop-player-art {background-image:url('/assets/new-fighters/bonviure-jump-v21849.png')!important}
-.coop-player.bacora.hit .coop-player-art,.coop-player.bacora.down .coop-player-art {background-image:url('/assets/new-fighters/bacora-crouch.png')!important}
-.coop-player.bonviure.hit .coop-player-art {background-image:url('/assets/new-fighters/bonviure-hit-v21849.png')!important}
-.coop-player.bonviure.down .coop-player-art {background-image:url('/assets/new-fighters/bonviure-down-v21849.png')!important}
-.coop-player.bacora.revive .coop-player-art {background-image:url('/assets/new-fighters/bacora-idle.png')!important}
-.coop-player.bonviure.revive .coop-player-art {background-image:url('/assets/new-fighters/bonviure-rise.png')!important}
-.arena .fighter.motion-rig.dodge .fighter-art.bacora {background-image:url('/assets/new-fighters/bacora-crouch.png')!important}
-.arena .fighter.motion-rig.dodge .fighter-art.bonviure {background-image:url('/assets/new-fighters/bonviure-guard-v21849.png')!important}
+.arena .fighter.motion-rig.kick .fighter-art.bacora {background-image:url('/assets/new-fighters/bacora-kick.webp')!important}
+.arena .fighter.motion-rig.kick .fighter-art.bonviure {background-image:url('/assets/new-fighters/bonviure-kick-clean.webp')!important}
+.coop-player.bacora:is(.fire,.special) .coop-player-art,.orb-hero.orb-firing .fighter-art.bacora {background-image:url('/assets/new-fighters/bacora-shield.webp')!important}
+.coop-player.bonviure:is(.fire,.special) .coop-player-art,.orb-hero.orb-firing .fighter-art.bonviure {background-image:url('/assets/new-fighters/bonviure-anchor-v21849.webp')!important}
+.arena .fighter.motion-rig.punch .fighter-art.bacora {background-image:url('/assets/new-fighters/bacora-punch-v1.webp')!important}
+.arena .fighter.motion-rig.shield .fighter-art.bacora {background-image:url('/assets/new-fighters/bacora-shield.webp')!important}
+.arena .fighter.motion-rig.staff .fighter-art.bacora {background-image:url('/assets/new-fighters/bacora-staff-v21849.webp')!important}
+.arena .fighter.motion-rig.punch .fighter-art.bonviure {background-image:url('/assets/new-fighters/bonviure-punch-v1.webp')!important}
+.arena .fighter.motion-rig.anchor .fighter-art.bonviure {background-image:url('/assets/new-fighters/bonviure-anchor-v21849.webp')!important}
+.arena .fighter.motion-rig.chain .fighter-art.bonviure {background-image:url('/assets/new-fighters/bonviure-chain-clean.webp')!important}
+.coop-player.bacora.fire .coop-player-art {background-image:url('/assets/new-fighters/bacora-shield.webp')!important}
+.coop-player.bacora.special .coop-player-art {background-image:url('/assets/new-fighters/bacora-staff-v21849.webp')!important}
+.coop-player.bonviure.fire .coop-player-art {background-image:url('/assets/new-fighters/bonviure-anchor-v21849.webp')!important}
+.coop-player.bonviure.special .coop-player-art {background-image:url('/assets/new-fighters/bonviure-chain-clean.webp')!important}
+.arena .fighter.motion-rig.punch .fighter-art.bacora {animation:none!important;background-image:url('/assets/new-fighters/bacora-punch-v1.webp')!important}
+.arena .fighter.motion-rig.special.shield .fighter-art.bacora {animation:none!important;background-image:url('/assets/new-fighters/bacora-shield.webp')!important}
+.arena .fighter.motion-rig.special.staff .fighter-art.bacora {animation:none!important;background-image:url('/assets/new-fighters/bacora-staff-v21849.webp')!important}
+.arena .fighter.motion-rig.punch .fighter-art.bonviure {animation:none!important;background-image:url('/assets/new-fighters/bonviure-punch-v1.webp')!important}
+.arena .fighter.motion-rig.special.anchor .fighter-art.bonviure {animation:none!important;background-image:url('/assets/new-fighters/bonviure-anchor-v21849.webp')!important}
+.arena .fighter.motion-rig.special.chain .fighter-art.bonviure {animation:none!important;background-image:url('/assets/new-fighters/bonviure-chain-clean.webp')!important}
+.arena .fighter.motion-rig.block .fighter-art.bacora {animation:none!important;background-image:url('/assets/new-fighters/bacora-crouch.webp')!important}
+.arena .fighter.motion-rig.block .fighter-art.bonviure {animation:none!important;background-image:url('/assets/new-fighters/bonviure-guard-v21849.webp')!important}
+.arena .fighter.motion-rig.jump .fighter-art.bacora,.arena .fighter.motion-rig.airborne:not(.punch):not(.kick):not(.special) .fighter-art.bacora {background-image:url('/assets/new-fighters/bacora-jump-v1.webp')!important}
+.arena .fighter.motion-rig.jump .fighter-art.bonviure,.arena .fighter.motion-rig.airborne:not(.punch):not(.kick):not(.special) .fighter-art.bonviure {background-image:url('/assets/new-fighters/bonviure-jump-v21849.webp')!important}
+.arena .fighter.motion-rig:is(.hit,.launched) .fighter-art.bacora {animation:none!important;filter:brightness(.72) saturate(.82);background-image:url('/assets/new-fighters/bacora-crouch.webp')!important}
+.arena .fighter.motion-rig:is(.hit,.launched) .fighter-art.bonviure {animation:none!important;background-image:url('/assets/new-fighters/bonviure-hit-v21849.webp')!important}
+.arena .fighter.motion-rig:is(.knockdown,.defeated) .fighter-art.bacora {background-image:url('/assets/new-fighters/bacora-crouch.webp')!important}
+.arena .fighter.motion-rig:is(.knockdown,.defeated) .fighter-art.bonviure {animation:none!important;background-image:url('/assets/new-fighters/bonviure-down-v21849.webp')!important}
+.arena .fighter.motion-rig.getup .fighter-art.bacora {background-image:url('/assets/new-fighters/bacora-crouch.webp')!important}
+.arena .fighter.motion-rig.getup .fighter-art.bonviure {animation:none!important;background-image:url('/assets/new-fighters/bonviure-rise.webp')!important}
+.coop-player.bacora.jump .coop-player-art {background-image:url('/assets/new-fighters/bacora-jump-v1.webp')!important}
+.coop-player.bonviure.jump .coop-player-art {background-image:url('/assets/new-fighters/bonviure-jump-v21849.webp')!important}
+.coop-player.bacora.hit .coop-player-art,.coop-player.bacora.down .coop-player-art {background-image:url('/assets/new-fighters/bacora-crouch.webp')!important}
+.coop-player.bonviure.hit .coop-player-art {background-image:url('/assets/new-fighters/bonviure-hit-v21849.webp')!important}
+.coop-player.bonviure.down .coop-player-art {background-image:url('/assets/new-fighters/bonviure-down-v21849.webp')!important}
+.coop-player.bacora.revive .coop-player-art {background-image:url('/assets/new-fighters/bacora-idle.webp')!important}
+.coop-player.bonviure.revive .coop-player-art {background-image:url('/assets/new-fighters/bonviure-rise.webp')!important}
+.arena .fighter.motion-rig.dodge .fighter-art.bacora {background-image:url('/assets/new-fighters/bacora-crouch.webp')!important}
+.arena .fighter.motion-rig.dodge .fighter-art.bonviure {background-image:url('/assets/new-fighters/bonviure-guard-v21849.webp')!important}
 
 /* Prison Slug roster additions use their supplied key art in the same fighter frame. */
-.fighter-art.xuso,.portrait.xuso,.result-dancer-art.xuso,.coop-player.xuso .coop-player-art,.orb-hero.xuso .fighter-art {background-image:url('/prison-slug/assets/duo-dog.png');background-size:contain;background-position:center bottom;background-repeat:no-repeat;mix-blend-mode:screen}
-.fighter-art.bomba,.portrait.bomba,.result-dancer-art.bomba,.coop-player.bomba .coop-player-art,.orb-hero.bomba .fighter-art {background-image:url('/prison-slug/assets/hoe-hero.png');background-size:contain;background-position:center bottom;background-repeat:no-repeat;mix-blend-mode:screen}
-.fighter-art.rafeta,.portrait.rafeta,.result-dancer-art.rafeta,.coop-player.rafeta .coop-player-art,.orb-hero.rafeta .fighter-art {background-image:url('/prison-slug/assets/white-hero.png');background-size:contain;background-position:center bottom;background-repeat:no-repeat;mix-blend-mode:screen}
+.fighter-art.xuso,.portrait.xuso,.result-dancer-art.xuso,.coop-player.xuso .coop-player-art,.orb-hero.xuso .fighter-art {background-image:url('/prison-slug/assets/duo-dog.webp');background-size:contain;background-position:center bottom;background-repeat:no-repeat;mix-blend-mode:screen}
+.fighter-art.bomba,.portrait.bomba,.result-dancer-art.bomba,.coop-player.bomba .coop-player-art,.orb-hero.bomba .fighter-art {background-image:url('/prison-slug/assets/hoe-hero.webp');background-size:contain;background-position:center bottom;background-repeat:no-repeat;mix-blend-mode:screen}
+.fighter-art.rafeta,.portrait.rafeta,.result-dancer-art.rafeta,.coop-player.rafeta .coop-player-art,.orb-hero.rafeta .fighter-art {background-image:url('/prison-slug/assets/white-hero.webp');background-size:contain;background-position:center bottom;background-repeat:no-repeat;mix-blend-mode:screen}
 .fighter-art.rafeta,.portrait.rafeta,.result-dancer-art.rafeta,.coop-player.rafeta .coop-player-art,.orb-hero.rafeta .fighter-art {mix-blend-mode:normal}
 .select-screen .portrait:is(.xuso,.bomba,.rafeta) {background-size:cover;background-position:center 8%}
 .fighter-art:is(.xuso,.bomba,.rafeta) .fighter-walk-layers {display:none!important}
 .fighter.motion-rig:is(.xuso,.bomba,.rafeta) {aspect-ratio:2/3!important;width:clamp(150px,27vh,250px)!important;height:clamp(225px,40.5vh,375px)!important}
-.fighter-art.rafeta::after {content:"";position:absolute;left:29.5%;top:55.1%;width:10.3%;height:21.5%;background:url('/assets/new-fighters/masia-logo.png') center/contain no-repeat;mix-blend-mode:normal;filter:drop-shadow(0 1px 1px rgba(0,0,0,.6));transform:scaleX(-1);pointer-events:none}
-.select-screen .portrait.rafeta::after {content:"";position:absolute;left:47%;top:59%;width:9%;height:25%;background:url('/assets/new-fighters/masia-logo.png') center/contain no-repeat;filter:drop-shadow(0 1px 1px rgba(0,0,0,.65));pointer-events:none}
+.fighter-art.rafeta::after {content:"";position:absolute;left:29.5%;top:55.1%;width:10.3%;height:21.5%;background:url('/assets/new-fighters/masia-logo.webp') center/contain no-repeat;mix-blend-mode:normal;filter:drop-shadow(0 1px 1px rgba(0,0,0,.6));transform:scaleX(-1);pointer-events:none}
+.select-screen .portrait.rafeta::after {content:"";position:absolute;left:47%;top:59%;width:9%;height:25%;background:url('/assets/new-fighters/masia-logo.webp') center/contain no-repeat;filter:drop-shadow(0 1px 1px rgba(0,0,0,.65));pointer-events:none}
 .arena .fighter.motion-rig.walk:is(.xuso,.bomba,.rafeta) .fighter-art {animation:prison-roster-step 420ms ease-in-out infinite alternate}
 .arena .fighter.motion-rig.punch:is(.xuso,.bomba,.rafeta) .fighter-art {animation:prison-roster-punch 480ms ease-out both}
 .arena .fighter.motion-rig.kick:is(.xuso,.bomba,.rafeta) .fighter-art {animation:prison-roster-kick 620ms ease-out both}
@@ -8255,7 +8255,7 @@ html[data-display-mode=mobile] .select-screen.lobby-v2168 .character-card small 
   left:-17%;
   right:auto;
   width:134%;
-  background-image:url('/assets/new-fighters/rafeta-frames/idle.png');
+  background-image:url('/assets/new-fighters/rafeta-frames/idle.webp');
   background-size:100% 100%;
   background-position:center bottom;
   background-repeat:no-repeat;
@@ -8269,36 +8269,36 @@ html[data-display-mode=mobile] .select-screen.lobby-v2168 .character-card small 
 }
 .arena .fighter.motion-rig.walk.rafeta .fighter-art.rafeta { animation:rafeta-walk-frames 680ms steps(1,end) infinite; }
 .arena .fighter.motion-rig.jump.rafeta .fighter-art.rafeta,
-.arena .fighter.motion-rig.airborne:not(.punch):not(.kick):not(.special).rafeta .fighter-art.rafeta { background-image:url('/assets/new-fighters/rafeta-frames/jump.png'); }
+.arena .fighter.motion-rig.airborne:not(.punch):not(.kick):not(.special).rafeta .fighter-art.rafeta { background-image:url('/assets/new-fighters/rafeta-frames/jump.webp'); }
 .arena .fighter.motion-rig.crouch.rafeta .fighter-art.rafeta,
-.arena .fighter.motion-rig.dodge.rafeta .fighter-art.rafeta { background-image:url('/assets/new-fighters/rafeta-frames/crouch.png'); }
-.arena .fighter.motion-rig.block.rafeta .fighter-art.rafeta { background-image:url('/assets/new-fighters/rafeta-frames/guard.png'); }
+.arena .fighter.motion-rig.dodge.rafeta .fighter-art.rafeta { background-image:url('/assets/new-fighters/rafeta-frames/crouch.webp'); }
+.arena .fighter.motion-rig.block.rafeta .fighter-art.rafeta { background-image:url('/assets/new-fighters/rafeta-frames/guard.webp'); }
 .arena .fighter.motion-rig.punch.rafeta .fighter-art.rafeta { animation:rafeta-punch-frames var(--move-duration,540ms) steps(1,end) both; }
 .arena .fighter.motion-rig.kick.rafeta .fighter-art.rafeta { animation:rafeta-kick-frames var(--move-duration,620ms) steps(1,end) both; }
 .arena .fighter.motion-rig.special.flag.rafeta .fighter-art.rafeta,
-.arena .fighter.motion-rig.special.flagSweep.rafeta .fighter-art.rafeta { background-image:url('/assets/new-fighters/rafeta-frames/flag-sweep.png'); }
+.arena .fighter.motion-rig.special.flagSweep.rafeta .fighter-art.rafeta { background-image:url('/assets/new-fighters/rafeta-frames/flag-sweep.webp'); }
 .arena .fighter.motion-rig.hit.rafeta .fighter-art.rafeta,
 .arena .fighter.motion-rig.launched.rafeta .fighter-art.rafeta,
 .arena .fighter.motion-rig.knockdown.rafeta .fighter-art.rafeta,
-.arena .fighter.motion-rig.defeated.rafeta .fighter-art.rafeta { animation:none!important; background-image:url('/assets/new-fighters/rafeta-frames/land.png')!important; }
-.arena .fighter.motion-rig.getup.rafeta .fighter-art.rafeta { animation:none; background-image:url('/assets/new-fighters/rafeta-frames/idle.png'); }
+.arena .fighter.motion-rig.defeated.rafeta .fighter-art.rafeta { animation:none!important; background-image:url('/assets/new-fighters/rafeta-frames/land.webp')!important; }
+.arena .fighter.motion-rig.getup.rafeta .fighter-art.rafeta { animation:none; background-image:url('/assets/new-fighters/rafeta-frames/idle.webp'); }
 .arena .fighter.motion-rig:is(.walk,.punch,.kick,.special,.jump,.block,.crouch,.dodge,.hit,.launched,.knockdown,.defeated,.getup).rafeta.face-right .fighter-art.rafeta { transform:scaleX(1); }
 .arena .fighter.motion-rig:is(.walk,.punch,.kick,.special,.jump,.block,.crouch,.dodge,.hit,.launched,.knockdown,.defeated,.getup).rafeta.face-left .fighter-art.rafeta { transform:scaleX(-1); }
 @keyframes rafeta-walk-frames {
-  0%,24.9% { background-image:url('/assets/new-fighters/rafeta-frames/walk-a.png'); }
-  25%,49.9% { background-image:url('/assets/new-fighters/rafeta-frames/walk-b.png'); }
-  50%,74.9% { background-image:url('/assets/new-fighters/rafeta-frames/walk-c.png'); }
-  75%,100% { background-image:url('/assets/new-fighters/rafeta-frames/walk-b.png'); }
+  0%,24.9% { background-image:url('/assets/new-fighters/rafeta-frames/walk-a.webp'); }
+  25%,49.9% { background-image:url('/assets/new-fighters/rafeta-frames/walk-b.webp'); }
+  50%,74.9% { background-image:url('/assets/new-fighters/rafeta-frames/walk-c.webp'); }
+  75%,100% { background-image:url('/assets/new-fighters/rafeta-frames/walk-b.webp'); }
 }
 @keyframes rafeta-punch-frames {
-  0%,19% { background-image:url('/assets/new-fighters/rafeta-frames/idle.png'); }
-  20%,72% { background-image:url('/assets/new-fighters/rafeta-frames/punch.png'); }
-  73%,100% { background-image:url('/assets/new-fighters/rafeta-frames/idle.png'); }
+  0%,19% { background-image:url('/assets/new-fighters/rafeta-frames/idle.webp'); }
+  20%,72% { background-image:url('/assets/new-fighters/rafeta-frames/punch.webp'); }
+  73%,100% { background-image:url('/assets/new-fighters/rafeta-frames/idle.webp'); }
 }
 @keyframes rafeta-kick-frames {
-  0%,20% { background-image:url('/assets/new-fighters/rafeta-frames/idle.png'); }
-  21%,72% { background-image:url('/assets/new-fighters/rafeta-frames/kick.png'); }
-  73%,100% { background-image:url('/assets/new-fighters/rafeta-frames/land.png'); }
+  0%,20% { background-image:url('/assets/new-fighters/rafeta-frames/idle.webp'); }
+  21%,72% { background-image:url('/assets/new-fighters/rafeta-frames/kick.webp'); }
+  73%,100% { background-image:url('/assets/new-fighters/rafeta-frames/land.webp'); }
 }
 .prison-slug-mode {position:fixed;inset:0;z-index:10050;background:#05090f}
 .prison-slug-mode iframe {display:block;width:100%;height:100%;border:0;background:#05090f}
@@ -8329,10 +8329,10 @@ html[data-display-mode=mobile] .select-screen.lobby-v2168 .character-card small 
   background-size:300% 300%!important;
   background-position:0% 0%;
 }
-.fighter-art.elchica,.result-dancer-art.elchica,.coop-player.elchica .coop-player-art,.orb-hero.elchica .fighter-art { background-image:url('/assets/new-fighters/elchica-atlas.png')!important; }
-.fighter-art.ogalla,.result-dancer-art.ogalla,.coop-player.ogalla .coop-player-art,.orb-hero.ogalla .fighter-art { background-image:url('/assets/new-fighters/ogalla-atlas.png')!important; }
-.portrait.elchica { background-image:url('/assets/new-fighters/elchica-atlas.png')!important; }
-.portrait.ogalla { background-image:url('/assets/new-fighters/ogalla-atlas.png')!important; }
+.fighter-art.elchica,.result-dancer-art.elchica,.coop-player.elchica .coop-player-art,.orb-hero.elchica .fighter-art { background-image:url('/assets/new-fighters/elchica-atlas.webp')!important; }
+.fighter-art.ogalla,.result-dancer-art.ogalla,.coop-player.ogalla .coop-player-art,.orb-hero.ogalla .fighter-art { background-image:url('/assets/new-fighters/ogalla-atlas.webp')!important; }
+.portrait.elchica { background-image:url('/assets/new-fighters/elchica-atlas.webp')!important; }
+.portrait.ogalla { background-image:url('/assets/new-fighters/ogalla-atlas.webp')!important; }
 .select-screen.lobby-v2168 .character-card .portrait:is(.elchica,.ogalla) {
   background-size:300% auto!important;
   background-position:0% 0%!important;
@@ -8342,8 +8342,8 @@ html[data-display-mode=mobile] .select-screen.lobby-v2168 .character-card small 
 .arena .fighter.motion-rig.walk:is(.elchica,.ogalla) .fighter-walk-layers { display:none!important; }
 .arena .fighter.motion-rig.walk.elchica .fighter-art.elchica { animation:elchica-walk-atlas-v21820 520ms steps(1,end) infinite!important; }
 .arena .fighter.motion-rig.walk.ogalla .fighter-art.ogalla { animation:ogalla-walk-atlas-v21820 520ms steps(1,end) infinite!important; }
-.arena .fighter.motion-rig.walk .fighter-art.elchica { background-image:url('/assets/new-fighters/elchica-atlas.png')!important; }
-.arena .fighter.motion-rig.walk .fighter-art.ogalla { background-image:url('/assets/new-fighters/ogalla-atlas.png')!important; }
+.arena .fighter.motion-rig.walk .fighter-art.elchica { background-image:url('/assets/new-fighters/elchica-atlas.webp')!important; }
+.arena .fighter.motion-rig.walk .fighter-art.ogalla { background-image:url('/assets/new-fighters/ogalla-atlas.webp')!important; }
 .arena .fighter.motion-rig.dash.elchica .fighter-art.elchica { animation:elchica-walk-atlas-v21820 340ms steps(1,end) infinite!important; }
 .arena .fighter.motion-rig.dash.ogalla .fighter-art.ogalla { animation:ogalla-walk-atlas-v21820 340ms steps(1,end) infinite!important; }
 @keyframes elchica-walk-atlas-v21820 { 0%,49% { background-position:50% 0%; } 50%,100% { background-position:100% 0%; } }
@@ -8424,11 +8424,11 @@ html[data-display-mode=mobile] .select-screen.lobby-v2168 .character-card small 
 .arena .fighter.motion-rig.dash.borja .fighter-art.borja { animation:borja-dash-v21820 340ms steps(1,end) infinite!important; }
 @keyframes cesaret-dash-v21820 { 0%,49% { background-image:url('/assets/new-fighters/cesaret-walk.webp'); } 50%,100% { background-image:url('/assets/new-fighters/cesaret-walk2-v1.webp'); } }
 @keyframes borja-dash-v21820 { 0%,49% { background-image:url('/assets/new-fighters/borja-walk.webp'); } 50%,100% { background-image:url('/assets/new-fighters/borja-walk2-v1.webp'); } }
-.arena .fighter.motion-rig.dash.bacora .fighter-art.bacora { background-image:url('/assets/new-fighters/bacora-walk.png')!important; }
-.arena .fighter.motion-rig.dash.bonviure .fighter-art.bonviure { background-image:url('/assets/new-fighters/bonviure-walk.png')!important; }
-.arena .fighter.motion-rig.block.bacora .fighter-art.bacora { background-image:url('/assets/new-fighters/bacora-shield.png')!important; }
-.arena .fighter.motion-rig.dodge.bacora .fighter-art.bacora { background-image:url('/assets/new-fighters/bacora-walk.png')!important; }
-.arena .fighter.motion-rig.dodge.bonviure .fighter-art.bonviure { background-image:url('/assets/new-fighters/bonviure-jump-v21849.png')!important; }
+.arena .fighter.motion-rig.dash.bacora .fighter-art.bacora { background-image:url('/assets/new-fighters/bacora-walk.webp')!important; }
+.arena .fighter.motion-rig.dash.bonviure .fighter-art.bonviure { background-image:url('/assets/new-fighters/bonviure-walk.webp')!important; }
+.arena .fighter.motion-rig.block.bacora .fighter-art.bacora { background-image:url('/assets/new-fighters/bacora-shield.webp')!important; }
+.arena .fighter.motion-rig.dodge.bacora .fighter-art.bacora { background-image:url('/assets/new-fighters/bacora-walk.webp')!important; }
+.arena .fighter.motion-rig.dodge.bonviure .fighter-art.bonviure { background-image:url('/assets/new-fighters/bonviure-jump-v21849.webp')!important; }
 .arena .fighter.motion-rig.dodge.elchica .fighter-art.elchica,
 .arena .fighter.motion-rig.dodge.ogalla .fighter-art.ogalla { background-position:100% 50%!important; }
 
@@ -8754,11 +8754,11 @@ html[data-display-mode=mobile] .select-screen.lobby-v2168 .character-card small 
   background-size:auto 100%; background-position:center bottom;
   animation:new-punch-sequence-v21828 var(--move-duration,480ms) steps(1,end) both;
 }
-.arena .fighter.motion-rig.punch.borja .fighter-art { --punch-a:url('/assets/new-fighters/borja-punch-1.png');--punch-b:url('/assets/new-fighters/borja-punch-2.png');--punch-c:url('/assets/new-fighters/borja-punch-v1.webp');--punch-d:url('/assets/new-fighters/borja-punch-1.png'); }
-.arena .fighter.motion-rig.punch.bacora .fighter-art { --punch-a:url('/assets/new-fighters/bacora-punch-1.png');--punch-b:url('/assets/new-fighters/bacora-punch-2.png');--punch-c:url('/assets/new-fighters/bacora-punch-contact-v2.png');--punch-d:url('/assets/new-fighters/bacora-punch-1.png'); }
-.arena .fighter.motion-rig.punch.bonviure .fighter-art { --punch-a:url('/assets/new-fighters/bonviure-punch-1.png');--punch-b:url('/assets/new-fighters/bonviure-punch-2.png');--punch-c:url('/assets/new-fighters/bonviure-punch-3.png');--punch-d:url('/assets/new-fighters/bonviure-punch-4.png'); }
-.arena .fighter.motion-rig.punch.elchica .fighter-art { --punch-a:url('/assets/new-fighters/elchica-punch-1.png');--punch-b:url('/assets/new-fighters/elchica-punch-2.png');--punch-c:url('/assets/new-fighters/elchica-punch-3.png');--punch-d:url('/assets/new-fighters/elchica-punch-4.png'); }
-.arena .fighter.motion-rig.punch.ogalla .fighter-art { --punch-a:url('/assets/new-fighters/ogalla-punch-1.png');--punch-b:url('/assets/new-fighters/ogalla-punch-2.png');--punch-c:url('/assets/new-fighters/ogalla-punch-3.png');--punch-d:url('/assets/new-fighters/ogalla-punch-4.png'); }
+.arena .fighter.motion-rig.punch.borja .fighter-art { --punch-a:url('/assets/new-fighters/borja-punch-1.webp');--punch-b:url('/assets/new-fighters/borja-punch-2.webp');--punch-c:url('/assets/new-fighters/borja-punch-v1.webp');--punch-d:url('/assets/new-fighters/borja-punch-1.webp'); }
+.arena .fighter.motion-rig.punch.bacora .fighter-art { --punch-a:url('/assets/new-fighters/bacora-punch-1.webp');--punch-b:url('/assets/new-fighters/bacora-punch-2.webp');--punch-c:url('/assets/new-fighters/bacora-punch-contact-v2.webp');--punch-d:url('/assets/new-fighters/bacora-punch-1.webp'); }
+.arena .fighter.motion-rig.punch.bonviure .fighter-art { --punch-a:url('/assets/new-fighters/bonviure-punch-1.webp');--punch-b:url('/assets/new-fighters/bonviure-punch-2.webp');--punch-c:url('/assets/new-fighters/bonviure-punch-3.webp');--punch-d:url('/assets/new-fighters/bonviure-punch-4.webp'); }
+.arena .fighter.motion-rig.punch.elchica .fighter-art { --punch-a:url('/assets/new-fighters/elchica-punch-1.webp');--punch-b:url('/assets/new-fighters/elchica-punch-2.webp');--punch-c:url('/assets/new-fighters/elchica-punch-3.webp');--punch-d:url('/assets/new-fighters/elchica-punch-4.webp'); }
+.arena .fighter.motion-rig.punch.ogalla .fighter-art { --punch-a:url('/assets/new-fighters/ogalla-punch-1.webp');--punch-b:url('/assets/new-fighters/ogalla-punch-2.webp');--punch-c:url('/assets/new-fighters/ogalla-punch-3.webp');--punch-d:url('/assets/new-fighters/ogalla-punch-4.webp'); }
 @keyframes new-punch-sequence-v21828 {
   0% { background-image:var(--punch-a); }
   18% { background-image:var(--punch-b); }
@@ -8780,11 +8780,11 @@ html[data-display-mode=mobile] .select-screen.lobby-v2168 .character-card small 
   background-size:auto 100%; background-position:center bottom;
   animation:new-kick-sequence-v21834 var(--move-duration,760ms) steps(1,end) both;
 }
-.arena .fighter.motion-rig.kick.borja .fighter-art { --kick-a:url('/assets/new-fighters/borja-kick-1.png');--kick-b:url('/assets/new-fighters/borja-kick-2.png');--kick-c:url('/assets/new-fighters/borja-kick-3.png');--kick-d:url('/assets/new-fighters/borja-kick-4.png');--kick-e:url('/assets/new-fighters/borja-kick-1.png'); }
-.arena .fighter.motion-rig.kick.bacora .fighter-art { --kick-a:url('/assets/new-fighters/bacora-kick-1.png');--kick-b:url('/assets/new-fighters/bacora-kick-2.png');--kick-c:url('/assets/new-fighters/bacora-kick-3.png');--kick-d:url('/assets/new-fighters/bacora-kick-4.png');--kick-e:url('/assets/new-fighters/bacora-kick-1.png'); }
-.arena .fighter.motion-rig.kick.bonviure .fighter-art { --kick-a:url('/assets/new-fighters/bonviure-kick-1.png');--kick-b:url('/assets/new-fighters/bonviure-kick-2.png');--kick-c:url('/assets/new-fighters/bonviure-kick-3.png');--kick-d:url('/assets/new-fighters/bonviure-kick-1.png');--kick-e:url('/assets/new-fighters/bonviure-kick-1.png'); }
-.arena .fighter.motion-rig.kick.elchica .fighter-art { --kick-a:url('/assets/new-fighters/elchica-kick-1.png');--kick-b:url('/assets/new-fighters/elchica-kick-2.png');--kick-c:url('/assets/new-fighters/elchica-kick-3.png');--kick-d:url('/assets/new-fighters/elchica-kick-4.png');--kick-e:url('/assets/new-fighters/elchica-kick-1.png'); }
-.arena .fighter.motion-rig.kick.ogalla .fighter-art { --kick-a:url('/assets/new-fighters/ogalla-kick-1.png');--kick-b:url('/assets/new-fighters/ogalla-kick-2.png');--kick-c:url('/assets/new-fighters/ogalla-kick-3.png');--kick-d:url('/assets/new-fighters/ogalla-kick-4.png');--kick-e:url('/assets/new-fighters/ogalla-kick-1.png'); }
+.arena .fighter.motion-rig.kick.borja .fighter-art { --kick-a:url('/assets/new-fighters/borja-kick-1.webp');--kick-b:url('/assets/new-fighters/borja-kick-2.webp');--kick-c:url('/assets/new-fighters/borja-kick-3.webp');--kick-d:url('/assets/new-fighters/borja-kick-4.webp');--kick-e:url('/assets/new-fighters/borja-kick-1.webp'); }
+.arena .fighter.motion-rig.kick.bacora .fighter-art { --kick-a:url('/assets/new-fighters/bacora-kick-1.webp');--kick-b:url('/assets/new-fighters/bacora-kick-2.webp');--kick-c:url('/assets/new-fighters/bacora-kick-3.webp');--kick-d:url('/assets/new-fighters/bacora-kick-4.webp');--kick-e:url('/assets/new-fighters/bacora-kick-1.webp'); }
+.arena .fighter.motion-rig.kick.bonviure .fighter-art { --kick-a:url('/assets/new-fighters/bonviure-kick-1.webp');--kick-b:url('/assets/new-fighters/bonviure-kick-2.webp');--kick-c:url('/assets/new-fighters/bonviure-kick-3.webp');--kick-d:url('/assets/new-fighters/bonviure-kick-1.webp');--kick-e:url('/assets/new-fighters/bonviure-kick-1.webp'); }
+.arena .fighter.motion-rig.kick.elchica .fighter-art { --kick-a:url('/assets/new-fighters/elchica-kick-1.webp');--kick-b:url('/assets/new-fighters/elchica-kick-2.webp');--kick-c:url('/assets/new-fighters/elchica-kick-3.webp');--kick-d:url('/assets/new-fighters/elchica-kick-4.webp');--kick-e:url('/assets/new-fighters/elchica-kick-1.webp'); }
+.arena .fighter.motion-rig.kick.ogalla .fighter-art { --kick-a:url('/assets/new-fighters/ogalla-kick-1.webp');--kick-b:url('/assets/new-fighters/ogalla-kick-2.webp');--kick-c:url('/assets/new-fighters/ogalla-kick-3.webp');--kick-d:url('/assets/new-fighters/ogalla-kick-4.webp');--kick-e:url('/assets/new-fighters/ogalla-kick-1.webp'); }
 @keyframes new-kick-sequence-v21834 {
   0% { background-image:var(--kick-a); }
   12%,22% { background-image:var(--kick-b); }
@@ -8818,16 +8818,16 @@ html[data-display-mode=mobile] .select-screen.lobby-v2168 .character-card small 
   background-size:500% 100%!important;
   background-position:0% 0%;
 }
-.arena .fighter.motion-rig.punch.borja .fighter-art::after { background-image:url('/assets/new-fighters/borja-punch-strip-v21836.png')!important; animation:new-punch-strip-v21836 480ms steps(1,end) both!important; }
-.arena .fighter.motion-rig.punch.bacora .fighter-art::after { background-image:url('/assets/new-fighters/bacora-punch-strip-v21836.png')!important; animation:new-punch-strip-v21836 480ms steps(1,end) both!important; }
-.arena .fighter.motion-rig.punch.bonviure .fighter-art::after { background-image:url('/assets/new-fighters/bonviure-punch-strip-v21836.png')!important; animation:new-punch-strip-v21836 480ms steps(1,end) both!important; }
-.arena .fighter.motion-rig.punch.elchica .fighter-art::after { background-image:url('/assets/new-fighters/elchica-punch-strip-v21836.png')!important; animation:new-punch-strip-v21836 480ms steps(1,end) both!important; }
-.arena .fighter.motion-rig.punch.ogalla .fighter-art::after { background-image:url('/assets/new-fighters/ogalla-punch-strip-v21836.png')!important; animation:new-punch-strip-v21836 480ms steps(1,end) both!important; }
-.arena .fighter.motion-rig.kick.borja .fighter-art::after { background-image:url('/assets/new-fighters/borja-kick-strip-v21836.png')!important; animation:new-kick-strip-v21836 760ms steps(1,end) both!important; }
-.arena .fighter.motion-rig.kick.bacora .fighter-art::after { background-image:url('/assets/new-fighters/bacora-kick-strip-v21836.png')!important; animation:new-kick-strip-v21836 760ms steps(1,end) both!important; }
-.arena .fighter.motion-rig.kick.bonviure .fighter-art::after { background-image:url('/assets/new-fighters/bonviure-kick-strip-v21836.png')!important; animation:new-kick-strip-v21836 760ms steps(1,end) both!important; }
-.arena .fighter.motion-rig.kick.elchica .fighter-art::after { background-image:url('/assets/new-fighters/elchica-kick-strip-v21836.png')!important; animation:new-kick-strip-v21836 760ms steps(1,end) both!important; }
-.arena .fighter.motion-rig.kick.ogalla .fighter-art::after { background-image:url('/assets/new-fighters/ogalla-kick-strip-v21836.png')!important; animation:new-kick-strip-v21836 760ms steps(1,end) both!important; }
+.arena .fighter.motion-rig.punch.borja .fighter-art::after { background-image:url('/assets/new-fighters/borja-punch-strip-v21836.webp')!important; animation:new-punch-strip-v21836 480ms steps(1,end) both!important; }
+.arena .fighter.motion-rig.punch.bacora .fighter-art::after { background-image:url('/assets/new-fighters/bacora-punch-strip-v21836.webp')!important; animation:new-punch-strip-v21836 480ms steps(1,end) both!important; }
+.arena .fighter.motion-rig.punch.bonviure .fighter-art::after { background-image:url('/assets/new-fighters/bonviure-punch-strip-v21836.webp')!important; animation:new-punch-strip-v21836 480ms steps(1,end) both!important; }
+.arena .fighter.motion-rig.punch.elchica .fighter-art::after { background-image:url('/assets/new-fighters/elchica-punch-strip-v21836.webp')!important; animation:new-punch-strip-v21836 480ms steps(1,end) both!important; }
+.arena .fighter.motion-rig.punch.ogalla .fighter-art::after { background-image:url('/assets/new-fighters/ogalla-punch-strip-v21836.webp')!important; animation:new-punch-strip-v21836 480ms steps(1,end) both!important; }
+.arena .fighter.motion-rig.kick.borja .fighter-art::after { background-image:url('/assets/new-fighters/borja-kick-strip-v21836.webp')!important; animation:new-kick-strip-v21836 760ms steps(1,end) both!important; }
+.arena .fighter.motion-rig.kick.bacora .fighter-art::after { background-image:url('/assets/new-fighters/bacora-kick-strip-v21836.webp')!important; animation:new-kick-strip-v21836 760ms steps(1,end) both!important; }
+.arena .fighter.motion-rig.kick.bonviure .fighter-art::after { background-image:url('/assets/new-fighters/bonviure-kick-strip-v21836.webp')!important; animation:new-kick-strip-v21836 760ms steps(1,end) both!important; }
+.arena .fighter.motion-rig.kick.elchica .fighter-art::after { background-image:url('/assets/new-fighters/elchica-kick-strip-v21836.webp')!important; animation:new-kick-strip-v21836 760ms steps(1,end) both!important; }
+.arena .fighter.motion-rig.kick.ogalla .fighter-art::after { background-image:url('/assets/new-fighters/ogalla-kick-strip-v21836.webp')!important; animation:new-kick-strip-v21836 760ms steps(1,end) both!important; }
 @keyframes new-punch-strip-v21836 {
   0%,12% { background-position:0% 0%; }
   18%,30% { background-position:25% 0%; }
@@ -8851,9 +8851,9 @@ html[data-display-mode=mobile] .select-screen.lobby-v2168 .character-card small 
   content:"";position:absolute;inset:0;background-repeat:no-repeat;background-size:auto 100%;background-position:center bottom;
   animation:elchica-special-v21828 var(--move-duration,820ms) steps(1,end) both;
 }
-.arena .fighter.motion-rig.special.jager.elchica .fighter-art { --special-pose:url('/assets/new-fighters/elchica-bottle-special-v2.png'); }
-.arena .fighter.motion-rig.special.amber.elchica .fighter-art { --special-pose:url('/assets/new-fighters/elchica-throw-special-v2.png'); }
-@keyframes elchica-special-v21828 { 0% {background-image:url('/assets/new-fighters/elchica-punch-1.png')} 18% {background-image:url('/assets/new-fighters/elchica-punch-2.png')} 36% {background-image:var(--special-pose)} 78%,100% {background-image:url('/assets/new-fighters/elchica-punch-1.png')} }
+.arena .fighter.motion-rig.special.jager.elchica .fighter-art { --special-pose:url('/assets/new-fighters/elchica-bottle-special-v2.webp'); }
+.arena .fighter.motion-rig.special.amber.elchica .fighter-art { --special-pose:url('/assets/new-fighters/elchica-throw-special-v2.webp'); }
+@keyframes elchica-special-v21828 { 0% {background-image:url('/assets/new-fighters/elchica-punch-1.webp')} 18% {background-image:url('/assets/new-fighters/elchica-punch-2.webp')} 36% {background-image:var(--special-pose)} 78%,100% {background-image:url('/assets/new-fighters/elchica-punch-1.webp')} }
 .arena.game-paused .fighter.motion-rig.special.elchica .fighter-art::after {animation-play-state:paused!important}
 
 /* Ogalla's old atlas specials overlapped the next cell and showed spare legs. */
@@ -8864,9 +8864,9 @@ html[data-display-mode=mobile] .select-screen.lobby-v2168 .character-card small 
   content:"";position:absolute;inset:0;background-repeat:no-repeat;background-size:auto 100%;background-position:center bottom;
   animation:ogalla-special-v21828 var(--move-duration,820ms) steps(1,end) both;
 }
-.arena .fighter.motion-rig.special.scepter.ogalla .fighter-art { --special-pose:url('/assets/new-fighters/ogalla-staff-special-v2.png'); }
-.arena .fighter.motion-rig.special.artichokes.ogalla .fighter-art { --special-pose:url('/assets/new-fighters/ogalla-punch-3.png'); }
-@keyframes ogalla-special-v21828 { 0% {background-image:url('/assets/new-fighters/ogalla-punch-1.png')} 18% {background-image:url('/assets/new-fighters/ogalla-punch-2.png')} 36% {background-image:var(--special-pose)} 78%,100% {background-image:url('/assets/new-fighters/ogalla-punch-1.png')} }
+.arena .fighter.motion-rig.special.scepter.ogalla .fighter-art { --special-pose:url('/assets/new-fighters/ogalla-staff-special-v2.webp'); }
+.arena .fighter.motion-rig.special.artichokes.ogalla .fighter-art { --special-pose:url('/assets/new-fighters/ogalla-punch-3.webp'); }
+@keyframes ogalla-special-v21828 { 0% {background-image:url('/assets/new-fighters/ogalla-punch-1.webp')} 18% {background-image:url('/assets/new-fighters/ogalla-punch-2.webp')} 36% {background-image:var(--special-pose)} 78%,100% {background-image:url('/assets/new-fighters/ogalla-punch-1.webp')} }
 .arena.game-paused .fighter.motion-rig.special.ogalla .fighter-art::after {animation-play-state:paused!important}
 
 /* El Chica and Ogalla walk using the two clean walk cells in their 3x3
@@ -8879,8 +8879,8 @@ html[data-display-mode=mobile] .select-screen.lobby-v2168 .character-card small 
   background-position:50% 0%;animation:atlas-walk-v21835 520ms steps(1,end) infinite!important;
 }
 .arena .fighter.motion-rig.dash:is(.elchica,.ogalla) .fighter-art { animation-duration:340ms!important; }
-.arena .fighter.motion-rig:is(.walk,.dash).elchica .fighter-art.elchica { background-image:url('/assets/new-fighters/elchica-atlas.png')!important; }
-.arena .fighter.motion-rig:is(.walk,.dash).ogalla .fighter-art.ogalla { background-image:url('/assets/new-fighters/ogalla-atlas.png')!important; }
+.arena .fighter.motion-rig:is(.walk,.dash).elchica .fighter-art.elchica { background-image:url('/assets/new-fighters/elchica-atlas.webp')!important; }
+.arena .fighter.motion-rig:is(.walk,.dash).ogalla .fighter-art.ogalla { background-image:url('/assets/new-fighters/ogalla-atlas.webp')!important; }
 .arena .fighter.motion-rig:is(.walk,.dash):is(.elchica,.ogalla).face-right .fighter-art { transform:scaleX(1)!important; }
 .arena .fighter.motion-rig:is(.walk,.dash):is(.elchica,.ogalla).face-left .fighter-art { transform:scaleX(-1)!important; }
 .arena .fighter.motion-rig:is(.walk,.dash):is(.elchica,.ogalla) .fighter-art::after { content:none!important;display:none!important;animation:none!important; }
@@ -8896,8 +8896,8 @@ html[data-display-mode=mobile] .select-screen.lobby-v2168 .character-card small 
   content:"";position:absolute;inset:0;background-repeat:no-repeat;background-size:auto 100%;background-position:center bottom;
   animation:new-weapon-walk-v21833 520ms steps(1,end) infinite;
 }
-.arena .fighter.motion-rig:is(.walk,.dash).bacora .fighter-art { --weapon-walk-a:url('/assets/new-fighters/bacora-idle.png');--weapon-walk-b:url('/assets/new-fighters/bacora-walk.png'); }
-.arena .fighter.motion-rig:is(.walk,.dash).bonviure .fighter-art { --weapon-walk-a:url('/assets/new-fighters/bonviure-idle.png');--weapon-walk-b:url('/assets/new-fighters/bonviure-walk.png'); }
+.arena .fighter.motion-rig:is(.walk,.dash).bacora .fighter-art { --weapon-walk-a:url('/assets/new-fighters/bacora-idle.webp');--weapon-walk-b:url('/assets/new-fighters/bacora-walk.webp'); }
+.arena .fighter.motion-rig:is(.walk,.dash).bonviure .fighter-art { --weapon-walk-a:url('/assets/new-fighters/bonviure-idle.webp');--weapon-walk-b:url('/assets/new-fighters/bonviure-walk.webp'); }
 .arena .fighter.motion-rig.dash:is(.bacora,.bonviure) .fighter-art::after { animation-duration:340ms; }
 @keyframes new-weapon-walk-v21833 { 0%,49% { background-image:var(--weapon-walk-a); } 50%,100% { background-image:var(--weapon-walk-b); } }
 .arena.game-paused .fighter.motion-rig:is(.walk,.dash):is(.bacora,.bonviure) .fighter-art::after { animation-play-state:paused!important; }
@@ -8928,13 +8928,13 @@ html[data-display-mode=mobile] .select-screen.lobby-v2168 .character-card small 
   content:"";position:absolute;inset:0;background-repeat:no-repeat;background-size:auto 100%;background-position:center bottom;
   animation:new-special-sequence-v21829 var(--move-duration,820ms) steps(1,end) both;
 }
-.arena .fighter.motion-rig.special.borja .fighter-art {--special-a:url('/assets/new-fighters/borja-punch-1.png');--special-b:url('/assets/new-fighters/borja-punch-2.png');--special-c:url('/assets/new-fighters/borja-attack.webp');}
-.arena .fighter.motion-rig.special.bacora .fighter-art {--special-a:url('/assets/new-fighters/bacora-punch-1.png');--special-b:url('/assets/new-fighters/bacora-punch-2.png');}
-.arena .fighter.motion-rig.special.shield.bacora .fighter-art {--special-c:url('/assets/new-fighters/bacora-release-shield-v1.png');}
-.arena .fighter.motion-rig.special.staff.bacora .fighter-art {--special-c:url('/assets/new-fighters/bacora-staff-v21849.png');}
-.arena .fighter.motion-rig.special.bonviure .fighter-art {--special-a:url('/assets/new-fighters/bonviure-punch-1.png');--special-b:url('/assets/new-fighters/bonviure-punch-2.png');}
-.arena .fighter.motion-rig.special.anchor.bonviure .fighter-art {--special-c:url('/assets/new-fighters/bonviure-anchor-v21849.png');}
-.arena .fighter.motion-rig.special.chain.bonviure .fighter-art {--special-c:url('/assets/new-fighters/bonviure-chain-clean.png');}
+.arena .fighter.motion-rig.special.borja .fighter-art {--special-a:url('/assets/new-fighters/borja-punch-1.webp');--special-b:url('/assets/new-fighters/borja-punch-2.webp');--special-c:url('/assets/new-fighters/borja-attack.webp');}
+.arena .fighter.motion-rig.special.bacora .fighter-art {--special-a:url('/assets/new-fighters/bacora-punch-1.webp');--special-b:url('/assets/new-fighters/bacora-punch-2.webp');}
+.arena .fighter.motion-rig.special.shield.bacora .fighter-art {--special-c:url('/assets/new-fighters/bacora-release-shield-v1.webp');}
+.arena .fighter.motion-rig.special.staff.bacora .fighter-art {--special-c:url('/assets/new-fighters/bacora-staff-v21849.webp');}
+.arena .fighter.motion-rig.special.bonviure .fighter-art {--special-a:url('/assets/new-fighters/bonviure-punch-1.webp');--special-b:url('/assets/new-fighters/bonviure-punch-2.webp');}
+.arena .fighter.motion-rig.special.anchor.bonviure .fighter-art {--special-c:url('/assets/new-fighters/bonviure-anchor-v21849.webp');}
+.arena .fighter.motion-rig.special.chain.bonviure .fighter-art {--special-c:url('/assets/new-fighters/bonviure-chain-clean.webp');}
 @keyframes new-special-sequence-v21829 {0%{background-image:var(--special-a)}18%{background-image:var(--special-b)}36%{background-image:var(--special-c)}78%,100%{background-image:var(--special-a)}}
 .arena.game-paused .fighter.motion-rig.special:is(.borja,.bacora,.bonviure) .fighter-art::after {animation-play-state:paused!important}
 
@@ -8970,7 +8970,7 @@ html[data-display-mode=mobile] .select-screen.lobby-v2168 .character-card small 
 @keyframes bacora-shield-sequence-v21832 {
   0% { background-image:var(--special-a); }
   18% { background-image:var(--special-b); }
-  36%,78%,100% { background-image:url('/assets/new-fighters/bacora-release-shield-v1.png'); }
+  36%,78%,100% { background-image:url('/assets/new-fighters/bacora-release-shield-v1.webp'); }
 }
 @keyframes bacora-shield-release-v21832 {
   0%,18% { transform:none; }
@@ -8980,11 +8980,11 @@ html[data-display-mode=mobile] .select-screen.lobby-v2168 .character-card small 
 /* Toni Massama: red shades, gold chain and compact firearm fighter sprites. */
 .fighter-art.tonimassama,.portrait.tonimassama,.result-dancer-art.tonimassama,
 .coop-player.tonimassama .coop-player-art,.orb-hero.tonimassama .fighter-art {
-  background-image:url('/assets/new-fighters/tonimassama-frames/idle.png');
+  background-image:url('/assets/new-fighters/tonimassama-frames/idle.webp');
   background-size:100% 100%;background-position:center bottom;background-repeat:no-repeat;mix-blend-mode:normal;
 }
 .select-screen.lobby-v2168 .character-card .portrait.tonimassama {
-  background-image:url('/assets/new-fighters/tonimassama.png')!important;
+  background-image:url('/assets/new-fighters/tonimassama.webp')!important;
   background-size:cover!important;background-position:center 3%!important;background-repeat:no-repeat!important;
 }
 .fighter-art.tonimassama .fighter-walk-layers {display:none!important}
@@ -8996,38 +8996,38 @@ html[data-display-mode=mobile] .select-screen.lobby-v2168 .character-card small 
 }
 .arena .fighter.motion-rig.walk.tonimassama .fighter-art.tonimassama {animation:tonimassama-walk-frames 660ms steps(1,end) infinite}
 .arena .fighter.motion-rig.jump.tonimassama .fighter-art.tonimassama,
-.arena .fighter.motion-rig.airborne:not(.punch):not(.kick):not(.special).tonimassama .fighter-art.tonimassama {background-image:url('/assets/new-fighters/tonimassama-frames/jump.png')}
+.arena .fighter.motion-rig.airborne:not(.punch):not(.kick):not(.special).tonimassama .fighter-art.tonimassama {background-image:url('/assets/new-fighters/tonimassama-frames/jump.webp')}
 .arena .fighter.motion-rig.crouch.tonimassama .fighter-art.tonimassama,
-.arena .fighter.motion-rig.dodge.tonimassama .fighter-art.tonimassama {background-image:url('/assets/new-fighters/tonimassama-frames/crouch.png')}
-.arena .fighter.motion-rig.block.tonimassama .fighter-art.tonimassama {background-image:url('/assets/new-fighters/tonimassama-frames/guard.png')}
+.arena .fighter.motion-rig.dodge.tonimassama .fighter-art.tonimassama {background-image:url('/assets/new-fighters/tonimassama-frames/crouch.webp')}
+.arena .fighter.motion-rig.block.tonimassama .fighter-art.tonimassama {background-image:url('/assets/new-fighters/tonimassama-frames/guard.webp')}
 .arena .fighter.motion-rig.punch.tonimassama .fighter-art.tonimassama {animation:tonimassama-punch-frames var(--move-duration,540ms) steps(1,end) both}
 .arena .fighter.motion-rig.kick.tonimassama .fighter-art.tonimassama {animation:tonimassama-kick-frames var(--move-duration,620ms) steps(1,end) both}
-.arena .fighter.motion-rig.special.goldPistol.tonimassama .fighter-art.tonimassama {background-image:url('/assets/new-fighters/tonimassama-frames/pistol.png')}
-.arena .fighter.motion-rig.special.fingerPeinetas.tonimassama .fighter-art.tonimassama {background-image:url('/assets/new-fighters/tonimassama-frames/punch.png')}
-.arena .fighter.motion-rig:is(.hit,.launched).tonimassama .fighter-art.tonimassama {animation:none!important;background-image:url('/assets/new-fighters/tonimassama-frames/hit.png')!important}
-.arena .fighter.motion-rig:is(.knockdown,.defeated).tonimassama .fighter-art.tonimassama {animation:none!important;background-image:url('/assets/new-fighters/tonimassama-frames/crouch.png')!important}
-.arena .fighter.motion-rig.getup.tonimassama .fighter-art.tonimassama {animation:none!important;background-image:url('/assets/new-fighters/tonimassama-frames/getup.png')!important}
+.arena .fighter.motion-rig.special.goldPistol.tonimassama .fighter-art.tonimassama {background-image:url('/assets/new-fighters/tonimassama-frames/pistol.webp')}
+.arena .fighter.motion-rig.special.fingerPeinetas.tonimassama .fighter-art.tonimassama {background-image:url('/assets/new-fighters/tonimassama-frames/punch.webp')}
+.arena .fighter.motion-rig:is(.hit,.launched).tonimassama .fighter-art.tonimassama {animation:none!important;background-image:url('/assets/new-fighters/tonimassama-frames/hit.webp')!important}
+.arena .fighter.motion-rig:is(.knockdown,.defeated).tonimassama .fighter-art.tonimassama {animation:none!important;background-image:url('/assets/new-fighters/tonimassama-frames/crouch.webp')!important}
+.arena .fighter.motion-rig.getup.tonimassama .fighter-art.tonimassama {animation:none!important;background-image:url('/assets/new-fighters/tonimassama-frames/getup.webp')!important}
 .arena .fighter.motion-rig:is(.walk,.punch,.kick,.special,.jump,.block,.crouch,.dodge,.hit,.launched,.knockdown,.defeated,.getup).tonimassama.face-right .fighter-art.tonimassama {transform:scaleX(1)}
 .arena .fighter.motion-rig:is(.walk,.punch,.kick,.special,.jump,.block,.crouch,.dodge,.hit,.launched,.knockdown,.defeated,.getup).tonimassama.face-left .fighter-art.tonimassama {transform:scaleX(-1)}
 @keyframes tonimassama-walk-frames {
-  0%,24.9% {background-image:url('/assets/new-fighters/tonimassama-frames/walk-a.png')}
-  25%,49.9% {background-image:url('/assets/new-fighters/tonimassama-frames/walk-b.png')}
-  50%,74.9% {background-image:url('/assets/new-fighters/tonimassama-frames/walk-c.png')}
-  75%,100% {background-image:url('/assets/new-fighters/tonimassama-frames/walk-b.png')}
+  0%,24.9% {background-image:url('/assets/new-fighters/tonimassama-frames/walk-a.webp')}
+  25%,49.9% {background-image:url('/assets/new-fighters/tonimassama-frames/walk-b.webp')}
+  50%,74.9% {background-image:url('/assets/new-fighters/tonimassama-frames/walk-c.webp')}
+  75%,100% {background-image:url('/assets/new-fighters/tonimassama-frames/walk-b.webp')}
 }
 @keyframes tonimassama-punch-frames {
-  0%,12% {background-image:url('/assets/new-fighters/tonimassama-frames/idle.png')}
-  13%,27% {background-image:url('/assets/new-fighters/tonimassama-frames/guard.png')}
-  28%,62% {background-image:url('/assets/new-fighters/tonimassama-frames/punch.png')}
-  63%,76% {background-image:url('/assets/new-fighters/tonimassama-frames/guard.png')}
-  77%,100% {background-image:url('/assets/new-fighters/tonimassama-frames/idle.png')}
+  0%,12% {background-image:url('/assets/new-fighters/tonimassama-frames/idle.webp')}
+  13%,27% {background-image:url('/assets/new-fighters/tonimassama-frames/guard.webp')}
+  28%,62% {background-image:url('/assets/new-fighters/tonimassama-frames/punch.webp')}
+  63%,76% {background-image:url('/assets/new-fighters/tonimassama-frames/guard.webp')}
+  77%,100% {background-image:url('/assets/new-fighters/tonimassama-frames/idle.webp')}
 }
 @keyframes tonimassama-kick-frames {
-  0%,12% {background-image:url('/assets/new-fighters/tonimassama-frames/idle.png')}
-  13%,27% {background-image:url('/assets/new-fighters/tonimassama-frames/crouch.png')}
-  28%,62% {background-image:url('/assets/new-fighters/tonimassama-frames/kick.png')}
-  63%,76% {background-image:url('/assets/new-fighters/tonimassama-frames/crouch.png')}
-  77%,100% {background-image:url('/assets/new-fighters/tonimassama-frames/idle.png')}
+  0%,12% {background-image:url('/assets/new-fighters/tonimassama-frames/idle.webp')}
+  13%,27% {background-image:url('/assets/new-fighters/tonimassama-frames/crouch.webp')}
+  28%,62% {background-image:url('/assets/new-fighters/tonimassama-frames/kick.webp')}
+  63%,76% {background-image:url('/assets/new-fighters/tonimassama-frames/crouch.webp')}
+  77%,100% {background-image:url('/assets/new-fighters/tonimassama-frames/idle.webp')}
 }
 .special-fx.fx-goldPistol .fx-unit {width:clamp(32px,4vw,52px);height:clamp(32px,4vw,52px);animation-duration:460ms}
 .special-fx.fx-goldPistol.toward-right .fx-unit {animation-name:tonimassama-shot-right}
@@ -9066,11 +9066,11 @@ html[data-display-mode=mobile] .select-screen.lobby-v2168 .character-card small 
   mix-blend-mode:normal!important;
   transform-origin:center bottom!important;
 }
-.arena .fighter.motion-rig.bacora .fighter-art { background-image:url('/assets/new-fighters/bacora-rig-v21845.png')!important; }
-.arena .fighter.motion-rig.bonviure .fighter-art { background-image:url('/assets/new-fighters/bonviure-rig-v21845.png')!important; }
-.arena .fighter.motion-rig.elchica .fighter-art { background-image:url('/assets/new-fighters/elchica-rig-v21845.png')!important; }
-.arena .fighter.motion-rig.ogalla .fighter-art { background-image:url('/assets/new-fighters/ogalla-rig-v21845.png')!important; }
-.arena .fighter.motion-rig.tonimassama .fighter-art { background-image:url('/assets/new-fighters/tonimassama-rig-v21845.png')!important; }
+.arena .fighter.motion-rig.bacora .fighter-art { background-image:url('/assets/new-fighters/bacora-rig-v21845.webp')!important; }
+.arena .fighter.motion-rig.bonviure .fighter-art { background-image:url('/assets/new-fighters/bonviure-rig-v21845.webp')!important; }
+.arena .fighter.motion-rig.elchica .fighter-art { background-image:url('/assets/new-fighters/elchica-rig-v21845.webp')!important; }
+.arena .fighter.motion-rig.ogalla .fighter-art { background-image:url('/assets/new-fighters/ogalla-rig-v21845.webp')!important; }
+.arena .fighter.motion-rig.tonimassama .fighter-art { background-image:url('/assets/new-fighters/tonimassama-rig-v21845.webp')!important; }
 .arena .fighter.motion-rig:is(.bacora,.bonviure,.elchica,.ogalla,.tonimassama) .fighter-art::after {
   content:none!important;
   display:none!important;
@@ -9120,7 +9120,7 @@ html[data-display-mode=mobile] .select-screen.lobby-v2168 .character-card small 
    orb modes without loading the PrisonSlug canvas. */
 .fighter-art.nova,.portrait.nova,.result-dancer-art.nova,
 .coop-player.nova .coop-player-art,.orb-hero.nova .fighter-art {
-  background-image:url('/assets/new-fighters/nova-frame-0.png');
+  background-image:url('/assets/new-fighters/nova-frame-0.webp');
   background-size:contain;background-position:center bottom;background-repeat:no-repeat;mix-blend-mode:normal;
 }
 .portrait.nova { background-size:cover; background-position:center 14%; }
@@ -9138,11 +9138,11 @@ html[data-display-mode=mobile] .select-screen.lobby-v2168 .character-card small 
 .orb-hero.orb-moving.nova .fighter-art.nova { animation:nova-walk-frames 520ms steps(1,end) infinite!important; }
 .arena .fighter.motion-rig:is(.punch,.kick,.special).nova .fighter-pose .fighter-art.nova,
 .coop-player.nova:is(.fire,.special) .coop-player-art,
-.orb-hero.orb-firing.nova .fighter-art.nova { animation:none!important;background-image:url('/assets/new-fighters/nova-frame-2.png')!important; }
+.orb-hero.orb-firing.nova .fighter-art.nova { animation:none!important;background-image:url('/assets/new-fighters/nova-frame-2.webp')!important; }
 .arena .fighter.motion-rig:is(.jump,.airborne).nova .fighter-pose .fighter-art.nova,
-.coop-player.nova.jump .coop-player-art { animation:none!important;background-image:url('/assets/new-fighters/nova-frame-3.png')!important; }
+.coop-player.nova.jump .coop-player-art { animation:none!important;background-image:url('/assets/new-fighters/nova-frame-3.webp')!important; }
 .arena .fighter.motion-rig:is(.hit,.launched,.knockdown,.defeated).nova .fighter-pose .fighter-art.nova,
-.coop-player.nova:is(.hit,.down) .coop-player-art { animation:none!important;background-image:url('/assets/new-fighters/nova-frame-3.png')!important; }
+.coop-player.nova:is(.hit,.down) .coop-player-art { animation:none!important;background-image:url('/assets/new-fighters/nova-frame-3.webp')!important; }
 .arena .fighter.motion-rig.nova.face-right .fighter-pose .fighter-art.nova,
 .coop-player.nova.face-right .coop-player-art,
 .orb-hero.nova.face-right .fighter-art.nova { transform:scaleX(1); }
@@ -9150,8 +9150,8 @@ html[data-display-mode=mobile] .select-screen.lobby-v2168 .character-card small 
 .coop-player.nova.face-left .coop-player-art,
 .orb-hero.nova.face-left .fighter-art.nova { transform:scaleX(-1); }
 @keyframes nova-walk-frames {
-  0%,49.9% { background-image:url('/assets/new-fighters/nova-frame-0.png'); }
-  50%,100% { background-image:url('/assets/new-fighters/nova-frame-1.png'); }
+  0%,49.9% { background-image:url('/assets/new-fighters/nova-frame-0.webp'); }
+  50%,100% { background-image:url('/assets/new-fighters/nova-frame-1.webp'); }
 }
 @media (orientation:landscape) and (max-height:600px) {
   .arena .fighter.motion-rig:is(.bacora,.bonviure,.elchica,.ogalla,.tonimassama) {
@@ -9177,11 +9177,11 @@ html[data-display-mode=mobile] .select-screen.lobby-v2168 .character-card small 
   mix-blend-mode:normal!important;
   transform-origin:center bottom!important;
 }
-.arena .fighter.motion-rig.bacora .fighter-pose .fighter-art.bacora { background-image:url('/assets/new-fighters/bacora-rig-v21845.png')!important; }
-.arena .fighter.motion-rig.bonviure .fighter-pose .fighter-art.bonviure { background-image:url('/assets/new-fighters/bonviure-rig-v21845.png')!important; }
-.arena .fighter.motion-rig.elchica .fighter-pose .fighter-art.elchica { background-image:url('/assets/new-fighters/elchica-rig-v21845.png')!important; }
-.arena .fighter.motion-rig.ogalla .fighter-pose .fighter-art.ogalla { background-image:url('/assets/new-fighters/ogalla-rig-v21845.png')!important; }
-.arena .fighter.motion-rig.tonimassama .fighter-pose .fighter-art.tonimassama { background-image:url('/assets/new-fighters/tonimassama-rig-v21845.png')!important; }
+.arena .fighter.motion-rig.bacora .fighter-pose .fighter-art.bacora { background-image:url('/assets/new-fighters/bacora-rig-v21845.webp')!important; }
+.arena .fighter.motion-rig.bonviure .fighter-pose .fighter-art.bonviure { background-image:url('/assets/new-fighters/bonviure-rig-v21845.webp')!important; }
+.arena .fighter.motion-rig.elchica .fighter-pose .fighter-art.elchica { background-image:url('/assets/new-fighters/elchica-rig-v21845.webp')!important; }
+.arena .fighter.motion-rig.ogalla .fighter-pose .fighter-art.ogalla { background-image:url('/assets/new-fighters/ogalla-rig-v21845.webp')!important; }
+.arena .fighter.motion-rig.tonimassama .fighter-pose .fighter-art.tonimassama { background-image:url('/assets/new-fighters/tonimassama-rig-v21845.webp')!important; }
 .arena .fighter.motion-rig:is(.bacora,.bonviure,.elchica,.ogalla,.tonimassama) .fighter-pose .fighter-art:is(.bacora,.bonviure,.elchica,.ogalla,.tonimassama)::after {
   content:none!important;
   display:none!important;
@@ -9205,39 +9205,39 @@ html[data-display-mode=mobile] .select-screen.lobby-v2168 .character-card small 
    the element, so a slow browser cannot reveal a neighbouring boot, weapon or
    second fighter while an attack changes frame. */
 .arena .fighter.motion-rig.bacora {
-  --rig-idle:url('/assets/new-fighters/bacora-rig-v21849-idle.png');
-  --rig-walk:url('/assets/new-fighters/bacora-rig-v21849-walk.png');
-  --rig-punch:url('/assets/new-fighters/bacora-rig-v21849-punch.png');
-  --rig-kick:url('/assets/new-fighters/bacora-rig-v21849-kick.png');
-  --rig-recover:url('/assets/new-fighters/bacora-rig-v21849-recover.png');
+  --rig-idle:url('/assets/new-fighters/bacora-rig-v21849-idle.webp');
+  --rig-walk:url('/assets/new-fighters/bacora-rig-v21849-walk.webp');
+  --rig-punch:url('/assets/new-fighters/bacora-rig-v21849-punch.webp');
+  --rig-kick:url('/assets/new-fighters/bacora-rig-v21849-kick.webp');
+  --rig-recover:url('/assets/new-fighters/bacora-rig-v21849-recover.webp');
 }
 .arena .fighter.motion-rig.bonviure {
-  --rig-idle:url('/assets/new-fighters/bonviure-rig-v21849-idle.png');
-  --rig-walk:url('/assets/new-fighters/bonviure-rig-v21849-walk.png');
-  --rig-punch:url('/assets/new-fighters/bonviure-rig-v21849-punch.png');
-  --rig-kick:url('/assets/new-fighters/bonviure-rig-v21849-kick.png');
-  --rig-recover:url('/assets/new-fighters/bonviure-rig-v21849-recover.png');
+  --rig-idle:url('/assets/new-fighters/bonviure-rig-v21849-idle.webp');
+  --rig-walk:url('/assets/new-fighters/bonviure-rig-v21849-walk.webp');
+  --rig-punch:url('/assets/new-fighters/bonviure-rig-v21849-punch.webp');
+  --rig-kick:url('/assets/new-fighters/bonviure-rig-v21849-kick.webp');
+  --rig-recover:url('/assets/new-fighters/bonviure-rig-v21849-recover.webp');
 }
 .arena .fighter.motion-rig.elchica {
-  --rig-idle:url('/assets/new-fighters/elchica-rig-v21849-idle.png');
-  --rig-walk:url('/assets/new-fighters/elchica-rig-v21849-walk.png');
-  --rig-punch:url('/assets/new-fighters/elchica-rig-v21849-punch.png');
-  --rig-kick:url('/assets/new-fighters/elchica-rig-v21849-kick.png');
-  --rig-recover:url('/assets/new-fighters/elchica-rig-v21849-recover.png');
+  --rig-idle:url('/assets/new-fighters/elchica-rig-v21849-idle.webp');
+  --rig-walk:url('/assets/new-fighters/elchica-rig-v21849-walk.webp');
+  --rig-punch:url('/assets/new-fighters/elchica-rig-v21849-punch.webp');
+  --rig-kick:url('/assets/new-fighters/elchica-rig-v21849-kick.webp');
+  --rig-recover:url('/assets/new-fighters/elchica-rig-v21849-recover.webp');
 }
 .arena .fighter.motion-rig.ogalla {
-  --rig-idle:url('/assets/new-fighters/ogalla-punch-1.png');
-  --rig-walk:url('/assets/new-fighters/ogalla-punch-2.png');
-  --rig-punch:url('/assets/new-fighters/ogalla-punch-3.png');
-  --rig-kick:url('/assets/new-fighters/ogalla-kick-3.png');
-  --rig-recover:url('/assets/new-fighters/ogalla-punch-4.png');
+  --rig-idle:url('/assets/new-fighters/ogalla-kick-1.webp');
+  --rig-walk:url('/assets/new-fighters/ogalla-kick-1.webp');
+  --rig-punch:url('/assets/new-fighters/ogalla-punch-3.webp');
+  --rig-kick:url('/assets/new-fighters/ogalla-kick-3.webp');
+  --rig-recover:url('/assets/new-fighters/ogalla-punch-4.webp');
 }
 .arena .fighter.motion-rig.tonimassama {
-  --rig-idle:url('/assets/new-fighters/tonimassama-rig-v21849-idle.png');
-  --rig-walk:url('/assets/new-fighters/tonimassama-rig-v21849-walk.png');
-  --rig-punch:url('/assets/new-fighters/tonimassama-rig-v21849-punch.png');
-  --rig-kick:url('/assets/new-fighters/tonimassama-rig-v21849-kick.png');
-  --rig-recover:url('/assets/new-fighters/tonimassama-rig-v21849-recover.png');
+  --rig-idle:url('/assets/new-fighters/tonimassama-rig-v21849-idle.webp');
+  --rig-walk:url('/assets/new-fighters/tonimassama-rig-v21849-walk.webp');
+  --rig-punch:url('/assets/new-fighters/tonimassama-rig-v21849-punch.webp');
+  --rig-kick:url('/assets/new-fighters/tonimassama-rig-v21849-kick.webp');
+  --rig-recover:url('/assets/new-fighters/tonimassama-rig-v21849-recover.webp');
 }
 .arena .fighter.motion-rig:is(.bacora,.bonviure,.elchica,.ogalla,.tonimassama) .fighter-pose .fighter-art:is(.bacora,.bonviure,.elchica,.ogalla,.tonimassama) {
   background-image:var(--rig-idle)!important;
@@ -9333,18 +9333,18 @@ html[data-display-mode=mobile] .select-screen.lobby-v2168 .character-card small 
   aspect-ratio:2/3!important;
 }
 .arena .fighter.motion-rig.xuso {
-  --rig-idle:url('/assets/new-fighters/xuso-rig-v21849-idle.png');
-  --rig-walk:url('/assets/new-fighters/xuso-rig-v21849-walk.png');
-  --rig-punch:url('/assets/new-fighters/xuso-rig-v21849-punch.png');
-  --rig-kick:url('/assets/new-fighters/xuso-rig-v21849-kick.png');
-  --rig-recover:url('/assets/new-fighters/xuso-rig-v21849-recover.png');
+  --rig-idle:url('/assets/new-fighters/xuso-rig-v21849-idle.webp');
+  --rig-walk:url('/assets/new-fighters/xuso-rig-v21849-walk.webp');
+  --rig-punch:url('/assets/new-fighters/xuso-rig-v21849-punch.webp');
+  --rig-kick:url('/assets/new-fighters/xuso-rig-v21849-kick.webp');
+  --rig-recover:url('/assets/new-fighters/xuso-rig-v21849-recover.webp');
 }
 .arena .fighter.motion-rig.bomba {
-  --rig-idle:url('/assets/new-fighters/bomba-rig-v21847-idle.png');
-  --rig-walk:url('/assets/new-fighters/bomba-rig-v21847-walk.png');
-  --rig-punch:url('/assets/new-fighters/bomba-rig-v21847-punch.png');
-  --rig-kick:url('/assets/new-fighters/bomba-rig-v21847-kick.png');
-  --rig-recover:url('/assets/new-fighters/bomba-rig-v21847-recover.png');
+  --rig-idle:url('/assets/new-fighters/bomba-rig-v21847-idle.webp');
+  --rig-walk:url('/assets/new-fighters/bomba-rig-v21847-walk.webp');
+  --rig-punch:url('/assets/new-fighters/bomba-rig-v21847-punch.webp');
+  --rig-kick:url('/assets/new-fighters/bomba-rig-v21847-kick.webp');
+  --rig-recover:url('/assets/new-fighters/bomba-rig-v21847-recover.webp');
 }
 .arena .fighter.motion-rig:is(.xuso,.bomba) .fighter-pose .fighter-art:is(.xuso,.bomba) {
   left:0!important;
@@ -9710,29 +9710,29 @@ html[data-display-mode=mobile] .select-screen.lobby-v2168 .character-card small 
   --rig-jump:url('/assets/new-fighters/borja-jump-v1.webp');
   --rig-hit:url('/assets/new-fighters/borja-hit-v1.webp');
   --rig-down:url('/assets/new-fighters/borja-knockdown-v1.webp');
-  --rig-punch-strip:url('/assets/new-fighters/borja-punch-strip-v21836.png');
-  --rig-kick-strip:url('/assets/new-fighters/borja-kick-strip-v21836.png');
+  --rig-punch-strip:url('/assets/new-fighters/borja-punch-strip-v21836.webp');
+  --rig-kick-strip:url('/assets/new-fighters/borja-kick-strip-v21836.webp');
 }
 .arena .fighter.motion-rig.bacora {
-  --rig-crouch:url('/assets/new-fighters/bacora-crouch.png');
-  --rig-jump:url('/assets/new-fighters/bacora-jump-v1.png');
-  --rig-punch-strip:url('/assets/new-fighters/bacora-punch-strip-v21836.png');
-  --rig-kick-strip:url('/assets/new-fighters/bacora-kick-strip-v21836.png');
+  --rig-crouch:url('/assets/new-fighters/bacora-crouch.webp');
+  --rig-jump:url('/assets/new-fighters/bacora-jump-v1.webp');
+  --rig-punch-strip:url('/assets/new-fighters/bacora-punch-strip-v21836.webp');
+  --rig-kick-strip:url('/assets/new-fighters/bacora-kick-strip-v21836.webp');
 }
 .arena .fighter.motion-rig.bonviure {
-  --rig-crouch:url('/assets/new-fighters/bonviure-crouch-v21849.png');
-  --rig-block:url('/assets/new-fighters/bonviure-guard-v21849.png');
-  --rig-jump:url('/assets/new-fighters/bonviure-jump-v21849.png');
-  --rig-hit:url('/assets/new-fighters/bonviure-hit-v21849.png');
-  --rig-down:url('/assets/new-fighters/bonviure-down-v21849.png');
-  --rig-punch-strip:url('/assets/new-fighters/bonviure-punch-strip-v21836.png');
-  --rig-kick-strip:url('/assets/new-fighters/bonviure-kick-strip-v21836.png');
+  --rig-crouch:url('/assets/new-fighters/bonviure-crouch-v21849.webp');
+  --rig-block:url('/assets/new-fighters/bonviure-guard-v21849.webp');
+  --rig-jump:url('/assets/new-fighters/bonviure-jump-v21849.webp');
+  --rig-hit:url('/assets/new-fighters/bonviure-hit-v21849.webp');
+  --rig-down:url('/assets/new-fighters/bonviure-down-v21849.webp');
+  --rig-punch-strip:url('/assets/new-fighters/bonviure-punch-strip-v21836.webp');
+  --rig-kick-strip:url('/assets/new-fighters/bonviure-kick-strip-v21836.webp');
 }
-.arena .fighter.motion-rig.elchica { --rig-crouch:url('/assets/new-fighters/elchica-crouch-v21849.png'); --rig-punch-strip:url('/assets/new-fighters/elchica-punch-strip-v21836.png'); --rig-kick-strip:url('/assets/new-fighters/elchica-kick-strip-v21836.png'); }
-.arena .fighter.motion-rig.ogalla { --rig-crouch:url('/assets/new-fighters/ogalla-crouch-v21849.png'); --rig-punch-strip:url('/assets/new-fighters/ogalla-punch-strip-v21836.png'); --rig-kick-strip:url('/assets/new-fighters/ogalla-kick-strip-v21836.png'); }
-.arena .fighter.motion-rig.xuso { --rig-crouch:url('/assets/new-fighters/xuso-crouch-v21849b.png'); }
-.arena .fighter.motion-rig.bomba { --rig-crouch:url('/assets/new-fighters/bomba-crouch-v21849.png'); }
-.arena .fighter.motion-rig.tonimassama { --rig-crouch:url('/assets/new-fighters/tonimassama-crouch-v21849.png'); }
+.arena .fighter.motion-rig.elchica { --rig-crouch:url('/assets/new-fighters/elchica-crouch-v21849.webp'); --rig-punch-strip:url('/assets/new-fighters/elchica-punch-strip-v21836.webp'); --rig-kick-strip:url('/assets/new-fighters/elchica-kick-strip-v21836.webp'); }
+.arena .fighter.motion-rig.ogalla { --rig-crouch:url('/assets/new-fighters/ogalla-crouch-v21849.webp'); --rig-punch-strip:url('/assets/new-fighters/ogalla-punch-strip-v21836.webp'); --rig-kick-strip:url('/assets/new-fighters/ogalla-kick-strip-v21836.webp'); }
+.arena .fighter.motion-rig.xuso { --rig-crouch:url('/assets/new-fighters/xuso-crouch-v21849b.webp'); }
+.arena .fighter.motion-rig.bomba { --rig-crouch:url('/assets/new-fighters/bomba-crouch-v21849.webp'); }
+.arena .fighter.motion-rig.tonimassama { --rig-crouch:url('/assets/new-fighters/tonimassama-crouch-v21849.webp'); }
 .arena .fighter.motion-rig:is(.borja,.bacora,.bonviure,.elchica,.ogalla,.xuso,.bomba,.tonimassama) .fighter-pose .fighter-art {
   left:0!important;
   width:100%!important;
@@ -9792,13 +9792,13 @@ html[data-display-mode=mobile] .select-screen.lobby-v2168 .character-card small 
 
 /* The active special uses the fighter's own weapon pose. The shared attack
    phases still control timing, but phase two must show the W, anchor or staff. */
-.arena .fighter.motion-rig.bacora.special.shield.pose-phase-2 .fighter-pose .fighter-art.bacora { background-image:url('/assets/new-fighters/bacora-release-shield-v1.png')!important; }
-.arena .fighter.motion-rig.bacora.special.staff.pose-phase-2 .fighter-pose .fighter-art.bacora { background-image:url('/assets/new-fighters/bacora-staff-v21849.png')!important; }
-.arena .fighter.motion-rig.bonviure.special.anchor.pose-phase-2 .fighter-pose .fighter-art.bonviure { background-image:url('/assets/new-fighters/bonviure-anchor-v21849.png')!important; }
-.arena .fighter.motion-rig.bonviure.special.chain.pose-phase-2 .fighter-pose .fighter-art.bonviure { background-image:url('/assets/new-fighters/bonviure-chain-clean.png')!important; }
-.arena .fighter.motion-rig.elchica.special.jager.pose-phase-2 .fighter-pose .fighter-art.elchica { background-image:url('/assets/new-fighters/elchica-bottle-special-v2.png')!important; }
-.arena .fighter.motion-rig.elchica.special.amber.pose-phase-2 .fighter-pose .fighter-art.elchica { background-image:url('/assets/new-fighters/elchica-throw-special-v2.png')!important; }
-.arena .fighter.motion-rig.ogalla.special.scepter.pose-phase-2 .fighter-pose .fighter-art.ogalla { background-image:url('/assets/new-fighters/ogalla-staff-special-v2.png')!important; }
+.arena .fighter.motion-rig.bacora.special.shield.pose-phase-2 .fighter-pose .fighter-art.bacora { background-image:url('/assets/new-fighters/bacora-release-shield-v1.webp')!important; }
+.arena .fighter.motion-rig.bacora.special.staff.pose-phase-2 .fighter-pose .fighter-art.bacora { background-image:url('/assets/new-fighters/bacora-staff-v21849.webp')!important; }
+.arena .fighter.motion-rig.bonviure.special.anchor.pose-phase-2 .fighter-pose .fighter-art.bonviure { background-image:url('/assets/new-fighters/bonviure-anchor-v21849.webp')!important; }
+.arena .fighter.motion-rig.bonviure.special.chain.pose-phase-2 .fighter-pose .fighter-art.bonviure { background-image:url('/assets/new-fighters/bonviure-chain-clean.webp')!important; }
+.arena .fighter.motion-rig.elchica.special.jager.pose-phase-2 .fighter-pose .fighter-art.elchica { background-image:url('/assets/new-fighters/elchica-bottle-special-v2.webp')!important; }
+.arena .fighter.motion-rig.elchica.special.amber.pose-phase-2 .fighter-pose .fighter-art.elchica { background-image:url('/assets/new-fighters/elchica-throw-special-v2.webp')!important; }
+.arena .fighter.motion-rig.ogalla.special.scepter.pose-phase-2 .fighter-pose .fighter-art.ogalla { background-image:url('/assets/new-fighters/ogalla-staff-special-v2.webp')!important; }
 
 /* Keep the sprite at the same height while giving wide weapons and capes a
    wider drawing window. auto 100% inside the narrow body box clipped them. */
@@ -9841,20 +9841,20 @@ html[data-display-mode=mobile] .select-screen.lobby-v2168 .character-card small 
   background-image:url('/assets/new-fighters/borja-attack.webp')!important;
 }
 .arena .fighter.motion-rig.ogalla.special.artichokes.pose-phase-2 .fighter-pose .fighter-art.ogalla {
-  background-image:url('/assets/new-fighters/ogalla-punch-3.png')!important;
+  background-image:url('/assets/new-fighters/ogalla-punch-3.webp')!important;
 }
 .arena .fighter.motion-rig.tonimassama.special.goldPistol.pose-phase-2 .fighter-pose .fighter-art.tonimassama {
-  background-image:url('/assets/new-fighters/tonimassama-frames/pistol.png')!important;
+  background-image:url('/assets/new-fighters/tonimassama-frames/pistol.webp')!important;
 }
 .arena .fighter.motion-rig.tonimassama.special.fingerPeinetas.pose-phase-2 .fighter-pose .fighter-art.tonimassama {
-  background-image:url('/assets/new-fighters/tonimassama-frames/punch.png')!important;
+  background-image:url('/assets/new-fighters/tonimassama-frames/punch.webp')!important;
 }
 
 /* V2.18.51 · Give Xuso and El Chica the same readable "face + signature
    object" treatment as the reference cabinet.  These are deliberately
    dedicated selector crops: the fight rigs stay untouched. */
 .select-screen.lobby-v2168 .character-card .portrait.xuso {
-  background-image:url('/prison-slug/assets/duo-dog.png')!important;
+  background-image:url('/prison-slug/assets/duo-dog.webp')!important;
   background-size:contain!important;
   background-position:center bottom!important;
   background-repeat:no-repeat!important;
@@ -9867,7 +9867,7 @@ html[data-display-mode=mobile] .select-screen.lobby-v2168 .character-card small 
     linear-gradient(145deg,#12211a,#07120f 76%)!important;
 }
 .select-screen.lobby-v2168 .character-card .portrait.elchica {
-  background-image:url('/assets/new-fighters/elchica-rig-v21849-idle.png')!important;
+  background-image:url('/assets/new-fighters/elchica-rig-v21849-idle.webp')!important;
   background-size:contain!important;
   background-position:center bottom!important;
   background-repeat:no-repeat!important;
@@ -9883,14 +9883,14 @@ html[data-display-mode=mobile] .select-screen.lobby-v2168 .character-card small 
    companion/object cannot be read in a full-body image.  The label has a
    separate bottom rail, so it never covers a face or the feature prop. */
 .select-screen.lobby-v2168 .character-card .portrait.xuso {
-  background-image:url('/assets/new-fighters/xuso-selector-v21852.png')!important;
+  background-image:url('/assets/new-fighters/xuso-selector-v21852.webp')!important;
   background-size:cover!important;
   background-position:center center!important;
   mix-blend-mode:normal!important;
   filter:saturate(1.06) contrast(1.07)!important;
 }
 .select-screen.lobby-v2168 .character-card .portrait.elchica {
-  background-image:url('/assets/new-fighters/elchica-selector-v21852.png')!important;
+  background-image:url('/assets/new-fighters/elchica-selector-v21852.webp')!important;
   background-size:cover!important;
   background-position:center center!important;
 }
@@ -10063,6 +10063,55 @@ html[data-display-mode=mobile] .select-screen.lobby-v2168 .character-card small 
     height:clamp(48px,10vh,58px)!important;
   }
   .game-shell:not(:has(.lobby-v2168)) .touch-joystick-label { font-size:6px!important; }
+}
+
+/* Directional effects for Xuso's dog and El Bomba's hoe. */
+.arena .special-fx:is(.fx-dog,.fx-howl,.fx-hoe,.fx-hoeSweep) .fx-unit { width:clamp(80px,10vw,140px); height:clamp(80px,10vw,140px); animation-duration:520ms!important; }
+.arena .special-fx:is(.fx-dog,.fx-howl,.fx-hoe,.fx-hoeSweep).toward-right .fx-unit { animation-name:signature-attack-right!important; }
+.arena .special-fx:is(.fx-dog,.fx-howl,.fx-hoe,.fx-hoeSweep).toward-left .fx-unit { animation-name:signature-attack-left!important; }
+.arena .special-fx:is(.fx-dog,.fx-howl,.fx-hoe,.fx-hoeSweep) .fx-unit img { filter:drop-shadow(0 0 10px #ffbd55) drop-shadow(3px 5px 4px #000a); }
+/* Xuso should not have a glowing outline or special-move aura. */
+.arena .fighter.motion-rig.xuso .fighter-art.xuso,
+.coop-player.xuso .coop-player-art,
+.orb-hero.xuso .fighter-art.xuso { filter:none!important; mix-blend-mode:normal!important; }
+.arena .fighter.motion-rig.xuso.special::before,
+.coop-player.xuso:is(.fire,.special)::before { content:none!important; }
+.arena .special-fx:is(.fx-dog,.fx-howl) .fx-unit img { filter:none!important; }
+/* Signature attack poses based on the supplied references. */
+.arena .fighter.motion-rig.xuso.special:is(.dog,.howl).pose-phase-2 .fighter-pose .fighter-art.xuso {
+  background-image:url('/assets/new-fighters/xuso-dog-attack-v2.webp')!important;
+  left:-35%!important; width:170%!important;
+}
+.arena .fighter.motion-rig.bomba.special:is(.hoe,.hoeSweep).pose-phase-2 .fighter-pose .fighter-art.bomba {
+  background-image:url('/assets/new-fighters/bomba-hoe-attack-v2.webp')!important;
+  left:-30%!important; width:160%!important;
+}
+.arena .fighter.motion-rig.ogalla.special.artichokes.pose-phase-2 .fighter-pose .fighter-art.ogalla {
+  background-image:url('/assets/new-fighters/ogalla-artichoke-attack-v2.webp')!important;
+}
+/* Transparent neutral, walking and guarding sprites. */
+.arena .fighter.motion-rig.xuso { --rig-idle:url('/assets/new-fighters/xuso-idle-v2.webp'); --rig-walk:url('/assets/new-fighters/xuso-walk-v2.webp'); --rig-crouch:url('/assets/new-fighters/xuso-guard-v2.webp'); --rig-block:var(--rig-crouch); --rig-recover:var(--rig-idle); --rig-jump:var(--rig-walk); }
+.arena .fighter.motion-rig.bomba { --rig-idle:url('/assets/new-fighters/bomba-idle-v2.webp'); --rig-walk:url('/assets/new-fighters/bomba-walk-v2.webp'); --rig-crouch:url('/assets/new-fighters/bomba-guard-v2.webp'); --rig-block:var(--rig-crouch); --rig-recover:var(--rig-idle); --rig-punch:url('/assets/new-fighters/bomba-hoe-attack-v2.webp'); --rig-kick:url('/assets/new-fighters/bomba-hoe-attack-v2.webp'); --rig-jump:var(--rig-walk); }
+.arena .fighter.motion-rig.ogalla { --rig-idle:url('/assets/new-fighters/ogalla-idle-v2.webp'); --rig-walk:url('/assets/new-fighters/ogalla-walk-v2.webp'); --rig-crouch:url('/assets/new-fighters/ogalla-guard-v2.webp'); --rig-block:var(--rig-crouch); --rig-recover:var(--rig-idle); --rig-jump:var(--rig-walk); }
+.coop-player.xuso .coop-player-art, .orb-hero .fighter-art.xuso { background-image:url('/assets/new-fighters/xuso-idle-v2.webp')!important; }
+.coop-player.bomba .coop-player-art, .orb-hero .fighter-art.bomba { background-image:url('/assets/new-fighters/bomba-idle-v2.webp')!important; }
+.coop-player.ogalla .coop-player-art, .orb-hero .fighter-art.ogalla { background-image:url('/assets/new-fighters/ogalla-idle-v2.webp')!important; }
+.coop-player:is(.xuso,.bomba,.ogalla) .coop-player-art, .orb-hero .fighter-art:is(.xuso,.bomba,.ogalla) { background-size:contain!important; background-position:center bottom!important; background-repeat:no-repeat!important; mix-blend-mode:normal!important; animation:none!important; }
+.coop-player.xuso.walk .coop-player-art, .orb-hero.orb-moving .fighter-art.xuso { background-image:url('/assets/new-fighters/xuso-walk-v2.webp')!important; }
+.coop-player.bomba.walk .coop-player-art, .orb-hero.orb-moving .fighter-art.bomba { background-image:url('/assets/new-fighters/bomba-walk-v2.webp')!important; }
+.coop-player.ogalla.walk .coop-player-art, .orb-hero.orb-moving .fighter-art.ogalla { background-image:url('/assets/new-fighters/ogalla-walk-v2.webp')!important; }
+.coop-player.xuso:is(.fire,.special) .coop-player-art, .orb-hero.orb-firing .fighter-art.xuso { background-image:url('/assets/new-fighters/xuso-dog-attack-v2.webp')!important; }
+.coop-player.bomba:is(.fire,.special) .coop-player-art, .orb-hero.orb-firing .fighter-art.bomba { background-image:url('/assets/new-fighters/bomba-hoe-attack-v2.webp')!important; }
+.coop-player.ogalla:is(.fire,.special) .coop-player-art, .orb-hero.orb-firing .fighter-art.ogalla { background-image:url('/assets/new-fighters/ogalla-artichoke-attack-v2.webp')!important; }
+@keyframes signature-attack-right {
+  0% { opacity:0; transform:translateX(0) scale(.5); }
+  22%,85% { opacity:1; }
+  100% { opacity:0; transform:translateX(var(--fx-travel)) scale(1.2); }
+}
+@keyframes signature-attack-left {
+  0% { opacity:0; transform:translateX(0) scaleX(-.5) scaleY(.5); }
+  22%,85% { opacity:1; }
+  100% { opacity:0; transform:translateX(var(--fx-travel)) scaleX(-1.2) scaleY(1.2); }
 }
 
 @media (max-width:390px) and (orientation:portrait) {

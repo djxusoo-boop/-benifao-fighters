@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#0b1017" />
+    <title>HARDCORE FIGHTERS · PRISON SLUG</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='10' fill='%23071018'/%3E%3Cpath d='M12 12h24c10 0 17 7 17 17S46 46 36 46H25v8H12V12zm13 12v10h10c3 0 5-2 5-5s-2-5-5-5H25z' fill='%237dff38'/%3E%3C/svg%3E" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="masthead">
+        <div>
+          <p class="eyebrow">PRISON SLUG · MISIÓN 01</p>
+          <h1>PRISON <em>SLUG</em></h1>
+        </div>
+        <button id="muteButton" class="icon-button" type="button" aria-pressed="false" title="Activar o desactivar sonido">SONIDO: OFF</button>
+      </header>
+
+      <section id="selectScreen" class="screen select-screen" aria-labelledby="selectTitle">
+        <div class="mission-copy">
+          <p class="eyebrow">RUN &amp; GUN ORIGINAL</p>
+          <h2 id="selectTitle">ELIGE A TU HÉROE</h2>
+          <p>Recupera la <strong>Furgoneta Resonante</strong>, activa su muro de altavoces y abre la ruta de escape. Cada héroe tiene un especial distinto.</p>
+        </div>
+        <div id="characterCards" class="character-cards" aria-label="Selección de personaje"></div>
+        <div class="select-actions">
+          <button id="startButton" class="primary-button" type="button">INICIAR MISIÓN <span>▶</span></button>
+          <p>Teclado: <kbd>A</kbd><kbd>D</kbd> mover · <kbd>W</kbd> saltar · <kbd>J</kbd> fuego · <kbd>K</kbd> especial</p>
+        </div>
+      </section>
+
+      <section id="gameScreen" class="screen game-screen hidden" aria-label="Juego PRISON Van Rush">
+        <div class="hud top-hud" aria-live="polite">
+          <div class="hud-block player-hud">
+            <span id="heroName">HÉROE</span>
+            <div class="meter"><i id="healthMeter"></i></div>
+            <small>VIDAS <b id="livesReadout">03</b></small>
+            <small id="weaponReadout" class="weapon-readout">PISTOLA · ∞</small>
+          </div>
+          <div class="stage-hud">
+            <span id="objectiveReadout">RUMBO A LA FURGONETA</span>
+            <b id="scoreReadout">000000</b>
+          </div>
+          <div class="hud-block energy-hud">
+            <span>ESPECIAL</span>
+            <div class="meter energy"><i id="energyMeter"></i></div>
+            <small id="abilityReadout">HABILIDAD</small>
+          </div>
+        </div>
+
+        <div class="canvas-frame">
+          <canvas id="gameCanvas" width="1280" height="720" aria-label="Aventura lateral de acción"></canvas>
+          <div id="eventBanner" class="event-banner" aria-live="assertive"></div>
+          <div id="vanPrompt" class="van-prompt hidden">PULSA <kbd>F</kbd> PARA SUBIR Y CONDUCIR</div>
+          <div id="pausePanel" class="pause-panel hidden">
+            <p class="eyebrow">PAUSA</p>
+            <h2>MISIÓN EN ESPERA</h2>
+            <button id="resumeButton" class="primary-button" type="button">CONTINUAR</button>
+            <button id="quitButton" class="secondary-button" type="button">VOLVER A SELECCIÓN</button>
+          </div>
+        </div>
+
+        <div class="mobile-controls" aria-label="Controles táctiles">
+          <div id="joystick" class="joystick" role="application" aria-label="Joystick virtual de movimiento">
+            <span class="joystick-ring" aria-hidden="true"></span>
+            <span id="joystickKnob" class="joystick-knob" aria-hidden="true"></span>
+          </div>
+          <div class="action-pad">
+            <button data-key="jump" type="button" class="jump" aria-label="Saltar">▲</button>
+            <button data-key="crouch" type="button" class="crouch" aria-label="Agacharse">▼</button>
+            <button data-key="fire" type="button" class="fire" aria-label="Fuego">F</button>
+            <button data-key="special" type="button" class="special" aria-label="Especial">★</button>
+            <button data-key="activate" type="button" class="activate" aria-label="Subir a la furgoneta">VAN</button>
+          </div>
+        </div>
+        <p class="desktop-controls"><kbd>A</kbd><kbd>D</kbd> MOVER · <kbd>W</kbd> SALTAR · <kbd>S</kbd> AGACHARSE · <kbd>J</kbd> FUEGO · <kbd>K</kbd> ESPECIAL · <kbd>F</kbd> FURGONETA · <kbd>P</kbd> PAUSA</p>
+      </section>
+
+      <section id="resultScreen" class="screen result-screen hidden" aria-live="polite">
+        <div class="result-card">
+          <p id="resultEyebrow" class="eyebrow">MISIÓN</p>
+          <h2 id="resultTitle">MISIÓN COMPLETA</h2>
+          <p id="resultText"></p>
+          <strong id="resultScore">000000</strong>
+          <div>
+            <button id="againButton" class="primary-button" type="button">JUGAR OTRA VEZ</button>
+            <button id="backButton" class="secondary-button" type="button">ELEGIR HÉROE</button>
+          </div>
+        </div>
+      </section>
+    </main>
+    <script src="game.js"></script>
+  </body>
+</html>

@@ -1,0 +1,26 @@
+{
+  "name": "Hardcore Fighters — Web Arcade Edition",
+  "short_name": "Hardcore Fighters",
+  "description": "Juego arcade para iPad, proyector, pantalla táctil y dos mandos.",
+  "lang": "es",
+  "start_url": "/?source=installed",
+  "scope": "/",
+  "display": "fullscreen",
+  "orientation": "landscape",
+  "background_color": "#080707",
+  "theme_color": "#080707",
+  "categories": ["games", "entertainment"],
+  "icons": [
+    {
+      "src": "/icon-180.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

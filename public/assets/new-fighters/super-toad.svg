@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 360">
+  <defs>
+    <radialGradient id="body" cx="45%" cy="35%" r="70%">
+      <stop offset="0" stop-color="#c8f26a"/>
+      <stop offset=".55" stop-color="#6fb83a"/>
+      <stop offset="1" stop-color="#2f6a1e"/>
+    </radialGradient>
+    <radialGradient id="belly" cx="50%" cy="30%" r="70%">
+      <stop offset="0" stop-color="#fbf7c4"/>
+      <stop offset="1" stop-color="#d4cf7a"/>
+    </radialGradient>
+    <radialGradient id="eye" cx="40%" cy="35%" r="65%">
+      <stop offset="0" stop-color="#fff59a"/>
+      <stop offset="1" stop-color="#e2a21b"/>
+    </radialGradient>
+  </defs>
+  <g stroke="#13250b" stroke-width="7" stroke-linejoin="round" stroke-linecap="round">
+    <!-- back legs -->
+    <path d="M58 300 C10 300 8 250 50 236 C80 226 104 250 112 282 Z" fill="url(#body)"/>
+    <path d="M342 300 C390 300 392 250 350 236 C320 226 296 250 288 282 Z" fill="url(#body)"/>
+    <!-- body -->
+    <path d="M70 250 C60 150 120 96 200 96 C280 96 340 150 330 250 C322 312 270 330 200 330 C130 330 78 312 70 250 Z" fill="url(#body)"/>
+    <path d="M128 262 C130 208 164 184 200 184 C236 184 270 208 272 262 C272 300 240 318 200 318 C160 318 128 300 128 262 Z" fill="url(#belly)" stroke-width="5"/>
+    <!-- eyes -->
+    <circle cx="132" cy="112" r="50" fill="url(#body)"/>
+    <circle cx="268" cy="112" r="50" fill="url(#body)"/>
+    <circle cx="132" cy="108" r="34" fill="url(#eye)"/>
+    <circle cx="268" cy="108" r="34" fill="url(#eye)"/>
+    <ellipse cx="136" cy="110" rx="8" ry="24" fill="#120a04" stroke="none"/>
+    <ellipse cx="264" cy="110" rx="8" ry="24" fill="#120a04" stroke="none"/>
+    <!-- angry brows -->
+    <path d="M92 74 L170 96" stroke-width="12"/>
+    <path d="M308 74 L230 96" stroke-width="12"/>
+    <!-- mouth -->
+    <path d="M110 184 C150 224 250 224 290 184" fill="none" stroke-width="9"/>
+    <path d="M150 204 C170 236 230 236 250 204 C230 214 170 214 150 204 Z" fill="#c2324a" stroke-width="5"/>
+    <!-- front feet -->
+    <path d="M128 318 C112 336 92 338 84 330 M128 318 C124 340 110 348 100 344 M128 318 C138 340 134 350 124 352" fill="none" stroke-width="8"/>
+    <path d="M272 318 C288 336 308 338 316 330 M272 318 C276 340 290 348 300 344 M272 318 C262 340 266 350 276 352" fill="none" stroke-width="8"/>
+  </g>
+  <!-- warts and shine -->
+  <g fill="#3f8a26" opacity=".85">
+    <circle cx="96" cy="200" r="9"/><circle cx="304" cy="196" r="10"/><circle cx="116" cy="240" r="7"/>
+    <circle cx="290" cy="244" r="8"/><circle cx="200" cy="140" r="8"/><circle cx="174" cy="160" r="5"/><circle cx="230" cy="158" r="6"/>
+  </g>
+  <g fill="#fff" opacity=".7">
+    <circle cx="122" cy="96" r="7"/><circle cx="258" cy="96" r="7"/>
+    <ellipse cx="160" cy="128" rx="16" ry="7" transform="rotate(-20 160 128)" opacity=".5"/>
+  </g>
+  <!-- venom drips -->
+  <g fill="#9dff3a" stroke="#13250b" stroke-width="4">
+    <path d="M176 222 C176 240 168 250 168 258 C168 268 184 268 184 258 C184 250 176 240 176 222 Z"/>
+    <path d="M226 222 C226 236 220 244 220 250 C220 258 232 258 232 250 C232 244 226 236 226 222 Z"/>
+  </g>
+</svg>

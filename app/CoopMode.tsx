@@ -432,8 +432,19 @@ export default function CoopMode({ playerOne, playerTwo, aiPlayerTwo = false, so
   }, [aiPlayerTwo, dodge, fire, jump, sync, unleashCombo]);
 
   useEffect(() => {
-    const movement = window.setInterval(() => {
-      if (document.hidden || statusRef.current !== "playing") return;
+    let frameId = 0;
+    let lastFrame = performance.now();
+    const movement = (frameTime: number) => {
+      if (document.hidden || statusRef.current !== "playing") {
+        lastFrame = frameTime;
+        frameId = window.requestAnimationFrame(movement);
+        return;
+      }
+      if (frameTime - lastFrame < 32) {
+        frameId = window.requestAnimationFrame(movement);
+        return;
+      }
+      lastFrame = frameTime - Math.min((frameTime - lastFrame) % 32, 16);
       const inputTime = Date.now();
       for (const slot of ["p1", "p2"] as PlayerSlot[]) {
         const pending = queuedAttackRef.current[slot];
@@ -564,8 +575,10 @@ export default function CoopMode({ playerOne, playerTwo, aiPlayerTwo = false, so
           later(() => setPlayers((current) => current[fighter].health > 0 && current[fighter].action === "hit" ? { ...current, [fighter]: { ...current[fighter], action: "idle" } } : current), 360);
         }, delay);
       });
-    }, 32);
-    return () => window.clearInterval(movement);
+      frameId = window.requestAnimationFrame(movement);
+    };
+    frameId = window.requestAnimationFrame(movement);
+    return () => window.cancelAnimationFrame(frameId);
   }, [aiPlayerTwo, beep, difficulty, fire, haptic, later]);
 
   useEffect(() => {

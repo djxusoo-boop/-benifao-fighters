@@ -1,6 +1,7 @@
 import { getD1 } from "../../../db";
 
 const MODES = ["fight", "orbs", "adventure", "coop", "tournament"] as const;
+const FIGHTERS = new Set(["maletilla", "vanessa", "josevictor", "cristian", "cesaret", "borja", "bacora", "bonviure", "elchica", "ogalla", "xuso", "bomba", "rafeta", "tonimassama", "nova"]);
 type Mode = typeof MODES[number];
 
 const isMode = (value: unknown): value is Mode => typeof value === "string" && MODES.includes(value as Mode);
@@ -40,7 +41,7 @@ export async function POST(request: Request) {
     const body = await request.json() as { playerName?: unknown; mode?: unknown; score?: unknown; fighter?: unknown };
     const playerName = typeof body.playerName === "string" ? body.playerName.trim().replace(/\s+/g, " ") : "";
     const score = Math.floor(Number(body.score));
-    const fighter = body.fighter === "cesaret" ? "cesaret" : body.fighter === "borja" ? "borja" : body.fighter === "bacora" ? "bacora" : body.fighter === "bonviure" ? "bonviure" : body.fighter === "elchica" ? "elchica" : body.fighter === "ogalla" ? "ogalla" : body.fighter === "vanessa" ? "vanessa" : body.fighter === "josevictor" ? "josevictor" : body.fighter === "cristian" ? "cristian" : "maletilla";
+    const fighter = typeof body.fighter === "string" && FIGHTERS.has(body.fighter) ? body.fighter : "maletilla";
     if (playerName.length < 2 || playerName.length > 30) {
       return Response.json({ error: "Escribe un nombre de 2 a 30 caracteres" }, { status: 400 });
     }

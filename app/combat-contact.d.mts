@@ -10,3 +10,5 @@ export function directionToOpponent(attackerX: number, opponentX: number): "towa
 export function attackFacesTarget(direction: "toward-right" | "toward-left", attackerX: number, targetX: number): boolean;
 export function fighterAttackRange(specialMove: string | null, normalMove: "punch" | "kick", airborne?: boolean): number;
 export function clampFighterStep(ownX: number, rivalX: number, proposedX: number, minimumGap: number): number;
+export function combatApproachGap(arenaWidth: number, fighterWidth: number): number;
+export function visibleFighterBounds(arenaWidth: number, fighterWidth: number, min?: number, max?: number, padding?: number, extraTravel?: number): { min: number; max: number };

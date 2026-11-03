@@ -19,13 +19,13 @@ const CORE_ASSETS = [
   "/assets/josevictor/idle.webp",
   "/assets/cristian/idle.webp",
   "/assets/new-fighters/borja-idle.webp",
-  "/assets/new-fighters/bacora-idle.png",
-  "/assets/new-fighters/bonviure-idle.png",
-  "/assets/new-fighters/elchica-atlas.png",
-  "/assets/new-fighters/ogalla-atlas.png",
-  "/prison-slug/assets/duo-dog.png",
-  "/prison-slug/assets/hoe-hero.png",
-  "/prison-slug/assets/white-hero.png",
+  "/assets/new-fighters/bacora-idle.webp",
+  "/assets/new-fighters/bonviure-idle.webp",
+  "/assets/new-fighters/elchica-atlas.webp",
+  "/assets/new-fighters/ogalla-atlas.webp",
+  "/prison-slug/assets/duo-dog.webp",
+  "/prison-slug/assets/hoe-hero.webp",
+  "/prison-slug/assets/white-hero.webp",
 ] as const;
 
 
