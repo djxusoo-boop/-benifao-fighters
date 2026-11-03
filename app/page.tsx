@@ -12,6 +12,9 @@ import GamepadManager from "./GamepadManager";
 import ArcadeDeviceManager from "./ArcadeDeviceManager";
 import Leaderboard, { type LeaderboardMode } from "./Leaderboard";
 import FighterWalkLayers from "./FighterWalkLayers";
+import FighterVisibilityGuard from "./FighterVisibilityGuard";
+import AutoFullscreen from "./AutoFullscreen";
+import { markFrameLoaded } from "./frame-registry";
 import { FIGHTER_FRAMES } from "./fighter-frames";
 import { attackFacesTarget, clampFighterStep, combatApproachGap, combatContact, directionToOpponent, fighterAttackRange, visibleFighterBounds } from "./combat-contact.mjs";
 import { joystickIntent } from "./touch-joystick.mjs";
@@ -141,7 +144,7 @@ const STAGES = [
 
 const GAME_TITLE = "HARDCORE FIGHTERS";
 const GAME_EDITION = "WEB · ARCADE EDITION";
-const GAME_VERSION = "V2.21.0";
+const GAME_VERSION = "V2.22.0";
 
 const ROUND_SECONDS = 99;
 const SUPER_MAX = 100;
@@ -255,24 +258,33 @@ const ARCADE_PICKUPS = [
 const cssFramesFor = (fighter: string): string[] => {
   if (typeof document === "undefined") return [];
   const found = new Set<string>();
-  const matcher = new RegExp(`\\.${fighter}(?![\\w-])`);
+  const selectorMatch = new RegExp(`\\.${fighter}(?![\\w-])`);
+  // File names carry the fighter id (bacora-kick-strip…, /ogalla/…), which also
+  // catches images used inside @keyframes and custom properties.
+  const urlMatch = new RegExp(`[/-]${fighter}(?![a-z])|/${fighter}-`, "i");
+  const collect = (cssText: string, bySelector: boolean) => {
+    for (const match of cssText.matchAll(/url\(["']?([^"')]+)["']?\)/g)) {
+      const url = match[1];
+      if (!(url.startsWith("/") || url.startsWith(location.origin))) continue;
+      if (bySelector || urlMatch.test(url)) found.add(url);
+    }
+  };
   const visit = (rules: CSSRuleList) => {
     for (const rule of Array.from(rules)) {
-      if ("cssRules" in rule && (rule as CSSGroupingRule).cssRules?.length && !(rule instanceof CSSStyleRule)) {
+      if (rule instanceof CSSStyleRule) {
+        const lobbyOnly = /\.(portrait|result-dancer-art|orb-|platform-|coop-)/.test(rule.selectorText) && !/\.fighter/.test(rule.selectorText);
+        collect(rule.cssText, selectorMatch.test(rule.selectorText) && !lobbyOnly);
+      } else if (typeof CSSKeyframesRule !== "undefined" && rule instanceof CSSKeyframesRule) {
+        collect(rule.cssText, false);
+      } else if ("cssRules" in rule && (rule as CSSGroupingRule).cssRules) {
         visit((rule as CSSGroupingRule).cssRules);
-        continue;
-      }
-      if (!(rule instanceof CSSStyleRule) || !matcher.test(rule.selectorText)) continue;
-      if (/\.(portrait|result-dancer-art|orb-|platform-|coop-)/.test(rule.selectorText) && !/\.fighter/.test(rule.selectorText)) continue;
-      for (const match of rule.cssText.matchAll(/url\(["']?([^"')]+)["']?\)/g)) {
-        if (match[1].startsWith("/") || match[1].startsWith(location.origin)) found.add(match[1]);
       }
     }
   };
   for (const sheet of Array.from(document.styleSheets)) {
     try { visit(sheet.cssRules); } catch { /* Cross-origin sheets can't be read. */ }
   }
-  return [...found];
+  return [...found].filter((url) => !/portrait|result|orb-|platform-|coop-|lobby|card/i.test(url));
 };
 
 function SuperEffect({ fx }: { fx: NonNullable<SuperFx> }) {
@@ -595,6 +607,7 @@ export default function Home() {
       const item = { image, finish: () => {
         if (finished) return;
         finished = true;
+        markFrameLoaded(image);
         image.onload = null;
         image.onerror = null;
         active.delete(item);
@@ -2604,6 +2617,8 @@ export default function Home() {
 
   return (
     <main className="game-shell">
+      <FighterVisibilityGuard />
+      <AutoFullscreen />
       <header className="topbar">
         <a className="brand" href="#game" aria-label="Hardcore Fighters, ir al juego">
           <span className="brand-kicker">ARCADE DE LA RIBERA</span>
@@ -2686,25 +2701,25 @@ export default function Home() {
 
         {game.phase !== "select" && <>
           <div ref={playerFighterRef} className={`fighter motion-rig ${selected} ${game.playerAction} ${game.playerMove ?? ""} combo-step-${game.playerAttackVariant} pose-phase-${game.playerPosePhase} ${playerVictory ? "winner-dance" : cpuVictory ? "defeated" : ""} ${game.playerAirborne ? "airborne" : ""} ${game.playerAction === "walk" ? `${playerWalkIntent} gear-${movementGear.player}` : ""} ${facing.player} ${immuneClock < immuneUntil.player ? "immune" : ""} ${stunned.player ? "stunned" : ""}`} style={{ left: `${game.playerX}%` }} aria-label={`${playerData.name}, jugador`} role="img">
-            <div className="fighter-pose">
+            <div className="fighter-motion"><div className="fighter-pose">
               <div className={`fighter-art ${selected} ${facing.player}`}>{!(["cesaret", "borja", "bacora", "bonviure", "elchica", "ogalla", "xuso", "bomba", "tonimassama"] as FighterId[]).includes(selected) && <FighterWalkLayers />}</div>
               {stunned.player && <b className="stun-word">★ ¡MAREADO! ★</b>}
               {passiveBadge.player && <b key={passiveBadge.player.id} className="passive-word">{passiveBadge.player.text}</b>}
               {immuneClock < immuneUntil.player && <b className="immune-word">INMUNE · {Math.max(1, Math.ceil((immuneUntil.player - immuneClock) / 1000))}s</b>}
               {game.playerAirborne && (game.playerAction === "punch" || game.playerAction === "kick" || game.playerAction === "special") && <b className="air-attack-word">¡AÉREO!</b>}
               {(game.playerAction === "hit" || game.playerAction === "launched" || game.playerAction === "knockdown") && <b className="hit-word">{game.playerAction === "launched" ? "¡VUELA!" : game.playerAction === "knockdown" ? "¡AL SUELO!" : "CRASH!"}</b>}
-            </div>
+            </div></div>
             <span className="fighter-shadow" />
           </div>
           <div ref={cpuFighterRef} className={`fighter motion-rig ${opponent} cpu ${battleMode === "cpu" ? "cpu-ai" : ""} ${game.cpuAction} ${game.cpuMove ?? ""} combo-step-${game.cpuAttackVariant} pose-phase-${game.cpuPosePhase} ${cpuVictory ? "winner-dance" : playerVictory ? "defeated" : ""} ${game.cpuAirborne ? "airborne" : ""} ${game.cpuAction === "walk" ? `${cpuWalkIntent} gear-${movementGear.cpu}` : ""} ${facing.cpu} ${immuneClock < immuneUntil.cpu ? "immune" : ""} ${stunned.cpu ? "stunned" : ""}`} style={{ left: `${game.cpuX}%` }} aria-label={`${cpuData.name}, rival`} role="img">
-            <div className="fighter-pose">
+            <div className="fighter-motion"><div className="fighter-pose">
               <div className={`fighter-art ${opponent} ${facing.cpu}`}>{!(["cesaret", "borja", "bacora", "bonviure", "elchica", "ogalla", "xuso", "bomba", "tonimassama"] as FighterId[]).includes(opponent) && <FighterWalkLayers />}</div>
               {stunned.cpu && <b className="stun-word">★ ¡MAREADO! ★</b>}
               {passiveBadge.cpu && <b key={passiveBadge.cpu.id} className="passive-word">{passiveBadge.cpu.text}</b>}
               {immuneClock < immuneUntil.cpu && <b className="immune-word">INMUNE · {Math.max(1, Math.ceil((immuneUntil.cpu - immuneClock) / 1000))}s</b>}
               {game.cpuAirborne && (game.cpuAction === "punch" || game.cpuAction === "kick" || game.cpuAction === "special") && <b className="air-attack-word">¡AÉREO!</b>}
               {(game.cpuAction === "hit" || game.cpuAction === "launched" || game.cpuAction === "knockdown") && <b className="hit-word">{game.cpuAction === "launched" ? "¡VUELA!" : game.cpuAction === "knockdown" ? "¡AL SUELO!" : "BAM!"}</b>}
-            </div>
+            </div></div>
             <span className="fighter-shadow" />
           </div>
         </>}

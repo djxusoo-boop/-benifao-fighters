@@ -701,3 +701,162 @@
   80% { opacity: 1; transform: translate(-50%, -6px) scale(1); }
   100% { opacity: 0; transform: translate(-50%, -16px) scale(.96); }
 }
+
+/* Visibility safety net: the guard sets the held frame inline; hide the other layers here. */
+#game .fighter.art-rescue .fighter-pose { opacity: 1 !important; visibility: visible !important; }
+#game .fighter.art-rescue .fighter-art::before,
+#game .fighter.art-rescue .fighter-art::after { opacity: 0 !important; }
+#game .fighter.art-rescue .fighter-walk-layers { visibility: hidden !important; }
+
+/* ===== V2.22 touch controls: bigger, spread out, no accidental double presses ===== */
+.arena .touch-controls {
+  --tc-main: clamp(64px, 15vmin, 104px);
+  --tc-special: clamp(54px, 12vmin, 84px);
+  --tc-gap: clamp(12px, 2.6vmin, 22px);
+  --tc-stick: clamp(118px, 26vmin, 178px);
+}
+html.arcade-controls-xl .arena .touch-controls {
+  --tc-main: clamp(70px, 17vmin, 116px);
+  --tc-special: clamp(58px, 13.5vmin, 92px);
+}
+/* Joystick: bigger area for the thumb */
+.arena .touch-controls .touch-joystick {
+  width: var(--tc-stick) !important;
+  height: var(--tc-stick) !important;
+  flex: 0 0 var(--tc-stick) !important;
+}
+.arena .touch-controls .touch-joystick-stick {
+  width: calc(var(--tc-stick) * .42) !important;
+  height: calc(var(--tc-stick) * .42) !important;
+  margin: calc(var(--tc-stick) * -.21) 0 0 calc(var(--tc-stick) * -.21) !important;
+}
+.arena .touch-controls .touch-joystick-label { font-size: 9px !important; max-width: none; }
+/*   [K]   [L]
+   [◆]  [J]  [H]   — punch/kick are the biggest, specials sit above, guard on the inside */
+.arena .touch-controls .touch-actions.touch-actions-redesign,
+.arena .touch-controls-p2 .touch-actions.touch-actions-redesign {
+  grid-template-columns: var(--tc-special) var(--tc-main) var(--tc-main) !important;
+  grid-template-rows: var(--tc-special) var(--tc-main) !important;
+  gap: var(--tc-gap) !important;
+  align-items: center !important;
+  justify-items: center !important;
+}
+.arena .touch-controls .touch-actions-redesign button {
+  display: grid !important;
+  place-content: center !important;
+  gap: 2px;
+  margin: 0 !important;
+  border-width: 3px !important;
+  touch-action: none;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.arena .touch-controls .touch-actions-redesign :is(.touch-hit, .touch-kick) {
+  width: var(--tc-main) !important;
+  height: var(--tc-main) !important;
+  border-radius: 50% !important;
+  font-size: calc(var(--tc-main) * .3) !important;
+  box-shadow: inset 0 -6px 0 rgba(0,0,0,.35), 0 6px 16px rgba(0,0,0,.6) !important;
+}
+.arena .touch-controls .touch-actions-redesign :is(.touch-special-one, .touch-special-two) {
+  width: var(--tc-special) !important;
+  height: var(--tc-special) !important;
+  border-radius: 50% !important;
+  font-size: calc(var(--tc-special) * .28) !important;
+}
+.arena .touch-controls .touch-actions-redesign .touch-block {
+  width: var(--tc-special) !important;
+  height: var(--tc-main) !important;
+  border-radius: 999px !important;
+  font-size: calc(var(--tc-special) * .32) !important;
+}
+.arena .touch-controls .touch-actions-redesign .touch-hit { grid-column: 2 !important; grid-row: 2 !important; }
+.arena .touch-controls .touch-actions-redesign .touch-kick { grid-column: 3 !important; grid-row: 2 !important; }
+.arena .touch-controls .touch-actions-redesign .touch-special-one { grid-column: 2 !important; grid-row: 1 !important; }
+.arena .touch-controls .touch-actions-redesign .touch-special-two { grid-column: 3 !important; grid-row: 1 !important; }
+.arena .touch-controls .touch-actions-redesign .touch-block { grid-column: 1 !important; grid-row: 2 !important; }
+.arena .touch-controls .touch-actions-redesign button > small {
+  max-width: calc(var(--tc-main) - 10px) !important;
+  font-size: clamp(8px, 1.6vmin, 11px) !important;
+  letter-spacing: .04em;
+}
+.arena .touch-controls .touch-actions-redesign button > span { font-size: inherit !important; }
+.arena .touch-controls .touch-actions-redesign button:active { transform: scale(.92) !important; filter: brightness(1.4) !important; }
+/* Keep the controls away from the screen edges and the notch */
+.arena:not(.phase-select) .touch-controls {
+  padding-left: max(14px, env(safe-area-inset-left)) !important;
+  padding-right: max(14px, env(safe-area-inset-right)) !important;
+  padding-bottom: max(10px, env(safe-area-inset-bottom)) !important;
+}
+
+/* ===== Fullscreen on every device ===== */
+html:fullscreen, html:-webkit-full-screen { background: #080707; }
+html:fullscreen body, html:-webkit-full-screen body { min-height: 100dvh; }
+html:fullscreen .game-shell, html:-webkit-full-screen .game-shell { min-height: 100dvh; }
+.iphone-fullscreen-tip {
+  position: fixed;
+  left: 50%;
+  bottom: max(16px, env(safe-area-inset-bottom));
+  z-index: 9999;
+  display: grid;
+  gap: 8px;
+  width: min(92vw, 440px);
+  padding: 14px 16px;
+  transform: translateX(-50%);
+  border: 2px solid #ff8125;
+  border-radius: 10px;
+  background: rgba(12, 9, 8, .96);
+  color: #ffe9cf;
+  box-shadow: 0 10px 30px rgba(0,0,0,.7);
+  font: 14px/1.35 Arial, sans-serif;
+  text-align: center;
+}
+.iphone-fullscreen-tip strong { color: #ff9d3d; font: 900 13px/1 Arial, sans-serif; letter-spacing: .16em; }
+.iphone-fullscreen-tip button { justify-self: center; padding: 9px 22px; border: 0; border-radius: 6px; background: #ff8125; color: #140a04; font: 900 13px/1 Arial, sans-serif; letter-spacing: .1em; }
+
+/* ===== V2.22 procedural motion: body language on top of the existing frames ===== */
+.arena .fighter { --fwd: 1; }
+.arena .fighter.face-left { --fwd: -1; }
+.arena .fighter .fighter-motion {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  transform-origin: 50% 100%;
+  transition: rotate 170ms ease-out, translate 170ms ease-out, scale 170ms ease-out, filter 140ms ease-out;
+}
+/* Walking: lean into the step, lean back when retreating */
+.arena .fighter.walk.advance .fighter-motion { rotate: calc(var(--fwd) * 3deg); }
+.arena .fighter.walk.retreat .fighter-motion { rotate: calc(var(--fwd) * -2deg); }
+/* Dash: strong lean plus two after-images */
+.arena .fighter.dash .fighter-motion {
+  rotate: calc(var(--fwd) * 7deg);
+  filter: drop-shadow(calc(var(--fwd) * -20px) 0 0 rgba(255, 150, 60, .38)) drop-shadow(calc(var(--fwd) * -40px) 0 0 rgba(255, 150, 60, .18));
+}
+/* Dodge: snap backwards with a cool after-image */
+.arena .fighter.dodge .fighter-motion {
+  rotate: calc(var(--fwd) * -9deg);
+  translate: calc(var(--fwd) * -10px) 4px;
+  filter: drop-shadow(calc(var(--fwd) * 18px) 0 0 rgba(110, 220, 255, .4));
+}
+/* Attacks: commit the body forward */
+.arena .fighter:is(.punch, .kick) .fighter-motion { rotate: calc(var(--fwd) * 4deg); translate: calc(var(--fwd) * 9px) 0; transition-duration: 90ms; }
+.arena .fighter.special .fighter-motion { rotate: calc(var(--fwd) * 5deg); scale: 1.04; filter: drop-shadow(0 0 16px rgba(255, 200, 90, .55)); }
+/* Taking a hit: snap back with a red flash */
+.arena .fighter.hit .fighter-motion {
+  rotate: calc(var(--fwd) * -8deg);
+  translate: calc(var(--fwd) * -14px) 0;
+  filter: brightness(1.45) sepia(.5) saturate(2.4) hue-rotate(-28deg);
+  transition-duration: 50ms;
+}
+.arena .fighter.launched .fighter-motion { rotate: calc(var(--fwd) * -15deg); filter: brightness(1.3) sepia(.4) saturate(2) hue-rotate(-28deg); transition-duration: 60ms; }
+/* Guard: tighten up and glow */
+.arena .fighter.block .fighter-motion { scale: 1 .97; filter: drop-shadow(0 0 12px rgba(120, 220, 255, .55)); }
+/* Crouch / jump: squash and stretch */
+.arena .fighter.crouch .fighter-motion { scale: 1.04 .95; }
+.arena .fighter.airborne .fighter-motion { scale: .97 1.04; }
+/* Stunned already sways; armor flash for heavy fighters */
+.arena .fighter.art-rescue .fighter-motion { filter: none; }
+@media (prefers-reduced-motion: reduce) {
+  .arena .fighter .fighter-motion { rotate: none !important; translate: none !important; scale: none !important; transition: none; }
+}

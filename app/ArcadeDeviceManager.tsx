@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { enterFullscreen, exitFullscreen, isFullscreen, setOptOut } from "./fullscreen";
 
 type InstallPromptEvent = Event & {
   prompt: () => Promise<void>;
@@ -93,13 +94,14 @@ export default function ArcadeDeviceManager() {
       event.preventDefault();
       installPromptRef.current = event as InstallPromptEvent;
     };
-    const onFullscreen = () => setFullscreen(Boolean(document.fullscreenElement));
+    const onFullscreen = () => setFullscreen(isFullscreen());
     const onFirstInteraction = () => { void requestWakeLock(); };
     const onVisibility = () => { if (document.visibilityState === "visible") void requestWakeLock(); };
     const onOnline = () => setOnline(true);
     const onOffline = () => setOnline(false);
     window.addEventListener("beforeinstallprompt", onInstallPrompt);
     document.addEventListener("fullscreenchange", onFullscreen);
+    document.addEventListener("webkitfullscreenchange", onFullscreen);
     window.addEventListener("pointerdown", onFirstInteraction, { passive: true });
     window.addEventListener("keydown", onFirstInteraction);
     document.addEventListener("visibilitychange", onVisibility);
@@ -155,6 +157,7 @@ export default function ArcadeDeviceManager() {
       window.cancelAnimationFrame(initialStateFrame);
       window.removeEventListener("beforeinstallprompt", onInstallPrompt);
       document.removeEventListener("fullscreenchange", onFullscreen);
+      document.removeEventListener("webkitfullscreenchange", onFullscreen);
       window.removeEventListener("pointerdown", onFirstInteraction);
       window.removeEventListener("keydown", onFirstInteraction);
       document.removeEventListener("visibilitychange", onVisibility);
@@ -279,14 +282,14 @@ export default function ArcadeDeviceManager() {
 
   const toggleFullscreen = async () => {
     try {
-      if (document.fullscreenElement) {
-        await document.exitFullscreen();
-      } else if (document.documentElement.requestFullscreen) {
-        await document.documentElement.requestFullscreen();
-        const orientation = screen.orientation as ScreenOrientation & { lock?: (mode: "landscape") => Promise<void> };
-        await orientation.lock?.("landscape").catch(() => undefined);
+      if (isFullscreen()) {
+        // The player chose to leave: stop re-entering fullscreen automatically.
+        setOptOut(true);
+        await exitFullscreen();
       } else {
-        setInstallOpen(true);
+        setOptOut(false);
+        const entered = await enterFullscreen();
+        if (!entered) setInstallOpen(true);
       }
       void requestWakeLock();
     } catch { setInstallOpen(true); }
