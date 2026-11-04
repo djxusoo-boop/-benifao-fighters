@@ -1,0 +1,96 @@
+/* ===== V2.31 Cooperativa: every hero keeps its size, faces the enemy, walks with real frames ===== */
+/* A square box like the fight mode: wide attack poses no longer shrink the body. */
+#game .coop-mode .coop-player { width:auto!important; aspect-ratio:1/1!important; }
+#game .coop-mode .coop-player .coop-player-art { background-size:contain!important; background-position:center bottom!important; background-repeat:no-repeat!important; mix-blend-mode:normal!important; }
+#game .coop-mode .coop-player .fighter-walk-layers { display:none!important; }
+/* All coop frames are drawn facing right: flip them toward enemies on the left. */
+#game .coop-mode .coop-player.face-right .coop-player-art { transform:scaleX(1)!important; }
+#game .coop-mode .coop-player.face-left .coop-player-art { transform:scaleX(-1)!important; }
+/* Cristian's vinyl throw is drawn facing left. */
+#game .coop-mode .coop-player.cristian.fire.face-right .coop-player-art { transform:scaleX(-1)!important; }
+#game .coop-mode .coop-player.cristian.fire.face-left .coop-player-art { transform:scaleX(1)!important; }
+/* Clone enemies keep their own facing wrapper. */
+#game .coop-mode .coop-enemy .coop-player.coop-clone { width:100%!important; aspect-ratio:auto!important; }
+#game .coop-mode .coop-enemy .coop-player.coop-clone .coop-player-art { transform:none!important; }
+
+@keyframes coop-walk-maletilla {
+  0.0%,24.9% { background-image:url('/assets/walk-normalized-v1/maletilla/frame-1.webp'); }
+  25.0%,49.9% { background-image:url('/assets/walk-normalized-v1/maletilla/frame-2.webp'); }
+  50.0%,74.9% { background-image:url('/assets/walk-normalized-v1/maletilla/frame-3.webp'); }
+  75.0%,100.0% { background-image:url('/assets/walk-normalized-v1/maletilla/frame-2.webp'); }
+}
+#game .coop-mode .coop-player.maletilla.walk:not(.airborne) .coop-player-art { background-image:url('/assets/walk-normalized-v1/maletilla/frame-1.webp')!important; animation:coop-walk-maletilla 560ms steps(1,end) infinite!important; }
+@keyframes coop-walk-vanessa {
+  0.0%,24.9% { background-image:url('/assets/walk-normalized-v1/vanessa/frame-1.webp'); }
+  25.0%,49.9% { background-image:url('/assets/walk-normalized-v1/vanessa/frame-2.webp'); }
+  50.0%,74.9% { background-image:url('/assets/walk-normalized-v1/vanessa/frame-3.webp'); }
+  75.0%,100.0% { background-image:url('/assets/walk-normalized-v1/vanessa/frame-2.webp'); }
+}
+#game .coop-mode .coop-player.vanessa.walk:not(.airborne) .coop-player-art { background-image:url('/assets/walk-normalized-v1/vanessa/frame-1.webp')!important; animation:coop-walk-vanessa 560ms steps(1,end) infinite!important; }
+@keyframes coop-walk-josevictor {
+  0.0%,24.9% { background-image:url('/assets/walk-normalized-v1/josevictor/frame-1.webp'); }
+  25.0%,49.9% { background-image:url('/assets/walk-normalized-v1/josevictor/frame-2.webp'); }
+  50.0%,74.9% { background-image:url('/assets/walk-normalized-v1/josevictor/frame-3.webp'); }
+  75.0%,100.0% { background-image:url('/assets/walk-normalized-v1/josevictor/frame-2.webp'); }
+}
+#game .coop-mode .coop-player.josevictor.walk:not(.airborne) .coop-player-art { background-image:url('/assets/walk-normalized-v1/josevictor/frame-1.webp')!important; animation:coop-walk-josevictor 560ms steps(1,end) infinite!important; }
+@keyframes coop-walk-cristian {
+  0.0%,24.9% { background-image:url('/assets/walk-normalized-v1/cristian/frame-1.webp'); }
+  25.0%,49.9% { background-image:url('/assets/walk-normalized-v1/cristian/frame-2.webp'); }
+  50.0%,74.9% { background-image:url('/assets/walk-normalized-v1/cristian/frame-3.webp'); }
+  75.0%,100.0% { background-image:url('/assets/walk-normalized-v1/cristian/frame-2.webp'); }
+}
+#game .coop-mode .coop-player.cristian.walk:not(.airborne) .coop-player-art { background-image:url('/assets/walk-normalized-v1/cristian/frame-1.webp')!important; animation:coop-walk-cristian 560ms steps(1,end) infinite!important; }
+@keyframes coop-walk-borja {
+  0.0%,49.9% { background-image:url('/assets/new-fighters/borja-walk.webp'); }
+  50.0%,100.0% { background-image:url('/assets/new-fighters/borja-idle.webp'); }
+}
+#game .coop-mode .coop-player.borja.walk:not(.airborne) .coop-player-art { background-image:url('/assets/new-fighters/borja-walk.webp')!important; animation:coop-walk-borja 460ms steps(1,end) infinite!important; }
+@keyframes coop-walk-bacora {
+  0.0%,49.9% { background-image:url('/assets/new-fighters/bacora-rig-v21849-walk.webp'); }
+  50.0%,100.0% { background-image:url('/assets/new-fighters/bacora-rig-v21849-idle.webp'); }
+}
+#game .coop-mode .coop-player.bacora.walk:not(.airborne) .coop-player-art { background-image:url('/assets/new-fighters/bacora-rig-v21849-walk.webp')!important; animation:coop-walk-bacora 460ms steps(1,end) infinite!important; }
+@keyframes coop-walk-bonviure {
+  0.0%,49.9% { background-image:url('/assets/new-fighters/bonviure-rig-v21849-walk.webp'); }
+  50.0%,100.0% { background-image:url('/assets/new-fighters/bonviure-rig-v21849-idle.webp'); }
+}
+#game .coop-mode .coop-player.bonviure.walk:not(.airborne) .coop-player-art { background-image:url('/assets/new-fighters/bonviure-rig-v21849-walk.webp')!important; animation:coop-walk-bonviure 460ms steps(1,end) infinite!important; }
+@keyframes coop-walk-elchica {
+  0.0%,49.9% { background-image:url('/assets/new-fighters/elchica-rig-v21849-walk.webp'); }
+  50.0%,100.0% { background-image:url('/assets/new-fighters/elchica-rig-v21849-idle.webp'); }
+}
+#game .coop-mode .coop-player.elchica.walk:not(.airborne) .coop-player-art { background-image:url('/assets/new-fighters/elchica-rig-v21849-walk.webp')!important; animation:coop-walk-elchica 460ms steps(1,end) infinite!important; }
+@keyframes coop-walk-ogalla {
+  0.0%,49.9% { background-image:url('/assets/new-fighters/ogalla-walk-v2.webp'); }
+  50.0%,100.0% { background-image:url('/assets/new-fighters/ogalla-idle-v2.webp'); }
+}
+#game .coop-mode .coop-player.ogalla.walk:not(.airborne) .coop-player-art { background-image:url('/assets/new-fighters/ogalla-walk-v2.webp')!important; animation:coop-walk-ogalla 460ms steps(1,end) infinite!important; }
+@keyframes coop-walk-bomba {
+  0.0%,49.9% { background-image:url('/assets/new-fighters/bomba-walk-v2.webp'); }
+  50.0%,100.0% { background-image:url('/assets/new-fighters/bomba-idle-v2.webp'); }
+}
+#game .coop-mode .coop-player.bomba.walk:not(.airborne) .coop-player-art { background-image:url('/assets/new-fighters/bomba-walk-v2.webp')!important; animation:coop-walk-bomba 460ms steps(1,end) infinite!important; }
+@keyframes coop-walk-tonimassama {
+  0.0%,24.9% { background-image:url('/assets/new-fighters/tonimassama-frames/walk-a.webp'); }
+  25.0%,49.9% { background-image:url('/assets/new-fighters/tonimassama-frames/walk-b.webp'); }
+  50.0%,74.9% { background-image:url('/assets/new-fighters/tonimassama-frames/walk-c.webp'); }
+  75.0%,100.0% { background-image:url('/assets/new-fighters/tonimassama-frames/walk-b.webp'); }
+}
+#game .coop-mode .coop-player.tonimassama.walk:not(.airborne) .coop-player-art { background-image:url('/assets/new-fighters/tonimassama-frames/walk-a.webp')!important; animation:coop-walk-tonimassama 560ms steps(1,end) infinite!important; }
+@keyframes coop-walk-nova {
+  0.0%,49.9% { background-image:url('/assets/new-fighters/nova-frame-1.webp'); }
+  50.0%,100.0% { background-image:url('/assets/new-fighters/nova-frame-0.webp'); }
+}
+#game .coop-mode .coop-player.nova.walk:not(.airborne) .coop-player-art { background-image:url('/assets/new-fighters/nova-frame-1.webp')!important; animation:coop-walk-nova 460ms steps(1,end) infinite!important; }
+@keyframes coop-walk-estefy {
+  0.0%,24.9% { background-image:url('/assets/new-fighters/estefy/caminar-01.webp'); }
+  25.0%,49.9% { background-image:url('/assets/new-fighters/estefy/caminar-02.webp'); }
+  50.0%,74.9% { background-image:url('/assets/new-fighters/estefy/caminar-03.webp'); }
+  75.0%,100.0% { background-image:url('/assets/new-fighters/estefy/caminar-04.webp'); }
+}
+#game .coop-mode .coop-player.estefy.walk:not(.airborne) .coop-player-art { background-image:url('/assets/new-fighters/estefy/caminar-01.webp')!important; animation:coop-walk-estefy 560ms steps(1,end) infinite!important; }
+#game .coop-mode .coop-enemy.clone { width:auto!important; aspect-ratio:1/1!important; }
+#game .coop-mode .coop-player.invulnerable:not(.down) .coop-player-art { animation-name:none; }
+#game .coop-mode .coop-player.invulnerable:not(.down) { animation:coop-iframes 160ms steps(2,end) infinite!important; }
+@keyframes coop-iframes { 0% { opacity:1; } 50% { opacity:.55; } }

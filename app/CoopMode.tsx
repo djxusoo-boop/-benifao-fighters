@@ -6,6 +6,7 @@ import Image from "next/image";
 import ArcadeCrowd from "./ArcadeCrowd";
 import FighterWalkLayers from "./FighterWalkLayers";
 import TouchStick, { type StickIntent } from "./TouchStick";
+import { preloadCoopFrames } from "./coop-preload";
 
 type FighterId = "maletilla" | "vanessa" | "josevictor" | "cristian" | "cesaret" | "borja" | "bacora" | "bonviure" | "elchica" | "ogalla" | "xuso" | "bomba" | "rafeta" | "tonimassama" | "nova" | "estefy";
 type PlayerSlot = "p1" | "p2";
@@ -22,6 +23,7 @@ type CoopPlayer = {
   airborne: boolean;
   revive: number;
   moveDirection: -1 | 0 | 1;
+  invulnerable?: boolean;
 };
 
 type Enemy = {
@@ -161,6 +163,12 @@ export default function CoopMode({ playerOne, playerTwo, aiPlayerTwo = false, so
   const completionRef = useRef(false);
   const restartRef = useRef<() => void>(() => undefined);
 
+  // Load both heroes' frames now, then the shadow clones' in the background.
+  useEffect(() => {
+    preloadCoopFrames([playerOne, playerTwo]);
+    const rest = window.setTimeout(() => preloadCoopFrames(ALL_FIGHTERS.filter((fighter) => fighter !== playerOne && fighter !== playerTwo)), 2500);
+    return () => window.clearTimeout(rest);
+  }, [playerOne, playerTwo]);
   useEffect(() => { playersRef.current = players; }, [players]);
   useEffect(() => { enemiesRef.current = enemies; }, [enemies]);
   useEffect(() => { scoreRef.current = score; }, [score]);
@@ -307,7 +315,13 @@ export default function CoopMode({ playerOne, playerTwo, aiPlayerTwo = false, so
     const health = target.health - damage;
     const next = health <= 0
       ? enemiesRef.current.filter((enemy) => enemy.id !== enemyId)
-      : enemiesRef.current.map((enemy) => enemy.id === enemyId ? { ...enemy, health, pose: "hurt" as const, enraged: enemy.enraged || (enemy.boss && health < enemy.maxHealth * .5) } : enemy);
+      : enemiesRef.current.map((enemy) => {
+        if (enemy.id !== enemyId) return enemy;
+        // Every hit shoves the enemy back a little, bosses barely move.
+        const away = Math.sign(enemy.x - playersRef.current[owner].x) || 1;
+        const push = enemy.boss ? .35 : enemy.role === "tank" ? .8 : 1.6;
+        return { ...enemy, x: clamp(enemy.x + away * push, 4, 96), health, pose: "hurt" as const, enraged: enemy.enraged || (enemy.boss && health < enemy.maxHealth * .5) };
+      });
     enemiesRef.current = next;
     setEnemies(next);
     if (target.boss && !target.enraged && health > 0 && health < target.maxHealth * .5) {
@@ -625,18 +639,26 @@ export default function CoopMode({ playerOne, playerTwo, aiPlayerTwo = false, so
           const direction = Math.sign(target.x - enemy.x);
           return { ...enemy, x: clamp(enemy.x + direction * enemy.speed * (enemy.enraged ? 1.5 : 1) * (32 / 42), 4, 96) };
         });
-        enemiesRef.current = next;
-        return next;
+        // Keep enemies from piling on top of each other so every one is readable.
+        const order = [...next].sort((a, b) => a.x - b.x);
+        for (let index = 1; index < order.length; index += 1) {
+          const gap = (order[index - 1].boss || order[index].boss) ? 7 : 4.2;
+          if (order[index].x - order[index - 1].x < gap) order[index] = { ...order[index], x: clamp(order[index - 1].x + gap, 4, 96) };
+        }
+        const spaced = next.map((enemy) => order.find((item) => item.id === enemy.id) ?? enemy);
+        enemiesRef.current = spaced;
+        return spaced;
       });
       incoming.forEach(({ fighter, damage }) => {
         const hitAt = Date.now();
         if (hitAt < hitCooldownRef.current[fighter] || hitAt < dodgeUntilRef.current[fighter]) return;
         hitCooldownRef.current[fighter] = hitAt + (difficulty === "easy" ? 620 : 440);
+        later(() => setPlayers((current) => current[fighter].invulnerable ? { ...current, [fighter]: { ...current[fighter], invulnerable: false } } : current), difficulty === "easy" ? 620 : 440);
         setPlayers((current) => {
           const target = current[fighter];
           if (target.health <= 0) return current;
           const health = Math.max(0, target.health - damage);
-          const next = { ...current, [fighter]: { ...target, health, action: health <= 0 ? "down" as const : "hit" as const, revive: 0 } };
+          const next = { ...current, [fighter]: { ...target, health, action: health <= 0 ? "down" as const : "hit" as const, revive: 0, invulnerable: true } };
           playersRef.current = next;
           return next;
         });
@@ -650,11 +672,12 @@ export default function CoopMode({ playerOne, playerTwo, aiPlayerTwo = false, so
           const hitAt = Date.now();
           if (hitAt < hitCooldownRef.current[fighter] || hitAt < dodgeUntilRef.current[fighter]) return;
           hitCooldownRef.current[fighter] = hitAt + (difficulty === "easy" ? 620 : 440);
+          later(() => setPlayers((current) => current[fighter].invulnerable ? { ...current, [fighter]: { ...current[fighter], invulnerable: false } } : current), difficulty === "easy" ? 620 : 440);
           setPlayers((current) => {
             const target = current[fighter];
             if (target.health <= 0 || target.airborne) return current;
             const health = Math.max(0, target.health - damage);
-            const next = { ...current, [fighter]: { ...target, health, action: health <= 0 ? "down" as const : "hit" as const, revive: 0 } };
+            const next = { ...current, [fighter]: { ...target, health, action: health <= 0 ? "down" as const : "hit" as const, revive: 0, invulnerable: true } };
             playersRef.current = next;
             return next;
           });
@@ -794,7 +817,7 @@ export default function CoopMode({ playerOne, playerTwo, aiPlayerTwo = false, so
         const movingForward = player.moveDirection !== 0 && (facingRight ? player.moveDirection > 0 : player.moveDirection < 0);
         const gait = player.action === "walk" ? (movingForward ? "walk-forward" : "walk-retreat") : "";
         return (
-          <div className={`coop-player ${slot} ${fighter} ${player.action} ${gait} ${player.airborne ? "airborne" : ""} ${nearestDirection[slot]}`} key={slot} style={{ left: `${player.x}%` }}>
+          <div className={`coop-player ${slot} ${fighter} ${player.action} ${gait} ${player.airborne ? "airborne" : ""} ${nearestDirection[slot]} ${player.health > 0 && player.invulnerable ? "invulnerable" : ""}`} key={slot} style={{ left: `${player.x}%` }}>
             <span className="coop-player-art" role="img" aria-label={PLAYER_NAMES[fighter]}>{!( ["cesaret", "borja", "bacora", "bonviure", "elchica", "ogalla", "xuso", "bomba", "rafeta", "tonimassama"] as FighterId[]).includes(fighter) && <FighterWalkLayers />}</span>
             <span className="coop-player-shadow" />
             {player.health <= 0 && <div className="revive-meter"><small>ACÉRCATE PARA REANIMAR</small><div><span style={{ width: `${player.revive}%` }} /></div></div>}
