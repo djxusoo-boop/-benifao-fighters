@@ -35,7 +35,12 @@ type Enemy = {
   nextHit: number;
   nextShot: number;
   pose: "move" | "attack" | "hurt";
+  fighter?: FighterId;
+  name?: string;
+  enraged?: boolean;
 };
+
+type Pickup = { id: number; x: number; kind: "health" | "sync"; expires: number };
 
 type Projectile = {
   id: number;
@@ -48,7 +53,7 @@ type Projectile = {
   duration?: number;
 };
 
-type EnemyShot = { id: number; from: number; to: number; high: boolean; duration: number };
+type EnemyShot = { id: number; from: number; to: number; high: boolean; duration: number; asset: string };
 
 type Props = {
   playerOne: FighterId;
@@ -75,6 +80,10 @@ const ATTACK_LABELS: Record<FighterId, [string, string]> = {
   xuso: ["SPOOKY", "AULLIDO"], bomba: ["AZADA", "BARRIDO"], rafeta: ["BANDERA", "GIRO"], tonimassama: ["PISTOLA", "PEINETAS"], nova: ["PRISMA", "LÁSER"],
 };
 const MAX_COOP_WAVES = 7;
+const ALL_FIGHTERS = Object.keys(PLAYER_NAMES) as FighterId[];
+// Each wave happens somewhere new; the name shows in the banner and tints the floor.
+const WAVE_THEMES = ["PATIO DE LA PRISIÓN", "PASILLO DE CELDAS", "COMEDOR", "DUCHAS", "GALERÍA DE SEGURIDAD", "AZOTEA", "DESPACHO DEL ALCAIDE"];
+const ROLE_LABELS: Record<EnemyRole, string> = { walker: "BOTELLA", runner: "SOMBRA RÁPIDA", tank: "SOMBRA BLINDADA", shooter: "SOMBRA TIRADORA", boss: "JEFE" };
 const PROJECTILE_ASSETS = {
   bottle: "/assets/mobile/cloretilo-projectile-v1.webp",
   microphone: "/assets/microphone-attack-mobile.webp",
@@ -103,6 +112,11 @@ const PROJECTILE_ASSETS = {
   prism: "/assets/new-fighters/tonimassama-bullet.svg",
 };
 
+const BASIC_SHOT: Record<FighterId, keyof typeof PROJECTILE_ASSETS> = {
+  maletilla: "bottle", vanessa: "microphone", josevictor: "bag", cristian: "vinyl", cesaret: "fish", borja: "venom", bacora: "shield", bonviure: "anchor",
+  elchica: "jager", ogalla: "scepter", xuso: "dog", bomba: "hoe", rafeta: "flag", tonimassama: "pistol", nova: "prism",
+};
+
 const freshPlayers = (playerOne: FighterId, playerTwo: FighterId): Record<PlayerSlot, CoopPlayer> => ({
   p1: { id: "p1", fighter: playerOne, x: 18, health: 100, action: "idle", airborne: false, revive: 0, moveDirection: 0 },
   p2: { id: "p2", fighter: playerTwo, x: 34, health: 100, action: "idle", airborne: false, revive: 0, moveDirection: 0 },
@@ -115,6 +129,9 @@ export default function CoopMode({ playerOne, playerTwo, aiPlayerTwo = false, so
   const [enemies, setEnemies] = useState<Enemy[]>([]);
   const [projectiles, setProjectiles] = useState<Projectile[]>([]);
   const [enemyShots, setEnemyShots] = useState<EnemyShot[]>([]);
+  const [pickups, setPickups] = useState<Pickup[]>([]);
+  const pickupsRef = useRef<Pickup[]>([]);
+  const pickupIdRef = useRef(0);
   const [wave, setWave] = useState(1);
   const [score, setScore] = useState(0);
   const [sync, setSync] = useState(38);
@@ -190,7 +207,20 @@ export default function CoopMode({ playerOne, playerTwo, aiPlayerTwo = false, so
               : number === 6
                 ? [{ health: 68, x: 48, role: "runner" as const }, { health: 96, x: 57, role: "tank" as const }, { health: 72, x: 66, role: "shooter" as const }, { health: 72, x: 75 }, { health: 78, x: 84, role: "runner" as const }, { health: 78, x: 92, role: "shooter" as const }, { health: 84, x: 97 }]
                 : [{ health: 2400, x: 82, boss: true }, { health: 76, x: 49, role: "runner" as const }, { health: 108, x: 59, role: "tank" as const }, { health: 82, x: 69, role: "shooter" as const }, { health: 82, x: 92, role: "runner" as const }, { health: 88, x: 97, role: "shooter" as const }];
-    const next = configs.map((config, index): Enemy => ({
+    // Rivals are shadow clones of the fighters nobody picked; plain walkers stay as bottles.
+    const pool = ALL_FIGHTERS.filter((fighter) => fighter !== playerOne && fighter !== playerTwo);
+    const shuffled = [...pool].sort((a, b) => ((a.charCodeAt(0) * 31 + number * 17) % 13) - ((b.charCodeAt(0) * 31 + number * 17) % 13));
+    let cloneIndex = 0;
+    const nextClone = () => shuffled[(cloneIndex++ + number) % shuffled.length];
+    const next = configs.map((config, index): Enemy => {
+      const role: EnemyRole = config.boss ? "boss" : config.role ?? "walker";
+      const fighter = role === "walker" || (role === "boss" && number === 5) ? undefined : nextClone();
+      const name = role === "boss"
+        ? number === 5 ? "MAESTRO DEL ESPRAY" : number === MAX_COOP_WAVES ? `ALCAIDE ${PLAYER_NAMES[fighter as FighterId]}` : `${PLAYER_NAMES[fighter as FighterId]} GIGANTE`
+        : fighter ? `${ROLE_LABELS[role]} · ${PLAYER_NAMES[fighter]}` : undefined;
+      return {
+      fighter,
+      name,
       id: ++enemyIdRef.current,
       x: config.x,
       health: config.health,
@@ -202,16 +232,17 @@ export default function CoopMode({ playerOne, playerTwo, aiPlayerTwo = false, so
       nextHit: 0,
       nextShot: Date.now() + 1200 + index * 220,
       pose: "move",
-    }));
+    };
+    });
     setEnemies(next);
     enemiesRef.current = next;
     setStatus("playing");
     statusRef.current = "playing";
-    setBanner(number === MAX_COOP_WAVES ? "¡JEFE FINAL GIGANTE!" : number === 3 || number === 5 ? "¡MINIJEFE!" : `OLEADA ${number}`);
+    setBanner(number === MAX_COOP_WAVES ? `¡JEFE FINAL! · ${WAVE_THEMES[number - 1]}` : number === 3 || number === 5 ? `¡MINIJEFE! · ${WAVE_THEMES[number - 1]}` : `OLEADA ${number} · ${WAVE_THEMES[number - 1]}`);
     transitioningRef.current = false;
-    later(() => setBanner(""), 1050);
+    later(() => setBanner(""), 1500);
     beep(number === MAX_COOP_WAVES || number === 3 || number === 5 ? 72 : 150 + number * 18, 0.18, "sawtooth");
-  }, [beep, difficulty, later]);
+  }, [beep, difficulty, later, playerOne, playerTwo]);
 
   const restart = useCallback(() => {
     timersRef.current.forEach((timer) => window.clearTimeout(timer));
@@ -228,6 +259,7 @@ export default function CoopMode({ playerOne, playerTwo, aiPlayerTwo = false, so
     setEnemies([]); enemiesRef.current = [];
     setProjectiles([]);
     setEnemyShots([]);
+    setPickups([]); pickupsRef.current = [];
     setWave(1); setScore(0); setSync(38);
     setStatus("intro"); statusRef.current = "intro";
     setBanner("¡JUNTOS SOMOS MÁS FUERTES!");
@@ -272,9 +304,25 @@ export default function CoopMode({ playerOne, playerTwo, aiPlayerTwo = false, so
     const health = target.health - damage;
     const next = health <= 0
       ? enemiesRef.current.filter((enemy) => enemy.id !== enemyId)
-      : enemiesRef.current.map((enemy) => enemy.id === enemyId ? { ...enemy, health, pose: "hurt" as const } : enemy);
+      : enemiesRef.current.map((enemy) => enemy.id === enemyId ? { ...enemy, health, pose: "hurt" as const, enraged: enemy.enraged || (enemy.boss && health < enemy.maxHealth * .5) } : enemy);
     enemiesRef.current = next;
     setEnemies(next);
+    if (target.boss && !target.enraged && health > 0 && health < target.maxHealth * .5) {
+      // Phase two: the boss gets angry and calls two fast shadows for help.
+      setBanner(`¡${target.name ?? "EL JEFE"} SE ENFURECE!`);
+      later(() => setBanner(""), 1300);
+      beep(58, .35, "sawtooth");
+      later(() => {
+        if (statusRef.current !== "playing") return;
+        const pool = ALL_FIGHTERS.filter((fighter) => fighter !== playersRef.current.p1.fighter && fighter !== playersRef.current.p2.fighter);
+        const helpers: Enemy[] = [4, 96].map((x, index) => {
+          const fighter = pool[(enemyIdRef.current + index * 3) % pool.length];
+          return { id: ++enemyIdRef.current, x, health: 40, maxHealth: 40, speed: .36, damage: difficulty === "easy" ? 4 : 6, boss: false, role: "runner", nextHit: 0, nextShot: Date.now() + 2000, pose: "move", fighter, name: `REFUERZO · ${PLAYER_NAMES[fighter]}` };
+        });
+        enemiesRef.current = [...enemiesRef.current, ...helpers];
+        setEnemies(enemiesRef.current);
+      }, 500);
+    }
     if (health > 0) later(() => {
       const recovered = enemiesRef.current.map((enemy) => enemy.id === enemyId && enemy.pose === "hurt" ? { ...enemy, pose: "move" as const } : enemy);
       enemiesRef.current = recovered;
@@ -290,9 +338,17 @@ export default function CoopMode({ playerOne, playerTwo, aiPlayerTwo = false, so
       const defeated = target;
       setScore((value) => value + (defeated.boss ? 5000 : 650));
       addProjectile({ owner, kind: "burst", from: defeated.x, to: defeated.x, delay: 0, high: defeated.boss }, 560);
+      // Tanks and bosses always drop a first-aid kit; others sometimes drop health or team sync.
+      const roll = Math.random();
+      const drop: Pickup["kind"] | null = defeated.boss || defeated.role === "tank" ? "health" : roll < .16 ? "health" : roll < .3 ? "sync" : null;
+      if (drop) {
+        const pickup = { id: ++pickupIdRef.current, x: clamp(defeated.x, 6, 94), kind: drop, expires: Date.now() + 9000 };
+        pickupsRef.current = [...pickupsRef.current, pickup];
+        setPickups(pickupsRef.current);
+      }
       haptic(defeated.boss ? [40, 30, 80] : [20, 18, 30]);
     }
-  }, [addProjectile, beep, haptic, later]);
+  }, [addProjectile, beep, difficulty, haptic, later]);
 
   const fire = useCallback((slot: PlayerSlot, special = false) => {
     if (statusRef.current !== "playing") return;
@@ -513,6 +569,33 @@ export default function CoopMode({ playerOne, playerTwo, aiPlayerTwo = false, so
       });
 
       const now = Date.now();
+      if (pickupsRef.current.length) {
+        const remaining = pickupsRef.current.filter((pickup) => {
+          if (now > pickup.expires) return false;
+          const collector = (["p1", "p2"] as PlayerSlot[]).find((slot) => playersRef.current[slot].health > 0 && Math.abs(playersRef.current[slot].x - pickup.x) < 4.5);
+          if (!collector) return true;
+          if (pickup.kind === "health") {
+            setPlayers((current) => {
+              const next = { ...current, [collector]: { ...current[collector], health: clamp(current[collector].health + 22, 0, 100) } };
+              playersRef.current = next;
+              return next;
+            });
+            setBanner("+22 VIDA");
+          } else {
+            setSync((value) => clamp(value + 25, 0, 100));
+            setBanner("+25 SINCRONÍA");
+          }
+          setScore((value) => value + 250);
+          later(() => setBanner(""), 700);
+          beep(pickup.kind === "health" ? 660 : 880, .12, "triangle");
+          haptic(14);
+          return false;
+        });
+        if (remaining.length !== pickupsRef.current.length) {
+          pickupsRef.current = remaining;
+          setPickups(remaining);
+        }
+      }
       const incoming: Array<{ fighter: PlayerSlot; damage: number }> = [];
       const rangedIncoming: Array<{ fighter: PlayerSlot; damage: number; delay: number }> = [];
       setEnemies((current) => {
@@ -523,12 +606,13 @@ export default function CoopMode({ playerOne, playerTwo, aiPlayerTwo = false, so
           const distance = Math.abs(target.x - enemy.x);
           if ((enemy.role === "shooter" || enemy.role === "boss") && distance > 12 && distance < 58 && now >= enemy.nextShot) {
             const travel = clamp(distance * 14, 380, 780);
-            const shot = { id: ++enemyShotIdRef.current, from: enemy.x, to: target.x, high: enemy.role === "boss" && enemy.id % 2 === 0, duration: travel };
+            const asset = enemy.fighter ? PROJECTILE_ASSETS[BASIC_SHOT[enemy.fighter]] : "/assets/platform-water-bottle-enemy.webp";
+            const shot = { id: ++enemyShotIdRef.current, from: enemy.x, to: target.x, high: enemy.role === "boss" && enemy.id % 2 === 0, duration: travel, asset };
             setEnemyShots((shots) => [...shots, shot]);
             later(() => setEnemyShots((shots) => shots.filter((item) => item.id !== shot.id)), travel + 220);
             rangedIncoming.push({ fighter: target.id, damage: enemy.role === "boss" ? enemy.damage : Math.max(3, enemy.damage - 1), delay: travel });
             later(() => setEnemies((active) => active.map((item) => item.id === enemy.id && item.pose === "attack" ? { ...item, pose: "move" } : item)), enemy.boss ? 620 : 360);
-            return { ...enemy, nextShot: now + (enemy.role === "boss" ? 1450 : 2100), pose: "attack" as const };
+            return { ...enemy, nextShot: now + (enemy.role === "boss" ? (enemy.enraged ? 950 : 1450) : 2100), pose: "attack" as const };
           }
           if (distance < (enemy.boss ? 6.5 : 4.3) && now >= enemy.nextHit) {
             incoming.push({ fighter: target.id, damage: enemy.damage });
@@ -536,7 +620,7 @@ export default function CoopMode({ playerOne, playerTwo, aiPlayerTwo = false, so
             return { ...enemy, nextHit: now + (enemy.boss ? 1000 : 1250), pose: "attack" as const };
           }
           const direction = Math.sign(target.x - enemy.x);
-          return { ...enemy, x: clamp(enemy.x + direction * enemy.speed * (32 / 42), 4, 96) };
+          return { ...enemy, x: clamp(enemy.x + direction * enemy.speed * (enemy.enraged ? 1.5 : 1) * (32 / 42), 4, 96) };
         });
         enemiesRef.current = next;
         return next;
@@ -645,6 +729,12 @@ export default function CoopMode({ playerOne, playerTwo, aiPlayerTwo = false, so
     };
   }, [enemies, status]);
 
+  const nearestPlayerX = (x: number) => {
+    const alive = Object.values(players).filter((player) => player.health > 0);
+    const list = alive.length ? alive : Object.values(players);
+    return [...list].sort((a, b) => Math.abs(a.x - x) - Math.abs(b.x - x))[0].x;
+  };
+
   const hold = (event: ReactPointerEvent<HTMLButtonElement>, key: string, active: boolean) => {
     event.preventDefault();
     if (active) {
@@ -660,7 +750,7 @@ export default function CoopMode({ playerOne, playerTwo, aiPlayerTwo = false, so
   };
 
   return (
-    <div className={`coop-mode status-${status} combo-${comboFlash % 2} ${aiPlayerTwo ? "coop-ai-partner" : "coop-human-duo"}`} key={gameKey} aria-label={`Aventura cooperativa de ${PLAYER_NAMES[playerOne]} y ${PLAYER_NAMES[playerTwo]}`}>
+    <div className={`coop-mode coop-stage-${wave} status-${status} combo-${comboFlash % 2} ${aiPlayerTwo ? "coop-ai-partner" : "coop-human-duo"}`} key={gameKey} aria-label={`Aventura cooperativa de ${PLAYER_NAMES[playerOne]} y ${PLAYER_NAMES[playerTwo]}`}>
       {status === "playing" && <ArcadeCrowd mode="coop" seed={wave - 1} phase={status} react={Boolean(comboFlash % 2)} cue={crowdBossCue} />}
       <div className="coop-hud">
         {(["p1", "p2"] as PlayerSlot[]).map((slot, index) => (
@@ -670,19 +760,25 @@ export default function CoopMode({ playerOne, playerTwo, aiPlayerTwo = false, so
             <b>{players[slot].health > 0 ? `${players[slot].health}%` : "CAÍDO"}</b>
           </div>
         ))}
-        <div className="coop-wave"><small>COOPERATIVO</small><strong>OLEADA {wave}/{MAX_COOP_WAVES}</strong><span>{String(score).padStart(6, "0")} PTS</span></div>
+        <div className="coop-wave"><small>{WAVE_THEMES[wave - 1]}</small><strong>OLEADA {wave}/{MAX_COOP_WAVES}</strong><span>{String(score).padStart(6, "0")} PTS</span></div>
       </div>
 
       <div className="coop-sync"><small>SINCRONÍA DE EQUIPO</small><div><span style={{ width: `${sync}%` }} /></div><b>{sync >= 100 ? "¡F · REMIX DEFINITIVO!" : `${Math.round(sync)}%`}</b></div>
       <button className="coop-exit" type="button" onClick={onExit}>← MENÚ</button>
 
       {enemies.map((enemy) => (
-        <div className={`coop-enemy role-${enemy.role} ${enemy.boss ? "boss" : ""} ${enemy.pose === "attack" ? "attacking" : ""} ${enemy.pose === "hurt" || enemy.boss && enemy.health < enemy.maxHealth * .48 ? "hurt" : ""}`} key={enemy.id} style={{ left: `${enemy.x}%` }}>
+        <div className={`coop-enemy role-${enemy.role} ${enemy.fighter ? `clone clone-${enemy.fighter}` : ""} ${enemy.enraged ? "enraged" : ""} ${enemy.boss ? "boss" : ""} ${enemy.pose === "attack" ? "attacking" : ""} ${enemy.pose === "hurt" || enemy.boss && enemy.health < enemy.maxHealth * .48 ? "hurt" : ""}`} key={enemy.id} style={{ left: `${enemy.x}%` }}>
           <div className="coop-enemy-health"><span style={{ width: `${Math.max(0, enemy.health / enemy.maxHealth * 100)}%` }} /></div>
-          {enemy.boss && <b>MAESTRO DEL ESPRAY</b>}
-          {enemy.boss
-            ? <span className="coop-boss-art" role="img" aria-label="Jefe Maestro del espray" />
-            : <Image src="/assets/platform-water-bottle-enemy.webp" alt="Botella enemiga" width={160} height={300} unoptimized draggable={false} />}
+          {enemy.boss && <b>{enemy.name ?? "MAESTRO DEL ESPRAY"}</b>}
+          {enemy.fighter
+            ? <span className={`coop-clone-flip ${nearestPlayerX(enemy.x) < enemy.x ? "look-left" : "look-right"}`}>
+                <span className={`coop-player coop-clone ${enemy.fighter} ${enemy.pose === "attack" ? "fire" : enemy.pose === "hurt" ? "hit" : "walk"}`}>
+                  <span className="coop-player-art" role="img" aria-label={enemy.name ?? PLAYER_NAMES[enemy.fighter]} />
+                </span>
+              </span>
+            : enemy.boss
+              ? <span className="coop-boss-art" role="img" aria-label="Jefe Maestro del espray" />
+              : <Image src="/assets/platform-water-bottle-enemy.webp" alt="Botella enemiga" width={160} height={300} unoptimized draggable={false} />}
         </div>
       ))}
 
@@ -711,7 +807,12 @@ export default function CoopMode({ playerOne, playerTwo, aiPlayerTwo = false, so
       })}
       {enemyShots.map((shot) => (
         <span className={`coop-enemy-shot ${shot.high ? "high" : ""}`} key={shot.id} style={{ "--from": `${shot.from}%`, "--to": `${shot.to}%`, "--duration": `${shot.duration}ms` } as CSSProperties}>
-          <Image src="/assets/platform-water-bottle-enemy.webp" alt="" width={96} height={160} unoptimized />
+          <Image src={shot.asset} alt="" width={96} height={160} unoptimized />
+        </span>
+      ))}
+      {pickups.map((pickup) => (
+        <span className={`coop-pickup ${pickup.kind}`} key={pickup.id} style={{ left: `${pickup.x}%` }} aria-label={pickup.kind === "health" ? "Botiquín" : "Sincronía"}>
+          {pickup.kind === "health" ? "✚" : "♫"}
         </span>
       ))}
 

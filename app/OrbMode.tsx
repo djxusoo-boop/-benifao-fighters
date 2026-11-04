@@ -39,6 +39,15 @@ type OrbParticle = {
   color: string;
 };
 
+type OrbPowerKind = "rapid" | "shield" | "freeze" | "life";
+type OrbPower = { id: number; x: number; y: number; vy: number; kind: OrbPowerKind; expires: number };
+const POWER_STYLE: Record<OrbPowerKind, { color: string; icon: string; label: string }> = {
+  rapid: { color: "#ff9a2e", icon: "»", label: "¡RÁFAGA!" },
+  shield: { color: "#59e8ff", icon: "◆", label: "¡ESCUDO!" },
+  freeze: { color: "#bfe9ff", icon: "❄", label: "¡CONGELADO!" },
+  life: { color: "#ff4f6d", icon: "♥", label: "¡VIDA EXTRA!" },
+};
+
 type OrbModeProps = {
   fighter: FighterId;
   fighterName: string;
@@ -93,7 +102,7 @@ export default function OrbMode({ fighter, fighterName, soundOn, difficulty, cam
   const audioRef = useRef<AudioContext | null>(null);
   const [round, setRound] = useState(0);
   const [status, setStatus] = useState<OrbStatus>("playing");
-  const [hud, setHud] = useState({ score: 0, lives: MAX_LIVES, remaining: 2, wave: 1, rapid: false, chain: 0, perfect: false });
+  const [hud, setHud] = useState({ score: 0, lives: MAX_LIVES, remaining: 2, wave: 1, rapid: false, chain: 0, perfect: false, shield: false, frozen: false, power: "" });
 
   useEffect(() => {
     onExitRef.current = onExit;
@@ -131,6 +140,7 @@ export default function OrbMode({ fighter, fighterName, soundOn, difficulty, cam
     let chain = 0;
     let chainUntil = 0;
     let waveLivesStart = lives;
+    let hudFrozen = false;
     let perfectFlashUntil = 0;
     let width = 0;
     let height = 0;
@@ -138,6 +148,11 @@ export default function OrbMode({ fighter, fighterName, soundOn, difficulty, cam
     const balls: OrbBall[] = [];
     const shots: OrbShot[] = [];
     const particles: OrbParticle[] = [];
+    const powers: OrbPower[] = [];
+    let shieldCharges = 0;
+    let frozenUntil = 0;
+    let powerCall = "";
+    let powerCallUntil = 0;
     const resolveAsset = (source: string) => {
       const resolver = (globalThis as typeof globalThis & { __asset?: (src: string) => string }).__asset;
       return typeof resolver === "function" ? resolver(source) : source;
@@ -172,7 +187,11 @@ export default function OrbMode({ fighter, fighterName, soundOn, difficulty, cam
       }
     };
 
-    const syncHud = () => setHud({ score, lives, remaining: balls.length, wave, rapid: performance.now() < rapidUntil, chain, perfect: performance.now() < perfectFlashUntil });
+    const syncHud = () => {
+      const now = performance.now();
+      setHud({ score, lives, remaining: balls.length, wave, rapid: now < rapidUntil, chain, perfect: now < perfectFlashUntil, shield: shieldCharges > 0, frozen: now < frozenUntil, power: now < powerCallUntil ? powerCall : "" });
+      heroRef.current?.classList.toggle("orb-shielded", shieldCharges > 0);
+    };
 
     const resize = () => {
       const previousWidth = width;
@@ -394,6 +413,43 @@ export default function OrbMode({ fighter, fighterName, soundOn, difficulty, cam
       context.stroke();
 
       balls.forEach(drawBall);
+      if (performance.now() < frozenUntil) {
+        context.save();
+        context.fillStyle = "rgba(150, 220, 255, 0.12)";
+        context.fillRect(0, 0, width, floorY);
+        balls.forEach((ball) => {
+          context.beginPath();
+          context.arc(ball.x, ball.y, ball.radius * 1.02, 0, Math.PI * 2);
+          context.strokeStyle = "rgba(210, 245, 255, 0.9)";
+          context.lineWidth = 4;
+          context.stroke();
+        });
+        context.restore();
+      }
+      powers.forEach((power) => {
+        const style = POWER_STYLE[power.kind];
+        const remaining = power.expires - performance.now();
+        if (remaining < 1800 && Math.floor(remaining / 120) % 2 === 0) return;
+        const bob = Math.sin(performance.now() / 160) * 3;
+        context.save();
+        context.translate(power.x, power.y + bob);
+        context.shadowColor = style.color;
+        context.shadowBlur = 22;
+        context.beginPath();
+        context.arc(0, 0, 20, 0, Math.PI * 2);
+        context.fillStyle = "rgba(8, 6, 14, 0.85)";
+        context.fill();
+        context.lineWidth = 4;
+        context.strokeStyle = style.color;
+        context.stroke();
+        context.shadowBlur = 0;
+        context.fillStyle = style.color;
+        context.font = "900 22px Arial, sans-serif";
+        context.textAlign = "center";
+        context.textBaseline = "middle";
+        context.fillText(style.icon, 0, 1);
+        context.restore();
+      });
 
       shots.forEach((shot) => {
         const isMaletilla = fighter === "maletilla";
@@ -498,7 +554,9 @@ export default function OrbMode({ fighter, fighterName, soundOn, difficulty, cam
           if (shots[shotIndex].y < -35) shots.splice(shotIndex, 1);
         }
 
+        const frozen = time < frozenUntil;
         balls.forEach((ball) => {
+          if (frozen) return;
           ball.vy += 720 * delta;
           ball.x += ball.vx * delta;
           ball.y += ball.vy * delta;
@@ -528,6 +586,13 @@ export default function OrbMode({ fighter, fighterName, soundOn, difficulty, cam
               balls.splice(ballIndex, 1);
               burst(ball);
               splitBall(ball);
+              // Broken objects sometimes drop a power-up; small ones more often.
+              const dropChance = ball.tier === 0 ? .16 : ball.tier === 1 ? .1 : .06;
+              if (Math.random() < dropChance && powers.length < 3) {
+                const roll = Math.random();
+                const kind: OrbPowerKind = roll < .38 ? "rapid" : roll < .66 ? "shield" : roll < .9 ? "freeze" : "life";
+                powers.push({ id: nextId++, x: ball.x, y: ball.y, vy: -120, kind, expires: time + 7000 });
+              }
               chain = time <= chainUntil ? chain + 1 : 1;
               chainUntil = time + 1150;
               const multiplier = Math.min(4, 1 + Math.floor((chain - 1) / 3));
@@ -557,6 +622,29 @@ export default function OrbMode({ fighter, fighterName, soundOn, difficulty, cam
           }
         }
 
+        for (let index = powers.length - 1; index >= 0; index -= 1) {
+          const power = powers[index];
+          power.vy = Math.min(420, power.vy + 640 * delta);
+          power.y = Math.min(floorY - 20, power.y + power.vy * delta);
+          if (time > power.expires) { powers.splice(index, 1); continue; }
+          const reach = clamp(width * 0.04, 34, 56);
+          if (Math.abs(power.x - heroX) < reach && power.y > floorY - clamp(height * 0.26, 100, 170)) {
+            powers.splice(index, 1);
+            if (power.kind === "rapid") rapidUntil = time + 6500;
+            if (power.kind === "shield") shieldCharges = 1;
+            if (power.kind === "freeze") frozenUntil = time + 3200;
+            if (power.kind === "life") lives = Math.min(MAX_LIVES + 4, lives + 1);
+            score += 300;
+            powerCall = POWER_STYLE[power.kind].label;
+            powerCallUntil = time + 1300;
+            playTone(power.kind === "freeze" ? 980 : 760, 0.12, "sine");
+            window.setTimeout(() => playTone(1180, 0.1, "sine"), 90);
+            syncHud();
+            window.setTimeout(syncHud, 1350);
+          }
+        }
+        if (frozen !== hudFrozen) { hudFrozen = frozen; syncHud(); }
+
         if (invulnerableUntil <= time) {
           const heroWidth = clamp(width * 0.055, 42, 68);
           const heroHeight = clamp(height * 0.24, 92, 155);
@@ -569,6 +657,17 @@ export default function OrbMode({ fighter, fighterName, soundOn, difficulty, cam
             const deltaX = ball.x - closestX;
             const deltaY = ball.y - closestY;
             if (deltaX * deltaX + deltaY * deltaY < ball.radius * ball.radius) {
+              if (shieldCharges > 0) {
+                // The shield takes the hit instead of a life.
+                shieldCharges = 0;
+                invulnerableUntil = time + 1200;
+                ball.vx = ball.x < heroX ? -Math.abs(ball.vx) : Math.abs(ball.vx);
+                ball.vy = -380;
+                burst(ball);
+                playTone(300, 0.14, "triangle");
+                syncHud();
+                break;
+              }
               lives -= 1;
               chain = 0;
               invulnerableUntil = time + (difficulty === "easy" ? 2600 : 1900);
@@ -652,8 +751,8 @@ export default function OrbMode({ fighter, fighterName, soundOn, difficulty, cam
       />}
 
       <div className="orb-hud" aria-live="polite">
-        <div><small>VIDAS</small><strong>♥ × {hud.lives}</strong></div>
-        <div className="orb-title"><small>MODO · FASE {hud.wave}/{MAX_ORB_WAVES}</small><strong>ROMPEOBJETOS</strong><span>{hud.remaining} EN PANTALLA · {hud.chain >= 2 ? `CADENA ×${hud.chain}` : hud.perfect ? "¡FASE PERFECTA · +1 VIDA!" : hud.rapid ? "RÁFAGA ACTIVA" : "GRANDE → MEDIANO → PEQUEÑO"}</span></div>
+        <div><small>VIDAS{hud.shield ? " · ESCUDO" : ""}</small><strong>♥ × {hud.lives}{hud.shield ? " ◆" : ""}</strong></div>
+        <div className="orb-title"><small>MODO · FASE {hud.wave}/{MAX_ORB_WAVES}</small><strong>ROMPEOBJETOS</strong><span>{hud.remaining} EN PANTALLA · {hud.power ? hud.power : hud.frozen ? "¡TIEMPO CONGELADO!" : hud.chain >= 2 ? `CADENA ×${hud.chain}` : hud.perfect ? "¡FASE PERFECTA · +1 VIDA!" : hud.rapid ? "RÁFAGA ACTIVA" : "GRANDE → MEDIANO → PEQUEÑO"}</span></div>
         <div><small>PUNTOS</small><strong>{String(hud.score).padStart(6, "0")}</strong></div>
       </div>
 

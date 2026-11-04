@@ -45,6 +45,7 @@ type Enemy = Rect & {
   defeatedUntil: number;
   facing: -1 | 1;
   bossStyle?: BossStyle;
+  clone?: FighterId;
 };
 type Spark = { x: number; y: number; vx: number; vy: number; life: number; color: string; size: number };
 type Projectile = { x: number; y: number; vx: number; vy: number; rotation: number; size: number; kind: "bottle" | "microphone" | "mushroom" | "ear" | "bag" | "money" | "vinyl" | "speaker" | "fish" | "venom" | "shield" | "staff" | "anchor" | "chain" | "jager" | "amber" | "scepter" | "artichokes" | "dog" | "hoe" | "flag" | "flagSweep" | "pistol" | "peineta" };
@@ -811,6 +812,12 @@ export default function PlatformMode({ fighter, fighterName, soundOn, difficulty
     };
 
     const impact = (x: number, y: number, text: string, color: string, now: number) => {
+      // A new label replaces a fresh one at the same spot so texts never pile up.
+      for (let index = impactTexts.length - 1; index >= 0; index -= 1) {
+        const item = impactTexts[index];
+        if (Math.abs(item.x - x) < 90 && Math.abs(item.y - y) < 70) impactTexts.splice(index, 1);
+      }
+      if (impactTexts.length > 7) impactTexts.splice(0, impactTexts.length - 7);
       impactTexts.push({ x, y, text, color, life: 0.7 });
       shakeUntil = now + 145;
     };
@@ -847,6 +854,11 @@ export default function PlatformMode({ fighter, fighterName, soundOn, difficulty
       setCrowdCue({ direction, label: nearby.label });
     };
 
+    const clonePool = (Object.keys(HERO_POSE_ASSETS) as FighterId[]).filter((id) => id !== fighter);
+    const CLONE_POSES = ["idle", "walkA", "fire", "hit"] as const;
+    const loadClone = (id: FighterId) => CLONE_POSES.forEach((pose) => {
+      if (!images[`clone-${id}-${pose}`]) loadImage(`clone-${id}-${pose}`, HERO_POSE_ASSETS[id][pose]);
+    });
     const makeEnemy = (blueprint: EnemyBlueprint, index: number): Enemy => {
       const boss = blueprint.kind === "boss";
       const miniboss = blueprint.kind === "miniboss";
@@ -871,6 +883,8 @@ export default function PlatformMode({ fighter, fighterName, soundOn, difficulty
         hitUntil: 0,
         defeatedUntil: 0,
         facing: blueprint.vx >= 0 ? 1 : -1,
+        // Tough enemies are shadow clones of the other fighters.
+        clone: heavy || blueprint.kind === "charger" || blueprint.kind === "shooter" ? clonePool[(index * 5 + levelIndex * 3) % clonePool.length] : undefined,
       };
     };
 
@@ -892,6 +906,7 @@ export default function PlatformMode({ fighter, fighterName, soundOn, difficulty
       lifeUps = level.lifeUps.map((item) => ({ ...item, collected: false }));
       blocks = level.blocks.map((item) => ({ ...item, state: "ready" }));
       enemies = buildLevelEnemies(level, levelIndex, difficulty === "easy").map(makeEnemy);
+      enemies.forEach((enemy) => { if (enemy.clone) loadClone(enemy.clone); });
       hazards = (level.hazards ?? []).map((item) => ({ ...item, triggeredUntil: 0 }));
       completedGates = new Set<number>();
       projectiles.length = 0;
@@ -1088,6 +1103,18 @@ export default function PlatformMode({ fighter, fighterName, soundOn, difficulty
         burst(enemy.x + enemy.width / 2, enemy.y + enemy.height / 2, "#ff6a42", 48, 10);
         impact(enemy.x - 35, enemy.y, enemy.kind === "boss" ? "¡MAESTRO K.O.!" : "¡GUARDIÁN K.O.!", "#fff09b", now);
         playTone(62, 0.38, "sawtooth");
+        updateHud(now);
+        return;
+      }
+      if (enemy.clone) {
+        enemy.state = "defeated";
+        enemy.defeatedUntil = now + 900;
+        enemy.vx = 0;
+        enemy.vy = 0;
+        score += 400;
+        burst(enemy.x + enemy.width / 2, enemy.y + enemy.height / 2, "#ff3d5e", 26, 7);
+        impact(enemy.x + enemy.width / 2, enemy.y, "¡SOMBRA K.O.!", "#ff8fa3", now);
+        playTone(92, 0.16, "sawtooth");
         updateHud(now);
         return;
       }
@@ -1542,6 +1569,7 @@ export default function PlatformMode({ fighter, fighterName, soundOn, difficulty
           } else
           if (enemy.hp > 1 && now >= poweredUntil) {
             enemy.hp -= 1;
+            enemy.hitUntil = now + 420;
             enemy.height = 92;
             enemy.y = GROUND_Y - enemy.height;
             enemy.baseY = enemy.y;
@@ -1593,7 +1621,7 @@ export default function PlatformMode({ fighter, fighterName, soundOn, difficulty
           if (enemy.state !== "bottle" || !overlaps(projectileRect, enemy as Rect)) continue;
           projectile.x = -9999;
           enemy.hp -= projectile.kind === "mushroom" || projectile.kind === "ear" ? 2 : 1;
-          if (enemy.kind === "boss" || enemy.kind === "miniboss") enemy.hitUntil = now + 420;
+          if (enemy.kind === "boss" || enemy.kind === "miniboss" || enemy.clone) enemy.hitUntil = now + 420;
           burst(enemy.x + enemy.width / 2, enemy.y + enemy.height / 2, projectile.kind === "bottle" ? "#ffad48" : "#ff54a5", 16, 5);
           if (enemy.hp <= 0) defeatEnemy(enemy, now, Math.sign(projectile.vx));
           else {
@@ -2053,6 +2081,37 @@ export default function PlatformMode({ fighter, fighterName, soundOn, difficulty
             context.fillStyle = "#ff513c";
             context.fillRect(bossHudX + 9, bossHudY + 24, (bossHudWidth - 18) * Math.max(0, enemy.hp) / maxBossHp, 10);
             context.textAlign = "left";
+          }
+        } else if (enemy.clone) {
+          const defeated = enemy.state === "defeated";
+          const pose = defeated || now < enemy.hitUntil ? "hit" : now < enemy.attackUntil ? "fire" : Math.floor(now / 170 + index) % 2 ? "walkA" : "idle";
+          const image = images[`clone-${enemy.clone}-${pose}`] ?? images[`clone-${enemy.clone}-idle`];
+          const drawHeight = enemy.height * 1.55;
+          const drawWidth = drawHeight * .72;
+          const facesRight = enemy.kind === "shooter" || enemy.kind === "charger" ? enemy.facing > 0 : enemy.vx > 0;
+          const fade = defeated ? Math.max(0, (enemy.defeatedUntil - now) / 900) : 1;
+          context.globalAlpha = fade;
+          context.shadowColor = enemy.kind === "shooter" ? "#59e8ff" : enemy.kind === "charger" ? "#ff4238" : "#ff8846";
+          context.shadowBlur = 22;
+          context.filter = enemy.kind === "shooter"
+            ? "grayscale(.5) brightness(.66) sepia(.4) hue-rotate(160deg) saturate(2)"
+            : "grayscale(.45) brightness(.62) contrast(1.2) sepia(.35) hue-rotate(-28deg) saturate(2.2)";
+          if (defeated) {
+            context.translate(x + enemy.width / 2, enemy.y + enemy.height);
+            context.rotate((1 - fade) * 1.35 * (facesRight ? -1 : 1));
+            context.translate(-(x + enemy.width / 2), -(enemy.y + enemy.height));
+          }
+          if (image && !drawImageContained(image, x + enemy.width / 2 - drawWidth / 2, enemy.y + enemy.height - drawHeight, drawWidth, drawHeight, !facesRight)) {
+            drawImageContained(images.bottle, x - 17, enemy.y - 19, enemy.width + 34, enemy.height + 29, facesRight);
+          }
+          context.filter = "none";
+          context.globalAlpha = 1;
+          if (!defeated && enemy.hp > 1) {
+            context.shadowBlur = 0;
+            context.fillStyle = "rgba(10,4,8,.85)";
+            context.fillRect(x + enemy.width / 2 - 22, enemy.y + enemy.height - drawHeight - 10, 44, 6);
+            context.fillStyle = "#ff5644";
+            context.fillRect(x + enemy.width / 2 - 22, enemy.y + enemy.height - drawHeight - 10, 44 * Math.min(1, enemy.hp / 2), 6);
           }
         } else if (enemy.state === "bottle") {
           const walkBob = enemy.kind === "hopper" && enemy.y < enemy.baseY ? 0 : Math.sin(now / (enemy.kind === "runner" ? 75 : 115) + index) * 3;

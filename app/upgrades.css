@@ -1026,3 +1026,39 @@ html:fullscreen .game-shell, html:-webkit-full-screen .game-shell { min-height: 
 .pause-moves .pause-passive b { color: #7dff9a; }
 .pause-layer:has(.pause-moves) > span { font-size: clamp(48px, 8vw, 104px) !important; line-height: .9; }
 .pause-layer:has(.pause-moves) { overflow-y: auto; }
+
+/* ===== V2.27 Cooperativa: shadow-clone rivals, pickups, stage per wave ===== */
+#game .coop-enemy.clone { width:clamp(92px,10.5vw,150px); height:clamp(185px,33vh,300px); animation:coop-enemy-bob 620ms ease-in-out infinite alternate; filter:none; }
+#game .coop-enemy.clone.role-runner { animation-duration:360ms; }
+#game .coop-enemy.clone.role-tank { width:clamp(110px,12.5vw,178px); height:clamp(215px,38vh,345px); animation-duration:860ms; }
+#game .coop-enemy.clone.boss { width:clamp(170px,20vw,290px); height:clamp(300px,58vh,500px); }
+#game .coop-clone-flip { position:absolute; inset:0; display:block; transition:transform 120ms ease; }
+#game .coop-clone-flip.look-left { transform:scaleX(-1); }
+#game .coop-enemy .coop-player.coop-clone { position:absolute; left:0; bottom:0; width:100%; height:100%; transform:none; animation:none; filter:none; transition:none; z-index:auto; }
+#game .coop-enemy .coop-player.coop-clone .coop-player-art { filter:grayscale(.45) brightness(.62) contrast(1.25) sepia(.35) hue-rotate(-28deg) saturate(2.2) drop-shadow(0 0 3px #ff2448) drop-shadow(0 0 12px rgba(160,10,40,.85)) drop-shadow(0 12px 8px rgba(0,0,0,.75))!important; }
+#game .coop-enemy.clone.role-runner .coop-player-art { filter:grayscale(.4) brightness(.7) contrast(1.2) sepia(.5) saturate(2.4) drop-shadow(0 0 3px #ffa12e) drop-shadow(0 0 12px rgba(255,120,20,.75)) drop-shadow(0 12px 8px rgba(0,0,0,.75))!important; }
+#game .coop-enemy.clone.role-shooter .coop-player-art { filter:grayscale(.5) brightness(.66) contrast(1.2) sepia(.4) hue-rotate(160deg) saturate(2.1) drop-shadow(0 0 3px #59e8ff) drop-shadow(0 0 12px rgba(40,180,255,.75)) drop-shadow(0 12px 8px rgba(0,0,0,.75))!important; }
+#game .coop-enemy.clone.boss .coop-player-art { filter:brightness(.78) contrast(1.25) saturate(1.4) drop-shadow(0 0 4px #ffdf5a) drop-shadow(0 0 20px rgba(255,40,60,.9)) drop-shadow(0 15px 10px rgba(0,0,0,.8))!important; }
+#game .coop-enemy.hurt .coop-player.coop-clone .coop-player-art { filter:brightness(1.9) saturate(.3) drop-shadow(0 0 10px #fff)!important; }
+#game .coop-enemy.enraged { animation-duration:240ms!important; }
+#game .coop-enemy.enraged::before { content:""; position:absolute; inset:8% -12% 0; z-index:-1; border-radius:50%; background:radial-gradient(circle, rgba(255,40,40,.42), transparent 66%); animation:coop-rage-pulse 420ms ease-in-out infinite alternate; }
+@keyframes coop-rage-pulse { from { opacity:.45; transform:scale(.92); } to { opacity:1; transform:scale(1.08); } }
+#game .coop-enemy.clone > b { color:#ffd25a; text-shadow:2px 2px 0 #6b0716; }
+
+#game .coop-pickup { position:absolute; bottom:11%; z-index:12; display:grid; width:42px; height:42px; place-items:center; border:3px solid #fff; border-radius:12px; color:#fff; font:900 26px/1 Arial,sans-serif; transform:translateX(-50%); animation:coop-pickup-float 700ms ease-in-out infinite alternate; pointer-events:none; }
+#game .coop-pickup.health { background:linear-gradient(#ff4f5e,#c2122a); box-shadow:0 0 18px #ff4258, 0 6px 0 #6d0715; }
+#game .coop-pickup.sync { background:linear-gradient(#5ee8ff,#2a62e8); box-shadow:0 0 18px #4fd8ff, 0 6px 0 #102a77; }
+@keyframes coop-pickup-float { from { translate:0 0; } to { translate:0 -12px; } }
+
+/* A floor colour per wave so every wave feels like a new place. */
+#game .coop-mode.coop-stage-2::before { background-image:linear-gradient(rgba(90,190,255,.2) 1px,transparent 1px),linear-gradient(90deg,rgba(90,190,255,.2) 1px,transparent 1px); }
+#game .coop-mode.coop-stage-3::before { background-image:linear-gradient(rgba(255,214,90,.22) 1px,transparent 1px),linear-gradient(90deg,rgba(255,214,90,.22) 1px,transparent 1px); }
+#game .coop-mode.coop-stage-4::before { background-image:linear-gradient(rgba(120,255,214,.2) 1px,transparent 1px),linear-gradient(90deg,rgba(120,255,214,.2) 1px,transparent 1px); background-size:24px 24px; }
+#game .coop-mode.coop-stage-5::before { background-image:linear-gradient(rgba(255,70,90,.24) 1px,transparent 1px),linear-gradient(90deg,rgba(255,70,90,.24) 1px,transparent 1px); }
+#game .coop-mode.coop-stage-6::before { background-image:linear-gradient(rgba(190,120,255,.24) 1px,transparent 1px),linear-gradient(90deg,rgba(190,120,255,.24) 1px,transparent 1px); background-size:48px 30px; }
+#game .coop-mode.coop-stage-7::before { background-image:linear-gradient(rgba(255,190,60,.3) 1px,transparent 1px),linear-gradient(90deg,rgba(255,190,60,.3) 1px,transparent 1px); opacity:.75; }
+#game .coop-mode.coop-stage-7 { background:radial-gradient(circle at 50% 40%, rgba(255,60,40,.14), transparent 45%), linear-gradient(180deg, rgba(20,4,6,.2), rgba(30,4,8,.55) 66%, rgba(8,2,3,.92)); }
+
+/* ===== V2.27 Rompeobjetos: shield ring on the hero ===== */
+#game .orb-hero.orb-shielded::after { content:""; position:absolute; inset:-8% -22% -4%; border:3px solid rgba(89,232,255,.85); border-radius:50% 50% 40% 40%; box-shadow:0 0 22px #59e8ff, inset 0 0 22px rgba(89,232,255,.4); animation:orb-shield-pulse 600ms ease-in-out infinite alternate; pointer-events:none; }
+@keyframes orb-shield-pulse { from { opacity:.6; transform:scale(.97); } to { opacity:1; transform:scale(1.03); } }
