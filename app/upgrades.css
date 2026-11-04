@@ -1067,3 +1067,33 @@ html:fullscreen .game-shell, html:-webkit-full-screen .game-shell { min-height: 
 #game .showcase-portrait .portrait.ogalla { background-image:url('/assets/new-fighters/ogalla-idle-v2.webp')!important; background-size:contain!important; background-position:center bottom!important; background-repeat:no-repeat!important; animation:none!important; }
 #game .showcase-portrait .portrait.elchica { background-image:url('/assets/new-fighters/elchica-rig-v21849-idle.webp')!important; background-size:contain!important; background-position:center bottom!important; background-repeat:no-repeat!important; animation:none!important; }
 #game .showcase-portrait .portrait:is(.ogalla,.elchica)::before, #game .showcase-portrait .portrait:is(.ogalla,.elchica)::after { content:none!important; }
+
+/* ===== V2.28 Thumb stick in every mode: stick bottom-left, actions bottom-right ===== */
+.mode-stick-wrap { position:relative; display:grid; justify-items:center; gap:4px; pointer-events:auto; touch-action:none; user-select:none; -webkit-user-select:none; }
+.mode-stick { position:relative; width:clamp(118px,15vw,150px); aspect-ratio:1; border:3px solid rgba(95,220,255,.7); border-radius:50%; background:radial-gradient(circle at 50% 45%, rgba(40,70,110,.55), rgba(6,8,16,.88) 70%); box-shadow:0 6px 20px rgba(0,0,0,.6), inset 0 0 24px rgba(95,220,255,.18); touch-action:none; cursor:grab; }
+.mode-stick-arrows { position:absolute; inset:7%; display:grid; grid-template:repeat(3,1fr)/repeat(3,1fr); place-items:center; color:rgba(220,245,255,.72); font:900 15px/1 Arial,sans-serif; pointer-events:none; }
+.mode-stick-arrows > i { font-style:normal; }
+.mode-stick-arrows > .up { grid-area:1/2; } .mode-stick-arrows > .left { grid-area:2/1; } .mode-stick-arrows > .right { grid-area:2/3; } .mode-stick-arrows > .down { grid-area:3/2; }
+.mode-stick-knob { position:absolute; top:50%; left:50%; width:44%; aspect-ratio:1; border:2px solid rgba(255,255,255,.75); border-radius:50%; background:radial-gradient(circle at 35% 30%, #8ea9c4, #2a3d58 60%, #121b2b); box-shadow:0 5px 12px rgba(0,0,0,.65); transform:translate(calc(-50% + var(--kx,0) * 120%), calc(-50% + var(--ky,0) * 120%)); transition:transform 60ms linear; pointer-events:none; }
+.mode-stick-hint { color:rgba(230,240,255,.8); font:900 8px/1 Arial,sans-serif; letter-spacing:.12em; text-shadow:1px 1px 0 #000; white-space:nowrap; }
+
+/* Rompeobjetos and Aventura: the stick replaces the arrow pair on the left. */
+.mode-stick-layout { justify-content:space-between!important; align-items:flex-end!important; }
+.mode-stick-layout > :last-child { margin-left:auto; pointer-events:auto; }
+
+/* Cooperativa: the stick replaces the arrows; jump/dodge stay as buttons too. */
+.coop-touch .coop-stick .mode-stick { width:clamp(108px,13vw,138px); }
+.coop-touch-p2 .coop-stick .mode-stick { border-color:rgba(255,75,158,.75); box-shadow:0 6px 20px rgba(0,0,0,.6), inset 0 0 24px rgba(255,75,158,.2); }
+/* With the AI partner the player's attack buttons always go to the right edge. */
+.coop-ai-partner .coop-touch-p1 { right:max(12px,env(safe-area-inset-right))!important; left:max(12px,env(safe-area-inset-left))!important; flex-direction:row!important; align-items:flex-end!important; justify-content:space-between!important; pointer-events:none; }
+.coop-ai-partner .coop-touch-p1 > * { pointer-events:auto; }
+.coop-ai-partner .coop-touch-p1 .coop-touch-actions { display:grid; grid-template-columns:repeat(2, auto); gap:8px; }
+.coop-ai-partner .coop-touch-p1 .coop-touch-actions button { width:68px; height:68px; }
+.coop-ai-partner .coop-touch-p1 > small { bottom:auto; top:-16px; }
+#game .orb-touch-controls.mode-stick-layout .orb-fire-button { width:clamp(84px,11vw,104px)!important; height:clamp(84px,11vw,104px)!important; font-size:30px!important; border-width:3px!important; }
+#game .orb-touch-controls.mode-stick-layout .orb-fire-button small { font-size:9px!important; }
+#game .platform-touch-controls.mode-stick-layout .platform-touch-actions button { min-width:74px; min-height:74px; }
+#game .mode-stick-wrap .mode-stick-hint { position:static!important; display:block!important; margin:0!important; transform:none!important; font-size:8px!important; }
+#game .mode-stick-wrap { display:grid!important; justify-items:center; gap:4px!important; }
+#game .coop-ai-partner .coop-touch-p1 .coop-touch-actions button { width:60px!important; height:60px!important; font-size:20px!important; }
+#game .coop-ai-partner .coop-touch-p1 .coop-touch-actions button i { font-size:7px!important; }

@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { PointerEvent as ReactPointerEvent } from "react";
 import ArcadeCrowd, { type CrowdCue } from "./ArcadeCrowd";
+import TouchStick from "./TouchStick";
 
 type FighterId = "maletilla" | "vanessa" | "josevictor" | "cristian" | "cesaret" | "borja" | "bacora" | "bonviure" | "elchica" | "ogalla" | "xuso" | "bomba" | "rafeta" | "tonimassama" | "nova";
 type AdventureStatus = "map" | "playing" | "level-complete" | "won" | "lost";
@@ -598,6 +599,7 @@ export default function PlatformMode({ fighter, fighterName, soundOn, difficulty
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const inputRef = useRef({ left: false, right: false, jump: false });
   const jumpRef = useRef<() => void>(() => undefined);
+  const stickJumpRef = useRef(false);
   const attackRef = useRef<() => void>(() => undefined);
   const specialRef = useRef<() => void>(() => undefined);
   const onExitRef = useRef(onExit);
@@ -2320,17 +2322,6 @@ export default function PlatformMode({ fighter, fighterName, soundOn, difficulty
     };
   }, [campaign, difficulty, fighter, round, startLevel, status]);
 
-  const beginHold = (event: ReactPointerEvent<HTMLButtonElement>, direction: "left" | "right") => {
-    event.preventDefault();
-    event.currentTarget.setPointerCapture?.(event.pointerId);
-    inputRef.current[direction] = true;
-  };
-
-  const endHold = (event: ReactPointerEvent<HTMLButtonElement>, direction: "left" | "right") => {
-    event.preventDefault();
-    inputRef.current[direction] = false;
-  };
-
   const releaseJump = (event: ReactPointerEvent<HTMLButtonElement>) => {
     event.preventDefault();
     inputRef.current.jump = false;
@@ -2392,11 +2383,14 @@ export default function PlatformMode({ fighter, fighterName, soundOn, difficulty
       <button className="platform-touch-exit" type="button" onClick={onExit}>← MENÚ</button>
       <p className="platform-instructions">A / D MOVER · MANTÉN W O ESPACIO PARA SALTAR MÁS · J ATAQUE · K ESPECIAL · ESC SALIR</p>
 
-      <div className="platform-touch-controls" aria-label="Controles táctiles de Aventura Central">
-        <div>
-          <button type="button" aria-label="Mover a la izquierda" onPointerDown={(event) => beginHold(event, "left")} onPointerUp={(event) => endHold(event, "left")} onPointerCancel={(event) => endHold(event, "left")} onLostPointerCapture={() => { inputRef.current.left = false; }}>←<small>ATRÁS</small></button>
-          <button type="button" aria-label="Mover a la derecha" onPointerDown={(event) => beginHold(event, "right")} onPointerUp={(event) => endHold(event, "right")} onPointerCancel={(event) => endHold(event, "right")} onLostPointerCapture={() => { inputRef.current.right = false; }}>→<small>AVANZA</small></button>
-        </div>
+      <div className="platform-touch-controls mode-stick-layout" aria-label="Controles táctiles de Aventura Central">
+        <TouchStick label="Joystick: mover y saltar" hint="MOVER · ↑ SALTO" onChange={(intent) => {
+          inputRef.current.left = intent.left;
+          inputRef.current.right = intent.right;
+          if (intent.up && !stickJumpRef.current) jumpRef.current();
+          if (!intent.up && stickJumpRef.current) inputRef.current.jump = false;
+          stickJumpRef.current = intent.up;
+        }} />
         <div className="platform-touch-actions">
           <button className="platform-attack-button" type="button" aria-label={fighter === "cesaret" ? "Lanzar peces" : fighter === "borja" ? "Ataque del sapo" : fighter === "maletilla" ? "Lanzar tres envases de cloretilo" : fighter === "vanessa" ? "Lanzar tres micrófonos" : fighter === "josevictor" ? "Lanzar bolsas blancas" : "Lanzar discos de vinilo"} onPointerDown={(event) => { event.preventDefault(); attackRef.current(); }}>{fighter === "cesaret" ? "P" : fighter === "borja" ? "S" : fighter === "maletilla" ? "C" : fighter === "vanessa" ? "M" : fighter === "josevictor" ? "B" : "V"}<small>{fighter === "cesaret" ? "PECES" : fighter === "borja" ? "SAPO" : fighter === "maletilla" ? "CLORETILO" : fighter === "vanessa" ? "3 MICROS" : fighter === "josevictor" ? "BOLSAS" : "VINILOS"}</small></button>
           <button className="platform-special-button" type="button" aria-label={fighter === "cesaret" ? "Lluvia de peces" : fighter === "borja" ? "Veneno del sapo" : fighter === "bacora" ? "Golpe de vara" : fighter === "bonviure" ? "Latigazo de cadena" : fighter === "maletilla" ? "Lanzar tormenta de setas" : fighter === "vanessa" ? "Lanzar orejas" : fighter === "josevictor" ? "Lanzar tubos de billetes" : "Lanzar altavoces KRK 8"} onPointerDown={(event) => { event.preventDefault(); specialRef.current(); }}>★<small>{fighter === "cesaret" ? "PECES" : fighter === "borja" ? "VENENO" : fighter === "bacora" ? "VARA" : fighter === "bonviure" ? "CADENA" : fighter === "maletilla" ? "SETAS" : fighter === "vanessa" ? "OREJAS" : fighter === "josevictor" ? "BILLETES" : "KRK 8"}</small></button>

@@ -141,3 +141,10 @@ kbd { display: inline-block; min-width: 18px; margin: 0 2px; padding: 3px 5px; b
   .mobile-controls button { width: clamp(48px, 8vw, 72px); height: clamp(48px, 8vw, 72px); border-width: 2px; background: rgba(8,19,28,.82); box-shadow: 0 5px 16px rgba(0,0,0,.5), inset 0 0 14px rgba(255,255,255,.08); backdrop-filter: blur(3px); }
   .mobile-controls .activate { font-size: clamp(10px, 1.5vw, 14px); }
 }
+
+/* V2.28: bigger action buttons on the right; fire and special are the largest. */
+@media (max-width: 1024px), (hover: none) and (pointer: coarse) {
+  .mobile-controls .action-pad { display: grid !important; grid-template-columns: repeat(3, auto); align-items: end; gap: 8px !important; }
+  .mobile-controls .action-pad button { width: 54px !important; height: 54px !important; font-size: 20px !important; }
+  .mobile-controls .action-pad .fire, .mobile-controls .action-pad .special { width: 66px !important; height: 66px !important; font-size: 24px !important; }
+}

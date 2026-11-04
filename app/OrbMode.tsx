@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import type { PointerEvent as ReactPointerEvent } from "react";
 import ArcadeCrowd from "./ArcadeCrowd";
 import FighterWalkLayers from "./FighterWalkLayers";
+import TouchStick from "./TouchStick";
 
 type FighterId = "maletilla" | "vanessa" | "josevictor" | "cristian" | "cesaret" | "borja" | "bacora" | "bonviure" | "elchica" | "ogalla" | "xuso" | "bomba" | "rafeta" | "tonimassama" | "nova";
 type OrbStatus = "playing" | "won" | "lost";
@@ -96,6 +97,7 @@ export default function OrbMode({ fighter, fighterName, soundOn, difficulty, cam
   const heroArtRef = useRef<HTMLDivElement>(null);
   const fireRef = useRef<() => void>(() => undefined);
   const inputRef = useRef({ left: false, right: false });
+  const stickUpRef = useRef(false);
   const onExitRef = useRef(onExit);
   const onCompleteRef = useRef(onComplete);
   const soundOnRef = useRef(soundOn);
@@ -735,11 +737,6 @@ export default function OrbMode({ fighter, fighterName, soundOn, difficulty, cam
     action();
   };
 
-  const endTouch = (event: ReactPointerEvent<HTMLButtonElement>, action: () => void) => {
-    event.preventDefault();
-    action();
-  };
-
   return (
     <div className="orb-mode" aria-label="Modo Rompeobjetos">
       <canvas ref={canvasRef} className="orb-canvas" aria-hidden="true" />
@@ -763,11 +760,13 @@ export default function OrbMode({ fighter, fighterName, soundOn, difficulty, cam
       <div className="orb-instructions">A / D PARA MOVER · ESPACIO, J O K PARA DISPARAR · ESC PARA SALIR</div>
 
       {status === "playing" && (
-        <div className="orb-touch-controls" aria-label="Controles de Rompeobjetos">
-          <div>
-            <button type="button" aria-label="Mover a la izquierda" onPointerDown={(event) => beginTouch(event, () => holdMovement("left", true))} onPointerUp={(event) => endTouch(event, () => holdMovement("left", false))} onPointerCancel={(event) => endTouch(event, () => holdMovement("left", false))} onLostPointerCapture={() => holdMovement("left", false)}>←</button>
-            <button type="button" aria-label="Mover a la derecha" onPointerDown={(event) => beginTouch(event, () => holdMovement("right", true))} onPointerUp={(event) => endTouch(event, () => holdMovement("right", false))} onPointerCancel={(event) => endTouch(event, () => holdMovement("right", false))} onLostPointerCapture={() => holdMovement("right", false)}>→</button>
-          </div>
+        <div className="orb-touch-controls mode-stick-layout" aria-label="Controles de Rompeobjetos">
+          <TouchStick label="Joystick: mover a izquierda o derecha, arriba para disparar" hint="MOVER · ↑ DISPARA" onChange={(intent) => {
+            holdMovement("left", intent.left);
+            holdMovement("right", intent.right);
+            if (intent.up && !stickUpRef.current) fireRef.current();
+            stickUpRef.current = intent.up;
+          }} />
           <button type="button" className="orb-fire-button" onPointerDown={(event) => beginTouch(event, () => fireRef.current())} aria-label="Disparar">●<small>DISPARAR</small></button>
         </div>
       )}

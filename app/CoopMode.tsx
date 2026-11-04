@@ -5,6 +5,7 @@ import type { CSSProperties, PointerEvent as ReactPointerEvent } from "react";
 import Image from "next/image";
 import ArcadeCrowd from "./ArcadeCrowd";
 import FighterWalkLayers from "./FighterWalkLayers";
+import TouchStick, { type StickIntent } from "./TouchStick";
 
 type FighterId = "maletilla" | "vanessa" | "josevictor" | "cristian" | "cesaret" | "borja" | "bacora" | "bonviure" | "elchica" | "ogalla" | "xuso" | "bomba" | "rafeta" | "tonimassama" | "nova";
 type PlayerSlot = "p1" | "p2";
@@ -735,12 +736,14 @@ export default function CoopMode({ playerOne, playerTwo, aiPlayerTwo = false, so
     return [...list].sort((a, b) => Math.abs(a.x - x) - Math.abs(b.x - x))[0].x;
   };
 
-  const hold = (event: ReactPointerEvent<HTMLButtonElement>, key: string, active: boolean) => {
-    event.preventDefault();
-    if (active) {
-      event.currentTarget.setPointerCapture?.(event.pointerId);
-      keysRef.current.add(key);
-    } else keysRef.current.delete(key);
+  const stickPrevRef = useRef<Record<PlayerSlot, StickIntent>>({ p1: { left: false, right: false, up: false, down: false }, p2: { left: false, right: false, up: false, down: false } });
+  const stickMove = (slot: PlayerSlot, intent: StickIntent) => {
+    const previous = stickPrevRef.current[slot];
+    if (intent.left) keysRef.current.add(`${slot}-left`); else keysRef.current.delete(`${slot}-left`);
+    if (intent.right) keysRef.current.add(`${slot}-right`); else keysRef.current.delete(`${slot}-right`);
+    if (intent.up && !previous.up) jump(slot);
+    if (intent.down && !previous.down) dodge(slot);
+    stickPrevRef.current[slot] = intent;
   };
 
   const tapAction = (event: ReactPointerEvent<HTMLButtonElement>, action: () => void) => {
@@ -837,19 +840,13 @@ export default function CoopMode({ playerOne, playerTwo, aiPlayerTwo = false, so
 
       <div className="coop-touch coop-touch-p1" aria-label={`Controles táctiles de ${PLAYER_NAMES[playerOne]}`}>
         <small>P1 · {PLAYER_NAMES[playerOne]}</small>
-        <div className="coop-touch-move">
-          <button type="button" onPointerDown={(event) => hold(event, "p1-left", true)} onPointerUp={(event) => hold(event, "p1-left", false)} onPointerLeave={(event) => hold(event, "p1-left", false)} onPointerCancel={(event) => hold(event, "p1-left", false)} onLostPointerCapture={() => keysRef.current.delete("p1-left")}>←</button>
-          <button type="button" onPointerDown={(event) => hold(event, "p1-right", true)} onPointerUp={(event) => hold(event, "p1-right", false)} onPointerLeave={(event) => hold(event, "p1-right", false)} onPointerCancel={(event) => hold(event, "p1-right", false)} onLostPointerCapture={() => keysRef.current.delete("p1-right")}>→</button>
-        </div>
+        <TouchStick className="coop-stick" label="Joystick de P1: mover, arriba salta, abajo esquiva" hint="↑ SALTO · ↓ ESQUIVA" onChange={(intent) => stickMove("p1", intent)} />
         <div className="coop-touch-actions"><button type="button" onPointerDown={(event) => tapAction(event, () => jump("p1"))}>↑<i>SALTO</i></button><button type="button" onPointerDown={(event) => tapAction(event, () => dodge("p1"))}>↓<i>ESQUIVA</i></button><button type="button" onPointerDown={(event) => tapAction(event, () => fire("p1"))}>J<i>{ATTACK_LABELS[playerOne][0]}</i></button><button type="button" onPointerDown={(event) => tapAction(event, () => fire("p1", true))}>K<i>{ATTACK_LABELS[playerOne][1]}</i></button></div>
       </div>
       <button className={`coop-combo-button ${sync >= 100 ? "ready" : ""}`} type="button" onPointerDown={(event) => tapAction(event, unleashCombo)} disabled={sync < 100}><b>F</b><small>{sync >= 100 ? "¡REMIX!" : `${Math.round(sync)}%`}</small></button>
       {!aiPlayerTwo && <div className="coop-touch coop-touch-p2" aria-label={`Controles táctiles de ${PLAYER_NAMES[playerTwo]}`}>
         <small>P2 · {PLAYER_NAMES[playerTwo]}</small>
-        <div className="coop-touch-move">
-          <button type="button" onPointerDown={(event) => hold(event, "p2-left", true)} onPointerUp={(event) => hold(event, "p2-left", false)} onPointerLeave={(event) => hold(event, "p2-left", false)} onPointerCancel={(event) => hold(event, "p2-left", false)} onLostPointerCapture={() => keysRef.current.delete("p2-left")}>←</button>
-          <button type="button" onPointerDown={(event) => hold(event, "p2-right", true)} onPointerUp={(event) => hold(event, "p2-right", false)} onPointerLeave={(event) => hold(event, "p2-right", false)} onPointerCancel={(event) => hold(event, "p2-right", false)} onLostPointerCapture={() => keysRef.current.delete("p2-right")}>→</button>
-        </div>
+        <TouchStick className="coop-stick" label="Joystick de P2: mover, arriba salta, abajo esquiva" hint="↑ SALTO · ↓ ESQUIVA" onChange={(intent) => stickMove("p2", intent)} />
         <div className="coop-touch-actions"><button type="button" onPointerDown={(event) => tapAction(event, () => jump("p2"))}>↑<i>SALTO</i></button><button type="button" onPointerDown={(event) => tapAction(event, () => dodge("p2"))}>↓<i>ESQUIVA</i></button><button type="button" onPointerDown={(event) => tapAction(event, () => fire("p2"))}>1<i>{ATTACK_LABELS[playerTwo][0]}</i></button><button type="button" onPointerDown={(event) => tapAction(event, () => fire("p2", true))}>2<i>{ATTACK_LABELS[playerTwo][1]}</i></button></div>
       </div>}
     </div>
