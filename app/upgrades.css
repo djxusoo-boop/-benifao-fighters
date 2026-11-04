@@ -1095,8 +1095,6 @@ html:fullscreen .game-shell, html:-webkit-full-screen .game-shell { min-height: 
 #game .platform-touch-controls.mode-stick-layout .platform-touch-actions button { min-width:74px; min-height:74px; }
 #game .mode-stick-wrap .mode-stick-hint { position:static!important; display:block!important; margin:0!important; transform:none!important; font-size:8px!important; }
 #game .mode-stick-wrap { display:grid!important; justify-items:center; gap:4px!important; }
-#game .coop-ai-partner .coop-touch-p1 .coop-touch-actions button { width:60px!important; height:60px!important; font-size:20px!important; }
-#game .coop-ai-partner .coop-touch-p1 .coop-touch-actions button i { font-size:7px!important; }
 
 /* ===== V2.28.2 crash recovery card ===== */
 .game-crash-card { min-height:100dvh; display:grid; place-content:center; justify-items:center; gap:14px; padding:24px; background:radial-gradient(circle at 50% 40%, #2a0f12, #050405 70%); color:#fff; text-align:center; font-family:Arial,sans-serif; }
@@ -1108,3 +1106,9 @@ html:fullscreen .game-shell, html:-webkit-full-screen .game-shell { min-height: 
 .arena .special-fx.fx-fingerPeinetas .fx-unit { width:clamp(46px,5vw,70px)!important; height:clamp(46px,5vw,70px)!important; }
 .arena .special-fx.fx-fingerPeinetas .fx-unit img { width:100%!important; height:100%!important; object-fit:contain; border-radius:50%; filter:drop-shadow(0 0 10px rgba(255,205,70,.85)) drop-shadow(3px 5px 4px rgba(0,0,0,.7))!important; animation:tm-logo-spin 900ms linear infinite; }
 @keyframes tm-logo-spin { from { rotate:-14deg; } 50% { rotate:14deg; } to { rotate:-14deg; } }
+
+/* ===== V2.30.3 Cooperativa: jump and dodge live on the stick; only the attacks stay on the right ===== */
+#game .coop-mode .coop-touch .coop-touch-actions { display:flex!important; gap:clamp(16px,3vw,28px)!important; align-items:flex-end; }
+#game .coop-mode .coop-touch .coop-touch-actions button { width:clamp(78px,10vw,96px)!important; height:clamp(78px,10vw,96px)!important; font-size:28px!important; border-width:3px!important; }
+#game .coop-mode .coop-touch .coop-touch-actions button i { font-size:9px!important; letter-spacing:.06em; margin-top:2px; }
+#game .coop-mode .coop-touch .coop-touch-actions button:last-child { translate:0 -22px; }

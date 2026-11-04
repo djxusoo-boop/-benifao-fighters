@@ -78,7 +78,7 @@ const ATTACK_LABELS: Record<FighterId, [string, string]> = {
   bonviure: ["ANCLA", "CADENA"],
   elchica: ["BOTELLA", "ÁMBAR"],
   ogalla: ["BASTÓN", "ALCACHOFAS"],
-  xuso: ["SPOOKY", "AULLIDO"], bomba: ["AZADA", "BARRIDO"], rafeta: ["BANDERA", "GIRO"], tonimassama: ["PISTOLA", "PEINETAS"], nova: ["PRISMA", "LÁSER"], estefy: ["MACHETE", "HOJAS"],
+  xuso: ["MORDISCO", "MEADA"], bomba: ["AZADA", "BARRIDO"], rafeta: ["BANDERA", "GIRO"], tonimassama: ["PISTOLA", "PEINETAS"], nova: ["PRISMA", "LÁSER"], estefy: ["MACHETE", "HOJAS"],
 };
 const MAX_COOP_WAVES = 7;
 const ALL_FIGHTERS = Object.keys(PLAYER_NAMES) as FighterId[];
@@ -842,14 +842,14 @@ export default function CoopMode({ playerOne, playerTwo, aiPlayerTwo = false, so
 
       <div className="coop-touch coop-touch-p1" aria-label={`Controles táctiles de ${PLAYER_NAMES[playerOne]}`}>
         <small>P1 · {PLAYER_NAMES[playerOne]}</small>
-        <TouchStick className="coop-stick" label="Joystick de P1: mover, arriba salta, abajo esquiva" hint="↑ SALTO · ↓ ESQUIVA" onChange={(intent) => stickMove("p1", intent)} />
-        <div className="coop-touch-actions"><button type="button" onPointerDown={(event) => tapAction(event, () => jump("p1"))}>↑<i>SALTO</i></button><button type="button" onPointerDown={(event) => tapAction(event, () => dodge("p1"))}>↓<i>ESQUIVA</i></button><button type="button" onPointerDown={(event) => tapAction(event, () => fire("p1"))}>J<i>{ATTACK_LABELS[playerOne][0]}</i></button><button type="button" onPointerDown={(event) => tapAction(event, () => fire("p1", true))}>K<i>{ATTACK_LABELS[playerOne][1]}</i></button></div>
+        <TouchStick className="coop-stick" label="Joystick de P1: mover, arriba salta, abajo esquiva" hint="↑ SALTA · ↓ ESQUIVA" onChange={(intent) => stickMove("p1", intent)} />
+        <div className="coop-touch-actions"><button type="button" onPointerDown={(event) => tapAction(event, () => fire("p1"))}>J<i>{ATTACK_LABELS[playerOne][0]}</i></button><button type="button" onPointerDown={(event) => tapAction(event, () => fire("p1", true))}>K<i>{ATTACK_LABELS[playerOne][1]}</i></button></div>
       </div>
       <button className={`coop-combo-button ${sync >= 100 ? "ready" : ""}`} type="button" onPointerDown={(event) => tapAction(event, unleashCombo)} disabled={sync < 100}><b>F</b><small>{sync >= 100 ? "¡REMIX!" : `${Math.round(sync)}%`}</small></button>
       {!aiPlayerTwo && <div className="coop-touch coop-touch-p2" aria-label={`Controles táctiles de ${PLAYER_NAMES[playerTwo]}`}>
         <small>P2 · {PLAYER_NAMES[playerTwo]}</small>
-        <TouchStick className="coop-stick" label="Joystick de P2: mover, arriba salta, abajo esquiva" hint="↑ SALTO · ↓ ESQUIVA" onChange={(intent) => stickMove("p2", intent)} />
-        <div className="coop-touch-actions"><button type="button" onPointerDown={(event) => tapAction(event, () => jump("p2"))}>↑<i>SALTO</i></button><button type="button" onPointerDown={(event) => tapAction(event, () => dodge("p2"))}>↓<i>ESQUIVA</i></button><button type="button" onPointerDown={(event) => tapAction(event, () => fire("p2"))}>1<i>{ATTACK_LABELS[playerTwo][0]}</i></button><button type="button" onPointerDown={(event) => tapAction(event, () => fire("p2", true))}>2<i>{ATTACK_LABELS[playerTwo][1]}</i></button></div>
+        <TouchStick className="coop-stick" label="Joystick de P2: mover, arriba salta, abajo esquiva" hint="↑ SALTA · ↓ ESQUIVA" onChange={(intent) => stickMove("p2", intent)} />
+        <div className="coop-touch-actions"><button type="button" onPointerDown={(event) => tapAction(event, () => fire("p2"))}>1<i>{ATTACK_LABELS[playerTwo][0]}</i></button><button type="button" onPointerDown={(event) => tapAction(event, () => fire("p2", true))}>2<i>{ATTACK_LABELS[playerTwo][1]}</i></button></div>
       </div>}
     </div>
   );
