@@ -1,0 +1,53 @@
+/* ===== V2.32 Cooperativa: ki blasts instead of flying objects ===== */
+#game .coop-mode .coop-ki {
+  position:absolute; bottom:30%; left:var(--from); z-index:18; width:clamp(34px,4.6vw,56px); aspect-ratio:1; pointer-events:none;
+  translate:-50% 0; animation:coop-ki-fly var(--duration,600ms) cubic-bezier(.35,.05,.6,1) var(--delay) both;
+}
+#game .coop-mode .coop-ki.high { bottom:40%; }
+#game .coop-mode .coop-ki.ki-big { width:clamp(64px,8.5vw,104px); bottom:27%; }
+#game .coop-mode .coop-ki .ki-ball {
+  position:absolute; inset:0; display:grid; place-items:center; border-radius:50%;
+  background:radial-gradient(circle at 42% 38%, #fff 0 18%, color-mix(in srgb, var(--ki) 35%, #fff) 30%, var(--ki) 56%, color-mix(in srgb, var(--ki) 60%, transparent) 72%, transparent 74%);
+  box-shadow:0 0 14px 4px var(--ki), 0 0 34px 10px color-mix(in srgb, var(--ki) 55%, transparent), inset 0 0 12px #fff;
+  animation:coop-ki-pulse 120ms ease-in-out infinite alternate;
+}
+#game .coop-mode .coop-ki .ki-ball img { width:58%!important; height:58%!important; object-fit:contain; opacity:.92; filter:drop-shadow(0 0 4px #fff)!important; mix-blend-mode:normal; }
+#game .coop-mode .coop-ki.ki-big .ki-ball { box-shadow:0 0 22px 8px var(--ki), 0 0 60px 22px color-mix(in srgb, var(--ki) 55%, transparent), inset 0 0 18px #fff; }
+/* Trail: a beam of energy stretching back to where it was fired from */
+#game .coop-mode .coop-ki .ki-trail {
+  position:absolute; top:50%; right:50%; height:46%; width:0; translate:0 -50%; border-radius:999px;
+  background:linear-gradient(90deg, transparent, color-mix(in srgb, var(--ki) 70%, transparent) 55%, #fff);
+  filter:blur(1.5px); box-shadow:0 0 12px var(--ki);
+  animation:coop-ki-trail var(--duration,600ms) ease-out var(--delay) both;
+}
+#game .coop-mode .coop-ki.ki-big .ki-trail { height:62%; animation-name:coop-ki-beam; }
+#game .coop-mode .coop-ki.ki-left .ki-trail { right:auto; left:50%; background:linear-gradient(270deg, transparent, color-mix(in srgb, var(--ki) 70%, transparent) 55%, #fff); }
+/* Charge: energy gathers in the hand before the big blast leaves */
+#game .coop-mode .coop-ki .ki-charge {
+  position:absolute; inset:-28%; border-radius:50%; opacity:0;
+  background:radial-gradient(circle, #fff 0 10%, var(--ki) 26%, color-mix(in srgb, var(--ki) 40%, transparent) 46%, transparent 64%);
+  animation:coop-ki-charge var(--delay) ease-in 0s both;
+}
+@keyframes coop-ki-fly { 0% { left:var(--from); opacity:0; scale:.3; } 8% { opacity:1; scale:1; } 100% { left:var(--to); opacity:1; scale:1.08; } }
+@keyframes coop-ki-pulse { from { filter:brightness(1); } to { filter:brightness(1.35); } }
+@keyframes coop-ki-trail { 0% { width:0; opacity:0; } 20% { width:160%; opacity:1; } 100% { width:260%; opacity:.85; } }
+@keyframes coop-ki-beam { 0% { width:0; opacity:0; } 15% { width:240%; opacity:1; } 100% { width:min(48vw,520px); opacity:.9; } }
+@keyframes coop-ki-charge { 0% { opacity:0; scale:.2; rotate:0deg; } 70% { opacity:1; scale:1; } 99% { opacity:1; scale:.8; rotate:180deg; } 100% { opacity:0; scale:.6; } }
+/* Hero's hand glows while firing */
+#game .coop-mode .coop-player:is(.fire,.special)::after {
+  content:""; position:absolute; top:34%; right:8%; width:28%; aspect-ratio:1; border-radius:50%; pointer-events:none;
+  background:radial-gradient(circle, #fff 0 12%, rgba(255,240,150,.9) 30%, rgba(255,200,60,.35) 55%, transparent 70%);
+  animation:coop-ki-pulse 90ms ease-in-out infinite alternate;
+}
+#game .coop-mode .coop-player.face-left:is(.fire,.special)::after { right:auto; left:8%; }
+/* Impact: a flash of the hero's energy with sparks */
+#game .coop-mode .coop-ki-impact {
+  position:absolute; bottom:28%; z-index:19; width:clamp(70px,9vw,120px); aspect-ratio:1; translate:-50% 0; pointer-events:none;
+  border-radius:50%; background:radial-gradient(circle, #fff 0 14%, var(--ki) 34%, color-mix(in srgb, var(--ki) 35%, transparent) 55%, transparent 70%);
+  animation:coop-ki-boom 460ms cubic-bezier(.15,.8,.25,1) both;
+}
+#game .coop-mode .coop-ki-impact.boss { bottom:42%; width:clamp(110px,14vw,180px); }
+#game .coop-mode .coop-ki-impact i { position:absolute; top:50%; left:50%; width:150%; height:4px; border-radius:4px; background:linear-gradient(90deg, transparent, #fff, transparent); box-shadow:0 0 10px var(--ki); translate:-50% -50%; }
+#game .coop-mode .coop-ki-impact i:nth-child(2) { rotate:60deg; }
+#game .coop-mode .coop-ki-impact i:nth-child(3) { rotate:120deg; }
+@keyframes coop-ki-boom { 0% { opacity:0; scale:.2; } 25% { opacity:1; scale:1.15; } 100% { opacity:0; scale:1.7; } }

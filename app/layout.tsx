@@ -6,6 +6,7 @@ import "./mode-pose-map.css";
 import "./estefy.css";
 import "./xuso.css";
 import "./coop-fix.css";
+import "./coop-ki.css";
 
 export const viewport: Viewport = {
   width: "device-width",
