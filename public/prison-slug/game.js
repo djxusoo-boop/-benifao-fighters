@@ -414,6 +414,16 @@ function showSelection() {
   makeCards();
 }
 
+// Inside Hardcore Fighters the menu buttons go back to the main lobby.
+function exitToLobby() {
+  if (window.parent && window.parent !== window) {
+    state = null;
+    window.parent.postMessage({ type: "hardcore-fighters-exit" }, window.location.origin);
+    return;
+  }
+  showSelection();
+}
+
 function completeMission(won) {
   if (!state || state.status === "complete" || state.status === "lost") return;
   state.status = won ? "complete" : "lost";
@@ -423,7 +433,7 @@ function completeMission(won) {
   ui.resultTitle.textContent = won ? "MISIÓN COMPLETA" : "MISIÓN FALLIDA";
   ui.resultText.textContent = won
     ? `La Furgoneta Resonante queda operativa. ${state.hero.name} abrió la salida con ${state.score} puntos.`
-    : "La banda de drones expulsó al equipo de la ruta. Elige un héroe y vuelve a intentarlo.";
+    : "La banda de drones expulsó al equipo de la ruta. Vuelve a intentarlo o regresa al menú principal.";
   ui.resultScore.textContent = formatScore(state.score);
   blip(won ? 740 : 100, .22);
 }
@@ -1634,9 +1644,9 @@ window.addEventListener("blur", releaseInputs);
 document.addEventListener("visibilitychange", () => { if (document.hidden) releaseInputs(); });
 ui.start.addEventListener("click", beginMission);
 ui.resume.addEventListener("click", () => setPaused(false));
-ui.quit.addEventListener("click", showSelection);
+ui.quit.addEventListener("click", exitToLobby);
 ui.again.addEventListener("click", beginMission);
-ui.back.addEventListener("click", showSelection);
+ui.back.addEventListener("click", exitToLobby);
 ui.mute.addEventListener("click", () => { soundOn = !soundOn; ui.mute.textContent = `SONIDO: ${soundOn ? "ON" : "OFF"}`; ui.mute.setAttribute("aria-pressed", String(soundOn)); if (soundOn) blip(440, .05); });
 
 makeCards();
