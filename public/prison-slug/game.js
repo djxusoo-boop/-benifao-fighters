@@ -142,6 +142,7 @@ const characters = [
   { id: "bonviure", name: "BONVIURE", title: "EL ANCLA NEGRA", ability: "BARRIDO DE ANCLA", color: "#a68c72", image: "/assets/new-fighters/bonviure-idle.png", specialText: "¡LATIGAZO DE CADENA!", specialColor: "#a68c72", description: "Combate con el arsenal de Hardcore Fighters." },
   { id: "elchica", name: "EL CHICA", title: "EL REY DEL JÄGER", ability: "BOTELLA DEL CHICA", color: "#ec8d27", image: "/assets/new-fighters/elchica-atlas.png", specialText: "¡SALPICADURA ÁMBAR!", specialColor: "#ec8d27", description: "Combate con el arsenal de Hardcore Fighters." },
   { id: "ogalla", name: "OGALLA", title: "EL REY DE LA ALCACHOFA", ability: "BASTÓN DE ALCACHOFA", color: "#c89a46", image: "/assets/new-fighters/ogalla-atlas.png", specialText: "¡LLUVIA DE ALCACHOFAS!", specialColor: "#c89a46", description: "Combate con el arsenal de Hardcore Fighters." },
+  { id: "estefy", name: "ESTEFY", title: "LA CAPITANA DEL MACHETE", ability: "MACHETAZO", color: "#ffd21f", image: "/assets/new-fighters/estefy/diseno.webp", specialText: "¡TORMENTA DE HOJAS!", specialColor: "#ffd21f", description: "Abre camino a machetazos y barre la ruta con una tormenta de hojas." },
   { id: "tonimassama", name: "TONI MASSAMA", title: "EL REY DE LA PEINETA", ability: "DISPARO DORADO", color: "#f0bd42", image: "/assets/new-fighters/tonimassama-frames/idle.webp", specialText: "¡PEINETAS VOLADORAS!", specialColor: "#f0bd42", description: "Combate con el arsenal de Hardcore Fighters." },
 ];
 
@@ -160,6 +161,10 @@ const HERO_POSE_ASSETS = {
     fire: "/assets/new-fighters/bomba-rig-v21847-punch.webp", heavyFire: "/assets/new-fighters/bomba-hoe-attack-v2.webp", kick: "/assets/new-fighters/bomba-rig-v21847-kick.webp", hit: "/assets/new-fighters/bomba-guard-v2.webp",
   },
   rafeta: atlasHeroPoses("/prison-slug/assets/white-hero.png"),
+  estefy: {
+    idle: "/assets/new-fighters/estefy/punio-guardia.webp", walkA: "/assets/new-fighters/estefy/caminar-01.webp", walkB: "/assets/new-fighters/estefy/caminar-02.webp", walkC: "/assets/new-fighters/estefy/caminar-03.webp", walkD: "/assets/new-fighters/estefy/caminar-04.webp", walkE: "/assets/new-fighters/estefy/caminar-02.webp",
+    crouch: "/assets/new-fighters/estefy/agacharse.webp", rise: "/assets/new-fighters/estefy/salto-aire.webp", fire: "/assets/new-fighters/estefy/machete-corte.webp", heavyFire: "/assets/new-fighters/estefy/machete-continuacion.webp", kick: "/assets/new-fighters/estefy/patada-contacto.webp", hit: "/assets/new-fighters/estefy/recibir-golpe.webp"
+  },
   nova: {
     idle: "/assets/new-fighters/nova-frame-0.webp", walkA: "/assets/new-fighters/nova-frame-1.webp", walkB: "/assets/new-fighters/nova-frame-0.webp", walkC: "/assets/new-fighters/nova-frame-1.webp", walkD: "/assets/new-fighters/nova-frame-0.webp", walkE: "/assets/new-fighters/nova-frame-1.webp",
     crouch: "/assets/new-fighters/nova-frame-1.webp", rise: "/assets/new-fighters/nova-frame-3.webp", fire: "/assets/new-fighters/nova-frame-2.webp", heavyFire: "/assets/new-fighters/nova-frame-2.webp", kick: "/assets/new-fighters/nova-frame-3.webp", hit: "/assets/new-fighters/nova-frame-3.webp",

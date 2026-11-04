@@ -3,6 +3,7 @@ import "./globals.css";
 import "./upgrades.css";
 import "./pose-map.css";
 import "./mode-pose-map.css";
+import "./estefy.css";
 
 export const viewport: Viewport = {
   width: "device-width",

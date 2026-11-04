@@ -7,7 +7,7 @@ import ArcadeCrowd from "./ArcadeCrowd";
 import FighterWalkLayers from "./FighterWalkLayers";
 import TouchStick, { type StickIntent } from "./TouchStick";
 
-type FighterId = "maletilla" | "vanessa" | "josevictor" | "cristian" | "cesaret" | "borja" | "bacora" | "bonviure" | "elchica" | "ogalla" | "xuso" | "bomba" | "rafeta" | "tonimassama" | "nova";
+type FighterId = "maletilla" | "vanessa" | "josevictor" | "cristian" | "cesaret" | "borja" | "bacora" | "bonviure" | "elchica" | "ogalla" | "xuso" | "bomba" | "rafeta" | "tonimassama" | "nova" | "estefy";
 type PlayerSlot = "p1" | "p2";
 type PlayerAction = "idle" | "walk" | "jump" | "fire" | "special" | "dodge" | "hit" | "down" | "revive";
 type CoopStatus = "intro" | "intermission" | "playing" | "won" | "lost";
@@ -46,7 +46,7 @@ type Pickup = { id: number; x: number; kind: "health" | "sync"; expires: number 
 type Projectile = {
   id: number;
   owner: PlayerSlot;
-  kind: "bottle" | "microphone" | "mushroom" | "ear" | "bag" | "money" | "vinyl" | "speaker" | "fish" | "venom" | "shield" | "staff" | "anchor" | "chain" | "jager" | "amber" | "scepter" | "artichokes" | "dog" | "hoe" | "flag" | "flagSweep" | "pistol" | "peineta" | "prism" | "combo" | "impact" | "burst";
+  kind: "bottle" | "microphone" | "mushroom" | "ear" | "bag" | "money" | "vinyl" | "speaker" | "fish" | "venom" | "shield" | "staff" | "anchor" | "chain" | "jager" | "amber" | "scepter" | "artichokes" | "dog" | "hoe" | "flag" | "flagSweep" | "pistol" | "peineta" | "prism" | "machete" | "leaves" | "combo" | "impact" | "burst";
   from: number;
   to: number;
   delay: number;
@@ -66,7 +66,7 @@ type Props = {
   onComplete: (score?: number) => void;
 };
 
-const PLAYER_NAMES: Record<FighterId, string> = { maletilla: "MALETILLA", vanessa: "VANESSA", josevictor: "JOSEVICTOR", cristian: "CRISTIAN", cesaret: "CESARET", borja: "BORJA", bacora: "BACORA", bonviure: "BONVIURE", elchica: "EL CHICA", ogalla: "OGALLA", xuso: "XUSO", bomba: "EL BOMBA", rafeta: "RAFETA", tonimassama: "TONI MASSAMA", nova: "YOYE" };
+const PLAYER_NAMES: Record<FighterId, string> = { maletilla: "MALETILLA", vanessa: "VANESSA", josevictor: "JOSEVICTOR", cristian: "CRISTIAN", cesaret: "CESARET", borja: "BORJA", bacora: "BACORA", bonviure: "BONVIURE", elchica: "EL CHICA", ogalla: "OGALLA", xuso: "XUSO", bomba: "EL BOMBA", rafeta: "RAFETA", tonimassama: "TONI MASSAMA", nova: "YOYE", estefy: "ESTEFY" };
 const ATTACK_LABELS: Record<FighterId, [string, string]> = {
   maletilla: ["CLORETILO", "SETAS"],
   vanessa: ["MICROS", "OREJAS"],
@@ -78,7 +78,7 @@ const ATTACK_LABELS: Record<FighterId, [string, string]> = {
   bonviure: ["ANCLA", "CADENA"],
   elchica: ["BOTELLA", "ÁMBAR"],
   ogalla: ["BASTÓN", "ALCACHOFAS"],
-  xuso: ["SPOOKY", "AULLIDO"], bomba: ["AZADA", "BARRIDO"], rafeta: ["BANDERA", "GIRO"], tonimassama: ["PISTOLA", "PEINETAS"], nova: ["PRISMA", "LÁSER"],
+  xuso: ["SPOOKY", "AULLIDO"], bomba: ["AZADA", "BARRIDO"], rafeta: ["BANDERA", "GIRO"], tonimassama: ["PISTOLA", "PEINETAS"], nova: ["PRISMA", "LÁSER"], estefy: ["MACHETE", "HOJAS"],
 };
 const MAX_COOP_WAVES = 7;
 const ALL_FIGHTERS = Object.keys(PLAYER_NAMES) as FighterId[];
@@ -111,11 +111,13 @@ const PROJECTILE_ASSETS = {
   pistol: "/assets/new-fighters/tonimassama-bullet.svg",
   peineta: "/assets/new-fighters/tonimassama-peineta.svg",
   prism: "/assets/new-fighters/tonimassama-bullet.svg",
+  machete: "/assets/new-fighters/estefy/machete-arco.webp",
+  leaves: "/assets/new-fighters/estefy/machete-hojas.webp",
 };
 
 const BASIC_SHOT: Record<FighterId, keyof typeof PROJECTILE_ASSETS> = {
   maletilla: "bottle", vanessa: "microphone", josevictor: "bag", cristian: "vinyl", cesaret: "fish", borja: "venom", bacora: "shield", bonviure: "anchor",
-  elchica: "jager", ogalla: "scepter", xuso: "dog", bomba: "hoe", rafeta: "flag", tonimassama: "pistol", nova: "prism",
+  elchica: "jager", ogalla: "scepter", xuso: "dog", bomba: "hoe", rafeta: "flag", tonimassama: "pistol", nova: "prism", estefy: "machete",
 };
 
 const freshPlayers = (playerOne: FighterId, playerTwo: FighterId): Record<PlayerSlot, CoopPlayer> => ({
@@ -368,8 +370,8 @@ export default function CoopMode({ playerOne, playerTwo, aiPlayerTwo = false, so
     setAction(slot, special ? "special" : "fire", special ? 820 : 540);
     const count = special ? 4 : 3;
     const kind: Projectile["kind"] = special
-      ? fighter === "nova" ? "prism" : fighter === "cesaret" ? "fish" : fighter === "borja" ? "venom" : fighter === "bacora" ? "staff" : fighter === "bonviure" ? "chain" : fighter === "elchica" ? "amber" : fighter === "ogalla" ? "artichokes" : fighter === "xuso" ? "dog" : fighter === "bomba" ? "hoe" : fighter === "rafeta" ? "flagSweep" : fighter === "tonimassama" ? "peineta" : fighter === "maletilla" ? "mushroom" : fighter === "vanessa" ? "ear" : fighter === "josevictor" ? "money" : "speaker"
-      : fighter === "nova" ? "prism" : fighter === "cesaret" ? "fish" : fighter === "borja" ? "venom" : fighter === "bacora" ? "shield" : fighter === "bonviure" ? "anchor" : fighter === "elchica" ? "jager" : fighter === "ogalla" ? "scepter" : fighter === "xuso" ? "dog" : fighter === "bomba" ? "hoe" : fighter === "rafeta" ? "flag" : fighter === "tonimassama" ? "pistol" : fighter === "maletilla" ? "bottle" : fighter === "vanessa" ? "microphone" : fighter === "josevictor" ? "bag" : "vinyl";
+      ? fighter === "nova" ? "prism" : fighter === "estefy" ? "leaves" : fighter === "cesaret" ? "fish" : fighter === "borja" ? "venom" : fighter === "bacora" ? "staff" : fighter === "bonviure" ? "chain" : fighter === "elchica" ? "amber" : fighter === "ogalla" ? "artichokes" : fighter === "xuso" ? "dog" : fighter === "bomba" ? "hoe" : fighter === "rafeta" ? "flagSweep" : fighter === "tonimassama" ? "peineta" : fighter === "maletilla" ? "mushroom" : fighter === "vanessa" ? "ear" : fighter === "josevictor" ? "money" : "speaker"
+      : fighter === "nova" ? "prism" : fighter === "estefy" ? "machete" : fighter === "cesaret" ? "fish" : fighter === "borja" ? "venom" : fighter === "bacora" ? "shield" : fighter === "bonviure" ? "anchor" : fighter === "elchica" ? "jager" : fighter === "ogalla" ? "scepter" : fighter === "xuso" ? "dog" : fighter === "bomba" ? "hoe" : fighter === "rafeta" ? "flag" : fighter === "tonimassama" ? "pistol" : fighter === "maletilla" ? "bottle" : fighter === "vanessa" ? "microphone" : fighter === "josevictor" ? "bag" : "vinyl";
     for (let index = 0; index < count; index += 1) {
       // Spread the volley across the closest enemies. The flight and its hit
       // share one travel time, so shots visibly reach what they damage.

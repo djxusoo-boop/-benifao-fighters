@@ -17,6 +17,7 @@ export const SUPER_ANIM: Record<string, SuperAnimData> = {
   nova: { size: 1.516, bottom: -0.0612, mirror: [false, false, false, true, true, false, false, false], name: "SINGULARIDAD PRISMÁTICA", companion: "Prisma y rayo de neón" },
   ogalla: { size: 1.6943, bottom: -0.0508, mirror: [false, false, false, false, false, false, false, false], name: "CORONA DE ALCACHOFAS", companion: "Alcachofas y hojas" },
   rafeta: { size: 1.4, bottom: -0.04, mirror: [false, false, false, false, false, false, false, false], name: "ESTANDARTE INVENCIBLE", companion: "Bandera y onda de impacto" },
+  estefy: { size: 1.6, bottom: -0.05, mirror: [false, false, false, false, false, false, false, false], name: "SELVA DE ACERO", companion: "Machete y hojas de la selva" },
   tonimassama: { size: 1.2449, bottom: -0.0584, mirror: [false, false, false, false, false, false, false, false], name: "JUICIO DE ORO", companion: "Pistola dorada y peinetas" },
   vanessa: { size: 1.2771, bottom: -0.0488, mirror: [false, false, false, false, false, false, false, false], name: "REINA DEL ESTRUENDO", companion: "Micrófono y onda sónica" },
   xuso: { size: 1.4072, bottom: 0.0239, mirror: [false, false, false, false, false, false, false, false], name: "PRISON DESATADO", companion: "Perro negro con pañuelo rojo" },

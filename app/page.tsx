@@ -24,11 +24,11 @@ import { ArcadeAudio, type HitKind, type MusicTheme } from "./arcade-audio";
 import { SUPER_MOVES } from "./super-moves";
 import { SUPER_ANIM, companionFrame, superFrame, superFramesFor } from "./super-anim";
 
-type FighterId = "maletilla" | "vanessa" | "josevictor" | "cristian" | "cesaret" | "borja" | "bacora" | "bonviure" | "elchica" | "ogalla" | "xuso" | "bomba" | "rafeta" | "tonimassama" | "nova";
+type FighterId = "maletilla" | "vanessa" | "josevictor" | "cristian" | "cesaret" | "borja" | "bacora" | "bonviure" | "elchica" | "ogalla" | "xuso" | "bomba" | "rafeta" | "tonimassama" | "nova" | "estefy";
 type Phase = "select" | "intro" | "fight" | "ko" | "over" | "orbs" | "platform" | "coop" | "prison-slug" | "campaign-final";
 type Action = "idle" | "walk" | "dash" | "dodge" | "crouch" | "punch" | "kick" | "special" | "jump" | "block" | "hit" | "launched" | "knockdown" | "getup";
 type Side = "player" | "cpu";
-type SpecialMove = "bottles" | "mushrooms" | "microphone" | "ears" | "bags" | "money" | "vinyl" | "speakers" | "fish" | "fishstorm" | "toad" | "venom" | "shield" | "staff" | "anchor" | "chain" | "jager" | "amber" | "scepter" | "artichokes" | "dog" | "howl" | "hoe" | "hoeSweep" | "flag" | "flagSweep" | "goldPistol" | "fingerPeinetas" | "prism" | "prismBurst";
+type SpecialMove = "bottles" | "mushrooms" | "microphone" | "ears" | "bags" | "money" | "vinyl" | "speakers" | "fish" | "fishstorm" | "toad" | "venom" | "shield" | "staff" | "anchor" | "chain" | "jager" | "amber" | "scepter" | "artichokes" | "dog" | "howl" | "hoe" | "hoeSweep" | "flag" | "flagSweep" | "goldPistol" | "fingerPeinetas" | "prism" | "prismBurst" | "machete" | "leafStorm";
 type NormalMove = "punch" | "kick";
 type AttackLevel = 0 | 1 | 2;
 type WalkIntent = "advance" | "retreat" | "neutral";
@@ -124,17 +124,18 @@ const FIGHTERS: Record<FighterId, { name: string; title: string; specialOne: str
   rafeta: { name: "RAFETA", title: "PORTAESTANDARTE", specialOne: "EMBESTIDA DE BANDERA", specialTwo: "GIRO DEL ESTANDARTE", color: "#e8c44d" },
   tonimassama: { name: "TONI MASSAMA", title: "EL REY DE LA PEINETA", specialOne: "DISPARO DORADO", specialTwo: "PEINETAS VOLADORAS", color: "#f0bd42" },
   nova: { name: "YOYE", title: "PRISMA DE NEÓN", specialOne: "RÁFAGA PRISMÁTICA", specialTwo: "LÁSER ARCOÍRIS", color: "#ff4be9" },
+  estefy: { name: "ESTEFY", title: "LA CAPITANA DEL MACHETE", specialOne: "MACHETAZO", specialTwo: "TORMENTA DE HOJAS", color: "#ffd21f" },
 };
 
 // Rafeta is temporarily unavailable; keep his assets and definition for a later return.
-const FIGHTER_ORDER: FighterId[] = ["maletilla", "vanessa", "josevictor", "cristian", "borja", "bacora", "bonviure", "elchica", "ogalla", "xuso", "bomba", "tonimassama", "nova"];
+const FIGHTER_ORDER: FighterId[] = ["maletilla", "vanessa", "josevictor", "cristian", "borja", "bacora", "bonviure", "elchica", "ogalla", "xuso", "bomba", "tonimassama", "nova", "estefy"];
 const SHORT_SPECIALS: Record<FighterId, [string, string]> = {
   maletilla: ["CLORETILO", "SETAS"], vanessa: ["MICRO", "OREJAS"],
   josevictor: ["BOLSAS", "BILLETES"], cristian: ["VINILOS", "KRK 8"],
   cesaret: ["PESCADO", "PECES"], borja: ["SAPO", "VENENO"],
   bacora: ["ESCUDO", "VARA"], bonviure: ["ANCLA", "CADENA"],
   elchica: ["BOTELLA", "ÁMBAR"], ogalla: ["BASTÓN", "ALCACHOFAS"],
-  xuso: ["PERRO", "AULLIDO"], bomba: ["AZADA", "BARRIDO"], rafeta: ["BANDERA", "GIRO"], tonimassama: ["PISTOLA", "PEINETAS"], nova: ["PRISMA", "LÁSER"],
+  xuso: ["PERRO", "AULLIDO"], bomba: ["AZADA", "BARRIDO"], rafeta: ["BANDERA", "GIRO"], tonimassama: ["PISTOLA", "PEINETAS"], nova: ["PRISMA", "LÁSER"], estefy: ["MACHETE", "HOJAS"],
 };
 
 const STAGES = [
@@ -150,7 +151,7 @@ const STAGES = [
 
 const GAME_TITLE = "HARDCORE FIGHTERS";
 const GAME_EDITION = "WEB · ARCADE EDITION";
-const GAME_VERSION = "V2.28.2";
+const GAME_VERSION = "V2.29.0";
 
 const ROUND_SECONDS = 99;
 const SUPER_MAX = 100;
@@ -207,6 +208,7 @@ const specialFor = (fighter: FighterId, level: Exclude<AttackLevel, 0>): Special
   if (fighter === "rafeta") return level === 1 ? "flag" : "flagSweep";
   if (fighter === "tonimassama") return level === 1 ? "goldPistol" : "fingerPeinetas";
   if (fighter === "nova") return level === 1 ? "prism" : "prismBurst";
+  if (fighter === "estefy") return level === 1 ? "machete" : "leafStorm";
   if (fighter === "maletilla") return level === 1 ? "bottles" : "mushrooms";
   if (fighter === "josevictor") return level === 1 ? "bags" : "money";
   if (fighter === "cristian") return level === 1 ? "vinyl" : "speakers";
@@ -228,10 +230,12 @@ const MOVE_LABELS: Record<SpecialMove, string> = {
   venom: "¡VENENO DEL SAPO!",
   shield: "¡EMBESTIDA DE ESCUDO!", staff: "¡GOLPE DE VARA!", anchor: "¡BARRIDO DE ANCLA!", chain: "¡LATIGAZO DE CADENA!",
   jager: "¡BOTELLA DEL CHICA!", amber: "¡SALPICADURA ÁMBAR!", scepter: "¡BASTÓN DE ALCACHOFA!", artichokes: "¡LLUVIA DE ALCACHOFAS!",
-  dog: "¡MORDISCO DE XUSO!", howl: "¡AULLIDO DE PRISON!", hoe: "¡AZADAZO!", hoeSweep: "¡BARRIDO DE AZADA!", flag: "¡EMBESTIDA DE BANDERA!", flagSweep: "¡GIRO DEL ESTANDARTE!", goldPistol: "¡DISPARO DORADO!", fingerPeinetas: "¡PEINETAS VOLADORAS!", prism: "¡RÁFAGA PRISMÁTICA!", prismBurst: "¡LÁSER ARCOÍRIS!",
+  dog: "¡MORDISCO DE XUSO!", howl: "¡AULLIDO DE PRISON!", hoe: "¡AZADAZO!", hoeSweep: "¡BARRIDO DE AZADA!", flag: "¡EMBESTIDA DE BANDERA!", flagSweep: "¡GIRO DEL ESTANDARTE!", goldPistol: "¡DISPARO DORADO!", fingerPeinetas: "¡PEINETAS VOLADORAS!", machete: "¡MACHETAZO!", leafStorm: "¡TORMENTA DE HOJAS!", prism: "¡RÁFAGA PRISMÁTICA!", prismBurst: "¡LÁSER ARCOÍRIS!",
 };
 
 const MOVE_ASSETS: Record<SpecialMove, string> = {
+  machete: "/assets/new-fighters/estefy/machete-arco.webp",
+  leafStorm: "/assets/new-fighters/estefy/machete-hojas.webp",
   bottles: "/assets/mobile/cloretilo-projectile-v1.webp",
   mushrooms: "/assets/mushroom-attack-mobile.webp",
   microphone: "/assets/microphone-attack-mobile.webp",
@@ -342,7 +346,7 @@ function SuperEffect({ fx, minimal = false }: { fx: NonNullable<SuperFx>; minima
 }
 
 function SpecialEffect({ move, side, origin, target, arenaWidth, direction, airborne = false, color = "#ff8b2b", heavy = false }: { move: SpecialMove; side: Side; origin: number; target: number; arenaWidth: number; direction: AttackDirection; airborne?: boolean; color?: string; heavy?: boolean }) {
-  const count = ["shield", "staff", "anchor", "chain", "dog", "howl", "hoe", "hoeSweep", "flag", "flagSweep", "goldPistol"].includes(move) ? 1 : move === "fingerPeinetas" ? 4 : move === "microphone" || move === "bottles" || move === "speakers" ? 3 : 4;
+  const count = ["shield", "staff", "anchor", "chain", "dog", "howl", "hoe", "hoeSweep", "flag", "flagSweep", "goldPistol", "machete"].includes(move) ? 1 : move === "fingerPeinetas" ? 4 : move === "microphone" || move === "bottles" || move === "speakers" ? 3 : 4;
   const launchPoint = Math.max(8, Math.min(92, origin + (direction === "toward-right" ? 2 : -2)));
   const distancePercent = Math.max(8, Math.abs(target - origin));
   const distancePx = Math.max(32, arenaWidth * distancePercent / 100);
@@ -1020,6 +1024,13 @@ function Home() {
         const nextX = clampFighterStep(rivalX, ownX, pulled, minimumCombatGap);
         return hit.attacker === "player" ? { ...current, cpuX: nextX } : { ...current, playerX: nextX };
       });
+    }
+    if (hit.passive === "jungleCut" && landed) {
+      passiveHitsRef.current[hit.attacker] += 1;
+      if (passiveHitsRef.current[hit.attacker] % 3 === 0) {
+        later(() => applyExtraHit(hit.attacker, hit.target, 3, "counter"), 160);
+        showPassive(hit.attacker, "🔪 ¡MACHETE AFILADO! +3");
+      }
     }
     if (hit.targetPassive === "shieldCounter" && hit.perfectGuard) {
       later(() => applyExtraHit(hit.target, hit.attacker, 6, "counter"), 140);

@@ -6,7 +6,7 @@ import ArcadeCrowd from "./ArcadeCrowd";
 import FighterWalkLayers from "./FighterWalkLayers";
 import TouchStick from "./TouchStick";
 
-type FighterId = "maletilla" | "vanessa" | "josevictor" | "cristian" | "cesaret" | "borja" | "bacora" | "bonviure" | "elchica" | "ogalla" | "xuso" | "bomba" | "rafeta" | "tonimassama" | "nova";
+type FighterId = "maletilla" | "vanessa" | "josevictor" | "cristian" | "cesaret" | "borja" | "bacora" | "bonviure" | "elchica" | "ogalla" | "xuso" | "bomba" | "rafeta" | "tonimassama" | "nova" | "estefy";
 type OrbStatus = "playing" | "won" | "lost";
 type Difficulty = "easy" | "normal";
 type OrbObjectKind = 0 | 1 | 2 | 3 | 4 | 5;
@@ -77,6 +77,7 @@ const ORB_WEAPONS: Record<FighterId, string> = {
   rafeta: "/assets/new-fighters/rafeta-flag.svg",
   tonimassama: "/assets/new-fighters/tonimassama-bullet.svg",
   nova: "/assets/new-fighters/tonimassama-bullet.svg",
+  estefy: "/assets/new-fighters/estefy/machete-arma.webp",
 };
 const ORB_OBJECTS = [
   "/assets/platform-card-token.webp",

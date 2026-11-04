@@ -4,9 +4,9 @@
 
 export type ProfileFighterId =
   | "maletilla" | "vanessa" | "josevictor" | "cristian" | "cesaret" | "borja" | "bacora"
-  | "bonviure" | "elchica" | "ogalla" | "xuso" | "bomba" | "rafeta" | "tonimassama" | "nova";
+  | "bonviure" | "elchica" | "ogalla" | "xuso" | "bomba" | "rafeta" | "tonimassama" | "nova" | "estefy";
 
-export type PassiveId = "noise" | "rhythmRush" | "investment" | "onBeat" | "angler" | "venom" | "shieldCounter" | "heavyArmor" | "liquidCourage" | "royalFury" | "dogBite" | "berserkArmor" | "banner" | "quickTrigger" | "prismCharge";
+export type PassiveId = "noise" | "rhythmRush" | "investment" | "onBeat" | "angler" | "venom" | "shieldCounter" | "heavyArmor" | "liquidCourage" | "royalFury" | "dogBite" | "berserkArmor" | "banner" | "quickTrigger" | "prismCharge" | "jungleCut";
 
 export type FighterProfile = {
   power: number;
@@ -113,6 +113,12 @@ export const FIGHTER_PROFILES: Record<ProfileFighterId, FighterProfile> = {
     bio: "Luz pura de neón. Si parpadeas, ya te ha dado tres veces.",
     winQuotes: ["Brillo demasiado para ti.", "Te he dejado en modo arcoíris.", "Apaga y vámonos."],
     endingTitle: ["¡PRISMA DE", "CENTRAL!"], endingText: "Yoye ilumina el torneo con un láser arcoíris.",
+  },
+  estefy: {
+    power: 4, speed: 4, defense: 2, technique: 4, motto: "Rumbo fijo y machete en mano.", passive: { id: "jungleCut", name: "MACHETE AFILADO", description: "Cada 3 golpes que conecta suma un corte extra de 3 de daño" }, archetype: "CAPITANA",
+    bio: "Capitana de su propio barco y dueña de la selva. Abre camino a machetazos.",
+    winQuotes: ["Aquí mando yo, marinero.", "Te he cortado el rollo.", "Rumbo a la victoria, como siempre."],
+    endingTitle: ["¡CAPITANA DE", "CENTRAL!"], endingText: "Estefy clava el machete en lo más alto y toma el mando del torneo.",
   },
 };
 

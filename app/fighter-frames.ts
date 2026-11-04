@@ -39,6 +39,9 @@ export const FIGHTER_FRAMES = {
     "/assets/new-fighters/tonimassama-crouch-v21849.webp",
     "/assets/new-fighters/tonimassama-bullet.svg", "/assets/new-fighters/tonimassama-peineta.svg",
   ],
+  estefy: [
+    "/assets/new-fighters/estefy/punio-guardia.webp", "/assets/new-fighters/estefy/machete-guardia.webp", "/assets/new-fighters/estefy/caminar-01.webp", "/assets/new-fighters/estefy/caminar-02.webp", "/assets/new-fighters/estefy/caminar-03.webp", "/assets/new-fighters/estefy/caminar-04.webp", "/assets/new-fighters/estefy/correr-01.webp", "/assets/new-fighters/estefy/correr-02.webp", "/assets/new-fighters/estefy/correr-03.webp", "/assets/new-fighters/estefy/correr-04.webp", "/assets/new-fighters/estefy/bloquear.webp", "/assets/new-fighters/estefy/esquivar.webp", "/assets/new-fighters/estefy/agacharse.webp", "/assets/new-fighters/estefy/salto-inicio.webp", "/assets/new-fighters/estefy/salto-aire.webp", "/assets/new-fighters/estefy/salto-caida.webp", "/assets/new-fighters/estefy/recibir-golpe.webp", "/assets/new-fighters/estefy/levantarse.webp", "/assets/new-fighters/estefy/punio-preparacion.webp", "/assets/new-fighters/estefy/punio-contacto.webp", "/assets/new-fighters/estefy/punio-recuperacion.webp", "/assets/new-fighters/estefy/patada-preparacion.webp", "/assets/new-fighters/estefy/patada-elevacion.webp", "/assets/new-fighters/estefy/patada-contacto.webp", "/assets/new-fighters/estefy/patada-recuperacion.webp", "/assets/new-fighters/estefy/machete-carga.webp", "/assets/new-fighters/estefy/machete-corte.webp", "/assets/new-fighters/estefy/machete-continuacion.webp", "/assets/new-fighters/estefy/machete-arco.webp", "/assets/new-fighters/estefy/machete-hojas.webp", "/assets/new-fighters/estefy/diseno.webp",
+  ],
   nova: [
     "/assets/new-fighters/nova-frame-0.webp", "/assets/new-fighters/nova-frame-1.webp",
     "/assets/new-fighters/nova-frame-2.webp", "/assets/new-fighters/nova-frame-3.webp",

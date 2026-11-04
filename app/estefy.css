@@ -1,0 +1,89 @@
+/* ===== V2.29 ESTEFY · la capitana del machete ===== */
+/* Her frames share one square canvas with the feet on the same line, so the box is square too. */
+.arena .fighter.motion-rig.estefy { aspect-ratio:1/1!important; width:clamp(235px,44vh,410px)!important; height:clamp(235px,44vh,410px)!important; }
+@media (orientation:landscape) and (max-height:600px) { .arena .fighter.motion-rig.estefy { width:clamp(162px,43vh,258px)!important; height:clamp(162px,43vh,258px)!important; } }
+#game .fighter.motion-rig.estefy .fighter-pose .fighter-art.estefy { left:0!important; width:100%!important; background-size:contain!important; background-position:center bottom!important; background-repeat:no-repeat!important; mix-blend-mode:normal!important; }
+#game .fighter.motion-rig.estefy .fighter-art.estefy::before, #game .fighter.motion-rig.estefy .fighter-art.estefy::after { content:none!important; }
+#game .fighter.motion-rig.estefy .fighter-walk-layers { display:none!important; }
+.arena .fighter.motion-rig.estefy.face-left .fighter-pose .fighter-art.estefy { transform:scaleX(-1)!important; }
+.arena .fighter.motion-rig.estefy.face-right .fighter-pose .fighter-art.estefy { transform:scaleX(1)!important; }
+#game .fighter.motion-rig.estefy.idle .fighter-pose .fighter-art.estefy,
+#game .fighter.motion-rig.estefy .fighter-pose .fighter-art.estefy { background-image:url('/assets/new-fighters/estefy/punio-guardia.webp')!important; animation:none!important; }
+#game .fighter.motion-rig.estefy.winner-dance .fighter-pose .fighter-art.estefy { background-image:url('/assets/new-fighters/estefy/machete-carga.webp')!important; animation:none!important; }
+#game .fighter.motion-rig.estefy.walk .fighter-pose .fighter-art.estefy { background-image:url('/assets/new-fighters/estefy/caminar-01.webp')!important; animation:none!important; }
+#game .fighter.motion-rig.estefy.walk.stride-alt .fighter-pose .fighter-art.estefy { background-image:url('/assets/new-fighters/estefy/caminar-03.webp')!important; animation:none!important; }
+#game .fighter.motion-rig.estefy.dash .fighter-pose .fighter-art.estefy { background-image:url('/assets/new-fighters/estefy/correr-02.webp')!important; animation:none!important; }
+#game .fighter.motion-rig.estefy.block .fighter-pose .fighter-art.estefy { background-image:url('/assets/new-fighters/estefy/bloquear.webp')!important; animation:none!important; }
+#game .fighter.motion-rig.estefy.dodge .fighter-pose .fighter-art.estefy { background-image:url('/assets/new-fighters/estefy/esquivar.webp')!important; animation:none!important; }
+#game .fighter.motion-rig.estefy.crouch .fighter-pose .fighter-art.estefy { background-image:url('/assets/new-fighters/estefy/agacharse.webp')!important; animation:none!important; }
+#game .fighter.motion-rig.estefy.jump .fighter-pose .fighter-art.estefy,
+#game .fighter.motion-rig.estefy.airborne:not(.punch):not(.kick):not(.special) .fighter-pose .fighter-art.estefy { background-image:url('/assets/new-fighters/estefy/salto-aire.webp')!important; animation:none!important; }
+#game .fighter.motion-rig.estefy.hit .fighter-pose .fighter-art.estefy,
+#game .fighter.motion-rig.estefy.launched .fighter-pose .fighter-art.estefy,
+#game .fighter.motion-rig.estefy.stunned:not(.punch):not(.kick):not(.special) .fighter-pose .fighter-art.estefy { background-image:url('/assets/new-fighters/estefy/recibir-golpe.webp')!important; animation:none!important; }
+#game .fighter.motion-rig.estefy.knockdown .fighter-pose .fighter-art.estefy,
+#game .fighter.motion-rig.estefy.defeated .fighter-pose .fighter-art.estefy { background-image:url('/assets/new-fighters/estefy/recibir-golpe.webp')!important; animation:none!important; }
+#game .fighter.motion-rig.estefy.getup .fighter-pose .fighter-art.estefy { background-image:url('/assets/new-fighters/estefy/levantarse.webp')!important; animation:none!important; }
+#game .fighter.motion-rig.estefy.punch.pose-phase-0 .fighter-pose .fighter-art.estefy { background-image:url('/assets/new-fighters/estefy/punio-preparacion.webp')!important; animation:none!important; }
+#game .fighter.motion-rig.estefy.punch.pose-phase-1 .fighter-pose .fighter-art.estefy,
+#game .fighter.motion-rig.estefy.punch.pose-phase-2 .fighter-pose .fighter-art.estefy,
+#game .fighter.motion-rig.estefy.punch.pose-phase-3 .fighter-pose .fighter-art.estefy,
+#game .fighter.motion-rig.estefy.punch.airborne .fighter-pose .fighter-art.estefy { background-image:url('/assets/new-fighters/estefy/punio-contacto.webp')!important; animation:none!important; }
+#game .fighter.motion-rig.estefy.punch.pose-phase-4 .fighter-pose .fighter-art.estefy { background-image:url('/assets/new-fighters/estefy/punio-recuperacion.webp')!important; animation:none!important; }
+#game .fighter.motion-rig.estefy.kick.pose-phase-0 .fighter-pose .fighter-art.estefy { background-image:url('/assets/new-fighters/estefy/patada-preparacion.webp')!important; animation:none!important; }
+#game .fighter.motion-rig.estefy.kick.pose-phase-1 .fighter-pose .fighter-art.estefy { background-image:url('/assets/new-fighters/estefy/patada-elevacion.webp')!important; animation:none!important; }
+#game .fighter.motion-rig.estefy.kick.pose-phase-2 .fighter-pose .fighter-art.estefy,
+#game .fighter.motion-rig.estefy.kick.pose-phase-3 .fighter-pose .fighter-art.estefy,
+#game .fighter.motion-rig.estefy.kick.airborne .fighter-pose .fighter-art.estefy { background-image:url('/assets/new-fighters/estefy/patada-contacto.webp')!important; animation:none!important; }
+#game .fighter.motion-rig.estefy.kick.pose-phase-4 .fighter-pose .fighter-art.estefy { background-image:url('/assets/new-fighters/estefy/patada-recuperacion.webp')!important; animation:none!important; }
+#game .fighter.motion-rig.estefy.special.pose-phase-0 .fighter-pose .fighter-art.estefy,
+#game .fighter.motion-rig.estefy.special.pose-phase-4 .fighter-pose .fighter-art.estefy { background-image:url('/assets/new-fighters/estefy/machete-guardia.webp')!important; animation:none!important; }
+#game .fighter.motion-rig.estefy.special.pose-phase-1 .fighter-pose .fighter-art.estefy { background-image:url('/assets/new-fighters/estefy/machete-carga.webp')!important; animation:none!important; }
+#game .fighter.motion-rig.estefy.special.machete.pose-phase-2 .fighter-pose .fighter-art.estefy,
+#game .fighter.motion-rig.estefy.special.leafStorm.pose-phase-2 .fighter-pose .fighter-art.estefy,
+#game .fighter.motion-rig.estefy.special.leafStorm.pose-phase-3 .fighter-pose .fighter-art.estefy { background-image:url('/assets/new-fighters/estefy/machete-corte.webp')!important; animation:none!important; }
+#game .fighter.motion-rig.estefy.special.machete.pose-phase-3 .fighter-pose .fighter-art.estefy { background-image:url('/assets/new-fighters/estefy/machete-continuacion.webp')!important; animation:none!important; }
+#game .fighter.motion-rig.estefy.low-attack.punch .fighter-pose .fighter-art.estefy,
+#game .fighter.motion-rig.estefy.low-attack.kick .fighter-pose .fighter-art.estefy { background-image:url('/assets/new-fighters/estefy/agacharse.webp')!important; animation:none!important; }
+/* No lying-down drawing: she falls onto her back from the feet, like the others. */
+#game .fighter.motion-rig.estefy:is(.knockdown,.defeated) .fighter-motion { rotate: calc(var(--fwd) * -82deg); translate: calc(var(--fwd) * -18%) 6%; transition: rotate 260ms cubic-bezier(.5,0,.9,.6), translate 260ms ease-in; }
+#game .fighter.motion-rig.estefy.launched .fighter-motion { rotate: calc(var(--fwd) * -32deg); translate: calc(var(--fwd) * -8%) -4%; }
+#game .fighter.motion-rig.estefy.getup .fighter-motion { rotate: calc(var(--fwd) * -6deg); transition-duration: 380ms; }
+
+/* Lobby card, dossier, VS screen and victory dance */
+.portrait.estefy, .result-dancer-art.estefy { background-image:url('/assets/new-fighters/estefy/diseno.webp'); background-repeat:no-repeat; mix-blend-mode:normal; }
+.portrait.estefy { background-size:cover; background-position:center 12%; }
+.result-dancer-art.estefy { background-size:contain; background-position:center bottom; }
+#game .showcase-portrait .portrait.estefy { background-image:url('/assets/new-fighters/estefy/diseno.webp')!important; background-size:contain!important; background-position:center bottom!important; background-repeat:no-repeat!important; animation:none!important; }
+.portrait.estefy::before, .portrait.estefy::after { content:none!important; }
+
+/* Cooperativa */
+#game .coop-player.estefy { width:auto!important; aspect-ratio:1/1; }
+#game .coop-player.estefy .coop-player-art { background-image:url('/assets/new-fighters/estefy/punio-guardia.webp')!important; background-size:contain!important; background-position:center bottom!important; background-repeat:no-repeat!important; animation:none!important; }
+#game .coop-player.estefy .fighter-walk-layers { display:none!important; }
+#game .coop-player.estefy.walk .coop-player-art { background-image:url('/assets/new-fighters/estefy/caminar-01.webp')!important; }
+#game .coop-player.estefy.walk.stride-alt .coop-player-art { background-image:url('/assets/new-fighters/estefy/caminar-03.webp')!important; }
+#game .coop-player.estefy:is(.jump,.airborne) .coop-player-art { background-image:url('/assets/new-fighters/estefy/salto-aire.webp')!important; }
+#game .coop-player.estefy.fire .coop-player-art { background-image:url('/assets/new-fighters/estefy/machete-corte.webp')!important; }
+#game .coop-player.estefy.special .coop-player-art { background-image:url('/assets/new-fighters/estefy/machete-continuacion.webp')!important; }
+#game .coop-player.estefy:is(.dodge,.revive) .coop-player-art { background-image:url('/assets/new-fighters/estefy/esquivar.webp')!important; }
+#game .coop-player.estefy.hit .coop-player-art { background-image:url('/assets/new-fighters/estefy/recibir-golpe.webp')!important; }
+#game .coop-player.estefy.down .coop-player-art { background-image:url('/assets/new-fighters/estefy/levantarse.webp')!important; }
+#game .coop-player.estefy.face-left .coop-player-art { transform:scaleX(-1); }
+#game .coop-enemy .coop-player.coop-clone.estefy { aspect-ratio:auto; width:100%!important; }
+
+/* Rompeobjetos */
+#game .orb-hero.estefy { aspect-ratio:1/1; width:auto!important; }
+#game .orb-hero.estefy .fighter-art.estefy { background-image:url('/assets/new-fighters/estefy/punio-guardia.webp')!important; background-size:contain!important; background-position:center bottom!important; background-repeat:no-repeat!important; animation:none!important; }
+#game .orb-hero.estefy .fighter-walk-layers { display:none!important; }
+#game .orb-hero.estefy.orb-moving .fighter-art.estefy { background-image:url('/assets/new-fighters/estefy/caminar-01.webp')!important; }
+#game .orb-hero.estefy.orb-moving.orb-walk-fast .fighter-art.estefy { background-image:url('/assets/new-fighters/estefy/correr-02.webp')!important; }
+#game .orb-hero.estefy.orb-firing .fighter-art.estefy { background-image:url('/assets/new-fighters/estefy/machete-carga.webp')!important; }
+#game .orb-hero.estefy.orb-defeated .fighter-art.estefy { background-image:url('/assets/new-fighters/estefy/recibir-golpe.webp')!important; }
+#game .orb-hero.estefy.orb-victory-dance .fighter-art.estefy { background-image:url('/assets/new-fighters/estefy/machete-carga.webp')!important; }
+#game .orb-hero.estefy .fighter-art.estefy.face-left { transform:scaleX(-1); }
+
+/* Special effects: one wide machete arc, then a fan of leaves */
+.special-fx.fx-machete .fx-unit { width:clamp(110px,14vw,190px)!important; height:clamp(110px,14vw,190px)!important; }
+.special-fx.fx-machete.toward-left .fx-unit img, .special-fx.fx-leafStorm.toward-left .fx-unit img { transform:scaleX(-1); }
+.special-fx.fx-leafStorm .fx-unit { width:clamp(70px,9vw,120px)!important; height:clamp(70px,9vw,120px)!important; }

@@ -5,7 +5,7 @@ import type { PointerEvent as ReactPointerEvent } from "react";
 import ArcadeCrowd, { type CrowdCue } from "./ArcadeCrowd";
 import TouchStick from "./TouchStick";
 
-type FighterId = "maletilla" | "vanessa" | "josevictor" | "cristian" | "cesaret" | "borja" | "bacora" | "bonviure" | "elchica" | "ogalla" | "xuso" | "bomba" | "rafeta" | "tonimassama" | "nova";
+type FighterId = "maletilla" | "vanessa" | "josevictor" | "cristian" | "cesaret" | "borja" | "bacora" | "bonviure" | "elchica" | "ogalla" | "xuso" | "bomba" | "rafeta" | "tonimassama" | "nova" | "estefy";
 type AdventureStatus = "map" | "playing" | "level-complete" | "won" | "lost";
 type HeroPose = "idle" | "walkA" | "walkB" | "walkC" | "walkD" | "walkE" | "crouch" | "rise" | "fire" | "heavyFire" | "kick" | "hit";
 type EnemyKind = "walker" | "runner" | "heavy" | "hopper" | "shooter" | "flyer" | "charger" | "miniboss" | "boss";
@@ -49,7 +49,7 @@ type Enemy = Rect & {
   clone?: FighterId;
 };
 type Spark = { x: number; y: number; vx: number; vy: number; life: number; color: string; size: number };
-type Projectile = { x: number; y: number; vx: number; vy: number; rotation: number; size: number; kind: "bottle" | "microphone" | "mushroom" | "ear" | "bag" | "money" | "vinyl" | "speaker" | "fish" | "venom" | "shield" | "staff" | "anchor" | "chain" | "jager" | "amber" | "scepter" | "artichokes" | "dog" | "hoe" | "flag" | "flagSweep" | "pistol" | "peineta" };
+type Projectile = { x: number; y: number; vx: number; vy: number; rotation: number; size: number; kind: "bottle" | "microphone" | "mushroom" | "ear" | "bag" | "money" | "vinyl" | "speaker" | "fish" | "venom" | "shield" | "staff" | "anchor" | "chain" | "jager" | "amber" | "scepter" | "artichokes" | "dog" | "hoe" | "flag" | "flagSweep" | "pistol" | "peineta" | "machete" | "leaves" };
 type MonsterShot = { x: number; y: number; vx: number; vy: number; life: number; size: number; color: string; kind: "spray" | "pulse" | "drop" | "waterBottle" };
 type ImpactText = { x: number; y: number; text: string; color: string; life: number };
 type EnemyBlueprint = { x: number; minX: number; maxX: number; vx: number; kind: EnemyKind; y?: number; hp?: number; bossStyle?: BossStyle };
@@ -484,6 +484,12 @@ const HERO_POSE_ASSETS: Record<FighterId, Record<HeroPose, string>> = {
     fire: "/assets/new-fighters/bomba-rig-v21847-punch.webp", heavyFire: "/assets/new-fighters/bomba-hoe-attack-v2.webp", kick: "/assets/new-fighters/bomba-rig-v21847-kick.webp", hit: "/assets/new-fighters/bomba-guard-v2.webp",
   },
   rafeta: atlasHeroPoses("/prison-slug/assets/white-hero.webp"),
+  estefy: {
+    idle: "/assets/new-fighters/estefy/punio-guardia.webp", walkA: "/assets/new-fighters/estefy/caminar-01.webp", walkB: "/assets/new-fighters/estefy/caminar-02.webp",
+    walkC: "/assets/new-fighters/estefy/caminar-03.webp", walkD: "/assets/new-fighters/estefy/caminar-04.webp", walkE: "/assets/new-fighters/estefy/caminar-02.webp",
+    crouch: "/assets/new-fighters/estefy/agacharse.webp", rise: "/assets/new-fighters/estefy/salto-aire.webp",
+    fire: "/assets/new-fighters/estefy/machete-corte.webp", heavyFire: "/assets/new-fighters/estefy/machete-continuacion.webp", kick: "/assets/new-fighters/estefy/patada-contacto.webp", hit: "/assets/new-fighters/estefy/recibir-golpe.webp",
+  },
   nova: {
     idle: "/assets/new-fighters/nova-frame-0.webp", walkA: "/assets/new-fighters/nova-frame-1.webp", walkB: "/assets/new-fighters/nova-frame-0.webp", walkC: "/assets/new-fighters/nova-frame-1.webp", walkD: "/assets/new-fighters/nova-frame-0.webp", walkE: "/assets/new-fighters/nova-frame-1.webp",
     crouch: "/assets/new-fighters/nova-frame-1.webp", rise: "/assets/new-fighters/nova-frame-3.webp", fire: "/assets/new-fighters/nova-frame-2.webp", heavyFire: "/assets/new-fighters/nova-frame-2.webp", kick: "/assets/new-fighters/nova-frame-3.webp", hit: "/assets/new-fighters/nova-frame-3.webp",
@@ -751,6 +757,8 @@ export default function PlatformMode({ fighter, fighterName, soundOn, difficulty
     loadImage("weapon-flagSweep", "/assets/new-fighters/rafeta-flag.svg");
     loadImage("weapon-pistol", "/assets/new-fighters/tonimassama-bullet.svg");
     loadImage("weapon-peineta", "/assets/new-fighters/tonimassama-peineta.svg");
+    loadImage("weapon-machete", "/assets/new-fighters/estefy/machete-arco.webp");
+    loadImage("weapon-leaves", "/assets/new-fighters/estefy/machete-hojas.webp");
     loadImage("weapon-masia", "/assets/new-fighters/masia-logo.webp");
     loadImage("boss-ready", "/assets/mobile/spray-boss-ready-v1.webp");
     loadImage("boss-attack", "/assets/mobile/spray-boss-attack-v1.webp");
@@ -1035,7 +1043,7 @@ export default function PlatformMode({ fighter, fighterName, soundOn, difficulty
       attackReadyAt = now + cooldown;
       attackPoseUntil = now + cooldown;
       attackPoseKind = level === 2
-        ? fighter === "bacora" || fighter === "bonviure" || fighter === "elchica" || fighter === "ogalla" || fighter === "xuso" || fighter === "bomba" || fighter === "rafeta" || fighter === "tonimassama" ? "heavyFire" : "kick"
+        ? fighter === "bacora" || fighter === "bonviure" || fighter === "elchica" || fighter === "ogalla" || fighter === "xuso" || fighter === "bomba" || fighter === "rafeta" || fighter === "tonimassama" || fighter === "estefy" ? "heavyFire" : "kick"
         : "fire";
       const direction = player.facing;
       const startX = player.x + player.width / 2 + direction * 28;
@@ -1046,6 +1054,11 @@ export default function PlatformMode({ fighter, fighterName, soundOn, difficulty
         const projectileSize = fighter === "rafeta" ? level === 2 ? 126 : 102 : fighter === "tonimassama" ? level === 2 ? 62 : 42 : kind === "scepter" ? 70 : kind === "artichokes" ? 58 : 64;
         spreads.forEach((verticalSpeed) => projectiles.push({ x: startX, y: startY, vx: direction * 520, vy: verticalSpeed, rotation: 0, size: projectileSize, kind }));
         playTone(fighter === "borja" ? 145 : fighter === "tonimassama" ? level === 2 ? 310 : 680 : 240, 0.1, "sine");
+      } else if (fighter === "estefy") {
+        // Machete arc on J, a fan of leaves on K.
+        if (level === 2) [-120, -40, 40, 120].forEach((verticalSpeed) => projectiles.push({ x: startX, y: startY, vx: direction * 540, vy: verticalSpeed, rotation: 0, size: 70, kind: "leaves" }));
+        else projectiles.push({ x: startX, y: startY - 6, vx: direction * 640, vy: 0, rotation: 0, size: 104, kind: "machete" });
+        playTone(level === 2 ? 420 : 760, 0.09, "triangle");
       } else if (fighter === "maletilla" && level === 1) {
         [-72, 0, 72].forEach((verticalSpeed) => projectiles.push({ x: startX, y: startY, vx: direction * 600, vy: verticalSpeed, rotation: 0, size: 62, kind: "bottle" }));
         playTone(205, 0.08, "square");
@@ -1071,7 +1084,7 @@ export default function PlatformMode({ fighter, fighterName, soundOn, difficulty
         [-150, -45, 65, 170].forEach((verticalSpeed) => projectiles.push({ x: startX, y: startY, vx: direction * 520, vy: verticalSpeed, rotation: 0, size: 72, kind: "money" }));
         playTone(315, 0.13, "square");
       }
-      const label = fighter === "tonimassama" ? level === 2 ? "¡PEINETAS VOLADORAS!" : "¡DISPARO DORADO!" : fighter === "cesaret" ? (level === 2 ? "¡LLUVIA DE PECES!" : "¡GOLPE DE PESCADO!") : fighter === "borja" ? (level === 2 ? "¡VENENO DEL SAPO!" : "¡ATAQUE DEL SAPO!") : fighter === "elchica" ? (level === 2 ? "¡SALPICADURA ÁMBAR!" : "¡BOTELLA DEL CHICA!") : fighter === "ogalla" ? (level === 2 ? "¡LLUVIA DE ALCACHOFAS!" : "¡BASTÓN DE ALCACHOFA!") : fighter === "xuso" ? "¡SPOOKY AL ATAQUE!" : fighter === "bomba" ? (level === 2 ? "¡BARRIDO DE AZADA!" : "¡AZADAZO!") : fighter === "rafeta" ? (level === 2 ? "¡GIRO DEL ESTANDARTE!" : "¡EMBESTIDA DE BANDERA!") : level === 2 ? (fighter === "maletilla" ? "¡TORMENTA DE SETAS!" : fighter === "vanessa" ? "¡OREJAS AL VUELO!" : fighter === "josevictor" ? "¡TUBOS DE BILLETES!" : "¡IMPACTO KRK 8!") : attackChain >= 3 ? `¡CADENA ×${attackChain}!` : fighter === "maletilla" ? "¡TRIPLE CLORETILO!" : fighter === "vanessa" ? "¡TRIPLE MICRO!" : fighter === "josevictor" ? "¡BOLSAS AL VUELO!" : "¡LLUVIA DE VINILOS!";
+      const label = fighter === "estefy" ? level === 2 ? "¡TORMENTA DE HOJAS!" : "¡MACHETAZO!" : fighter === "tonimassama" ? level === 2 ? "¡PEINETAS VOLADORAS!" : "¡DISPARO DORADO!" : fighter === "cesaret" ? (level === 2 ? "¡LLUVIA DE PECES!" : "¡GOLPE DE PESCADO!") : fighter === "borja" ? (level === 2 ? "¡VENENO DEL SAPO!" : "¡ATAQUE DEL SAPO!") : fighter === "elchica" ? (level === 2 ? "¡SALPICADURA ÁMBAR!" : "¡BOTELLA DEL CHICA!") : fighter === "ogalla" ? (level === 2 ? "¡LLUVIA DE ALCACHOFAS!" : "¡BASTÓN DE ALCACHOFA!") : fighter === "xuso" ? "¡SPOOKY AL ATAQUE!" : fighter === "bomba" ? (level === 2 ? "¡BARRIDO DE AZADA!" : "¡AZADAZO!") : fighter === "rafeta" ? (level === 2 ? "¡GIRO DEL ESTANDARTE!" : "¡EMBESTIDA DE BANDERA!") : level === 2 ? (fighter === "maletilla" ? "¡TORMENTA DE SETAS!" : fighter === "vanessa" ? "¡OREJAS AL VUELO!" : fighter === "josevictor" ? "¡TUBOS DE BILLETES!" : "¡IMPACTO KRK 8!") : attackChain >= 3 ? `¡CADENA ×${attackChain}!` : fighter === "maletilla" ? "¡TRIPLE CLORETILO!" : fighter === "vanessa" ? "¡TRIPLE MICRO!" : fighter === "josevictor" ? "¡BOLSAS AL VUELO!" : "¡LLUVIA DE VINILOS!";
       impact(startX, startY, label, fighter === "maletilla" ? "#ff9b35" : fighter === "vanessa" ? "#ff4f9b" : fighter === "josevictor" ? "#f2c94c" : fighter === "elchica" ? "#ef8b26" : fighter === "ogalla" ? "#c89a46" : "#63f2d0", now);
       updateHud(now);
       later(() => updateHud(performance.now()), cooldown + 30);

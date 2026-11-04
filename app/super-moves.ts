@@ -62,5 +62,6 @@ export const SUPER_MOVES: Record<ProfileFighterId, SuperMove> = {
   bomba: { name: "SURCO DEL TERREMOTO", pattern: "quake", bonus: "crush", bonusCall: "¡TERREMOTO!", description: "Golpea el suelo y hace temblar todo Central", assets: [A.hoe] },
   rafeta: { name: "ESTANDARTE INVENCIBLE", pattern: "wave", bonus: "armor", bonusCall: "¡LA BANDERA PROTEGE!", description: "Ola de banderas: Rafeta queda inmune unos segundos", assets: [A.flag] },
   tonimassama: { name: "JUICIO DE ORO", pattern: "barrage", bonus: "multi", hits: 4, bonusCall: "¡CARGADOR VACÍO!", description: "Ráfaga de balas y peinetas doradas: 4 impactos", assets: [A.bullet, A.peineta] },
+  estefy: { name: "SELVA DE ACERO", pattern: "wave", bonus: "multi", hits: 3, bonusCall: "¡TRES MACHETAZOS!", description: "Ola de machetazos y hojas: 3 cortes seguidos", assets: ["/assets/new-fighters/estefy/machete-arco.webp", "/assets/new-fighters/estefy/machete-hojas.webp"] },
   nova: { name: "SINGULARIDAD PRISMÁTICA", pattern: "beam", bonus: "drain", bonusCall: "¡ENERGÍA ABSORBIDA!", description: "Láser arcoíris que absorbe la barra SUPER del rival", assets: [A.bullet] },
 };
