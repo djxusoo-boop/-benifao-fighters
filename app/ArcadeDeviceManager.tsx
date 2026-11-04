@@ -119,7 +119,15 @@ export default function ArcadeDeviceManager() {
             if (window.sessionStorage.getItem(BUILD_RELOAD_KEY) === BUILD_VERSION) return;
             window.sessionStorage.setItem(BUILD_RELOAD_KEY, BUILD_VERSION);
           } catch { /* Reloading once is still safe when session storage is unavailable. */ }
-          window.location.reload();
+          // Never reload in the middle of a match: wait until the player is
+          // back in the lobby (or the game is in the background).
+          const inLobby = () => Boolean(document.querySelector(".arena.phase-select"));
+          if (inLobby()) { window.location.reload(); return; }
+          const waitForLobby = window.setInterval(() => {
+            if (!inLobby()) return;
+            window.clearInterval(waitForLobby);
+            window.location.reload();
+          }, 1500);
         };
         navigator.serviceWorker.addEventListener("controllerchange", onControllerChange);
 

@@ -18,6 +18,7 @@ import { markFrameLoaded } from "./frame-registry";
 import { FIGHTER_FRAMES } from "./fighter-frames";
 import { attackFacesTarget, clampFighterStep, combatApproachGap, combatContact, directionToOpponent, fighterAttackRange, visibleFighterBounds } from "./combat-contact.mjs";
 import { joystickIntent } from "./touch-joystick.mjs";
+import GameErrorBoundary from "./GameErrorBoundary";
 import { FIGHTER_PROFILES, defenseMultiplier, pickWinQuote, powerMultiplier, speedMultiplier } from "./fighter-profiles";
 import { ArcadeAudio, type HitKind, type MusicTheme } from "./arcade-audio";
 import { SUPER_MOVES } from "./super-moves";
@@ -149,7 +150,7 @@ const STAGES = [
 
 const GAME_TITLE = "HARDCORE FIGHTERS";
 const GAME_EDITION = "WEB · ARCADE EDITION";
-const GAME_VERSION = "V2.28.1";
+const GAME_VERSION = "V2.28.2";
 
 const ROUND_SECONDS = 99;
 const SUPER_MAX = 100;
@@ -366,7 +367,11 @@ function SpecialEffect({ move, side, origin, target, arenaWidth, direction, airb
   );
 }
 
-export default function Home() {
+export default function Page() {
+  return <GameErrorBoundary>{(resetKey) => <Home key={resetKey} />}</GameErrorBoundary>;
+}
+
+function Home() {
   const [selected, setSelected] = useState<FighterId>("maletilla");
   const [localOpponent, setLocalOpponent] = useState<FighterId>("vanessa");
   const [coopPlayerOne, setCoopPlayerOne] = useState<FighterId>("maletilla");
@@ -2884,9 +2889,9 @@ export default function Home() {
         {combo.player >= 2 && <div className="combo-callout combo-player"><strong>{combo.player} GOLPES</strong><span>COMBO</span></div>}
         {combo.cpu >= 2 && <div className="combo-callout combo-cpu"><strong>{combo.cpu} GOLPES</strong><span>{battleMode === "local" ? "COMBO P2" : "COMBO RIVAL"}</span></div>}
         {(game.phase === "fight" || game.phase === "ko") && damagePops.map((pop) => (
-          <b key={pop.id} className={`damage-pop pop-${pop.kind} pop-${pop.side}`} style={{ left: `${pop.x}%` }} aria-hidden="true">{pop.kind === "guard" ? `-${pop.amount} ◆` : `-${pop.amount}`}</b>
+          <b key={`pop-${pop.id}`} className={`damage-pop pop-${pop.kind} pop-${pop.side}`} style={{ left: `${pop.x}%` }} aria-hidden="true">{pop.kind === "guard" ? `-${pop.amount} ◆` : `-${pop.amount}`}</b>
         ))}
-        {superFx && <SuperEffect key={superFx.id} fx={superFx} minimal={Boolean(SUPER_ANIM[superFx.fighter])} />}
+        {superFx && <SuperEffect key={`superfx-${superFx.id}`} fx={superFx} minimal={Boolean(SUPER_ANIM[superFx.fighter])} />}
         {(["player", "cpu"] as Side[]).map((side) => {
           const anim = superAnim[side];
           if (!anim || !anim.companion) return null;
@@ -2900,12 +2905,12 @@ export default function Home() {
           );
         })}
         {superFlash && (
-          <div key={superFlash.id} className={`super-cinematic super-${superFlash.side}`} aria-live="assertive">
+          <div key={`superflash-${superFlash.id}`} className={`super-cinematic super-${superFlash.side}`} aria-live="assertive">
             <span className={`super-cinematic-portrait portrait ${superFlash.fighter}`} />
             <div className="super-cinematic-copy"><small>{FIGHTERS[superFlash.fighter].name}</small><strong>SUPER<br />HARDCORE</strong><em>{SUPER_ANIM[superFlash.fighter]?.name ?? SUPER_MOVES[superFlash.fighter].name}</em></div>
           </div>
         )}
-        {fightCall && <div key={fightCall.id} className={`fight-technique-call technique-${fightCall.side}`} aria-live="polite">{fightCall.text}</div>}
+        {fightCall && <div key={`call-${fightCall.id}`} className={`fight-technique-call technique-${fightCall.side}`} aria-live="polite">{fightCall.text}</div>}
         {game.phase === "fight" && game.impact > 0 && (
           <div
             key={game.impact}
@@ -3157,7 +3162,7 @@ export default function Home() {
         )}
 
         {vsScreen && game.phase === "intro" && (
-          <div key={vsScreen.id} className="vs-screen" aria-live="assertive">
+          <div key={`vs-${vsScreen.id}`} className="vs-screen" aria-live="assertive">
             {([["player", selected], ["cpu", opponent]] as [Side, FighterId][]).map(([side, fighter]) => (
               <div key={side} className={`vs-side vs-${side}`} style={{ "--vs-color": FIGHTERS[fighter].color } as CSSProperties}>
                 <span className={`vs-portrait portrait ${fighter}`} />

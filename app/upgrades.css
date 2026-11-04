@@ -1097,3 +1097,9 @@ html:fullscreen .game-shell, html:-webkit-full-screen .game-shell { min-height: 
 #game .mode-stick-wrap { display:grid!important; justify-items:center; gap:4px!important; }
 #game .coop-ai-partner .coop-touch-p1 .coop-touch-actions button { width:60px!important; height:60px!important; font-size:20px!important; }
 #game .coop-ai-partner .coop-touch-p1 .coop-touch-actions button i { font-size:7px!important; }
+
+/* ===== V2.28.2 crash recovery card ===== */
+.game-crash-card { min-height:100dvh; display:grid; place-content:center; justify-items:center; gap:14px; padding:24px; background:radial-gradient(circle at 50% 40%, #2a0f12, #050405 70%); color:#fff; text-align:center; font-family:Arial,sans-serif; }
+.game-crash-card strong { font:italic 900 clamp(26px,5vw,48px)/1 Impact,"Arial Black",sans-serif; color:#ffb13f; text-shadow:3px 3px 0 #000; }
+.game-crash-card p { margin:0; opacity:.85; }
+.game-crash-card small { max-width:520px; opacity:.4; font-size:10px; word-break:break-word; }
