@@ -56,7 +56,7 @@ export const SUPER_MOVES: Record<ProfileFighterId, SuperMove> = {
   borja: { name: "SAPO TITÁN", pattern: "summon", bonus: "poison", bonusCall: "¡ENVENENADO!", description: "Invoca un sapo gigante: el veneno sigue haciendo daño", assets: [A.toad] },
   bacora: { name: "MURALLA DE LA W", pattern: "wave", bonus: "armor", bonusCall: "¡ESCUDO TOTAL!", description: "Muro de escudos: Bacora queda inmune unos segundos", assets: [A.shield] },
   bonviure: { name: "MAREA DEL ANCLA NEGRA", pattern: "summon", bonus: "crush", bonusCall: "¡APLASTADO!", description: "Un ancla gigante cae del cielo: el golpe más fuerte", assets: [A.anchor, A.chain] },
-  elchica: { name: "BRINDIS DEL CAOS", pattern: "barrage", bonus: "heal", bonusCall: "¡SALUD! +15", description: "Ráfaga de botellas: Yoye recupera vida", assets: [A.jager, A.amber] },
+  elchica: { name: "BRINDIS DEL CAOS", pattern: "barrage", bonus: "heal", bonusCall: "¡SALUD! +15", description: "Ráfaga de botellas: El Chica recupera vida", assets: [A.jager, A.amber] },
   ogalla: { name: "CORONA DE ALCACHOFAS", pattern: "rain", bonus: "multi", hits: 3, bonusCall: "¡COSECHA TRIPLE!", description: "Cae una cosecha de alcachofas: 3 impactos", assets: [A.artichoke, A.scepter] },
   xuso: { name: "PRISON DESATADO", pattern: "barrage", bonus: "multi", hits: 4, bonusCall: "¡LA JAURÍA MUERDE!", description: "Una manada de perros: 4 mordiscos seguidos", assets: [A.dog] },
   bomba: { name: "SURCO DEL TERREMOTO", pattern: "quake", bonus: "crush", bonusCall: "¡TERREMOTO!", description: "Golpea el suelo y hace temblar todo Central", assets: [A.hoe] },

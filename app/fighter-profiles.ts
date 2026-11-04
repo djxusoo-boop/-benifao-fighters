@@ -76,7 +76,7 @@ export const FIGHTER_PROFILES: Record<ProfileFighterId, FighterProfile> = {
     power: 3, speed: 4, defense: 3, technique: 4, motto: "La noche es joven y yo también.", passive: { id: "liquidCourage", name: "VALOR LÍQUIDO", description: "Cada especial que usa le da +6% de daño (hasta +30%)" }, archetype: "FIESTERO",
     bio: "Siempre con la botella en alto. Imprevisible, rápido y con mucha chispa.",
     winQuotes: ["¡Esta ronda la invito yo!", "Salud, campeón. Bueno, campeón no.", "Un chupito de ámbar y a la lona."],
-    endingTitle: ["¡REY DEL", "JÄGER!"], endingText: "Yoye brinda por el torneo desde lo más alto de La Fábrica.",
+    endingTitle: ["¡REY DEL", "JÄGER!"], endingText: "El Chica brinda por el torneo desde lo más alto de La Fábrica.",
   },
   ogalla: {
     power: 4, speed: 2, defense: 4, technique: 3, motto: "La corona no se hereda, se gana.", passive: { id: "royalFury", name: "FURIA REAL", description: "Con menos del 30% de vida pega y aguanta un 20% más" }, archetype: "VETERANO",
@@ -112,7 +112,7 @@ export const FIGHTER_PROFILES: Record<ProfileFighterId, FighterProfile> = {
     power: 3, speed: 5, defense: 2, technique: 4, motto: "Luz pura de neón.", passive: { id: "prismCharge", name: "CARGA PRISMÁTICA", description: "Llena la barra SUPER un 50% más rápido" }, archetype: "PRISMA",
     bio: "Luz pura de neón. Si parpadeas, ya te ha dado tres veces.",
     winQuotes: ["Brillo demasiado para ti.", "Te he dejado en modo arcoíris.", "Apaga y vámonos."],
-    endingTitle: ["¡PRISMA DE", "CENTRAL!"], endingText: "Nova ilumina el torneo con un láser arcoíris.",
+    endingTitle: ["¡PRISMA DE", "CENTRAL!"], endingText: "Yoye ilumina el torneo con un láser arcoíris.",
   },
 };
 

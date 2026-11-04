@@ -65,7 +65,7 @@ type Props = {
   onComplete: (score?: number) => void;
 };
 
-const PLAYER_NAMES: Record<FighterId, string> = { maletilla: "MALETILLA", vanessa: "VANESSA", josevictor: "JOSEVICTOR", cristian: "CRISTIAN", cesaret: "CESARET", borja: "BORJA", bacora: "BACORA", bonviure: "BONVIURE", elchica: "YOYE", ogalla: "OGALLA", xuso: "XUSO", bomba: "EL BOMBA", rafeta: "RAFETA", tonimassama: "TONI MASSAMA", nova: "NOVA" };
+const PLAYER_NAMES: Record<FighterId, string> = { maletilla: "MALETILLA", vanessa: "VANESSA", josevictor: "JOSEVICTOR", cristian: "CRISTIAN", cesaret: "CESARET", borja: "BORJA", bacora: "BACORA", bonviure: "BONVIURE", elchica: "EL CHICA", ogalla: "OGALLA", xuso: "XUSO", bomba: "EL BOMBA", rafeta: "RAFETA", tonimassama: "TONI MASSAMA", nova: "YOYE" };
 const ATTACK_LABELS: Record<FighterId, [string, string]> = {
   maletilla: ["CLORETILO", "SETAS"],
   vanessa: ["MICROS", "OREJAS"],

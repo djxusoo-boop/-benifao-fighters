@@ -129,7 +129,7 @@ const characters = [
     description: "Ataca con su bandera de España y el águila del estandarte.",
   },
   {
-    id: "nova", name: "NOVA", title: "PRISMA DE NEÓN", ability: "RÁFAGA PRISMÁTICA", color: "#ff4be9",
+    id: "nova", name: "YOYE", title: "PRISMA DE NEÓN", ability: "RÁFAGA PRISMÁTICA", color: "#ff4be9",
     image: "/assets/new-fighters/nova-card.png", specialText: "¡RÁFAGA PRISMÁTICA!", specialColor: "#ff4be9",
     description: "Sus trenzas canalizan energía rosa y azul en un disparo que atraviesa la línea enemiga.",
   },
@@ -140,7 +140,7 @@ const characters = [
   { id: "borja", name: "BORJA", title: "EL DOMADOR DEL SAPO", ability: "ATAQUE DEL SAPO", color: "#a9e450", image: "/assets/new-fighters/borja-idle.webp", specialText: "¡VENENO DEL SAPO!", specialColor: "#a9e450", description: "Combate con el arsenal de Hardcore Fighters." },
   { id: "bacora", name: "BACORA", title: "EL GUARDIÁN DE LA W", ability: "EMBESTIDA DE ESCUDO", color: "#e6b82e", image: "/assets/new-fighters/bacora-idle.png", specialText: "¡GOLPE DE VARA!", specialColor: "#e6b82e", description: "Combate con el arsenal de Hardcore Fighters." },
   { id: "bonviure", name: "BONVIURE", title: "EL ANCLA NEGRA", ability: "BARRIDO DE ANCLA", color: "#a68c72", image: "/assets/new-fighters/bonviure-idle.png", specialText: "¡LATIGAZO DE CADENA!", specialColor: "#a68c72", description: "Combate con el arsenal de Hardcore Fighters." },
-  { id: "elchica", name: "YOYE", title: "EL REY DEL JÄGER", ability: "BOTELLA DE YOYE", color: "#ec8d27", image: "/assets/new-fighters/elchica-atlas.png", specialText: "¡SALPICADURA ÁMBAR!", specialColor: "#ec8d27", description: "Combate con el arsenal de Hardcore Fighters." },
+  { id: "elchica", name: "EL CHICA", title: "EL REY DEL JÄGER", ability: "BOTELLA DEL CHICA", color: "#ec8d27", image: "/assets/new-fighters/elchica-atlas.png", specialText: "¡SALPICADURA ÁMBAR!", specialColor: "#ec8d27", description: "Combate con el arsenal de Hardcore Fighters." },
   { id: "ogalla", name: "OGALLA", title: "EL REY DE LA ALCACHOFA", ability: "BASTÓN DE ALCACHOFA", color: "#c89a46", image: "/assets/new-fighters/ogalla-atlas.png", specialText: "¡LLUVIA DE ALCACHOFAS!", specialColor: "#c89a46", description: "Combate con el arsenal de Hardcore Fighters." },
   { id: "tonimassama", name: "TONI MASSAMA", title: "EL REY DE LA PEINETA", ability: "DISPARO DORADO", color: "#f0bd42", image: "/assets/new-fighters/tonimassama-frames/idle.webp", specialText: "¡PEINETAS VOLADORAS!", specialColor: "#f0bd42", description: "Combate con el arsenal de Hardcore Fighters." },
 ];

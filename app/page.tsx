@@ -116,13 +116,13 @@ const FIGHTERS: Record<FighterId, { name: string; title: string; specialOne: str
   borja: { name: "BORJA", title: "EL DOMADOR DEL SAPO", specialOne: "ATAQUE DEL SAPO", specialTwo: "VENENO DEL SAPO", color: "#a9e450" },
   bacora: { name: "BACORA", title: "EL GUARDIÁN DE LA W", specialOne: "EMBESTIDA DE ESCUDO", specialTwo: "GOLPE DE VARA", color: "#e6b82e" },
   bonviure: { name: "BONVIURE", title: "EL ANCLA NEGRA", specialOne: "BARRIDO DE ANCLA", specialTwo: "LATIGAZO DE CADENA", color: "#a68c72" },
-  elchica: { name: "YOYE", title: "EL REY DEL JÄGER", specialOne: "BOTELLA DE YOYE", specialTwo: "SALPICADURA ÁMBAR", color: "#ec8d27" },
+  elchica: { name: "EL CHICA", title: "EL REY DEL JÄGER", specialOne: "BOTELLA DEL CHICA", specialTwo: "SALPICADURA ÁMBAR", color: "#ec8d27" },
   ogalla: { name: "OGALLA", title: "EL REY DE LA ALCACHOFA", specialOne: "BASTÓN DE ALCACHOFA", specialTwo: "LLUVIA DE ALCACHOFAS", color: "#c89a46" },
   xuso: { name: "XUSO", title: "EL DÚO DEL PERRO", specialOne: "MORDISCO DE XUSO", specialTwo: "AULLIDO DE PRISON", color: "#7dff38" },
   bomba: { name: "EL BOMBA", title: "EL AZADÓN", specialOne: "AZADAZO", specialTwo: "BARRIDO DE AZADA", color: "#ff9a31" },
   rafeta: { name: "RAFETA", title: "PORTAESTANDARTE", specialOne: "EMBESTIDA DE BANDERA", specialTwo: "GIRO DEL ESTANDARTE", color: "#e8c44d" },
   tonimassama: { name: "TONI MASSAMA", title: "EL REY DE LA PEINETA", specialOne: "DISPARO DORADO", specialTwo: "PEINETAS VOLADORAS", color: "#f0bd42" },
-  nova: { name: "NOVA", title: "PRISMA DE NEÓN", specialOne: "RÁFAGA PRISMÁTICA", specialTwo: "LÁSER ARCOÍRIS", color: "#ff4be9" },
+  nova: { name: "YOYE", title: "PRISMA DE NEÓN", specialOne: "RÁFAGA PRISMÁTICA", specialTwo: "LÁSER ARCOÍRIS", color: "#ff4be9" },
 };
 
 // Rafeta is temporarily unavailable; keep his assets and definition for a later return.
@@ -149,7 +149,7 @@ const STAGES = [
 
 const GAME_TITLE = "HARDCORE FIGHTERS";
 const GAME_EDITION = "WEB · ARCADE EDITION";
-const GAME_VERSION = "V2.27.1";
+const GAME_VERSION = "V2.27.2";
 
 const ROUND_SECONDS = 99;
 const SUPER_MAX = 100;
@@ -226,7 +226,7 @@ const MOVE_LABELS: Record<SpecialMove, string> = {
   toad: "¡ATAQUE DEL SAPO!",
   venom: "¡VENENO DEL SAPO!",
   shield: "¡EMBESTIDA DE ESCUDO!", staff: "¡GOLPE DE VARA!", anchor: "¡BARRIDO DE ANCLA!", chain: "¡LATIGAZO DE CADENA!",
-  jager: "¡BOTELLA DE YOYE!", amber: "¡SALPICADURA ÁMBAR!", scepter: "¡BASTÓN DE ALCACHOFA!", artichokes: "¡LLUVIA DE ALCACHOFAS!",
+  jager: "¡BOTELLA DEL CHICA!", amber: "¡SALPICADURA ÁMBAR!", scepter: "¡BASTÓN DE ALCACHOFA!", artichokes: "¡LLUVIA DE ALCACHOFAS!",
   dog: "¡MORDISCO DE XUSO!", howl: "¡AULLIDO DE PRISON!", hoe: "¡AZADAZO!", hoeSweep: "¡BARRIDO DE AZADA!", flag: "¡EMBESTIDA DE BANDERA!", flagSweep: "¡GIRO DEL ESTANDARTE!", goldPistol: "¡DISPARO DORADO!", fingerPeinetas: "¡PEINETAS VOLADORAS!", prism: "¡RÁFAGA PRISMÁTICA!", prismBurst: "¡LÁSER ARCOÍRIS!",
 };
 
