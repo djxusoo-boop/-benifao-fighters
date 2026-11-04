@@ -151,7 +151,7 @@ const STAGES = [
 
 const GAME_TITLE = "HARDCORE FIGHTERS";
 const GAME_EDITION = "WEB · ARCADE EDITION";
-const GAME_VERSION = "V2.30.1";
+const GAME_VERSION = "V2.30.2";
 
 const ROUND_SECONDS = 99;
 const SUPER_MAX = 100;
@@ -252,7 +252,7 @@ const MOVE_ASSETS: Record<SpecialMove, string> = {
   anchor: "/assets/new-fighters/anchor.svg", chain: "/assets/new-fighters/chain.svg",
   jager: "/assets/new-fighters/jager.svg", amber: "/assets/new-fighters/amber.svg",
   scepter: "/assets/new-fighters/scepter.svg", artichokes: "/assets/new-fighters/artichokes.svg",
-  dog: "/assets/new-fighters/xuso-v3/perro-mordisco-05.webp", howl: "/assets/new-fighters/xuso-v3/perro-pata-arriba.webp", hoe: "/assets/new-fighters/hoe.svg", hoeSweep: "/assets/new-fighters/hoe.svg", flag: "/assets/new-fighters/rafeta-flag.svg", flagSweep: "/assets/new-fighters/rafeta-flag.svg", goldPistol: "/assets/new-fighters/tonimassama-bullet.svg", fingerPeinetas: "/assets/new-fighters/tonimassama-peineta.svg", prism: "/assets/new-fighters/tonimassama-bullet.svg", prismBurst: "/assets/new-fighters/tonimassama-bullet.svg",
+  dog: "/assets/new-fighters/xuso-v3/perro-mordisco-05.webp", howl: "/assets/new-fighters/xuso-v3/perro-pata-arriba.webp", hoe: "/assets/new-fighters/hoe.svg", hoeSweep: "/assets/new-fighters/hoe.svg", flag: "/assets/new-fighters/rafeta-flag.svg", flagSweep: "/assets/new-fighters/rafeta-flag.svg", goldPistol: "/assets/new-fighters/tonimassama-bullet.svg", fingerPeinetas: "/assets/new-fighters/tonimassama-peineta-logo.webp", prism: "/assets/new-fighters/tonimassama-bullet.svg", prismBurst: "/assets/new-fighters/tonimassama-bullet.svg",
 };
 
 const ARCADE_PICKUPS = [

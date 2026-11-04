@@ -1103,3 +1103,8 @@ html:fullscreen .game-shell, html:-webkit-full-screen .game-shell { min-height: 
 .game-crash-card strong { font:italic 900 clamp(26px,5vw,48px)/1 Impact,"Arial Black",sans-serif; color:#ffb13f; text-shadow:3px 3px 0 #000; }
 .game-crash-card p { margin:0; opacity:.85; }
 .game-crash-card small { max-width:520px; opacity:.4; font-size:10px; word-break:break-word; }
+
+/* ===== V2.30.2 Toni Massama's flying peineta: the round TM ring logo ===== */
+.arena .special-fx.fx-fingerPeinetas .fx-unit { width:clamp(46px,5vw,70px)!important; height:clamp(46px,5vw,70px)!important; }
+.arena .special-fx.fx-fingerPeinetas .fx-unit img { width:100%!important; height:100%!important; object-fit:contain; border-radius:50%; filter:drop-shadow(0 0 10px rgba(255,205,70,.85)) drop-shadow(3px 5px 4px rgba(0,0,0,.7))!important; animation:tm-logo-spin 900ms linear infinite; }
+@keyframes tm-logo-spin { from { rotate:-14deg; } 50% { rotate:14deg; } to { rotate:-14deg; } }

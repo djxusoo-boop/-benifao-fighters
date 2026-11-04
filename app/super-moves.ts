@@ -44,7 +44,7 @@ const A = {
   hoe: "/assets/new-fighters/hoe.svg",
   flag: "/assets/new-fighters/rafeta-flag.svg",
   bullet: "/assets/new-fighters/tonimassama-bullet.svg",
-  peineta: "/assets/new-fighters/tonimassama-peineta.svg",
+  peineta: "/assets/new-fighters/tonimassama-peineta-logo.webp",
 };
 
 export const SUPER_MOVES: Record<ProfileFighterId, SuperMove> = {

@@ -756,7 +756,7 @@ export default function PlatformMode({ fighter, fighterName, soundOn, difficulty
     loadImage("weapon-flag", "/assets/new-fighters/rafeta-flag.svg");
     loadImage("weapon-flagSweep", "/assets/new-fighters/rafeta-flag.svg");
     loadImage("weapon-pistol", "/assets/new-fighters/tonimassama-bullet.svg");
-    loadImage("weapon-peineta", "/assets/new-fighters/tonimassama-peineta.svg");
+    loadImage("weapon-peineta", "/assets/new-fighters/tonimassama-peineta-logo.webp");
     loadImage("weapon-machete", "/assets/new-fighters/estefy/machete-arco.webp");
     loadImage("weapon-leaves", "/assets/new-fighters/estefy/machete-hojas.webp");
     loadImage("weapon-masia", "/assets/new-fighters/masia-logo.webp");

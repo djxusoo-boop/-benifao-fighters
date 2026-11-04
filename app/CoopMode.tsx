@@ -109,7 +109,7 @@ const PROJECTILE_ASSETS = {
   flag: "/assets/new-fighters/rafeta-flag.svg",
   flagSweep: "/assets/new-fighters/rafeta-flag.svg",
   pistol: "/assets/new-fighters/tonimassama-bullet.svg",
-  peineta: "/assets/new-fighters/tonimassama-peineta.svg",
+  peineta: "/assets/new-fighters/tonimassama-peineta-logo.webp",
   prism: "/assets/new-fighters/tonimassama-bullet.svg",
   machete: "/assets/new-fighters/estefy/machete-arco.webp",
   leaves: "/assets/new-fighters/estefy/machete-hojas.webp",
