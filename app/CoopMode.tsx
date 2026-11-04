@@ -437,8 +437,9 @@ export default function CoopMode({ playerOne, playerTwo, aiPlayerTwo = false, so
       const target = sorted[index % Math.min(sorted.length, special ? 3 : 2)];
       // The big ki ball charges in the hand first; the small ones follow quickly.
       const delay = special ? (index === 0 ? 380 : 520 + index * 90) : 90 + index * 85;
-      const travel = clamp(Math.abs(target.x - player.x) * 11, special ? 380 : 300, special ? 760 : 640);
-      addProjectile({ owner: slot, kind, from: player.x, to: target.x, delay, high: player.airborne || index % 2 === 1, duration: travel, special: special && index === 0, color: KI_COLORS[fighter] }, travel);
+      // Ki travels fast like a tracer round; the beam reaches almost at once.
+      const travel = clamp(Math.abs(target.x - player.x) * (special ? 6 : 7), special ? 220 : 190, special ? 420 : 430);
+      addProjectile({ owner: slot, kind, from: player.x, to: target.x, delay, high: player.airborne || index % 2 === 1, duration: travel, special: special && index === 0, color: KI_COLORS[fighter] }, special && index === 0 ? travel + 320 : travel);
       later(() => damageEnemy(target.id, special ? 11 : 9, slot), travel + delay);
     }
     setSync((value) => clamp(value + (special ? 10 : 4), 0, 100));
@@ -878,11 +879,19 @@ export default function CoopMode({ playerOne, playerTwo, aiPlayerTwo = false, so
         if (projectile.kind === "combo") return <span className={`coop-combo-wave ${projectile.high ? "high" : ""}`} key={projectile.id} style={style}>♫★</span>;
         // Ki blasts: a glowing ball with the hero's object inside and a trail behind it.
         const kiStyle = { ...style, "--ki": projectile.color ?? "#ffd84d" } as CSSProperties;
+        if (projectile.special) {
+          // Big ki: it charges in the hand, then a straight beam reaches the enemy.
+          const left = Math.min(projectile.from, projectile.to);
+          const width = Math.max(4, Math.abs(projectile.to - projectile.from));
+          return (
+            <span className={`coop-ki-beam ${projectile.to < projectile.from ? "ki-left" : "ki-right"} ${projectile.high ? "high" : ""}`} key={projectile.id} style={{ ...kiStyle, left: `${left}%`, width: `${width}%` }}>
+              <i className="beam-charge" /><i className="beam-glow" /><i className="beam-core" /><i className="beam-edge top" /><i className="beam-edge bottom" /><i className="beam-head" />
+            </span>
+          );
+        }
         return (
-          <span className={`coop-ki ${projectile.special ? "ki-big" : ""} ${projectile.to < projectile.from ? "ki-left" : "ki-right"} ${projectile.high ? "high" : ""}`} key={projectile.id} style={kiStyle}>
-            {projectile.special && <i className="ki-charge" />}
-            <i className="ki-trail" />
-            <i className="ki-ball"><Image src={PROJECTILE_ASSETS[projectile.kind]} alt="" width={64} height={64} unoptimized /></i>
+          <span className={`coop-ki ${projectile.to < projectile.from ? "ki-left" : "ki-right"} ${projectile.high ? "high" : ""}`} key={projectile.id} style={kiStyle}>
+            <i className="ki-trail" /><i className="ki-bolt" /><i className="ki-flash" />
           </span>
         );
       })}
