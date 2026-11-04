@@ -101,12 +101,19 @@
 .arena .dog-special.dog-howl .dog-sprite { animation:dog-pee-frames 980ms steps(1,end) forwards; }
 /* For the pee he turns his back to the rival. */
 .arena .dog-special.dog-howl .dog-body { animation:dog-turn-away 980ms steps(1,end) forwards; }
+/* The stream starts at the lifted hind leg (hip ~38% of the dog's height,
+   14% of its width behind the centre) and lands on the rival's feet. */
+.arena .dog-special { --dogw:clamp(96px,17vh,170px); }
+.arena .dog-special .dog-runner { width:var(--dogw)!important; }
 .arena .dog-special .dog-pee {
-  position:absolute; left:56%; bottom:10%; width:clamp(170px,30vh,300px); aspect-ratio:2/1; opacity:0;
-  filter:drop-shadow(0 0 6px rgba(255,220,60,.8));
-  background:no-repeat left bottom / contain; transform-origin:left 40%;
+  position:absolute; bottom:5.5%; height:calc(var(--dogw) * .45); opacity:0;
+  left:calc(var(--dog-to) + var(--dogw) * .14);
+  width:calc(var(--pee-len) - var(--dogw) * .14);
+  background:no-repeat 0 0 / 100% 100%;
+  filter:drop-shadow(0 0 3px rgba(255,220,80,.55));
   animation:dog-pee-stream 980ms steps(1,end) forwards;
 }
+.arena .dog-special.toward-left .dog-pee { left:auto; right:calc(100% - var(--dog-to) + var(--dogw) * .14); scale:-1 1; }
 @keyframes dog-run-to { 0% { left:var(--dog-from); } 36%,100% { left:var(--dog-to); } }
 @keyframes dog-run-to-pee { 0% { left:var(--dog-from); } 34%,100% { left:var(--dog-to); } }
 @keyframes dog-turn-away { 0%,37.9% { scale:1 1; } 38%,100% { scale:-1 1; } }

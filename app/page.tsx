@@ -151,7 +151,7 @@ const STAGES = [
 
 const GAME_TITLE = "HARDCORE FIGHTERS";
 const GAME_EDITION = "WEB · ARCADE EDITION";
-const GAME_VERSION = "V2.30.0";
+const GAME_VERSION = "V2.30.1";
 
 const ROUND_SECONDS = 99;
 const SUPER_MAX = 100;
@@ -349,20 +349,22 @@ function SuperEffect({ fx, minimal = false }: { fx: NonNullable<SuperFx>; minima
 // turns round, lifts a leg and pees on them (L).
 function DogSpecial({ move, side, origin, target, direction }: { move: "dog" | "howl"; side: Side; origin: number; target: number; direction: AttackDirection }) {
   // Freeze the run when the order is given, so the dog never jumps if a fighter moves.
-  const [{ start, stop }] = useState(() => {
+  const [{ start, stop, peeLength }] = useState(() => {
     const toward = direction === "toward-right" ? 1 : -1;
     const gap = Math.abs(target - origin);
-    const keep = move === "dog" ? 5 : 11;
+    const keep = move === "dog" ? 5 : 13;
     const travel = Math.max(4, gap - keep);
-    return { start: Math.max(4, Math.min(96, origin + toward * 3)), stop: Math.max(4, Math.min(96, origin + toward * travel)) };
+    const stopAt = Math.max(4, Math.min(96, origin + toward * travel));
+    // The stream reaches from the dog's hip to the rival's feet.
+    return { start: Math.max(4, Math.min(96, origin + toward * 3)), stop: stopAt, peeLength: Math.max(6, Math.abs(target - stopAt)) };
   });
   return (
-    <div className={`dog-special dog-${move} ${side} ${direction}`} style={{ "--dog-from": `${start}%`, "--dog-to": `${stop}%` } as CSSProperties} aria-hidden="true">
+    <div className={`dog-special dog-${move} ${side} ${direction}`} style={{ "--dog-from": `${start}%`, "--dog-to": `${stop}%`, "--pee-len": `${peeLength}%` } as CSSProperties} aria-hidden="true">
       <b className="move-callout">{MOVE_LABELS[move]}</b>
       <span className="dog-runner">
         <span className="dog-body"><i className="dog-sprite" /></span>
-        {move === "howl" && <i className="dog-pee" />}
       </span>
+      {move === "howl" && <i className="dog-pee" />}
     </div>
   );
 }
