@@ -1,0 +1,251 @@
+/* ===== V2.25 pose map for Cooperativa and Rompeobjetos (generated) ===== */
+/* maletilla */
+#game .coop-player.maletilla .coop-player-art, #game .orb-hero.maletilla .fighter-art.maletilla { background-size:contain!important;background-position:center bottom!important;background-repeat:no-repeat!important; }
+#game .coop-player.maletilla .coop-player-art,
+#game .orb-hero.maletilla .fighter-art.maletilla { background-image:url('/assets/actions-normalized-v1/maletilla/maletilla-00.webp')!important; animation:none!important; }
+#game .coop-player.maletilla.jump .coop-player-art,
+#game .coop-player.maletilla.airborne .coop-player-art { background-image:url('/assets/actions-normalized-v1/maletilla/maletilla-08.webp')!important; animation:none!important; }
+#game .coop-player.maletilla.fire .coop-player-art,
+#game .orb-hero.maletilla.orb-firing .fighter-art.maletilla { background-image:url('/assets/actions-normalized-v1/maletilla/maletilla-05.webp')!important; animation:none!important; }
+#game .coop-player.maletilla.special .coop-player-art { background-image:url('/assets/actions-normalized-v1/maletilla/maletilla-04-clean-v1.webp')!important; animation:none!important; }
+#game .coop-player.maletilla.dodge .coop-player-art,
+#game .coop-player.maletilla.revive .coop-player-art { background-image:url('/assets/actions-normalized-v1/maletilla/maletilla-09-clean-v1.webp')!important; animation:none!important; }
+#game .coop-player.maletilla.hit .coop-player-art { background-image:url('/assets/actions-normalized-v1/maletilla/maletilla-motion-12-hit-v1.webp')!important; animation:none!important; }
+#game .coop-player.maletilla.down .coop-player-art,
+#game .orb-hero.maletilla.orb-defeated .fighter-art.maletilla { background-image:url('/assets/actions-normalized-v1/maletilla/maletilla-extra-09-knockdown-v2.webp')!important; animation:none!important; }
+#game .orb-hero.maletilla.orb-victory-dance .fighter-art.maletilla { background-image:url('/assets/actions-normalized-v1/maletilla/maletilla-11.webp')!important; animation:none!important; }
+/* vanessa */
+#game .coop-player.vanessa .coop-player-art, #game .orb-hero.vanessa .fighter-art.vanessa { background-size:contain!important;background-position:center bottom!important;background-repeat:no-repeat!important; }
+#game .coop-player.vanessa .coop-player-art,
+#game .orb-hero.vanessa .fighter-art.vanessa { background-image:url('/assets/actions-normalized-v1/vanessa/vanessa-00.webp')!important; animation:none!important; }
+#game .coop-player.vanessa.jump .coop-player-art,
+#game .coop-player.vanessa.airborne .coop-player-art { background-image:url('/assets/actions-normalized-v1/vanessa/vanessa-motion-11-jump-air-v1.webp')!important; animation:none!important; }
+#game .coop-player.vanessa.fire .coop-player-art,
+#game .orb-hero.vanessa.orb-firing .fighter-art.vanessa { background-image:url('/assets/actions-normalized-v1/vanessa/vanessa-05.webp')!important; animation:none!important; }
+#game .coop-player.vanessa.special .coop-player-art { background-image:url('/assets/actions-normalized-v1/vanessa/vanessa-extra-05-special-aim-v2.webp')!important; animation:none!important; }
+#game .coop-player.vanessa.dodge .coop-player-art,
+#game .coop-player.vanessa.revive .coop-player-art { background-image:url('/assets/actions-normalized-v1/vanessa/vanessa-09-clean-v1.webp')!important; animation:none!important; }
+#game .coop-player.vanessa.hit .coop-player-art { background-image:url('/assets/actions-normalized-v1/vanessa/vanessa-motion-12-hit-v1.webp')!important; animation:none!important; }
+#game .coop-player.vanessa.down .coop-player-art,
+#game .orb-hero.vanessa.orb-defeated .fighter-art.vanessa { background-image:url('/assets/actions-normalized-v1/vanessa/vanessa-extra-09-knockdown-v2.webp')!important; animation:none!important; }
+#game .orb-hero.vanessa.orb-victory-dance .fighter-art.vanessa { background-image:url('/assets/actions-normalized-v1/vanessa/vanessa-extra-12-victory-v2.webp')!important; animation:none!important; }
+/* josevictor */
+#game .coop-player.josevictor .coop-player-art, #game .orb-hero.josevictor .fighter-art.josevictor { background-size:contain!important;background-position:center bottom!important;background-repeat:no-repeat!important; }
+#game .coop-player.josevictor .coop-player-art,
+#game .orb-hero.josevictor .fighter-art.josevictor { background-image:url('/assets/actions-normalized-v1/josevictor/idle-clean-v1.webp')!important; animation:none!important; }
+#game .coop-player.josevictor.jump .coop-player-art,
+#game .coop-player.josevictor.airborne .coop-player-art { background-image:url('/assets/actions-normalized-v1/josevictor/jump-air.webp')!important; animation:none!important; }
+#game .coop-player.josevictor.fire .coop-player-art,
+#game .orb-hero.josevictor.orb-firing .fighter-art.josevictor { background-image:url('/assets/actions-normalized-v1/josevictor/throw-money-clean-v1.webp')!important; animation:none!important; }
+#game .coop-player.josevictor.special .coop-player-art { background-image:url('/assets/actions-normalized-v1/josevictor/throw-bag-clean-v1.webp')!important; animation:none!important; }
+#game .coop-player.josevictor.dodge .coop-player-art,
+#game .coop-player.josevictor.revive .coop-player-art { background-image:url('/assets/actions-normalized-v1/josevictor/guard.webp')!important; animation:none!important; }
+#game .coop-player.josevictor.hit .coop-player-art { background-image:url('/assets/actions-normalized-v1/josevictor/hit-clean-v1.webp')!important; animation:none!important; }
+#game .coop-player.josevictor.down .coop-player-art,
+#game .orb-hero.josevictor.orb-defeated .fighter-art.josevictor { background-image:url('/assets/actions-normalized-v1/josevictor/defeated-clean-v1.webp')!important; animation:none!important; }
+#game .orb-hero.josevictor.orb-victory-dance .fighter-art.josevictor { background-image:url('/assets/actions-normalized-v1/josevictor/victory-tall.webp')!important; animation:none!important; }
+/* cristian */
+#game .coop-player.cristian .coop-player-art, #game .orb-hero.cristian .fighter-art.cristian { background-size:contain!important;background-position:center bottom!important;background-repeat:no-repeat!important; }
+#game .coop-player.cristian .coop-player-art,
+#game .orb-hero.cristian .fighter-art.cristian { background-image:url('/assets/actions-normalized-v1/cristian/idle.webp')!important; animation:none!important; }
+#game .coop-player.cristian.jump .coop-player-art,
+#game .coop-player.cristian.airborne .coop-player-art { background-image:url('/assets/actions-normalized-v1/cristian/jump.webp')!important; animation:none!important; }
+#game .coop-player.cristian.fire .coop-player-art,
+#game .orb-hero.cristian.orb-firing .fighter-art.cristian { background-image:url('/assets/actions-normalized-v1/cristian/throw-vinyl.webp')!important; animation:none!important; }
+#game .coop-player.cristian.special .coop-player-art { background-image:url('/assets/actions-normalized-v1/cristian/throw-speaker.webp')!important; animation:none!important; }
+#game .coop-player.cristian.dodge .coop-player-art,
+#game .coop-player.cristian.revive .coop-player-art { background-image:url('/assets/actions-normalized-v1/cristian/block.webp')!important; animation:none!important; }
+#game .coop-player.cristian.hit .coop-player-art { background-image:url('/assets/actions-normalized-v1/cristian/hit.webp')!important; animation:none!important; }
+#game .coop-player.cristian.down .coop-player-art,
+#game .orb-hero.cristian.orb-defeated .fighter-art.cristian { background-image:url('/assets/actions-normalized-v1/cristian/defeated.webp')!important; animation:none!important; }
+#game .orb-hero.cristian.orb-victory-dance .fighter-art.cristian { background-image:url('/assets/actions-normalized-v1/cristian/victory.webp')!important; animation:none!important; }
+/* borja */
+#game .coop-player.borja .coop-player-art, #game .orb-hero.borja .fighter-art.borja { background-size:contain!important;background-position:center bottom!important;background-repeat:no-repeat!important; }
+#game .coop-player.borja .coop-player-art::before, #game .coop-player.borja .coop-player-art::after, #game .orb-hero.borja .fighter-art.borja::before, #game .orb-hero.borja .fighter-art.borja::after { content:none!important; }
+#game .coop-player.borja .fighter-walk-layers, #game .orb-hero.borja .fighter-walk-layers { display:none!important; }
+#game .coop-player.borja .coop-player-art,
+#game .orb-hero.borja .fighter-art.borja { background-image:url('/assets/new-fighters/borja-idle.webp')!important; animation:none!important; }
+#game .coop-player.borja.walk .coop-player-art,
+#game .orb-hero.borja.orb-moving .fighter-art.borja { background-image:url('/assets/new-fighters/borja-walk.webp')!important; animation:none!important; }
+#game .coop-player.borja.walk.stride-alt .coop-player-art,
+#game .orb-hero.borja.orb-moving.orb-walk-fast .fighter-art.borja { background-image:url('/assets/new-fighters/borja-walk2-v1.webp')!important; animation:none!important; }
+#game .coop-player.borja.jump .coop-player-art,
+#game .coop-player.borja.airborne .coop-player-art { background-image:url('/assets/new-fighters/borja-jump-v1.webp')!important; animation:none!important; }
+#game .coop-player.borja.fire .coop-player-art,
+#game .orb-hero.borja.orb-firing .fighter-art.borja { background-image:url('/assets/new-fighters/borja-punch-v1.webp')!important; animation:none!important; }
+#game .coop-player.borja.special .coop-player-art { background-image:url('/assets/new-fighters/borja-attack.webp')!important; animation:none!important; }
+#game .coop-player.borja.dodge .coop-player-art,
+#game .coop-player.borja.revive .coop-player-art { background-image:url('/assets/new-fighters/borja-guard-v1.webp')!important; animation:none!important; }
+#game .coop-player.borja.hit .coop-player-art { background-image:url('/assets/new-fighters/borja-hit-v1.webp')!important; animation:none!important; }
+#game .coop-player.borja.down .coop-player-art,
+#game .orb-hero.borja.orb-defeated .fighter-art.borja { background-image:url('/assets/new-fighters/borja-knockdown-v1.webp')!important; animation:none!important; }
+#game .orb-hero.borja.orb-victory-dance .fighter-art.borja { background-image:url('/assets/new-fighters/borja-attack.webp')!important; animation:none!important; }
+/* bacora */
+#game .coop-player.bacora .coop-player-art, #game .orb-hero.bacora .fighter-art.bacora { background-size:contain!important;background-position:center bottom!important;background-repeat:no-repeat!important; }
+#game .coop-player.bacora .coop-player-art::before, #game .coop-player.bacora .coop-player-art::after, #game .orb-hero.bacora .fighter-art.bacora::before, #game .orb-hero.bacora .fighter-art.bacora::after { content:none!important; }
+#game .coop-player.bacora .fighter-walk-layers, #game .orb-hero.bacora .fighter-walk-layers { display:none!important; }
+#game .coop-player.bacora .coop-player-art,
+#game .orb-hero.bacora .fighter-art.bacora { background-image:url('/assets/new-fighters/bacora-rig-v21849-idle.webp')!important; animation:none!important; }
+#game .coop-player.bacora.walk .coop-player-art,
+#game .orb-hero.bacora.orb-moving .fighter-art.bacora { background-image:url('/assets/new-fighters/bacora-rig-v21849-walk.webp')!important; animation:none!important; }
+#game .coop-player.bacora.walk.stride-alt .coop-player-art,
+#game .orb-hero.bacora.orb-moving.orb-walk-fast .fighter-art.bacora { background-image:url('/assets/new-fighters/bacora-rig-v21849-idle.webp')!important; animation:none!important; }
+#game .coop-player.bacora.jump .coop-player-art,
+#game .coop-player.bacora.airborne .coop-player-art { background-image:url('/assets/new-fighters/bacora-jump-v1.webp')!important; animation:none!important; }
+#game .coop-player.bacora.fire .coop-player-art,
+#game .orb-hero.bacora.orb-firing .fighter-art.bacora { background-image:url('/assets/new-fighters/bacora-release-shield-v1.webp')!important; animation:none!important; }
+#game .coop-player.bacora.special .coop-player-art { background-image:url('/assets/new-fighters/bacora-staff-v21849.webp')!important; animation:none!important; }
+#game .coop-player.bacora.dodge .coop-player-art,
+#game .coop-player.bacora.revive .coop-player-art { background-image:url('/assets/new-fighters/bacora-rig-v21849-recover.webp')!important; animation:none!important; }
+#game .coop-player.bacora.hit .coop-player-art { background-image:url('/assets/new-fighters/bacora-rig-v21849-recover.webp')!important; animation:none!important; }
+#game .coop-player.bacora.down .coop-player-art,
+#game .orb-hero.bacora.orb-defeated .fighter-art.bacora { background-image:url('/assets/new-fighters/bacora-rig-v21849-recover.webp')!important; animation:none!important; }
+#game .orb-hero.bacora.orb-victory-dance .fighter-art.bacora { background-image:url('/assets/new-fighters/bacora-staff-v21849.webp')!important; animation:none!important; }
+/* bonviure */
+#game .coop-player.bonviure .coop-player-art, #game .orb-hero.bonviure .fighter-art.bonviure { background-size:contain!important;background-position:center bottom!important;background-repeat:no-repeat!important; }
+#game .coop-player.bonviure .coop-player-art::before, #game .coop-player.bonviure .coop-player-art::after, #game .orb-hero.bonviure .fighter-art.bonviure::before, #game .orb-hero.bonviure .fighter-art.bonviure::after { content:none!important; }
+#game .coop-player.bonviure .fighter-walk-layers, #game .orb-hero.bonviure .fighter-walk-layers { display:none!important; }
+#game .coop-player.bonviure .coop-player-art,
+#game .orb-hero.bonviure .fighter-art.bonviure { background-image:url('/assets/new-fighters/bonviure-rig-v21849-idle.webp')!important; animation:none!important; }
+#game .coop-player.bonviure.walk .coop-player-art,
+#game .orb-hero.bonviure.orb-moving .fighter-art.bonviure { background-image:url('/assets/new-fighters/bonviure-rig-v21849-walk.webp')!important; animation:none!important; }
+#game .coop-player.bonviure.walk.stride-alt .coop-player-art,
+#game .orb-hero.bonviure.orb-moving.orb-walk-fast .fighter-art.bonviure { background-image:url('/assets/new-fighters/bonviure-rig-v21849-idle.webp')!important; animation:none!important; }
+#game .coop-player.bonviure.jump .coop-player-art,
+#game .coop-player.bonviure.airborne .coop-player-art { background-image:url('/assets/new-fighters/bonviure-jump-v21849.webp')!important; animation:none!important; }
+#game .coop-player.bonviure.fire .coop-player-art,
+#game .orb-hero.bonviure.orb-firing .fighter-art.bonviure { background-image:url('/assets/new-fighters/bonviure-anchor-v21849.webp')!important; animation:none!important; }
+#game .coop-player.bonviure.special .coop-player-art { background-image:url('/assets/new-fighters/bonviure-chain-clean.webp')!important; animation:none!important; }
+#game .coop-player.bonviure.dodge .coop-player-art,
+#game .coop-player.bonviure.revive .coop-player-art { background-image:url('/assets/new-fighters/bonviure-guard-v21849.webp')!important; animation:none!important; }
+#game .coop-player.bonviure.hit .coop-player-art { background-image:url('/assets/new-fighters/bonviure-hit-v21849.webp')!important; animation:none!important; }
+#game .coop-player.bonviure.down .coop-player-art,
+#game .orb-hero.bonviure.orb-defeated .fighter-art.bonviure { background-image:url('/assets/new-fighters/bonviure-down-v21849.webp')!important; animation:none!important; }
+#game .orb-hero.bonviure.orb-victory-dance .fighter-art.bonviure { background-image:url('/assets/new-fighters/bonviure-anchor-v21849.webp')!important; animation:none!important; }
+/* elchica */
+#game .coop-player.elchica .coop-player-art, #game .orb-hero.elchica .fighter-art.elchica { background-size:contain!important;background-position:center bottom!important;background-repeat:no-repeat!important; }
+#game .coop-player.elchica .coop-player-art::before, #game .coop-player.elchica .coop-player-art::after, #game .orb-hero.elchica .fighter-art.elchica::before, #game .orb-hero.elchica .fighter-art.elchica::after { content:none!important; }
+#game .coop-player.elchica .fighter-walk-layers, #game .orb-hero.elchica .fighter-walk-layers { display:none!important; }
+#game .coop-player.elchica .coop-player-art,
+#game .orb-hero.elchica .fighter-art.elchica { background-image:url('/assets/new-fighters/elchica-rig-v21849-idle.webp')!important; animation:none!important; }
+#game .coop-player.elchica.walk .coop-player-art,
+#game .orb-hero.elchica.orb-moving .fighter-art.elchica { background-image:url('/assets/new-fighters/elchica-rig-v21849-walk.webp')!important; animation:none!important; }
+#game .coop-player.elchica.walk.stride-alt .coop-player-art,
+#game .orb-hero.elchica.orb-moving.orb-walk-fast .fighter-art.elchica { background-image:url('/assets/new-fighters/elchica-rig-v21849-idle.webp')!important; animation:none!important; }
+#game .coop-player.elchica.jump .coop-player-art,
+#game .coop-player.elchica.airborne .coop-player-art { background-image:url('/assets/new-fighters/elchica-crouch-v21849.webp')!important; animation:none!important; }
+#game .coop-player.elchica.fire .coop-player-art,
+#game .orb-hero.elchica.orb-firing .fighter-art.elchica { background-image:url('/assets/new-fighters/elchica-bottle-special-v2.webp')!important; animation:none!important; }
+#game .coop-player.elchica.special .coop-player-art { background-image:url('/assets/new-fighters/elchica-throw-special-v2.webp')!important; animation:none!important; }
+#game .coop-player.elchica.dodge .coop-player-art,
+#game .coop-player.elchica.revive .coop-player-art { background-image:url('/assets/new-fighters/elchica-rig-v21849-recover.webp')!important; animation:none!important; }
+#game .coop-player.elchica.hit .coop-player-art { background-image:url('/assets/new-fighters/elchica-rig-v21849-recover.webp')!important; animation:none!important; }
+#game .coop-player.elchica.down .coop-player-art,
+#game .orb-hero.elchica.orb-defeated .fighter-art.elchica { background-image:url('/assets/new-fighters/elchica-rig-v21849-recover.webp')!important; animation:none!important; }
+#game .orb-hero.elchica.orb-victory-dance .fighter-art.elchica { background-image:url('/assets/new-fighters/elchica-bottle-special-v2.webp')!important; animation:none!important; }
+/* ogalla */
+#game .coop-player.ogalla .coop-player-art, #game .orb-hero.ogalla .fighter-art.ogalla { background-size:contain!important;background-position:center bottom!important;background-repeat:no-repeat!important; }
+#game .coop-player.ogalla .coop-player-art::before, #game .coop-player.ogalla .coop-player-art::after, #game .orb-hero.ogalla .fighter-art.ogalla::before, #game .orb-hero.ogalla .fighter-art.ogalla::after { content:none!important; }
+#game .coop-player.ogalla .fighter-walk-layers, #game .orb-hero.ogalla .fighter-walk-layers { display:none!important; }
+#game .coop-player.ogalla .coop-player-art,
+#game .orb-hero.ogalla .fighter-art.ogalla { background-image:url('/assets/new-fighters/ogalla-idle-v2.webp')!important; animation:none!important; }
+#game .coop-player.ogalla.walk .coop-player-art,
+#game .orb-hero.ogalla.orb-moving .fighter-art.ogalla { background-image:url('/assets/new-fighters/ogalla-walk-v2.webp')!important; animation:none!important; }
+#game .coop-player.ogalla.walk.stride-alt .coop-player-art,
+#game .orb-hero.ogalla.orb-moving.orb-walk-fast .fighter-art.ogalla { background-image:url('/assets/new-fighters/ogalla-idle-v2.webp')!important; animation:none!important; }
+#game .coop-player.ogalla.jump .coop-player-art,
+#game .coop-player.ogalla.airborne .coop-player-art { background-image:url('/assets/new-fighters/ogalla-crouch-v21849.webp')!important; animation:none!important; }
+#game .coop-player.ogalla.fire .coop-player-art,
+#game .orb-hero.ogalla.orb-firing .fighter-art.ogalla { background-image:url('/assets/new-fighters/ogalla-artichoke-attack-v2.webp')!important; animation:none!important; }
+#game .coop-player.ogalla.special .coop-player-art { background-image:url('/assets/new-fighters/ogalla-staff-special-v2.webp')!important; animation:none!important; }
+#game .coop-player.ogalla.dodge .coop-player-art,
+#game .coop-player.ogalla.revive .coop-player-art { background-image:url('/assets/new-fighters/ogalla-guard-v2.webp')!important; animation:none!important; }
+#game .coop-player.ogalla.hit .coop-player-art { background-image:url('/assets/new-fighters/ogalla-guard-v2.webp')!important; animation:none!important; }
+#game .coop-player.ogalla.down .coop-player-art,
+#game .orb-hero.ogalla.orb-defeated .fighter-art.ogalla { background-image:url('/assets/new-fighters/ogalla-guard-v2.webp')!important; animation:none!important; }
+#game .orb-hero.ogalla.orb-victory-dance .fighter-art.ogalla { background-image:url('/assets/new-fighters/ogalla-staff-special-v2.webp')!important; animation:none!important; }
+/* xuso */
+#game .coop-player.xuso .coop-player-art, #game .orb-hero.xuso .fighter-art.xuso { background-size:contain!important;background-position:center bottom!important;background-repeat:no-repeat!important; }
+#game .coop-player.xuso .coop-player-art::before, #game .coop-player.xuso .coop-player-art::after, #game .orb-hero.xuso .fighter-art.xuso::before, #game .orb-hero.xuso .fighter-art.xuso::after { content:none!important; }
+#game .coop-player.xuso .fighter-walk-layers, #game .orb-hero.xuso .fighter-walk-layers { display:none!important; }
+#game .coop-player.xuso .coop-player-art,
+#game .orb-hero.xuso .fighter-art.xuso { background-image:url('/assets/new-fighters/xuso-rig-v21849-idle.webp')!important; animation:none!important; }
+#game .coop-player.xuso.walk .coop-player-art,
+#game .orb-hero.xuso.orb-moving .fighter-art.xuso { background-image:url('/assets/new-fighters/xuso-rig-v21849-walk.webp')!important; animation:none!important; }
+#game .coop-player.xuso.walk.stride-alt .coop-player-art,
+#game .orb-hero.xuso.orb-moving.orb-walk-fast .fighter-art.xuso { background-image:url('/assets/new-fighters/xuso-rig-v21849-idle.webp')!important; animation:none!important; }
+#game .coop-player.xuso.jump .coop-player-art,
+#game .coop-player.xuso.airborne .coop-player-art { background-image:url('/assets/new-fighters/xuso-crouch-v21849b.webp')!important; animation:none!important; }
+#game .coop-player.xuso.fire .coop-player-art,
+#game .orb-hero.xuso.orb-firing .fighter-art.xuso { background-image:url('/assets/new-fighters/xuso-rig-v21849-punch.webp')!important; animation:none!important; }
+#game .coop-player.xuso.special .coop-player-art { background-image:url('/assets/new-fighters/xuso-dog-attack-v2.webp')!important; animation:none!important; }
+#game .coop-player.xuso.dodge .coop-player-art,
+#game .coop-player.xuso.revive .coop-player-art { background-image:url('/assets/new-fighters/xuso-rig-v21849-recover.webp')!important; animation:none!important; }
+#game .coop-player.xuso.hit .coop-player-art { background-image:url('/assets/new-fighters/xuso-rig-v21849-recover.webp')!important; animation:none!important; }
+#game .coop-player.xuso.down .coop-player-art,
+#game .orb-hero.xuso.orb-defeated .fighter-art.xuso { background-image:url('/assets/new-fighters/xuso-rig-v21849-recover.webp')!important; animation:none!important; }
+#game .orb-hero.xuso.orb-victory-dance .fighter-art.xuso { background-image:url('/assets/new-fighters/xuso-rig-v21849-kick.webp')!important; animation:none!important; }
+/* bomba */
+#game .coop-player.bomba .coop-player-art, #game .orb-hero.bomba .fighter-art.bomba { background-size:contain!important;background-position:center bottom!important;background-repeat:no-repeat!important; }
+#game .coop-player.bomba .coop-player-art::before, #game .coop-player.bomba .coop-player-art::after, #game .orb-hero.bomba .fighter-art.bomba::before, #game .orb-hero.bomba .fighter-art.bomba::after { content:none!important; }
+#game .coop-player.bomba .fighter-walk-layers, #game .orb-hero.bomba .fighter-walk-layers { display:none!important; }
+#game .coop-player.bomba .coop-player-art,
+#game .orb-hero.bomba .fighter-art.bomba { background-image:url('/assets/new-fighters/bomba-idle-v2.webp')!important; animation:none!important; }
+#game .coop-player.bomba.walk .coop-player-art,
+#game .orb-hero.bomba.orb-moving .fighter-art.bomba { background-image:url('/assets/new-fighters/bomba-walk-v2.webp')!important; animation:none!important; }
+#game .coop-player.bomba.walk.stride-alt .coop-player-art,
+#game .orb-hero.bomba.orb-moving.orb-walk-fast .fighter-art.bomba { background-image:url('/assets/new-fighters/bomba-idle-v2.webp')!important; animation:none!important; }
+#game .coop-player.bomba.jump .coop-player-art,
+#game .coop-player.bomba.airborne .coop-player-art { background-image:url('/assets/new-fighters/bomba-crouch-v21849.webp')!important; animation:none!important; }
+#game .coop-player.bomba.fire .coop-player-art,
+#game .orb-hero.bomba.orb-firing .fighter-art.bomba { background-image:url('/assets/new-fighters/bomba-rig-v21847-punch.webp')!important; animation:none!important; }
+#game .coop-player.bomba.special .coop-player-art { background-image:url('/assets/new-fighters/bomba-hoe-attack-v2.webp')!important; animation:none!important; }
+#game .coop-player.bomba.dodge .coop-player-art,
+#game .coop-player.bomba.revive .coop-player-art { background-image:url('/assets/new-fighters/bomba-guard-v2.webp')!important; animation:none!important; }
+#game .coop-player.bomba.hit .coop-player-art { background-image:url('/assets/new-fighters/bomba-guard-v2.webp')!important; animation:none!important; }
+#game .coop-player.bomba.down .coop-player-art,
+#game .orb-hero.bomba.orb-defeated .fighter-art.bomba { background-image:url('/assets/new-fighters/bomba-guard-v2.webp')!important; animation:none!important; }
+#game .orb-hero.bomba.orb-victory-dance .fighter-art.bomba { background-image:url('/assets/new-fighters/bomba-hoe-attack-v2.webp')!important; animation:none!important; }
+/* tonimassama */
+#game .coop-player.tonimassama .coop-player-art, #game .orb-hero.tonimassama .fighter-art.tonimassama { background-size:contain!important;background-position:center bottom!important;background-repeat:no-repeat!important; }
+#game .coop-player.tonimassama .coop-player-art::before, #game .coop-player.tonimassama .coop-player-art::after, #game .orb-hero.tonimassama .fighter-art.tonimassama::before, #game .orb-hero.tonimassama .fighter-art.tonimassama::after { content:none!important; }
+#game .coop-player.tonimassama .fighter-walk-layers, #game .orb-hero.tonimassama .fighter-walk-layers { display:none!important; }
+#game .coop-player.tonimassama .coop-player-art,
+#game .orb-hero.tonimassama .fighter-art.tonimassama { background-image:url('/assets/new-fighters/tonimassama-frames/idle.webp')!important; animation:none!important; }
+#game .coop-player.tonimassama.walk .coop-player-art,
+#game .orb-hero.tonimassama.orb-moving .fighter-art.tonimassama { background-image:url('/assets/new-fighters/tonimassama-frames/walk-a.webp')!important; animation:none!important; }
+#game .coop-player.tonimassama.walk.stride-alt .coop-player-art,
+#game .orb-hero.tonimassama.orb-moving.orb-walk-fast .fighter-art.tonimassama { background-image:url('/assets/new-fighters/tonimassama-frames/walk-b.webp')!important; animation:none!important; }
+#game .coop-player.tonimassama.jump .coop-player-art,
+#game .coop-player.tonimassama.airborne .coop-player-art { background-image:url('/assets/new-fighters/tonimassama-frames/jump.webp')!important; animation:none!important; }
+#game .coop-player.tonimassama.fire .coop-player-art,
+#game .orb-hero.tonimassama.orb-firing .fighter-art.tonimassama { background-image:url('/assets/new-fighters/tonimassama-frames/pistol.webp')!important; animation:none!important; }
+#game .coop-player.tonimassama.special .coop-player-art { background-image:url('/assets/new-fighters/tonimassama-frames/punch.webp')!important; animation:none!important; }
+#game .coop-player.tonimassama.dodge .coop-player-art,
+#game .coop-player.tonimassama.revive .coop-player-art { background-image:url('/assets/new-fighters/tonimassama-frames/guard.webp')!important; animation:none!important; }
+#game .coop-player.tonimassama.hit .coop-player-art { background-image:url('/assets/new-fighters/tonimassama-frames/hit.webp')!important; animation:none!important; }
+#game .coop-player.tonimassama.down .coop-player-art,
+#game .orb-hero.tonimassama.orb-defeated .fighter-art.tonimassama { background-image:url('/assets/new-fighters/tonimassama-frames/getup.webp')!important; animation:none!important; }
+#game .orb-hero.tonimassama.orb-victory-dance .fighter-art.tonimassama { background-image:url('/assets/new-fighters/tonimassama-frames/kick.webp')!important; animation:none!important; }
+/* nova */
+#game .coop-player.nova .coop-player-art, #game .orb-hero.nova .fighter-art.nova { background-size:contain!important;background-position:center bottom!important;background-repeat:no-repeat!important; }
+#game .coop-player.nova .coop-player-art::before, #game .coop-player.nova .coop-player-art::after, #game .orb-hero.nova .fighter-art.nova::before, #game .orb-hero.nova .fighter-art.nova::after { content:none!important; }
+#game .coop-player.nova .fighter-walk-layers, #game .orb-hero.nova .fighter-walk-layers { display:none!important; }
+#game .coop-player.nova .coop-player-art,
+#game .orb-hero.nova .fighter-art.nova { background-image:url('/assets/new-fighters/nova-frame-0.webp')!important; animation:none!important; }
+#game .coop-player.nova.walk .coop-player-art,
+#game .orb-hero.nova.orb-moving .fighter-art.nova { background-image:url('/assets/new-fighters/nova-frame-1.webp')!important; animation:none!important; }
+#game .coop-player.nova.walk.stride-alt .coop-player-art,
+#game .orb-hero.nova.orb-moving.orb-walk-fast .fighter-art.nova { background-image:url('/assets/new-fighters/nova-frame-0.webp')!important; animation:none!important; }
+#game .coop-player.nova.jump .coop-player-art,
+#game .coop-player.nova.airborne .coop-player-art { background-image:url('/assets/new-fighters/nova-frame-3.webp')!important; animation:none!important; }
+#game .coop-player.nova.fire .coop-player-art,
+#game .orb-hero.nova.orb-firing .fighter-art.nova { background-image:url('/assets/new-fighters/nova-frame-2.webp')!important; animation:none!important; }
+#game .coop-player.nova.special .coop-player-art { background-image:url('/assets/new-fighters/nova-frame-2.webp')!important; animation:none!important; }
+#game .coop-player.nova.dodge .coop-player-art,
+#game .coop-player.nova.revive .coop-player-art { background-image:url('/assets/new-fighters/nova-frame-0.webp')!important; animation:none!important; }
+#game .coop-player.nova.hit .coop-player-art { background-image:url('/assets/new-fighters/nova-frame-1.webp')!important; animation:none!important; }
+#game .coop-player.nova.down .coop-player-art,
+#game .orb-hero.nova.orb-defeated .fighter-art.nova { background-image:url('/assets/new-fighters/nova-frame-1.webp')!important; animation:none!important; }
+#game .orb-hero.nova.orb-victory-dance .fighter-art.nova { background-image:url('/assets/new-fighters/nova-frame-3.webp')!important; animation:none!important; }
+

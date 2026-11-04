@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import "./upgrades.css";
 import "./pose-map.css";
+import "./mode-pose-map.css";
 
 export const viewport: Viewport = {
   width: "device-width",

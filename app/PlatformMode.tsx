@@ -469,12 +469,22 @@ const atlasHeroPoses = (asset: string): Record<HeroPose, string> => ({
 });
 
 const HERO_POSE_ASSETS: Record<FighterId, Record<HeroPose, string>> = {
-  xuso: atlasHeroPoses("/prison-slug/assets/duo-dog.webp"),
-  bomba: atlasHeroPoses("/prison-slug/assets/hoe-hero.webp"),
+  xuso: {
+    idle: "/assets/new-fighters/xuso-rig-v21849-idle.webp", walkA: "/assets/new-fighters/xuso-rig-v21849-walk.webp", walkB: "/assets/new-fighters/xuso-rig-v21849-idle.webp",
+    walkC: "/assets/new-fighters/xuso-rig-v21849-walk.webp", walkD: "/assets/new-fighters/xuso-rig-v21849-idle.webp", walkE: "/assets/new-fighters/xuso-rig-v21849-walk.webp",
+    crouch: "/assets/new-fighters/xuso-crouch-v21849b.webp", rise: "/assets/new-fighters/xuso-crouch-v21849b.webp",
+    fire: "/assets/new-fighters/xuso-rig-v21849-punch.webp", heavyFire: "/assets/new-fighters/xuso-dog-attack-v2.webp", kick: "/assets/new-fighters/xuso-rig-v21849-kick.webp", hit: "/assets/new-fighters/xuso-rig-v21849-recover.webp",
+  },
+  bomba: {
+    idle: "/assets/new-fighters/bomba-idle-v2.webp", walkA: "/assets/new-fighters/bomba-walk-v2.webp", walkB: "/assets/new-fighters/bomba-idle-v2.webp",
+    walkC: "/assets/new-fighters/bomba-walk-v2.webp", walkD: "/assets/new-fighters/bomba-idle-v2.webp", walkE: "/assets/new-fighters/bomba-walk-v2.webp",
+    crouch: "/assets/new-fighters/bomba-crouch-v21849.webp", rise: "/assets/new-fighters/bomba-crouch-v21849.webp",
+    fire: "/assets/new-fighters/bomba-rig-v21847-punch.webp", heavyFire: "/assets/new-fighters/bomba-hoe-attack-v2.webp", kick: "/assets/new-fighters/bomba-rig-v21847-kick.webp", hit: "/assets/new-fighters/bomba-guard-v2.webp",
+  },
   rafeta: atlasHeroPoses("/prison-slug/assets/white-hero.webp"),
   nova: {
     idle: "/assets/new-fighters/nova-frame-0.webp", walkA: "/assets/new-fighters/nova-frame-1.webp", walkB: "/assets/new-fighters/nova-frame-0.webp", walkC: "/assets/new-fighters/nova-frame-1.webp", walkD: "/assets/new-fighters/nova-frame-0.webp", walkE: "/assets/new-fighters/nova-frame-1.webp",
-    crouch: "/assets/new-fighters/nova-frame-0.webp", rise: "/assets/new-fighters/nova-frame-3.webp", fire: "/assets/new-fighters/nova-frame-2.webp", heavyFire: "/assets/new-fighters/nova-frame-2.webp", kick: "/assets/new-fighters/nova-frame-3.webp", hit: "/assets/new-fighters/nova-frame-3.webp",
+    crouch: "/assets/new-fighters/nova-frame-1.webp", rise: "/assets/new-fighters/nova-frame-3.webp", fire: "/assets/new-fighters/nova-frame-2.webp", heavyFire: "/assets/new-fighters/nova-frame-2.webp", kick: "/assets/new-fighters/nova-frame-3.webp", hit: "/assets/new-fighters/nova-frame-3.webp",
   },
   tonimassama: {
     idle: "/assets/new-fighters/tonimassama-frames/idle.webp",
@@ -529,10 +539,10 @@ const HERO_POSE_ASSETS: Record<FighterId, Record<HeroPose, string>> = {
     walkE: "/assets/signature-v271/maletilla-01.webp",
     crouch: "/assets/signature-v271/maletilla-03.webp",
     rise: "/assets/signature-v271/maletilla-08.webp",
-    fire: "/assets/safe-frames/maletilla-platform-punch.svg",
-    heavyFire: "/assets/safe-frames/maletilla-platform-punch.svg",
+    fire: "/assets/actions-normalized-v1/maletilla/maletilla-05.webp",
+    heavyFire: "/assets/maletilla-cloretilo-fire-v3.webp",
     kick: "/assets/signature-v271/maletilla-07-clean-v1.webp",
-    hit: "/assets/actions-normalized-v1/maletilla/maletilla-extra-09-knockdown-v2.webp",
+    hit: "/assets/actions-normalized-v1/maletilla/maletilla-motion-12-hit-v1.webp",
   },
   vanessa: {
     idle: "/assets/signature-v271/vanessa-00.webp",
@@ -1804,7 +1814,7 @@ export default function PlatformMode({ fighter, fighterName, soundOn, difficulty
 
     const drawHeroPose = (pose: HeroPose, alpha: number, now: number, playerX: number, powered: boolean, flashAlpha: number) => {
       const visualScale = powered ? 1.13 : 1;
-      const isWidePose = pose === "kick" || pose === "crouch" || pose === "fire";
+      const isWidePose = pose === "kick" || pose === "crouch" || pose === "fire" || pose === "heavyFire";
       const poseWidth = (isWidePose ? 194 : 145) * visualScale;
       const poseHeight = (pose === "crouch" ? 145 : 170) * visualScale;
       const jumpTilt = player.onGround || pose === "hit" ? 0 : clamp(player.vy / 1800, -0.2, 0.2);
@@ -1832,8 +1842,9 @@ export default function PlatformMode({ fighter, fighterName, soundOn, difficulty
               ? images["hero-fire"]
               : images["hero-fire-recoil"]
         : images[`hero-${pose}`];
-      const usesLegacyFire = pose === "fire" && poseImage === images["hero-fire"];
-      const nativeFacesRight = usesLegacyFire ? fighter === "maletilla" || fighter === "cesaret" || fighter === "borja" : true;
+      // Only these attack drawings face left; every other frame faces right.
+      const usesLegacyFire = pose === "fire" && (poseImage === images["hero-fire"] || poseImage === images["hero-fire-aim"]);
+      const nativeFacesRight = usesLegacyFire ? fighter !== "cristian" && fighter !== "bacora" : true;
       const flipPose = nativeFacesRight ? player.facing < 0 : player.facing > 0;
       const atlasCell = fighter === "elchica" || fighter === "ogalla"
         ? pose === "walkA" || pose === "walkE" ? { column: 1, row: 0 }

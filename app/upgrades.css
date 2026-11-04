@@ -890,3 +890,16 @@ html:fullscreen .game-shell, html:-webkit-full-screen .game-shell { min-height: 
   filter: drop-shadow(0 0 16px rgba(255, 240, 160, .6));
 }
 .super-cinematic { animation-duration: 560ms !important; }
+
+/* ===== V2.25 modes polish ===== */
+/* Crowd extras stay behind menus and result panels instead of covering the level cards and buttons. */
+:is(.adventure-map, .platform-result, .coop-result, .orb-result) > .arcade-crowd { z-index: 0 !important; opacity: .5; filter: saturate(.85) brightness(.8); }
+:is(.adventure-map, .platform-result, .coop-result, .orb-result) > :not(.arcade-crowd) { position: relative; z-index: 1; }
+/* Crowd extras read as background, not as part of the action. */
+.arena .arcade-crowd { z-index: 1 !important; }
+.arena .arcade-crowd .arcade-crowd-person {
+  opacity: .5 !important;
+  filter: blur(1.2px) saturate(.7) brightness(.72) !important;
+}
+.arena:is(.phase-over) .arcade-crowd .arcade-crowd-person,
+.result-screen .arcade-crowd .arcade-crowd-person { opacity: .65 !important; filter: saturate(.85) brightness(.85) !important; }
