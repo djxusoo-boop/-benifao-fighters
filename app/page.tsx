@@ -40,6 +40,9 @@ type FighterStyle = "classic" | "neon" | "gold";
 type ArcadeTool = "moves" | "profile" | "controls" | null;
 type DamagePop = { id: number; side: Side; x: number; amount: number; kind: "normal" | "special" | "super" | "guard" | "counter" };
 type SuperFlash = { id: number; side: Side; fighter: FighterId } | null;
+type ArcadeRun = { rivals: FighterId[]; index: number; score: number; continues: number; savedDifficulty: Difficulty; status: "fighting" | "between" | "lost" | "cleared"; pendingStart: boolean; lastScore: number };
+const ARCADE_LENGTH = 6;
+const arcadeDifficultyFor = (index: number): Difficulty => index < 2 ? "easy" : index < ARCADE_LENGTH - 1 ? "normal" : "hard";
 type SuperAnim = { id: number; fighter: FighterId; frame: number; companion: number; companionX: number; origin: number; target: number; laneTop: number; laneHeight: number };
 type SuperFx = { id: number; side: Side; fighter: FighterId; origin: number; target: number } | null;
 type MatchStats = { hits: number; damage: number; specials: number; supers: number; perfectGuards: number; maxCombo: number; perfectRounds: number };
@@ -146,7 +149,7 @@ const STAGES = [
 
 const GAME_TITLE = "HARDCORE FIGHTERS";
 const GAME_EDITION = "WEB · ARCADE EDITION";
-const GAME_VERSION = "V2.25.0";
+const GAME_VERSION = "V2.26.0";
 
 const ROUND_SECONDS = 99;
 const SUPER_MAX = 100;
@@ -429,6 +432,9 @@ export default function Home() {
   const [superAnim, setSuperAnim] = useState<Record<Side, SuperAnim | null>>({ player: null, cpu: null });
   const [stunned, setStunned] = useState<Record<Side, boolean>>({ player: false, cpu: false });
   const [lowAttack, setLowAttack] = useState<Record<Side, boolean>>({ player: false, cpu: false });
+  const [vsScreen, setVsScreen] = useState<{ id: number } | null>(null);
+  const [arcadeRun, setArcadeRun] = useState<ArcadeRun | null>(null);
+  const arcadeRunRef = useRef<ArcadeRun | null>(null);
   const [passiveBadge, setPassiveBadge] = useState<Record<Side, { text: string; id: number } | null>>({ player: null, cpu: null });
   const [matchStats, setMatchStats] = useState<MatchStats>(freshMatchStats);
   const [roundEndKind, setRoundEndKind] = useState<"ko" | "perfect" | "time">("ko");
@@ -1731,16 +1737,26 @@ export default function Home() {
       phase: "intro",
       ...(newFighterMatch ? { playerX: startingBounds.min, cpuX: startingBounds.max } : {}),
     });
-    setRoundCall(number === 3 ? "ROUND 3 · DESEMPATE" : `ROUND ${number}`);
-    jingle("round");
+    // First round of a match opens with a VS screen.
+    const vsDelay = number === 1 ? 2200 : 0;
+    if (vsDelay) {
+      setVsScreen({ id: Date.now() });
+      setRoundCall("");
+      jingle("perfect");
+      later(() => setVsScreen(null), vsDelay - 120);
+    }
+    later(() => {
+      setRoundCall(number === 3 ? "ROUND 3 · DESEMPATE" : `ROUND ${number}`);
+      jingle("round");
+    }, vsDelay);
     later(() => {
       setRoundCall("FIGHT!");
       jingle("fight");
-    }, 650);
+    }, vsDelay + 650);
     introTimerRef.current = later(() => {
       setRoundCall("");
       setGame((current) => ({ ...current, phase: "fight" }));
-    }, 1250);
+    }, vsDelay + 1250);
   }, [clearTransientTimers, fightReady, jingle, later, newFighterMatch, opponent, selected]);
 
   const resetMatchMeters = useCallback(() => {
@@ -1835,6 +1851,39 @@ export default function Home() {
     }, 55);
     return () => window.clearInterval(collisionTimer);
   }, [beep, fightPickup, game.phase, haptic]);
+
+  useEffect(() => { arcadeRunRef.current = arcadeRun; }, [arcadeRun]);
+
+  // ARCADE: a ladder of rivals with rising difficulty, continues and the fighter's ending.
+  const startArcade = useCallback(() => {
+    const pool = FIGHTER_ORDER.filter((fighter) => fighter !== selected);
+    for (let index = pool.length - 1; index > 0; index -= 1) {
+      const swap = Math.floor(Math.random() * (index + 1));
+      [pool[index], pool[swap]] = [pool[swap], pool[index]];
+    }
+    const rivals = pool.slice(0, ARCADE_LENGTH);
+    setPendingRanking(null);
+    setCampaignStep(0);
+    setBattleMode("cpu");
+    setLocalOpponent(rivals[0]);
+    setDifficulty(arcadeDifficultyFor(0));
+    setArcadeRun({ rivals, index: 0, score: 0, continues: 3, savedDifficulty: difficulty, status: "fighting", pendingStart: true, lastScore: 0 });
+  }, [difficulty, selected]);
+
+  const nextArcadeFight = useCallback(() => {
+    setArcadeRun((run) => {
+      if (!run) return run;
+      const index = run.index + 1;
+      setLocalOpponent(run.rivals[index]);
+      setStageIndex((current) => (current + 3) % STAGES.length);
+      setDifficulty(arcadeDifficultyFor(index));
+      return { ...run, index, status: "fighting", pendingStart: true };
+    });
+  }, []);
+
+  const continueArcade = useCallback(() => {
+    setArcadeRun((run) => run && run.continues > 0 ? { ...run, continues: run.continues - 1, status: "fighting", pendingStart: true } : run);
+  }, []);
 
   const startCampaign = useCallback(() => {
     if (!fightReady) return;
@@ -2279,11 +2328,11 @@ export default function Home() {
   }, [endRound, game.phase, game.winner]);
 
   useEffect(() => {
-    if (campaignStep !== 0 || game.phase !== "over" || game.winner !== "player" || rankingCapturedRef.current) return;
+    if (campaignStep !== 0 || arcadeRun || game.phase !== "over" || game.winner !== "player" || rankingCapturedRef.current) return;
     rankingCapturedRef.current = true;
     const score = Math.round(game.playerHealth * 100 + game.timer * 25 + roundWins.player * 1000 + progress.bestCombo * 150);
     setPendingRanking({ mode: "fight", score });
-  }, [campaignStep, game.phase, game.playerHealth, game.timer, game.winner, progress.bestCombo, roundWins.player]);
+  }, [arcadeRun, campaignStep, game.phase, game.playerHealth, game.timer, game.winner, progress.bestCombo, roundWins.player]);
 
   useEffect(() => {
     if (campaignStep !== 1 || game.phase !== "over" || game.winner !== "player") return;
@@ -2295,6 +2344,42 @@ export default function Home() {
     }, 3000);
     return () => window.clearTimeout(nextTimer);
   }, [campaignStep, clearTransientTimers, game.phase, game.playerHealth, game.timer, game.winner]);
+
+  useEffect(() => {
+    if (!arcadeRun?.pendingStart || !fightReady) return;
+    if (opponent !== arcadeRun.rivals[arcadeRun.index]) return;
+    if (game.phase !== "select" && game.phase !== "over") return;
+    const timer = window.setTimeout(() => {
+      setArcadeRun((run) => run ? { ...run, pendingStart: false } : run);
+      startRound();
+    }, 60);
+    return () => window.clearTimeout(timer);
+  }, [arcadeRun, fightReady, game.phase, opponent, startRound]);
+
+  useEffect(() => {
+    if (!arcadeRun || arcadeRun.status !== "fighting" || arcadeRun.pendingStart || game.phase !== "over" || !game.winner) return;
+    const won = game.winner === "player";
+    const fightScore = won ? Math.round(1500 + game.playerHealth * 25 + game.timer * 15 + matchStats.perfectRounds * 1000 + matchStats.maxCombo * 120 + arcadeRun.index * 500) : 0;
+    const last = arcadeRun.index >= arcadeRun.rivals.length - 1;
+    const timer = window.setTimeout(() => {
+      setArcadeRun((run) => {
+        if (!run || run.status !== "fighting") return run;
+        const score = run.score + fightScore;
+        if (won && last) {
+          setDifficulty(run.savedDifficulty);
+          setPendingRanking({ mode: "fight", score });
+          setProgress((current) => {
+            const next = { ...current, crowns: (current.crowns ?? 0) + 1 };
+            window.localStorage.setItem("benifaio-progress", JSON.stringify(next));
+            return next;
+          });
+          return { ...run, score, lastScore: fightScore, status: "cleared" };
+        }
+        return { ...run, score, lastScore: fightScore, status: won ? "between" : "lost" };
+      });
+    }, 0);
+    return () => window.clearTimeout(timer);
+  }, [arcadeRun, game.phase, game.playerHealth, game.timer, game.winner, matchStats.maxCombo, matchStats.perfectRounds]);
 
   const finishCampaignOrbs = useCallback((modeScore = 0) => {
     clearTransientTimers();
@@ -2620,6 +2705,12 @@ export default function Home() {
     setLobbyLocked([false, false]);
     setGame(freshGame());
     setRoundCall("");
+    setVsScreen(null);
+    const run = arcadeRunRef.current;
+    if (run) {
+      setDifficulty(run.savedDifficulty);
+      setArcadeRun(null);
+    }
   }, [clearTransientTimers]);
   useEffect(() => { resetToSelectRef.current = resetToSelect; }, [resetToSelect]);
 
@@ -2928,6 +3019,7 @@ export default function Home() {
             <div className="lobby-games">
               <h2>MODOS DE JUEGO <small>ELIGE CÓMO QUIERES JUGAR</small></h2>
               <div className="mode-start-actions">
+                <button className="fight-button arcade-ladder-button" type="button" onClick={startArcade} disabled={!fightersReady}>MODO ARCADE <span>♜</span><small className="mode-sub">6 RIVALES SEGUIDOS · TU FINAL</small></button>
                 <button className="fight-button" type="button" onClick={startRound} disabled={!fightReady} data-gamepad-default="true">MODO LUCHA <span>↗</span><small className="mode-sub">PARTIDAS RÁPIDAS CONTRA LA IA O UN AMIGO</small></button>
                 <button className="fight-button coop-mode-button" type="button" onClick={startCoopMode} disabled={!fightersReady}>AVENTURA COOPERATIVA <span>∞</span><small className="mode-sub">HASTA 2 JUGADORES</small></button>
                 <button className="fight-button orb-mode-button" type="button" onClick={startOrbMode} disabled={!fightersReady}>MODO ROMPEOBJETOS <span>◆</span><small className="mode-sub">DESTRUYE Y CONSIGUE PUNTOS</small></button>
@@ -3064,9 +3156,39 @@ export default function Home() {
           </div>
         )}
 
+        {vsScreen && game.phase === "intro" && (
+          <div key={vsScreen.id} className="vs-screen" aria-live="assertive">
+            {([["player", selected], ["cpu", opponent]] as [Side, FighterId][]).map(([side, fighter]) => (
+              <div key={side} className={`vs-side vs-${side}`} style={{ "--vs-color": FIGHTERS[fighter].color } as CSSProperties}>
+                <span className={`vs-portrait portrait ${fighter}`} />
+                <div className="vs-name">
+                  <small>{side === "player" ? "JUGADOR 1" : battleMode === "local" ? "JUGADOR 2" : arcadeRun ? `RIVAL ${arcadeRun.index + 1} / ${arcadeRun.rivals.length}` : "CPU"}</small>
+                  <strong>{FIGHTERS[fighter].name}</strong>
+                  <em>{FIGHTERS[fighter].title}</em>
+                  <q>{FIGHTER_PROFILES[fighter].motto}</q>
+                </div>
+              </div>
+            ))}
+            <b className="vs-mark">VS</b>
+            <span className="vs-stage">{arcadeRun ? `ARCADE · COMBATE ${arcadeRun.index + 1}${arcadeRun.index === arcadeRun.rivals.length - 1 ? " · JEFE FINAL" : ""} · ` : ""}{stage.name}</span>
+          </div>
+        )}
+
         {((game.phase === "intro" || game.phase === "ko") || (game.phase === "campaign-final" && roundCall)) && <div key={roundCall} className={`round-call ${game.phase === "ko" ? `ko-call end-${roundEndKind}` : ""} ${game.phase === "ko" && roundCall === "PREPARA EL SIGUIENTE ASALTO" ? "waiting-call" : ""} ${game.phase === "campaign-final" ? "boss-phase-call" : ""}`} aria-live="assertive">{roundCall}</div>}
 
-        {paused && <div className={`pause-layer ${resumeCountdown ? "resuming" : ""}`}><ArcadeCrowd mode="fight" seed={stageIndex + roundNumber} phase="paused" /><span>{resumeCountdown || "PAUSA"}</span><small>{resumeCountdown ? "PREPÁRATE · EL COMBATE CONTINÚA" : "PULSA ESC, P O START PARA CONTINUAR"}</small>{!resumeCountdown && <><button type="button" className="fight-button" onClick={resumeGame} data-gamepad-default="true">CONTINUAR</button><button type="button" className="secondary-button" onClick={resetToSelect}>VOLVER AL MENÚ</button></>}</div>}
+        {paused && <div className={`pause-layer ${resumeCountdown ? "resuming" : ""}`}><ArcadeCrowd mode="fight" seed={stageIndex + roundNumber} phase="paused" /><span>{resumeCountdown || "PAUSA"}</span><small>{resumeCountdown ? "PREPÁRATE · EL COMBATE CONTINÚA" : "PULSA ESC, P O START PARA CONTINUAR"}</small>{!resumeCountdown && <><button type="button" className="fight-button" onClick={resumeGame} data-gamepad-default="true">CONTINUAR</button><button type="button" className="secondary-button" onClick={resetToSelect}>VOLVER AL MENÚ</button>
+          <div className="pause-moves" aria-label={`Movimientos de ${playerData.name}`}>
+            <h3>{playerData.name} · MOVIMIENTOS</h3>
+            <ul>
+              <li><kbd>J</kbd> PUÑO <kbd>H</kbd> PATADA</li>
+              <li><kbd>K</kbd> {playerData.specialOne}</li>
+              <li><kbd>L</kbd> {playerData.specialTwo}</li>
+              <li><kbd>L</kbd> CON BARRA LLENA · SUPER {SUPER_ANIM[selected]?.name ?? SUPER_MOVES[selected].name}</li>
+              <li><kbd>S + J</kbd> AGARRE <kbd>C + H</kbd> BARRIDA <kbd>C + J</kbd> PUÑO BAJO</li>
+              <li><kbd>S + A/D</kbd> ESQUIVA <kbd>A/D ×2</kbd> DASH <kbd>W</kbd> SALTO</li>
+              <li className="pause-passive"><b>{FIGHTER_PROFILES[selected].passive.name}</b> · {FIGHTER_PROFILES[selected].passive.description}</li>
+            </ul>
+          </div></>}</div>}
 
         {game.phase === "fight" && <button className="pause-button" type="button" onClick={() => { resumeSequenceRef.current = false; setResumeCountdown(0); setPaused(true); }}>Ⅱ <small>PAUSA</small></button>}
 
@@ -3102,10 +3224,43 @@ export default function Home() {
               <span><b>{matchStats.perfectGuards}</b>BLOQ. PERFECTOS</span>
               {matchStats.perfectRounds > 0 && <span className="perfect-stat"><b>{matchStats.perfectRounds}</b>PERFECT</span>}
             </div>
-            <div className="result-actions">
-              <button className="fight-button" type="button" onClick={startRound}>REVANCHA</button>
-              <button className="secondary-button" type="button" onClick={resetToSelect}>CAMBIAR LUCHADOR</button>
-            </div>
+            {arcadeRun ? (
+              <div className={`arcade-panel arcade-${arcadeRun.status}`}>
+                <div className="arcade-ladder" aria-label="Progreso del modo arcade">
+                  {arcadeRun.rivals.map((rival, index) => (
+                    <span key={rival} className={`arcade-rung ${index < arcadeRun.index || (index === arcadeRun.index && (arcadeRun.status === "between" || arcadeRun.status === "cleared")) ? "beaten" : index === arcadeRun.index ? "current" : "upcoming"} ${index === arcadeRun.rivals.length - 1 ? "boss" : ""}`}>
+                      <i className={`portrait ${rival}`} /><b>{index === arcadeRun.rivals.length - 1 ? "JEFE" : index + 1}</b>
+                    </span>
+                  ))}
+                </div>
+                <strong className="arcade-score">{String(arcadeRun.score).padStart(7, "0")} PTS{arcadeRun.lastScore ? <small> +{arcadeRun.lastScore}</small> : null}</strong>
+                {arcadeRun.status === "between" && (
+                  <div className="result-actions">
+                    <button className="fight-button" type="button" onClick={nextArcadeFight} data-gamepad-default="true">SIGUIENTE: {FIGHTERS[arcadeRun.rivals[arcadeRun.index + 1]].name} ▶</button>
+                    <button className="secondary-button" type="button" onClick={resetToSelect}>ABANDONAR</button>
+                  </div>
+                )}
+                {arcadeRun.status === "lost" && (
+                  <div className="result-actions">
+                    {arcadeRun.continues > 0 && <button className="fight-button" type="button" onClick={continueArcade} data-gamepad-default="true">CONTINUAR · QUEDAN {arcadeRun.continues}</button>}
+                    <button className="secondary-button" type="button" onClick={resetToSelect}>{arcadeRun.continues > 0 ? "ABANDONAR" : "FIN DE LA PARTIDA"}</button>
+                  </div>
+                )}
+                {arcadeRun.status === "cleared" && (
+                  <div className="arcade-ending">
+                    <small>MODO ARCADE COMPLETADO · +1 CORONA</small>
+                    <h3>{FIGHTER_PROFILES[selected].endingTitle[0]} {FIGHTER_PROFILES[selected].endingTitle[1]}</h3>
+                    <p>{FIGHTER_PROFILES[selected].endingText}</p>
+                    <div className="result-actions"><button className="fight-button" type="button" onClick={resetToSelect} data-gamepad-default="true">VOLVER AL MENÚ</button></div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="result-actions">
+                <button className="fight-button" type="button" onClick={startRound}>REVANCHA</button>
+                <button className="secondary-button" type="button" onClick={resetToSelect}>CAMBIAR LUCHADOR</button>
+              </div>
+            )}
           </div>
         )}
 

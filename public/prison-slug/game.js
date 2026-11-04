@@ -142,48 +142,132 @@ const characters = [
   { id: "bonviure", name: "BONVIURE", title: "EL ANCLA NEGRA", ability: "BARRIDO DE ANCLA", color: "#a68c72", image: "/assets/new-fighters/bonviure-idle.png", specialText: "¡LATIGAZO DE CADENA!", specialColor: "#a68c72", description: "Combate con el arsenal de Hardcore Fighters." },
   { id: "elchica", name: "YOYE", title: "EL REY DEL JÄGER", ability: "BOTELLA DE YOYE", color: "#ec8d27", image: "/assets/new-fighters/elchica-atlas.png", specialText: "¡SALPICADURA ÁMBAR!", specialColor: "#ec8d27", description: "Combate con el arsenal de Hardcore Fighters." },
   { id: "ogalla", name: "OGALLA", title: "EL REY DE LA ALCACHOFA", ability: "BASTÓN DE ALCACHOFA", color: "#c89a46", image: "/assets/new-fighters/ogalla-atlas.png", specialText: "¡LLUVIA DE ALCACHOFAS!", specialColor: "#c89a46", description: "Combate con el arsenal de Hardcore Fighters." },
+  { id: "tonimassama", name: "TONI MASSAMA", title: "EL REY DE LA PEINETA", ability: "DISPARO DORADO", color: "#f0bd42", image: "/assets/new-fighters/tonimassama-frames/idle.webp", specialText: "¡PEINETAS VOLADORAS!", specialColor: "#f0bd42", description: "Combate con el arsenal de Hardcore Fighters." },
 ];
 
 const atlasHeroPoses = (asset) => ({ idle: asset, walkA: asset, walkB: asset, walkC: asset, walkD: asset, walkE: asset, crouch: asset, rise: asset, fire: asset, heavyFire: asset, kick: asset, hit: asset });
 const HERO_POSE_ASSETS = {
-  xuso: atlasHeroPoses("/prison-slug/assets/duo-dog.png"),
-  bomba: atlasHeroPoses("/prison-slug/assets/hoe-hero.png"),
+  xuso: {
+    idle: "/assets/new-fighters/xuso-rig-v21849-idle.webp", walkA: "/assets/new-fighters/xuso-rig-v21849-walk.webp", walkB: "/assets/new-fighters/xuso-rig-v21849-idle.webp",
+    walkC: "/assets/new-fighters/xuso-rig-v21849-walk.webp", walkD: "/assets/new-fighters/xuso-rig-v21849-idle.webp", walkE: "/assets/new-fighters/xuso-rig-v21849-walk.webp",
+    crouch: "/assets/new-fighters/xuso-crouch-v21849b.webp", rise: "/assets/new-fighters/xuso-crouch-v21849b.webp",
+    fire: "/assets/new-fighters/xuso-rig-v21849-punch.webp", heavyFire: "/assets/new-fighters/xuso-dog-attack-v2.webp", kick: "/assets/new-fighters/xuso-rig-v21849-kick.webp", hit: "/assets/new-fighters/xuso-rig-v21849-recover.webp",
+  },
+  bomba: {
+    idle: "/assets/new-fighters/bomba-idle-v2.webp", walkA: "/assets/new-fighters/bomba-walk-v2.webp", walkB: "/assets/new-fighters/bomba-idle-v2.webp",
+    walkC: "/assets/new-fighters/bomba-walk-v2.webp", walkD: "/assets/new-fighters/bomba-idle-v2.webp", walkE: "/assets/new-fighters/bomba-walk-v2.webp",
+    crouch: "/assets/new-fighters/bomba-crouch-v21849.webp", rise: "/assets/new-fighters/bomba-crouch-v21849.webp",
+    fire: "/assets/new-fighters/bomba-rig-v21847-punch.webp", heavyFire: "/assets/new-fighters/bomba-hoe-attack-v2.webp", kick: "/assets/new-fighters/bomba-rig-v21847-kick.webp", hit: "/assets/new-fighters/bomba-guard-v2.webp",
+  },
   rafeta: atlasHeroPoses("/prison-slug/assets/white-hero.png"),
-  nova: atlasHeroPoses("/assets/new-fighters/nova-sheet.png"),
-  maletilla: {
-    idle: "/assets/signature-v271/maletilla-00.webp", walkA: "/assets/signature-v271/maletilla-01.webp", walkB: "/assets/signature-v271/maletilla-00.webp", walkC: "/assets/signature-v271/maletilla-02.webp", walkD: "/assets/signature-v271/maletilla-00.webp", walkE: "/assets/signature-v271/maletilla-01.webp",
-    crouch: "/assets/signature-v271/maletilla-03.webp", rise: "/assets/signature-v271/maletilla-08.webp", fire: "/assets/safe-frames/maletilla-platform-punch.svg", heavyFire: "/assets/safe-frames/maletilla-platform-punch.svg", kick: "/assets/signature-v271/maletilla-07-clean-v1.webp", hit: "/assets/actions-normalized-v1/maletilla/maletilla-extra-09-knockdown-v2.webp",
+  nova: {
+    idle: "/assets/new-fighters/nova-frame-0.webp", walkA: "/assets/new-fighters/nova-frame-1.webp", walkB: "/assets/new-fighters/nova-frame-0.webp", walkC: "/assets/new-fighters/nova-frame-1.webp", walkD: "/assets/new-fighters/nova-frame-0.webp", walkE: "/assets/new-fighters/nova-frame-1.webp",
+    crouch: "/assets/new-fighters/nova-frame-1.webp", rise: "/assets/new-fighters/nova-frame-3.webp", fire: "/assets/new-fighters/nova-frame-2.webp", heavyFire: "/assets/new-fighters/nova-frame-2.webp", kick: "/assets/new-fighters/nova-frame-3.webp", hit: "/assets/new-fighters/nova-frame-3.webp",
   },
-  vanessa: {
-    idle: "/assets/signature-v271/vanessa-00.webp", walkA: "/assets/signature-v271/vanessa-01.webp", walkB: "/assets/signature-v271/vanessa-00.webp", walkC: "/assets/signature-v271/vanessa-02.webp", walkD: "/assets/signature-v271/vanessa-00.webp", walkE: "/assets/signature-v271/vanessa-01.webp",
-    crouch: "/assets/signature-v271/vanessa-03.webp", rise: "/assets/actions-normalized-v1/vanessa/vanessa-motion-11-jump-air-v1.webp", fire: "/assets/signature-v271/vanessa-05.webp", heavyFire: "/assets/signature-v271/vanessa-05.webp", kick: "/assets/actions-normalized-v1/vanessa/vanessa-motion-09-kick-contact-v1.webp", hit: "/assets/actions-normalized-v1/vanessa/vanessa-motion-12-hit-v1.webp",
+  tonimassama: {
+    idle: "/assets/new-fighters/tonimassama-frames/idle.webp",
+    walkA: "/assets/new-fighters/tonimassama-frames/walk-a.webp",
+    walkB: "/assets/new-fighters/tonimassama-frames/walk-b.webp",
+    walkC: "/assets/new-fighters/tonimassama-frames/walk-c.webp",
+    walkD: "/assets/new-fighters/tonimassama-frames/walk-b.webp",
+    walkE: "/assets/new-fighters/tonimassama-frames/walk-a.webp",
+    crouch: "/assets/new-fighters/tonimassama-frames/crouch.webp",
+    rise: "/assets/new-fighters/tonimassama-frames/getup.webp",
+    fire: "/assets/new-fighters/tonimassama-frames/pistol.webp",
+    heavyFire: "/assets/new-fighters/tonimassama-frames/pistol.webp",
+    kick: "/assets/new-fighters/tonimassama-frames/kick.webp",
+    hit: "/assets/new-fighters/tonimassama-frames/hit.webp",
   },
-  josevictor: {
-    idle: "/assets/josevictor/idle-clean-v1.webp", walkA: "/assets/josevictor/run-a-clean-v1.webp", walkB: "/assets/josevictor/idle-clean-v1.webp", walkC: "/assets/josevictor/run-b-clean-v1.webp", walkD: "/assets/josevictor/idle-clean-v1.webp", walkE: "/assets/josevictor/run-a-clean-v1.webp",
-    crouch: "/assets/josevictor/jump-takeoff.webp", rise: "/assets/josevictor/jump-air.webp", fire: "/assets/actions-normalized-v1/josevictor/throw-money-clean-v1.webp", heavyFire: "/assets/actions-normalized-v1/josevictor/throw-money-clean-v1.webp", kick: "/assets/josevictor/kick.webp", hit: "/assets/josevictor/hit-clean-v1.webp",
-  },
-  cristian: {
-    idle: "/assets/cristian/idle.webp", walkA: "/assets/cristian/walk-a.webp", walkB: "/assets/cristian/idle.webp", walkC: "/assets/cristian/walk-b.webp", walkD: "/assets/cristian/walk-c.webp", walkE: "/assets/cristian/walk-a.webp",
-    crouch: "/assets/cristian/crouch.webp", rise: "/assets/cristian/getup.webp", fire: "/assets/cristian/throw-vinyl.webp", heavyFire: "/assets/cristian/throw-vinyl.webp", kick: "/assets/cristian/kick.webp", hit: "/assets/cristian/hit.webp",
+  elchica: atlasHeroPoses("/assets/new-fighters/elchica-atlas.webp"),
+  ogalla: atlasHeroPoses("/assets/new-fighters/ogalla-atlas.webp"),
+  cesaret: {
+    idle: "/assets/new-fighters/cesaret-idle.webp", walkA: "/assets/new-fighters/cesaret-walk.webp",
+    walkB: "/assets/new-fighters/cesaret-idle.webp", walkC: "/assets/new-fighters/cesaret-walk2-v1.webp",
+    walkD: "/assets/new-fighters/cesaret-idle.webp", walkE: "/assets/new-fighters/cesaret-walk.webp",
+    crouch: "/assets/new-fighters/cesaret-crouch-v1.webp", rise: "/assets/new-fighters/cesaret-jump-v1.webp",
+    fire: "/assets/new-fighters/cesaret-punch-v1.webp", heavyFire: "/assets/new-fighters/cesaret-punch-v1.webp", kick: "/assets/new-fighters/cesaret-kick-v1.webp", hit: "/assets/new-fighters/cesaret-hit-v1.webp",
   },
   borja: {
-    idle: "/assets/new-fighters/borja-idle.webp", walkA: "/assets/new-fighters/borja-walk.webp", walkB: "/assets/new-fighters/borja-idle.webp", walkC: "/assets/new-fighters/borja-walk2-v1.webp", walkD: "/assets/new-fighters/borja-idle.webp", walkE: "/assets/new-fighters/borja-walk.webp",
-    crouch: "/assets/new-fighters/borja-crouch-v1.webp", rise: "/assets/new-fighters/borja-jump-v1.webp", fire: "/assets/new-fighters/borja-punch-v1.webp", heavyFire: "/assets/new-fighters/borja-punch-v1.webp", kick: "/assets/new-fighters/borja-kick-v1.webp", hit: "/assets/new-fighters/borja-hit-v1.webp",
+    idle: "/assets/new-fighters/borja-idle.webp", walkA: "/assets/new-fighters/borja-walk.webp",
+    walkB: "/assets/new-fighters/borja-idle.webp", walkC: "/assets/new-fighters/borja-walk2-v1.webp",
+    walkD: "/assets/new-fighters/borja-idle.webp", walkE: "/assets/new-fighters/borja-walk.webp",
+    crouch: "/assets/new-fighters/borja-crouch-v1.webp", rise: "/assets/new-fighters/borja-jump-v1.webp",
+    fire: "/assets/new-fighters/borja-punch-v1.webp", heavyFire: "/assets/new-fighters/borja-punch-v1.webp", kick: "/assets/new-fighters/borja-kick-v1.webp", hit: "/assets/new-fighters/borja-hit-v1.webp",
   },
   bacora: {
-    idle: "/assets/new-fighters/bacora-idle.png", walkA: "/assets/new-fighters/bacora-walk.png", walkB: "/assets/new-fighters/bacora-idle.png", walkC: "/assets/new-fighters/bacora-walk.png", walkD: "/assets/new-fighters/bacora-idle.png", walkE: "/assets/new-fighters/bacora-walk.png",
-    crouch: "/assets/new-fighters/bacora-crouch.png", rise: "/assets/new-fighters/bacora-staff.png", fire: "/assets/new-fighters/bacora-shield.png", heavyFire: "/assets/new-fighters/bacora-staff.png", kick: "/assets/new-fighters/bacora-kick.png", hit: "/assets/new-fighters/bacora-crouch.png",
+    idle: "/assets/new-fighters/bacora-idle.webp", walkA: "/assets/new-fighters/bacora-walk.webp",
+    walkB: "/assets/new-fighters/bacora-idle.webp", walkC: "/assets/new-fighters/bacora-walk.webp",
+    walkD: "/assets/new-fighters/bacora-idle.webp", walkE: "/assets/new-fighters/bacora-walk.webp",
+    crouch: "/assets/new-fighters/bacora-crouch.webp", rise: "/assets/new-fighters/bacora-staff-v21849.webp",
+    fire: "/assets/new-fighters/bacora-shield.webp", heavyFire: "/assets/new-fighters/bacora-staff-v21849.webp", kick: "/assets/new-fighters/bacora-kick.webp", hit: "/assets/new-fighters/bacora-crouch.webp",
   },
   bonviure: {
-    idle: "/assets/new-fighters/bonviure-idle.png", walkA: "/assets/new-fighters/bonviure-walk.png", walkB: "/assets/new-fighters/bonviure-idle.png", walkC: "/assets/new-fighters/bonviure-walk.png", walkD: "/assets/new-fighters/bonviure-idle.png", walkE: "/assets/new-fighters/bonviure-walk.png",
-    crouch: "/assets/new-fighters/bonviure-crouch.png", rise: "/assets/new-fighters/bonviure-jump.png", fire: "/assets/new-fighters/bonviure-anchor.png", heavyFire: "/assets/new-fighters/bonviure-chain-clean.png", kick: "/assets/new-fighters/bonviure-kick-clean.png", hit: "/assets/new-fighters/bonviure-hit.png",
+    idle: "/assets/new-fighters/bonviure-idle.webp", walkA: "/assets/new-fighters/bonviure-walk.webp",
+    walkB: "/assets/new-fighters/bonviure-idle.webp", walkC: "/assets/new-fighters/bonviure-walk.webp",
+    walkD: "/assets/new-fighters/bonviure-idle.webp", walkE: "/assets/new-fighters/bonviure-walk.webp",
+    crouch: "/assets/new-fighters/bonviure-crouch-v21849.webp", rise: "/assets/new-fighters/bonviure-jump-v21849.webp",
+    fire: "/assets/new-fighters/bonviure-anchor-v21849.webp", heavyFire: "/assets/new-fighters/bonviure-chain-clean.webp", kick: "/assets/new-fighters/bonviure-kick-clean.webp", hit: "/assets/new-fighters/bonviure-hit-v21849.webp",
   },
-  elchica: atlasHeroPoses("/assets/new-fighters/elchica-atlas.png"),
-  ogalla: atlasHeroPoses("/assets/new-fighters/ogalla-atlas.png"),
+  maletilla: {
+    idle: "/assets/signature-v271/maletilla-00.webp",
+    walkA: "/assets/signature-v271/maletilla-01.webp",
+    walkB: "/assets/signature-v271/maletilla-00.webp",
+    walkC: "/assets/signature-v271/maletilla-02.webp",
+    walkD: "/assets/signature-v271/maletilla-00.webp",
+    walkE: "/assets/signature-v271/maletilla-01.webp",
+    crouch: "/assets/signature-v271/maletilla-03.webp",
+    rise: "/assets/signature-v271/maletilla-08.webp",
+    fire: "/assets/actions-normalized-v1/maletilla/maletilla-05.webp",
+    heavyFire: "/assets/maletilla-cloretilo-fire-v3.webp",
+    kick: "/assets/signature-v271/maletilla-07-clean-v1.webp",
+    hit: "/assets/actions-normalized-v1/maletilla/maletilla-motion-12-hit-v1.webp",
+  },
+  vanessa: {
+    idle: "/assets/signature-v271/vanessa-00.webp",
+    walkA: "/assets/signature-v271/vanessa-01.webp",
+    walkB: "/assets/signature-v271/vanessa-00.webp",
+    walkC: "/assets/signature-v271/vanessa-02.webp",
+    walkD: "/assets/signature-v271/vanessa-00.webp",
+    walkE: "/assets/signature-v271/vanessa-01.webp",
+    crouch: "/assets/signature-v271/vanessa-03.webp",
+    rise: "/assets/actions-normalized-v1/vanessa/vanessa-motion-11-jump-air-v1.webp",
+    fire: "/assets/signature-v271/vanessa-05.webp",
+    heavyFire: "/assets/signature-v271/vanessa-05.webp",
+    kick: "/assets/actions-normalized-v1/vanessa/vanessa-motion-09-kick-contact-v1.webp",
+    hit: "/assets/actions-normalized-v1/vanessa/vanessa-motion-12-hit-v1.webp",
+  },
+  josevictor: {
+    idle: "/assets/josevictor/idle-clean-v1.webp",
+    walkA: "/assets/josevictor/run-a-clean-v1.webp",
+    walkB: "/assets/josevictor/idle-clean-v1.webp",
+    walkC: "/assets/josevictor/run-b-clean-v1.webp",
+    walkD: "/assets/josevictor/idle-clean-v1.webp",
+    walkE: "/assets/josevictor/run-a-clean-v1.webp",
+    crouch: "/assets/josevictor/jump-takeoff.webp",
+    rise: "/assets/josevictor/jump-air.webp",
+    fire: "/assets/actions-normalized-v1/josevictor/throw-money-clean-v1.webp",
+    heavyFire: "/assets/actions-normalized-v1/josevictor/throw-money-clean-v1.webp",
+    kick: "/assets/josevictor/kick.webp",
+    hit: "/assets/josevictor/hit-clean-v1.webp",
+  },
+  cristian: {
+    idle: "/assets/cristian/idle.webp",
+    walkA: "/assets/cristian/walk-a.webp",
+    walkB: "/assets/cristian/idle.webp",
+    walkC: "/assets/cristian/walk-b.webp",
+    walkD: "/assets/cristian/walk-c.webp",
+    walkE: "/assets/cristian/walk-a.webp",
+    crouch: "/assets/cristian/crouch.webp",
+    rise: "/assets/cristian/getup.webp",
+    fire: "/assets/cristian/throw-vinyl.webp",
+    heavyFire: "/assets/cristian/throw-vinyl.webp",
+    kick: "/assets/cristian/kick.webp",
+    hit: "/assets/cristian/hit.webp",
+  },
 };
 
 const HERO_ATLAS_POSES = new Set(["elchica", "ogalla"]);
-const HERO_SHEET_POSES = new Set(["nova"]);
+const HERO_SHEET_POSES = new Set([]);
 const imageCache = new Map();
 
 const art = {
@@ -1241,15 +1325,15 @@ function drawCharacterSprite(heroId, screenX, groundY, facing = 1, pose = "idle"
   if (facing < 0) ctx.scale(-1, 1);
   ctx.shadowColor = `${hero.color}aa`;
   ctx.shadowBlur = 10 * scale;
-  ctx.globalCompositeOperation = "screen";
+  // Transparent cutouts are drawn normally; only Rafeta's legacy sprite still has a dark backdrop.
+  ctx.globalCompositeOperation = heroId === "rafeta" ? "screen" : "source-over";
+  // These two attack drawings face left, everything else faces right.
+  if ((heroId === "cristian" || heroId === "bacora") && pose === "fire") ctx.scale(-1, 1);
   const drawn = drawHeroFrame(poseImage, -poseWidth / 2, -poseHeight, poseWidth, poseHeight, heroAtlasCell(heroId, pose));
   ctx.globalCompositeOperation = "source-over";
   ctx.shadowBlur = 0;
   if (!drawn) { ctx.fillStyle = hero.color; ctx.fillRect(-24 * scale, -145 * scale, 48 * scale, 145 * scale); }
   if (heroId === "rafeta" && art.masia.complete) { ctx.save(); ctx.scale(-1, 1); ctx.drawImage(art.masia, 10 * scale, -poseHeight * .46, 15 * scale, 34 * scale); ctx.restore(); }
-  if (heroId === "xuso" && art.spooky.complete && art.spooky.naturalWidth) {
-    ctx.save(); ctx.globalCompositeOperation = "source-over"; ctx.shadowColor = "#7dff38"; ctx.shadowBlur = 9 * scale; ctx.drawImage(art.spooky, -68 * scale, -56 * scale, 58 * scale, 60 * scale); ctx.restore();
-  }
   ctx.restore();
   return { poseWidth, poseHeight };
 }
