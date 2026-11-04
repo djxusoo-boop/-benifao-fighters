@@ -27,7 +27,9 @@ const framesFor = (fighter: string) => {
   return [...urls];
 };
 
-export const preloadCoopFrames = (fighters: string[]) => {
+// Heroes: load and decode (kept in memory). Clones: only warm the download
+// cache, so a phone never holds every fighter's bitmaps at once.
+export const preloadCoopFrames = (fighters: string[], decode = true) => {
   fighters.forEach((fighter) => {
     framesFor(fighter).forEach((url) => {
       if (started.has(url)) return;
@@ -35,8 +37,10 @@ export const preloadCoopFrames = (fighters: string[]) => {
       const image = new Image();
       image.decoding = "async";
       image.src = url;
-      keep.push(image);
-      void image.decode?.().catch(() => undefined);
+      if (decode) {
+        keep.push(image);
+        void image.decode?.().catch(() => undefined);
+      }
     });
   });
 };

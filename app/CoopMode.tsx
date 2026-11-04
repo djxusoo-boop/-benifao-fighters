@@ -205,8 +205,6 @@ export default function CoopMode({ playerOne, playerTwo, aiPlayerTwo = false, so
   // Load both heroes' frames now, then the shadow clones' in the background.
   useEffect(() => {
     preloadCoopFrames([playerOne, playerTwo]);
-    const rest = window.setTimeout(() => preloadCoopFrames(ALL_FIGHTERS.filter((fighter) => fighter !== playerOne && fighter !== playerTwo)), 2500);
-    return () => window.clearTimeout(rest);
   }, [playerOne, playerTwo]);
   useEffect(() => { playersRef.current = players; }, [players]);
   useEffect(() => { enemiesRef.current = enemies; }, [enemies]);
@@ -285,6 +283,8 @@ export default function CoopMode({ playerOne, playerTwo, aiPlayerTwo = false, so
       pose: "move",
     };
     });
+    // Only this wave's clones are fetched, never the whole roster.
+    preloadCoopFrames([...new Set(next.map((enemy) => enemy.fighter).filter((fighter): fighter is FighterId => Boolean(fighter)))], false);
     setEnemies(next);
     enemiesRef.current = next;
     setStatus("playing");
