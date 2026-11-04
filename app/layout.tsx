@@ -4,6 +4,7 @@ import "./upgrades.css";
 import "./pose-map.css";
 import "./mode-pose-map.css";
 import "./estefy.css";
+import "./xuso.css";
 
 export const viewport: Viewport = {
   width: "device-width",

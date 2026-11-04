@@ -119,7 +119,7 @@ const FIGHTERS: Record<FighterId, { name: string; title: string; specialOne: str
   bonviure: { name: "BONVIURE", title: "EL ANCLA NEGRA", specialOne: "BARRIDO DE ANCLA", specialTwo: "LATIGAZO DE CADENA", color: "#a68c72" },
   elchica: { name: "EL CHICA", title: "EL REY DEL JÄGER", specialOne: "BOTELLA DEL CHICA", specialTwo: "SALPICADURA ÁMBAR", color: "#ec8d27" },
   ogalla: { name: "OGALLA", title: "EL REY DE LA ALCACHOFA", specialOne: "BASTÓN DE ALCACHOFA", specialTwo: "LLUVIA DE ALCACHOFAS", color: "#c89a46" },
-  xuso: { name: "XUSO", title: "EL DÚO DEL PERRO", specialOne: "MORDISCO DE XUSO", specialTwo: "AULLIDO DE PRISON", color: "#7dff38" },
+  xuso: { name: "XUSO", title: "EL DÚO DEL PERRO", specialOne: "MORDISCO DE SPOOKY", specialTwo: "MEADA DE SPOOKY", color: "#7dff38" },
   bomba: { name: "EL BOMBA", title: "EL AZADÓN", specialOne: "AZADAZO", specialTwo: "BARRIDO DE AZADA", color: "#ff9a31" },
   rafeta: { name: "RAFETA", title: "PORTAESTANDARTE", specialOne: "EMBESTIDA DE BANDERA", specialTwo: "GIRO DEL ESTANDARTE", color: "#e8c44d" },
   tonimassama: { name: "TONI MASSAMA", title: "EL REY DE LA PEINETA", specialOne: "DISPARO DORADO", specialTwo: "PEINETAS VOLADORAS", color: "#f0bd42" },
@@ -135,7 +135,7 @@ const SHORT_SPECIALS: Record<FighterId, [string, string]> = {
   cesaret: ["PESCADO", "PECES"], borja: ["SAPO", "VENENO"],
   bacora: ["ESCUDO", "VARA"], bonviure: ["ANCLA", "CADENA"],
   elchica: ["BOTELLA", "ÁMBAR"], ogalla: ["BASTÓN", "ALCACHOFAS"],
-  xuso: ["PERRO", "AULLIDO"], bomba: ["AZADA", "BARRIDO"], rafeta: ["BANDERA", "GIRO"], tonimassama: ["PISTOLA", "PEINETAS"], nova: ["PRISMA", "LÁSER"], estefy: ["MACHETE", "HOJAS"],
+  xuso: ["MORDISCO", "MEADA"], bomba: ["AZADA", "BARRIDO"], rafeta: ["BANDERA", "GIRO"], tonimassama: ["PISTOLA", "PEINETAS"], nova: ["PRISMA", "LÁSER"], estefy: ["MACHETE", "HOJAS"],
 };
 
 const STAGES = [
@@ -151,7 +151,7 @@ const STAGES = [
 
 const GAME_TITLE = "HARDCORE FIGHTERS";
 const GAME_EDITION = "WEB · ARCADE EDITION";
-const GAME_VERSION = "V2.29.0";
+const GAME_VERSION = "V2.30.0";
 
 const ROUND_SECONDS = 99;
 const SUPER_MAX = 100;
@@ -230,7 +230,7 @@ const MOVE_LABELS: Record<SpecialMove, string> = {
   venom: "¡VENENO DEL SAPO!",
   shield: "¡EMBESTIDA DE ESCUDO!", staff: "¡GOLPE DE VARA!", anchor: "¡BARRIDO DE ANCLA!", chain: "¡LATIGAZO DE CADENA!",
   jager: "¡BOTELLA DEL CHICA!", amber: "¡SALPICADURA ÁMBAR!", scepter: "¡BASTÓN DE ALCACHOFA!", artichokes: "¡LLUVIA DE ALCACHOFAS!",
-  dog: "¡MORDISCO DE XUSO!", howl: "¡AULLIDO DE PRISON!", hoe: "¡AZADAZO!", hoeSweep: "¡BARRIDO DE AZADA!", flag: "¡EMBESTIDA DE BANDERA!", flagSweep: "¡GIRO DEL ESTANDARTE!", goldPistol: "¡DISPARO DORADO!", fingerPeinetas: "¡PEINETAS VOLADORAS!", machete: "¡MACHETAZO!", leafStorm: "¡TORMENTA DE HOJAS!", prism: "¡RÁFAGA PRISMÁTICA!", prismBurst: "¡LÁSER ARCOÍRIS!",
+  dog: "¡MORDISCO DE SPOOKY!", howl: "¡SPOOKY TE MEA!", hoe: "¡AZADAZO!", hoeSweep: "¡BARRIDO DE AZADA!", flag: "¡EMBESTIDA DE BANDERA!", flagSweep: "¡GIRO DEL ESTANDARTE!", goldPistol: "¡DISPARO DORADO!", fingerPeinetas: "¡PEINETAS VOLADORAS!", machete: "¡MACHETAZO!", leafStorm: "¡TORMENTA DE HOJAS!", prism: "¡RÁFAGA PRISMÁTICA!", prismBurst: "¡LÁSER ARCOÍRIS!",
 };
 
 const MOVE_ASSETS: Record<SpecialMove, string> = {
@@ -252,7 +252,7 @@ const MOVE_ASSETS: Record<SpecialMove, string> = {
   anchor: "/assets/new-fighters/anchor.svg", chain: "/assets/new-fighters/chain.svg",
   jager: "/assets/new-fighters/jager.svg", amber: "/assets/new-fighters/amber.svg",
   scepter: "/assets/new-fighters/scepter.svg", artichokes: "/assets/new-fighters/artichokes.svg",
-  dog: "/assets/new-fighters/dog.svg", howl: "/assets/new-fighters/dog.svg", hoe: "/assets/new-fighters/hoe.svg", hoeSweep: "/assets/new-fighters/hoe.svg", flag: "/assets/new-fighters/rafeta-flag.svg", flagSweep: "/assets/new-fighters/rafeta-flag.svg", goldPistol: "/assets/new-fighters/tonimassama-bullet.svg", fingerPeinetas: "/assets/new-fighters/tonimassama-peineta.svg", prism: "/assets/new-fighters/tonimassama-bullet.svg", prismBurst: "/assets/new-fighters/tonimassama-bullet.svg",
+  dog: "/assets/new-fighters/xuso-v3/perro-mordisco-05.webp", howl: "/assets/new-fighters/xuso-v3/perro-pata-arriba.webp", hoe: "/assets/new-fighters/hoe.svg", hoeSweep: "/assets/new-fighters/hoe.svg", flag: "/assets/new-fighters/rafeta-flag.svg", flagSweep: "/assets/new-fighters/rafeta-flag.svg", goldPistol: "/assets/new-fighters/tonimassama-bullet.svg", fingerPeinetas: "/assets/new-fighters/tonimassama-peineta.svg", prism: "/assets/new-fighters/tonimassama-bullet.svg", prismBurst: "/assets/new-fighters/tonimassama-bullet.svg",
 };
 
 const ARCADE_PICKUPS = [
@@ -345,7 +345,30 @@ function SuperEffect({ fx, minimal = false }: { fx: NonNullable<SuperFx>; minima
   );
 }
 
+// Xuso's specials use his real dog: it sprints to the rival and bites (K) or
+// turns round, lifts a leg and pees on them (L).
+function DogSpecial({ move, side, origin, target, direction }: { move: "dog" | "howl"; side: Side; origin: number; target: number; direction: AttackDirection }) {
+  // Freeze the run when the order is given, so the dog never jumps if a fighter moves.
+  const [{ start, stop }] = useState(() => {
+    const toward = direction === "toward-right" ? 1 : -1;
+    const gap = Math.abs(target - origin);
+    const keep = move === "dog" ? 5 : 11;
+    const travel = Math.max(4, gap - keep);
+    return { start: Math.max(4, Math.min(96, origin + toward * 3)), stop: Math.max(4, Math.min(96, origin + toward * travel)) };
+  });
+  return (
+    <div className={`dog-special dog-${move} ${side} ${direction}`} style={{ "--dog-from": `${start}%`, "--dog-to": `${stop}%` } as CSSProperties} aria-hidden="true">
+      <b className="move-callout">{MOVE_LABELS[move]}</b>
+      <span className="dog-runner">
+        <span className="dog-body"><i className="dog-sprite" /></span>
+        {move === "howl" && <i className="dog-pee" />}
+      </span>
+    </div>
+  );
+}
+
 function SpecialEffect({ move, side, origin, target, arenaWidth, direction, airborne = false, color = "#ff8b2b", heavy = false }: { move: SpecialMove; side: Side; origin: number; target: number; arenaWidth: number; direction: AttackDirection; airborne?: boolean; color?: string; heavy?: boolean }) {
+  if (move === "dog" || move === "howl") return <DogSpecial move={move} side={side} origin={origin} target={target} direction={direction} />;
   const count = ["shield", "staff", "anchor", "chain", "dog", "howl", "hoe", "hoeSweep", "flag", "flagSweep", "goldPistol", "machete"].includes(move) ? 1 : move === "fingerPeinetas" ? 4 : move === "microphone" || move === "bottles" || move === "speakers" ? 3 : 4;
   const launchPoint = Math.max(8, Math.min(92, origin + (direction === "toward-right" ? 2 : -2)));
   const distancePercent = Math.max(8, Math.abs(target - origin));
@@ -444,6 +467,7 @@ function Home() {
   const [vsScreen, setVsScreen] = useState<{ id: number } | null>(null);
   const [arcadeRun, setArcadeRun] = useState<ArcadeRun | null>(null);
   const arcadeRunRef = useRef<ArcadeRun | null>(null);
+  const [passiveDog, setPassiveDog] = useState<{ side: Side; id: number } | null>(null);
   const [passiveBadge, setPassiveBadge] = useState<Record<Side, { text: string; id: number } | null>>({ player: null, cpu: null });
   const [matchStats, setMatchStats] = useState<MatchStats>(freshMatchStats);
   const [roundEndKind, setRoundEndKind] = useState<"ko" | "perfect" | "time">("ko");
@@ -1800,8 +1824,12 @@ function Home() {
       dogSides.forEach((side) => {
         const target: Side = side === "player" ? "cpu" : "player";
         if (Date.now() < immuneUntilRef.current[target] || Date.now() < evadeUntilRef.current[target]) return;
-        applyExtraHit(side, target, 4, "normal");
-        showPassive(side, "🐕 ¡MORDISCO DEL PERRO!");
+        // Spooky runs in on his own and bites; the bite lands with his jaws.
+        const id = Date.now() + Math.random();
+        setPassiveDog({ side, id });
+        window.setTimeout(() => setPassiveDog((current) => current?.id === id ? null : current), 820);
+        window.setTimeout(() => applyExtraHit(side, target, 4, "normal"), 320);
+        showPassive(side, "🐕 ¡SPOOKY MUERDE!");
       });
     }, 6500);
     return () => window.clearInterval(timer);
@@ -2902,6 +2930,11 @@ function Home() {
         {(game.phase === "fight" || game.phase === "ko") && damagePops.map((pop) => (
           <b key={`pop-${pop.id}`} className={`damage-pop pop-${pop.kind} pop-${pop.side}`} style={{ left: `${pop.x}%` }} aria-hidden="true">{pop.kind === "guard" ? `-${pop.amount} ◆` : `-${pop.amount}`}</b>
         ))}
+        {passiveDog && game.phase === "fight" && (
+          <DogSpecial key={`passive-dog-${passiveDog.id}`} move="dog" side={passiveDog.side}
+            origin={passiveDog.side === "player" ? game.playerX : game.cpuX} target={passiveDog.side === "player" ? game.cpuX : game.playerX}
+            direction={directionToOpponent(passiveDog.side === "player" ? game.playerX : game.cpuX, passiveDog.side === "player" ? game.cpuX : game.playerX)} />
+        )}
         {superFx && <SuperEffect key={`superfx-${superFx.id}`} fx={superFx} minimal={Boolean(SUPER_ANIM[superFx.fighter])} />}
         {(["player", "cpu"] as Side[]).map((side) => {
           const anim = superAnim[side];
@@ -2911,7 +2944,7 @@ function Home() {
           const mirror = right ? data.mirror[anim.companion - 1] : !data.mirror[anim.companion - 1];
           return (
             <span key={`${side}-${anim.id}`} className="super-companion" aria-hidden="true" style={{ left: `${anim.companionX}%`, top: `${anim.laneTop}px`, height: `${anim.laneHeight}px` }}>
-              <i style={{ height: `${data.size * 100}%`, bottom: `${data.bottom * 100}%`, backgroundImage: `url("${companionFrame(anim.fighter, anim.companion)}")`, transform: `translateX(-50%) scaleX(${mirror ? -1 : 1})` }} />
+              <i style={{ height: `${(data.companionSize ?? data.size) * 100}%`, bottom: `${(data.companionBottom ?? data.bottom) * 100}%`, backgroundImage: `url("${companionFrame(anim.fighter, anim.companion)}")`, transform: `translateX(-50%) scaleX(${mirror ? -1 : 1})` }} />
             </span>
           );
         })}

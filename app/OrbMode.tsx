@@ -72,7 +72,7 @@ const ORB_WEAPONS: Record<FighterId, string> = {
   bonviure: "/assets/new-fighters/bonviure-anchor-v21849.webp",
   elchica: "/assets/new-fighters/jager.svg",
   ogalla: "/assets/new-fighters/artichokes.svg",
-  xuso: "/assets/new-fighters/dog.svg",
+  xuso: "/assets/new-fighters/xuso-v3/perro-correr-02.webp",
   bomba: "/assets/new-fighters/hoe.svg",
   rafeta: "/assets/new-fighters/rafeta-flag.svg",
   tonimassama: "/assets/new-fighters/tonimassama-bullet.svg",

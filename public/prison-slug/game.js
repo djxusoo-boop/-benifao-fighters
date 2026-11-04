@@ -149,10 +149,10 @@ const characters = [
 const atlasHeroPoses = (asset) => ({ idle: asset, walkA: asset, walkB: asset, walkC: asset, walkD: asset, walkE: asset, crouch: asset, rise: asset, fire: asset, heavyFire: asset, kick: asset, hit: asset });
 const HERO_POSE_ASSETS = {
   xuso: {
-    idle: "/assets/new-fighters/xuso-rig-v21849-idle.webp", walkA: "/assets/new-fighters/xuso-rig-v21849-walk.webp", walkB: "/assets/new-fighters/xuso-rig-v21849-idle.webp",
-    walkC: "/assets/new-fighters/xuso-rig-v21849-walk.webp", walkD: "/assets/new-fighters/xuso-rig-v21849-idle.webp", walkE: "/assets/new-fighters/xuso-rig-v21849-walk.webp",
-    crouch: "/assets/new-fighters/xuso-crouch-v21849b.webp", rise: "/assets/new-fighters/xuso-crouch-v21849b.webp",
-    fire: "/assets/new-fighters/xuso-rig-v21849-punch.webp", heavyFire: "/assets/new-fighters/xuso-dog-attack-v2.webp", kick: "/assets/new-fighters/xuso-rig-v21849-kick.webp", hit: "/assets/new-fighters/xuso-rig-v21849-recover.webp",
+    idle: "/assets/new-fighters/xuso-v3/xuso-reposo-01.webp", walkA: "/assets/new-fighters/xuso-v3/xuso-caminar-01.webp", walkB: "/assets/new-fighters/xuso-v3/xuso-caminar-02.webp",
+    walkC: "/assets/new-fighters/xuso-v3/xuso-caminar-03.webp", walkD: "/assets/new-fighters/xuso-v3/xuso-caminar-04.webp", walkE: "/assets/new-fighters/xuso-v3/xuso-caminar-02.webp",
+    crouch: "/assets/new-fighters/xuso-v3/xuso-agacharse.webp", rise: "/assets/new-fighters/xuso-v3/xuso-salto-aire.webp",
+    fire: "/assets/new-fighters/xuso-v3/xuso-orden-perro-03.webp", heavyFire: "/assets/new-fighters/xuso-v3/xuso-superorden-03.webp", kick: "/assets/new-fighters/xuso-v3/xuso-patada-03.webp", hit: "/assets/new-fighters/xuso-v3/xuso-recibir-golpe.webp",
   },
   bomba: {
     idle: "/assets/new-fighters/bomba-idle-v2.webp", walkA: "/assets/new-fighters/bomba-walk-v2.webp", walkB: "/assets/new-fighters/bomba-idle-v2.webp",
@@ -294,7 +294,7 @@ const art = {
   },
   hero: Object.fromEntries(characters.map((hero) => [hero.id, loadImage(hero.image)])),
   heroPoses: Object.fromEntries(Object.entries(HERO_POSE_ASSETS).map(([id, poses]) => [id, Object.fromEntries(Object.entries(poses).map(([pose, src]) => [pose, loadImage(src)]))])),
-  spooky: loadImage("assets/spooky-dog.svg"),
+  spooky: loadImage("/assets/new-fighters/xuso-v3/perro-correr-02.webp"),
   masia: loadImage("/assets/new-fighters/masia-logo.png"),
   rafetaFlag: loadImage("/assets/new-fighters/rafeta-flag.svg"),
 };

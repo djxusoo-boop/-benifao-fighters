@@ -104,7 +104,7 @@ const PROJECTILE_ASSETS = {
   amber: "/assets/new-fighters/amber.svg",
   scepter: "/assets/new-fighters/scepter.svg",
   artichokes: "/assets/new-fighters/artichokes.svg",
-  dog: "/assets/new-fighters/dog.svg",
+  dog: "/assets/new-fighters/xuso-v3/perro-correr-02.webp",
   hoe: "/assets/new-fighters/hoe.svg",
   flag: "/assets/new-fighters/rafeta-flag.svg",
   flagSweep: "/assets/new-fighters/rafeta-flag.svg",

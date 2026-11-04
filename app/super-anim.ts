@@ -2,7 +2,7 @@
 // size/bottom keep the super body at the same scale and foot line as the fighter's normal poses
 // (fractions of the fighter box height). mirror = companion frames drawn facing left.
 
-export type SuperAnimData = { size: number; bottom: number; mirror: boolean[]; name: string; companion: string };
+export type SuperAnimData = { size: number; bottom: number; mirror: boolean[]; name: string; companion: string; companionSize?: number; companionBottom?: number };
 
 export const SUPER_ANIM: Record<string, SuperAnimData> = {
   bacora: { size: 1.5658, bottom: -0.0018, mirror: [false, false, false, false, false, false, false, false], name: "MURALLA DE LA W", companion: "Escudo y vara" },
@@ -20,7 +20,7 @@ export const SUPER_ANIM: Record<string, SuperAnimData> = {
   estefy: { size: 1.6, bottom: -0.05, mirror: [false, false, false, false, false, false, false, false], name: "SELVA DE ACERO", companion: "Machete y hojas de la selva" },
   tonimassama: { size: 1.2449, bottom: -0.0584, mirror: [false, false, false, false, false, false, false, false], name: "JUICIO DE ORO", companion: "Pistola dorada y peinetas" },
   vanessa: { size: 1.2771, bottom: -0.0488, mirror: [false, false, false, false, false, false, false, false], name: "REINA DEL ESTRUENDO", companion: "Micrófono y onda sónica" },
-  xuso: { size: 1.4072, bottom: 0.0239, mirror: [false, false, false, false, false, false, false, false], name: "PRISON DESATADO", companion: "Perro negro con pañuelo rojo" },
+  xuso: { size: 1.68, bottom: -0.045, mirror: [false, false, false, false, false, false, false, false], name: "MORDISCO DE PRISON", companion: "Spooky gigante con la boca abierta", companionSize: 2.7, companionBottom: -0.1 },
 };
 
 export const superFrame = (fighter: string, frame: number) => `/assets/supers/${fighter}/p${frame}.webp`;

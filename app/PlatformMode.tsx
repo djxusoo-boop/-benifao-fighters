@@ -472,10 +472,10 @@ const atlasHeroPoses = (asset: string): Record<HeroPose, string> => ({
 
 const HERO_POSE_ASSETS: Record<FighterId, Record<HeroPose, string>> = {
   xuso: {
-    idle: "/assets/new-fighters/xuso-rig-v21849-idle.webp", walkA: "/assets/new-fighters/xuso-rig-v21849-walk.webp", walkB: "/assets/new-fighters/xuso-rig-v21849-idle.webp",
-    walkC: "/assets/new-fighters/xuso-rig-v21849-walk.webp", walkD: "/assets/new-fighters/xuso-rig-v21849-idle.webp", walkE: "/assets/new-fighters/xuso-rig-v21849-walk.webp",
-    crouch: "/assets/new-fighters/xuso-crouch-v21849b.webp", rise: "/assets/new-fighters/xuso-crouch-v21849b.webp",
-    fire: "/assets/new-fighters/xuso-rig-v21849-punch.webp", heavyFire: "/assets/new-fighters/xuso-dog-attack-v2.webp", kick: "/assets/new-fighters/xuso-rig-v21849-kick.webp", hit: "/assets/new-fighters/xuso-rig-v21849-recover.webp",
+    idle: "/assets/new-fighters/xuso-v3/xuso-reposo-01.webp", walkA: "/assets/new-fighters/xuso-v3/xuso-caminar-01.webp", walkB: "/assets/new-fighters/xuso-v3/xuso-caminar-02.webp",
+    walkC: "/assets/new-fighters/xuso-v3/xuso-caminar-03.webp", walkD: "/assets/new-fighters/xuso-v3/xuso-caminar-04.webp", walkE: "/assets/new-fighters/xuso-v3/xuso-caminar-02.webp",
+    crouch: "/assets/new-fighters/xuso-v3/xuso-agacharse.webp", rise: "/assets/new-fighters/xuso-v3/xuso-salto-aire.webp",
+    fire: "/assets/new-fighters/xuso-v3/xuso-orden-perro-03.webp", heavyFire: "/assets/new-fighters/xuso-v3/xuso-superorden-03.webp", kick: "/assets/new-fighters/xuso-v3/xuso-patada-03.webp", hit: "/assets/new-fighters/xuso-v3/xuso-recibir-golpe.webp",
   },
   bomba: {
     idle: "/assets/new-fighters/bomba-idle-v2.webp", walkA: "/assets/new-fighters/bomba-walk-v2.webp", walkB: "/assets/new-fighters/bomba-idle-v2.webp",
@@ -751,7 +751,7 @@ export default function PlatformMode({ fighter, fighterName, soundOn, difficulty
     loadImage("weapon-amber", "/assets/new-fighters/amber.svg");
     loadImage("weapon-scepter", "/assets/new-fighters/scepter.svg");
     loadImage("weapon-artichokes", "/assets/new-fighters/artichokes.svg");
-    loadImage("weapon-dog", "/assets/new-fighters/dog.svg");
+    loadImage("weapon-dog", "/assets/new-fighters/xuso-v3/perro-correr-02.webp");
     loadImage("weapon-hoe", "/assets/new-fighters/hoe.svg");
     loadImage("weapon-flag", "/assets/new-fighters/rafeta-flag.svg");
     loadImage("weapon-flagSweep", "/assets/new-fighters/rafeta-flag.svg");

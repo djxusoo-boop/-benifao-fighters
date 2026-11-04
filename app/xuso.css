@@ -1,0 +1,171 @@
+/* ===== V2.30 XUSO · PRISON sin aura (80-frame pack) and his real dog Spooky ===== */
+/* Every frame shares one square canvas with the feet on the same line. */
+.arena .fighter.motion-rig.xuso { aspect-ratio:1/1!important; width:clamp(235px,44vh,410px)!important; height:clamp(235px,44vh,410px)!important; }
+@media (orientation:landscape) and (max-height:600px) { .arena .fighter.motion-rig.xuso { width:clamp(162px,43vh,258px)!important; height:clamp(162px,43vh,258px)!important; } }
+#game .fighter.motion-rig.xuso .fighter-pose .fighter-art.xuso { left:0!important; width:100%!important; background-size:contain!important; background-position:center bottom!important; background-repeat:no-repeat!important; mix-blend-mode:normal!important; filter:none!important; }
+#game .fighter.motion-rig.xuso .fighter-art.xuso::before, #game .fighter.motion-rig.xuso .fighter-art.xuso::after { content:none!important; display:none!important; }
+#game .fighter.motion-rig.xuso .fighter-walk-layers { display:none!important; }
+
+/* Idle breathes through its 4 frames; walk, run, getup and victory are animated too. */
+#game .fighter.motion-rig.xuso .fighter-pose .fighter-art.xuso,
+#game .fighter.motion-rig.xuso.idle .fighter-pose .fighter-art.xuso { background-image:url('/assets/new-fighters/xuso-v3/xuso-reposo-01.webp')!important; animation:xuso-v3-idle 1300ms steps(1,end) infinite!important; }
+#game .fighter.motion-rig.xuso.walk .fighter-pose .fighter-art.xuso,
+#game .fighter.motion-rig.xuso.walk.stride-alt .fighter-pose .fighter-art.xuso { background-image:url('/assets/new-fighters/xuso-v3/xuso-caminar-01.webp')!important; animation:xuso-v3-walk 620ms steps(1,end) infinite!important; }
+#game .fighter.motion-rig.xuso.dash .fighter-pose .fighter-art.xuso { background-image:url('/assets/new-fighters/xuso-v3/xuso-correr-01.webp')!important; animation:xuso-v3-run 420ms steps(1,end) infinite!important; }
+#game .fighter.motion-rig.xuso.winner-dance .fighter-pose .fighter-art.xuso { background-image:url('/assets/new-fighters/xuso-v3/xuso-victoria-01.webp')!important; animation:xuso-v3-victory 1400ms steps(1,end) infinite!important; }
+#game .fighter.motion-rig.xuso.getup .fighter-pose .fighter-art.xuso { background-image:url('/assets/new-fighters/xuso-v3/xuso-levantarse-02.webp')!important; animation:xuso-v3-getup 520ms steps(1,end) both!important; }
+#game .fighter.motion-rig.xuso.block .fighter-pose .fighter-art.xuso { background-image:url('/assets/new-fighters/xuso-v3/xuso-bloquear.webp')!important; animation:none!important; }
+#game .fighter.motion-rig.xuso.dodge .fighter-pose .fighter-art.xuso { background-image:url('/assets/new-fighters/xuso-v3/xuso-esquivar.webp')!important; animation:none!important; }
+#game .fighter.motion-rig.xuso.crouch .fighter-pose .fighter-art.xuso,
+#game .fighter.motion-rig.xuso.low-attack.punch .fighter-pose .fighter-art.xuso,
+#game .fighter.motion-rig.xuso.low-attack.kick .fighter-pose .fighter-art.xuso { background-image:url('/assets/new-fighters/xuso-v3/xuso-agacharse.webp')!important; animation:none!important; }
+#game .fighter.motion-rig.xuso.jump .fighter-pose .fighter-art.xuso,
+#game .fighter.motion-rig.xuso.airborne:not(.punch):not(.kick):not(.special) .fighter-pose .fighter-art.xuso { background-image:url('/assets/new-fighters/xuso-v3/xuso-salto-aire.webp')!important; animation:none!important; }
+#game .fighter.motion-rig.xuso.hit .fighter-pose .fighter-art.xuso,
+#game .fighter.motion-rig.xuso.stunned:not(.punch):not(.kick):not(.special) .fighter-pose .fighter-art.xuso { background-image:url('/assets/new-fighters/xuso-v3/xuso-recibir-golpe.webp')!important; animation:none!important; }
+#game .fighter.motion-rig.xuso.launched .fighter-pose .fighter-art.xuso { background-image:url('/assets/new-fighters/xuso-v3/xuso-derribo-02.webp')!important; animation:none!important; }
+#game .fighter.motion-rig.xuso.knockdown .fighter-pose .fighter-art.xuso { background-image:url('/assets/new-fighters/xuso-v3/xuso-derribo-03.webp')!important; animation:none!important; }
+#game .fighter.motion-rig.xuso.defeated .fighter-pose .fighter-art.xuso { background-image:url('/assets/new-fighters/xuso-v3/xuso-derrotado.webp')!important; animation:none!important; }
+/* He has real falling drawings now, so no rotated body. */
+#game .fighter.motion-rig.xuso:is(.knockdown,.defeated,.launched,.getup) .fighter-motion { rotate:none!important; translate:none!important; }
+
+#game .fighter.motion-rig.xuso.punch.pose-phase-0 .fighter-pose .fighter-art.xuso { background-image:url('/assets/new-fighters/xuso-v3/xuso-punio-01.webp')!important; animation:none!important; }
+#game .fighter.motion-rig.xuso.punch.pose-phase-1 .fighter-pose .fighter-art.xuso { background-image:url('/assets/new-fighters/xuso-v3/xuso-punio-02.webp')!important; animation:none!important; }
+#game .fighter.motion-rig.xuso.punch.pose-phase-2 .fighter-pose .fighter-art.xuso,
+#game .fighter.motion-rig.xuso.punch.pose-phase-3 .fighter-pose .fighter-art.xuso,
+#game .fighter.motion-rig.xuso.punch.airborne .fighter-pose .fighter-art.xuso { background-image:url('/assets/new-fighters/xuso-v3/xuso-punio-03.webp')!important; animation:none!important; }
+#game .fighter.motion-rig.xuso.punch.pose-phase-4 .fighter-pose .fighter-art.xuso { background-image:url('/assets/new-fighters/xuso-v3/xuso-punio-04.webp')!important; animation:none!important; }
+#game .fighter.motion-rig.xuso.kick.pose-phase-0 .fighter-pose .fighter-art.xuso { background-image:url('/assets/new-fighters/xuso-v3/xuso-patada-01.webp')!important; animation:none!important; }
+#game .fighter.motion-rig.xuso.kick.pose-phase-1 .fighter-pose .fighter-art.xuso { background-image:url('/assets/new-fighters/xuso-v3/xuso-patada-02.webp')!important; animation:none!important; }
+#game .fighter.motion-rig.xuso.kick.pose-phase-2 .fighter-pose .fighter-art.xuso,
+#game .fighter.motion-rig.xuso.kick.pose-phase-3 .fighter-pose .fighter-art.xuso,
+#game .fighter.motion-rig.xuso.kick.airborne .fighter-pose .fighter-art.xuso { background-image:url('/assets/new-fighters/xuso-v3/xuso-patada-03.webp')!important; animation:none!important; }
+#game .fighter.motion-rig.xuso.kick.pose-phase-4 .fighter-pose .fighter-art.xuso { background-image:url('/assets/new-fighters/xuso-v3/xuso-patada-04.webp')!important; animation:none!important; }
+/* Specials: Xuso gives the order and Spooky does the job. */
+#game .fighter.motion-rig.xuso.special.dog.pose-phase-0 .fighter-pose .fighter-art.xuso,
+#game .fighter.motion-rig.xuso.special.howl.pose-phase-0 .fighter-pose .fighter-art.xuso { background-image:url('/assets/new-fighters/xuso-v3/xuso-orden-perro-01.webp')!important; animation:none!important; }
+#game .fighter.motion-rig.xuso.special.dog.pose-phase-1 .fighter-pose .fighter-art.xuso,
+#game .fighter.motion-rig.xuso.special.howl.pose-phase-1 .fighter-pose .fighter-art.xuso { background-image:url('/assets/new-fighters/xuso-v3/xuso-orden-perro-02.webp')!important; animation:none!important; }
+#game .fighter.motion-rig.xuso.special.dog.pose-phase-2 .fighter-pose .fighter-art.xuso,
+#game .fighter.motion-rig.xuso.special.dog.pose-phase-3 .fighter-pose .fighter-art.xuso,
+#game .fighter.motion-rig.xuso.special.howl.pose-phase-2 .fighter-pose .fighter-art.xuso,
+#game .fighter.motion-rig.xuso.special.howl.pose-phase-3 .fighter-pose .fighter-art.xuso { background-image:url('/assets/new-fighters/xuso-v3/xuso-orden-perro-03.webp')!important; animation:none!important; }
+#game .fighter.motion-rig.xuso.special.dog.pose-phase-4 .fighter-pose .fighter-art.xuso,
+#game .fighter.motion-rig.xuso.special.howl.pose-phase-4 .fighter-pose .fighter-art.xuso { background-image:url('/assets/new-fighters/xuso-v3/xuso-orden-perro-04.webp')!important; animation:none!important; }
+.arena .fighter.motion-rig.xuso.face-right .fighter-pose .fighter-art.xuso { transform:scaleX(1)!important; }
+.arena .fighter.motion-rig.xuso.face-left .fighter-pose .fighter-art.xuso { transform:scaleX(-1)!important; }
+
+@keyframes xuso-v3-idle {
+  0%,24.9% { background-image:url('/assets/new-fighters/xuso-v3/xuso-reposo-01.webp'); }
+  25%,49.9% { background-image:url('/assets/new-fighters/xuso-v3/xuso-reposo-02.webp'); }
+  50%,74.9% { background-image:url('/assets/new-fighters/xuso-v3/xuso-reposo-03.webp'); }
+  75%,100% { background-image:url('/assets/new-fighters/xuso-v3/xuso-reposo-04.webp'); }
+}
+@keyframes xuso-v3-walk {
+  0%,24.9% { background-image:url('/assets/new-fighters/xuso-v3/xuso-caminar-01.webp'); }
+  25%,49.9% { background-image:url('/assets/new-fighters/xuso-v3/xuso-caminar-02.webp'); }
+  50%,74.9% { background-image:url('/assets/new-fighters/xuso-v3/xuso-caminar-03.webp'); }
+  75%,100% { background-image:url('/assets/new-fighters/xuso-v3/xuso-caminar-04.webp'); }
+}
+@keyframes xuso-v3-run {
+  0%,24.9% { background-image:url('/assets/new-fighters/xuso-v3/xuso-correr-01.webp'); }
+  25%,49.9% { background-image:url('/assets/new-fighters/xuso-v3/xuso-correr-02.webp'); }
+  50%,74.9% { background-image:url('/assets/new-fighters/xuso-v3/xuso-correr-03.webp'); }
+  75%,100% { background-image:url('/assets/new-fighters/xuso-v3/xuso-correr-04.webp'); }
+}
+@keyframes xuso-v3-victory {
+  0%,24.9% { background-image:url('/assets/new-fighters/xuso-v3/xuso-victoria-01.webp'); }
+  25%,49.9% { background-image:url('/assets/new-fighters/xuso-v3/xuso-victoria-02.webp'); }
+  50%,74.9% { background-image:url('/assets/new-fighters/xuso-v3/xuso-victoria-03.webp'); }
+  75%,100% { background-image:url('/assets/new-fighters/xuso-v3/xuso-victoria-04.webp'); }
+}
+@keyframes xuso-v3-getup {
+  0%,32.9% { background-image:url('/assets/new-fighters/xuso-v3/xuso-levantarse-02.webp'); }
+  33%,65.9% { background-image:url('/assets/new-fighters/xuso-v3/xuso-levantarse-03.webp'); }
+  66%,100% { background-image:url('/assets/new-fighters/xuso-v3/xuso-levantarse-04.webp'); }
+}
+
+/* ---- Spooky, the real dog: K sprints and bites, L turns round and pees ---- */
+.arena .dog-special { position:absolute; inset:0; z-index:44; pointer-events:none; }
+.arena .dog-special .move-callout { position:absolute; top:22%; left:50%; translate:-50% 0; }
+.arena .dog-special .dog-runner {
+  position:absolute; bottom:5.5%; left:var(--dog-from);
+  width:clamp(96px,17vh,170px); aspect-ratio:307/283; translate:-50% 0;
+  animation:dog-run-to 820ms cubic-bezier(.3,.1,.4,1) forwards;
+}
+.arena .dog-special.dog-howl .dog-runner { animation-duration:980ms; animation-name:dog-run-to-pee; }
+.arena .dog-special.toward-left .dog-runner { scale:-1 1; }
+.arena .dog-special .dog-body { position:absolute; inset:0; display:block; }
+.arena .dog-special .dog-sprite { position:absolute; inset:0; display:block; background:no-repeat center bottom / contain; filter:drop-shadow(0 6px 6px rgba(0,0,0,.6)); }
+.arena .dog-special.dog-dog .dog-sprite { animation:dog-bite-frames 820ms steps(1,end) forwards; }
+.arena .dog-special.dog-howl .dog-sprite { animation:dog-pee-frames 980ms steps(1,end) forwards; }
+/* For the pee he turns his back to the rival. */
+.arena .dog-special.dog-howl .dog-body { animation:dog-turn-away 980ms steps(1,end) forwards; }
+.arena .dog-special .dog-pee {
+  position:absolute; left:56%; bottom:10%; width:clamp(170px,30vh,300px); aspect-ratio:2/1; opacity:0;
+  filter:drop-shadow(0 0 6px rgba(255,220,60,.8));
+  background:no-repeat left bottom / contain; transform-origin:left 40%;
+  animation:dog-pee-stream 980ms steps(1,end) forwards;
+}
+@keyframes dog-run-to { 0% { left:var(--dog-from); } 36%,100% { left:var(--dog-to); } }
+@keyframes dog-run-to-pee { 0% { left:var(--dog-from); } 34%,100% { left:var(--dog-to); } }
+@keyframes dog-turn-away { 0%,37.9% { scale:1 1; } 38%,100% { scale:-1 1; } }
+@keyframes dog-bite-frames {
+  0%,8.9% { background-image:url('/assets/new-fighters/xuso-v3/perro-correr-01.webp'); }
+  9%,17.9% { background-image:url('/assets/new-fighters/xuso-v3/perro-correr-02.webp'); }
+  18%,26.9% { background-image:url('/assets/new-fighters/xuso-v3/perro-correr-03.webp'); }
+  27%,35.9% { background-image:url('/assets/new-fighters/xuso-v3/perro-correr-04.webp'); }
+  36%,43.9% { background-image:url('/assets/new-fighters/xuso-v3/perro-mordisco-03.webp'); }
+  44%,51.9% { background-image:url('/assets/new-fighters/xuso-v3/perro-mordisco-04.webp'); }
+  52%,63.9% { background-image:url('/assets/new-fighters/xuso-v3/perro-mordisco-05.webp'); }
+  64%,73.9% { background-image:url('/assets/new-fighters/xuso-v3/perro-mordisco-06.webp'); }
+  74%,85.9% { background-image:url('/assets/new-fighters/xuso-v3/perro-mordisco-07.webp'); }
+  86%,100% { background-image:url('/assets/new-fighters/xuso-v3/perro-mordisco-08.webp'); }
+}
+@keyframes dog-pee-frames {
+  0%,8.9% { background-image:url('/assets/new-fighters/xuso-v3/perro-correr-01.webp'); }
+  9%,17.9% { background-image:url('/assets/new-fighters/xuso-v3/perro-correr-02.webp'); }
+  18%,26.9% { background-image:url('/assets/new-fighters/xuso-v3/perro-correr-03.webp'); }
+  27%,37.9% { background-image:url('/assets/new-fighters/xuso-v3/perro-correr-04.webp'); }
+  38%,43.9% { background-image:url('/assets/new-fighters/xuso-v3/perro-alerta.webp'); }
+  44%,92.9% { background-image:url('/assets/new-fighters/xuso-v3/perro-pata-arriba.webp'); }
+  93%,100% { background-image:url('/assets/new-fighters/xuso-v3/perro-alerta.webp'); }
+}
+@keyframes dog-pee-stream {
+  0%,45.9% { opacity:0; background-image:url('/assets/new-fighters/xuso-v3/meada-1.webp'); }
+  46%,59.9% { opacity:1; background-image:url('/assets/new-fighters/xuso-v3/meada-1.webp'); }
+  60%,73.9% { opacity:1; background-image:url('/assets/new-fighters/xuso-v3/meada-2.webp'); }
+  74%,89.9% { opacity:1; background-image:url('/assets/new-fighters/xuso-v3/meada-3.webp'); }
+  90%,100% { opacity:0; background-image:url('/assets/new-fighters/xuso-v3/meada-3.webp'); }
+}
+
+/* SUPER: the companion is a giant Spooky with his jaws wide open */
+.arena .super-companion > i[style*="/supers/xuso/"] { filter:drop-shadow(0 0 22px rgba(255,60,60,.65)) drop-shadow(0 10px 14px rgba(0,0,0,.7)); }
+
+/* Lobby card, dossier and victory dance use the new design */
+.portrait.xuso, .result-dancer-art.xuso { background-image:url('/assets/new-fighters/xuso-v3/diseno.webp')!important; mix-blend-mode:normal!important; }
+.result-dancer-art.xuso { background-size:contain!important; background-position:center bottom!important; }
+#game .showcase-portrait .portrait.xuso { background-image:url('/assets/new-fighters/xuso-v3/diseno.webp')!important; background-size:contain!important; background-position:center bottom!important; background-repeat:no-repeat!important; animation:none!important; }
+.select-screen .character-card .portrait.xuso { background-image:url('/assets/new-fighters/xuso-v3/diseno.webp')!important; background-size:cover!important; background-position:center 6%!important; mix-blend-mode:normal!important; }
+
+/* Cooperativa and Rompeobjetos */
+#game .coop-player.xuso { width:auto!important; aspect-ratio:1/1; }
+#game .coop-player.xuso .coop-player-art { background-image:url('/assets/new-fighters/xuso-v3/xuso-reposo-01.webp')!important; background-size:contain!important; background-position:center bottom!important; background-repeat:no-repeat!important; animation:none!important; filter:none!important; mix-blend-mode:normal!important; }
+#game .coop-player.xuso.walk .coop-player-art { background-image:url('/assets/new-fighters/xuso-v3/xuso-caminar-01.webp')!important; animation:xuso-v3-walk 620ms steps(1,end) infinite!important; }
+#game .coop-player.xuso:is(.jump,.airborne) .coop-player-art { background-image:url('/assets/new-fighters/xuso-v3/xuso-salto-aire.webp')!important; animation:none!important; }
+#game .coop-player.xuso:is(.fire,.special) .coop-player-art { background-image:url('/assets/new-fighters/xuso-v3/xuso-orden-perro-03.webp')!important; animation:none!important; }
+#game .coop-player.xuso:is(.dodge,.revive) .coop-player-art { background-image:url('/assets/new-fighters/xuso-v3/xuso-esquivar.webp')!important; animation:none!important; }
+#game .coop-player.xuso.hit .coop-player-art { background-image:url('/assets/new-fighters/xuso-v3/xuso-recibir-golpe.webp')!important; animation:none!important; }
+#game .coop-player.xuso.down .coop-player-art { background-image:url('/assets/new-fighters/xuso-v3/xuso-derrotado.webp')!important; animation:none!important; }
+#game .coop-player.xuso.down { transform:translateX(-50%)!important; }
+#game .coop-player.xuso.face-left .coop-player-art { transform:scaleX(-1); }
+#game .coop-enemy .coop-player.coop-clone.xuso { aspect-ratio:auto; width:100%!important; }
+#game .orb-hero.xuso { aspect-ratio:1/1; width:auto!important; }
+#game .orb-hero.xuso .fighter-art.xuso { background-image:url('/assets/new-fighters/xuso-v3/xuso-reposo-01.webp')!important; background-size:contain!important; background-position:center bottom!important; background-repeat:no-repeat!important; animation:none!important; filter:none!important; mix-blend-mode:normal!important; }
+#game .orb-hero.xuso .fighter-walk-layers { display:none!important; }
+#game .orb-hero.xuso.orb-moving .fighter-art.xuso { background-image:url('/assets/new-fighters/xuso-v3/xuso-caminar-02.webp')!important; }
+#game .orb-hero.xuso.orb-moving.orb-walk-fast .fighter-art.xuso { background-image:url('/assets/new-fighters/xuso-v3/xuso-correr-02.webp')!important; }
+#game .orb-hero.xuso.orb-firing .fighter-art.xuso { background-image:url('/assets/new-fighters/xuso-v3/xuso-orden-perro-03.webp')!important; }
+#game .orb-hero.xuso.orb-defeated .fighter-art.xuso { background-image:url('/assets/new-fighters/xuso-v3/xuso-derrotado.webp')!important; }
+#game .orb-hero.xuso.orb-victory-dance .fighter-art.xuso { background-image:url('/assets/new-fighters/xuso-v3/xuso-victoria-03.webp')!important; }
+#game .orb-hero.xuso .fighter-art.xuso.face-left { transform:scaleX(-1); }
