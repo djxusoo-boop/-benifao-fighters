@@ -358,3 +358,20 @@
 #game .fighter.motion-rig:is(.maletilla,.vanessa,.josevictor,.cristian) .fighter-pose {
   inset: 0 !important; left: 0 !important; top: 0 !important; right: auto !important; bottom: auto !important; width: 100% !important; height: 100% !important; margin: 0 !important;
 }
+
+/* ===== V2.27.1 Ogalla: real single frames for every attack, always fitted to the box ===== */
+#game .fighter.motion-rig:is(.ogalla,.bacora,.bonviure,.elchica,.borja):is(.special,.jump,.airborne,.crouch,.hit,.launched,.knockdown,.defeated,.getup,.dodge,.idle,.walk,.block) .fighter-pose .fighter-art:is(.ogalla,.bacora,.bonviure,.elchica,.borja) { background-size:contain!important; background-position:center bottom!important; background-repeat:no-repeat!important; }
+#game .fighter.motion-rig.ogalla:is(.punch,.kick,.special) .fighter-pose .fighter-art.ogalla { background-size:contain!important; background-position:center bottom!important; background-repeat:no-repeat!important; animation:none!important; }
+#game .fighter.motion-rig.ogalla:is(.punch,.kick) .fighter-art.ogalla::before, #game .fighter.motion-rig.ogalla:is(.punch,.kick) .fighter-art.ogalla::after { content:none!important; }
+#game .fighter.motion-rig.ogalla.punch.pose-phase-0 .fighter-pose .fighter-art.ogalla { background-image:url('/assets/new-fighters/ogalla-punch-1.webp')!important; }
+#game .fighter.motion-rig.ogalla.punch.pose-phase-1 .fighter-pose .fighter-art.ogalla { background-image:url('/assets/new-fighters/ogalla-punch-2.webp')!important; }
+#game .fighter.motion-rig.ogalla.punch:is(.pose-phase-2,.pose-phase-3) .fighter-pose .fighter-art.ogalla { background-image:url('/assets/new-fighters/ogalla-punch-3.webp')!important; }
+#game .fighter.motion-rig.ogalla.punch.pose-phase-4 .fighter-pose .fighter-art.ogalla { background-image:url('/assets/new-fighters/ogalla-punch-4.webp')!important; }
+#game .fighter.motion-rig.ogalla.kick.pose-phase-0 .fighter-pose .fighter-art.ogalla { background-image:url('/assets/new-fighters/ogalla-kick-1.webp')!important; }
+#game .fighter.motion-rig.ogalla.kick.pose-phase-1 .fighter-pose .fighter-art.ogalla { background-image:url('/assets/new-fighters/ogalla-kick-2.webp')!important; }
+#game .fighter.motion-rig.ogalla.kick:is(.pose-phase-2,.pose-phase-3) .fighter-pose .fighter-art.ogalla { background-image:url('/assets/new-fighters/ogalla-kick-3.webp')!important; }
+#game .fighter.motion-rig.ogalla.kick.pose-phase-4 .fighter-pose .fighter-art.ogalla { background-image:url('/assets/new-fighters/ogalla-kick-4.webp')!important; }
+#game .fighter.motion-rig.ogalla.special:is(.pose-phase-0,.pose-phase-1) .fighter-pose .fighter-art.ogalla { background-image:url('/assets/new-fighters/ogalla-guard-v2.webp')!important; }
+#game .fighter.motion-rig.ogalla.special.scepter:is(.pose-phase-2,.pose-phase-3) .fighter-pose .fighter-art.ogalla { background-image:url('/assets/new-fighters/ogalla-staff-special-v2.webp')!important; }
+#game .fighter.motion-rig.ogalla.special.artichokes:is(.pose-phase-2,.pose-phase-3) .fighter-pose .fighter-art.ogalla { background-image:url('/assets/new-fighters/ogalla-artichoke-attack-v2.webp')!important; }
+#game .fighter.motion-rig.ogalla.special.pose-phase-4 .fighter-pose .fighter-art.ogalla { background-image:url('/assets/new-fighters/ogalla-idle-v2.webp')!important; }

@@ -1062,3 +1062,8 @@ html:fullscreen .game-shell, html:-webkit-full-screen .game-shell { min-height: 
 /* ===== V2.27 Rompeobjetos: shield ring on the hero ===== */
 #game .orb-hero.orb-shielded::after { content:""; position:absolute; inset:-8% -22% -4%; border:3px solid rgba(89,232,255,.85); border-radius:50% 50% 40% 40%; box-shadow:0 0 22px #59e8ff, inset 0 0 22px rgba(89,232,255,.4); animation:orb-shield-pulse 600ms ease-in-out infinite alternate; pointer-events:none; }
 @keyframes orb-shield-pulse { from { opacity:.6; transform:scale(.97); } to { opacity:1; transform:scale(1.03); } }
+
+/* ===== V2.27.1 Lobby dossier: a single full-body pose, never a sprite sheet ===== */
+#game .showcase-portrait .portrait.ogalla { background-image:url('/assets/new-fighters/ogalla-idle-v2.webp')!important; background-size:contain!important; background-position:center bottom!important; background-repeat:no-repeat!important; animation:none!important; }
+#game .showcase-portrait .portrait.elchica { background-image:url('/assets/new-fighters/elchica-rig-v21849-idle.webp')!important; background-size:contain!important; background-position:center bottom!important; background-repeat:no-repeat!important; animation:none!important; }
+#game .showcase-portrait .portrait:is(.ogalla,.elchica)::before, #game .showcase-portrait .portrait:is(.ogalla,.elchica)::after { content:none!important; }
