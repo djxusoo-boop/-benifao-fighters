@@ -8,6 +8,7 @@ import "./xuso.css";
 import "./coop-fix.css";
 import "./coop-ki.css";
 import "./orb-fix.css";
+import "./phone-fit.css";
 
 export const viewport: Viewport = {
   width: "device-width",

@@ -7681,7 +7681,9 @@ html.arcade-gamepad-active .final-controls {
 
 /* Unified image selection and controller flow. The lobby owns its layout,
    independently of the fight arena and old projector column minimums. */
-html:has(.lobby-v2168), html:has(.lobby-v2168) body { height:auto; min-height:100%; overflow-y:auto; }
+/* Only the root scrolls: if body is also overflow:auto, Chrome on Android makes it its own (empty) scroller and finger swipes stop scrolling the lobby. */
+html:has(.lobby-v2168) { height:auto; min-height:100%; overflow-y:auto; }
+html:has(.lobby-v2168) body { height:auto; min-height:100%; overflow-x:clip; overflow-y:visible; }
 .game-shell:has(.lobby-v2168) { height:auto; min-height:100dvh; width:100%; max-width:1500px; padding:0 12px 12px; }
 .game-shell:has(.lobby-v2168) .topbar { flex-wrap:wrap; gap:8px; padding:10px 0; min-height:56px; }
 .game-shell:has(.lobby-v2168) .topbar-actions { flex-wrap:wrap; justify-content:flex-end; gap:6px; }
@@ -7760,7 +7762,8 @@ html[data-display-mode] .topbar { flex-wrap:wrap; height:auto; gap:8px; }
 html[data-display-mode] .topbar-actions { min-width:0; max-width:100%; flex-wrap:wrap; gap:6px; }
 html[data-display-mode] .topbar-actions > * { flex-shrink:1; }
 html[data-display-mode] .device-panel, html[data-display-mode] .gamepad-panel, html[data-display-mode] .leaderboard-panel, html[data-display-mode] .arcade-tools-panel { width:min(700px,94vw); max-height:85dvh; overflow:auto; }
-html[data-display-mode=mobile],html[data-display-mode=mobile] body { height:auto!important; min-height:100%; overflow-y:auto!important; }
+html[data-display-mode=mobile] { height:auto!important; min-height:100%; overflow-y:auto!important; }
+html[data-display-mode=mobile] body { height:auto!important; min-height:100%; overflow-x:clip!important; overflow-y:visible!important; }
 html[data-display-mode=mobile] .game-shell { width:100%; height:auto!important; min-height:100dvh; }
 html[data-display-mode=mobile] .brand-name { font-size:24px; }
 html[data-display-mode=mobile] .brand-kicker,html[data-display-mode=mobile] .below-arena,html[data-display-mode=mobile] footer { display:none; }

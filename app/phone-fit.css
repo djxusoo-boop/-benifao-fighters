@@ -1,0 +1,56 @@
+/* ===== V2.34.0 Phones in landscape (Android and iPhone): a compact lobby ===== */
+/* A phone on its side is only ~360-430px tall. The lobby used to be ~2800px long;
+   here it shrinks to a few short screens: one-row top bar, 7-column roster,
+   short showcase and a 4-column mode grid. */
+@media (orientation: landscape) and (max-height: 560px) {
+  html[data-display-mode=mobile] .topbar { flex-wrap: nowrap !important; height: auto !important; min-height: 0 !important; padding: 4px 0 !important; gap: 8px !important; }
+  html[data-display-mode=mobile] .topbar .brand-name { font-size: 18px !important; white-space: nowrap; }
+  html[data-display-mode=mobile] .topbar .raspberry-edition-badge { display: none !important; }
+  html[data-display-mode=mobile] .topbar-actions { flex-wrap: nowrap !important; overflow-x: auto; overscroll-behavior-x: contain; scrollbar-width: none; justify-content: flex-start !important; gap: 5px !important; }
+  html[data-display-mode=mobile] .topbar-actions::-webkit-scrollbar { display: none; }
+  html[data-display-mode=mobile] .topbar-actions > * { flex: 0 0 auto !important; }
+  html[data-display-mode=mobile] .topbar-actions .sound-button { min-height: 36px !important; padding: 4px 8px !important; font-size: 10px !important; }
+  html[data-display-mode=mobile] .display-mode-control select { min-height: 36px; font-size: 10px; }
+
+  html[data-display-mode=mobile] #game.phase-select .select-screen.lobby-v2168 { padding: 8px !important; gap: 8px !important; }
+  html[data-display-mode=mobile] #game.phase-select .lobby-heading { grid-template-columns: auto 1fr !important; align-items: center; min-height: 0 !important; padding: 0 !important; gap: 10px !important; }
+  html[data-display-mode=mobile] #game.phase-select .lobby-heading h1 { font-size: 24px !important; margin: 0 !important; }
+  html[data-display-mode=mobile] #game.phase-select .lobby-prison-mark { justify-self: end; }
+  html[data-display-mode=mobile] #game.phase-select .lobby-prison-mark .prison-logo { height: 34px !important; width: auto !important; }
+  html[data-display-mode=mobile] #game.phase-select .lobby-prison-mark > :not(img) { display: none !important; }
+
+  html[data-display-mode=mobile] #game.phase-select .lobby-slots { position: sticky; top: 0; }
+  html[data-display-mode=mobile] #game.phase-select .lobby-slots button { min-height: 40px !important; font-size: 12px !important; }
+  html[data-display-mode=mobile] #game.phase-select .select-screen.lobby-v2168 .character-cards { grid-template-columns: repeat(7, minmax(0, 1fr)) !important; gap: 6px !important; }
+  html[data-display-mode=mobile] #game.phase-select .select-screen.lobby-v2168 .character-card { height: clamp(104px, 31dvh, 140px) !important; }
+  html[data-display-mode=mobile] #game.phase-select .select-screen.lobby-v2168 .character-card .portrait { inset: 4px 4px 26px !important; }
+  html[data-display-mode=mobile] #game.phase-select .select-screen.lobby-v2168 .character-card b { bottom: 8px !important; font-size: 12px !important; }
+  html[data-display-mode=mobile] #game.phase-select .select-screen.lobby-v2168 .character-card small { display: none !important; }
+
+  html[data-display-mode=mobile] #game.phase-select .fighter-showcase .showcase-top { min-height: 0 !important; height: auto !important; grid-template-columns: 160px 1fr !important; }
+  html[data-display-mode=mobile] #game.phase-select .fighter-showcase .showcase-portrait { min-height: 150px !important; height: 150px !important; }
+  html[data-display-mode=mobile] #game.phase-select .fighter-showcase .showcase-portrait .portrait { height: 150px !important; }
+  html[data-display-mode=mobile] #game.phase-select .fighter-showcase .showcase-bottom { grid-template-columns: 1fr 1fr !important; }
+  html[data-display-mode=mobile] #game.phase-select .fighter-showcase .showcase-moves > span { min-height: 0 !important; padding-block: 4px !important; }
+
+  html[data-display-mode=mobile] #game.phase-select .lobby-v2168 .mode-start-actions { grid-template-columns: repeat(4, minmax(0, 1fr)) !important; gap: 6px !important; }
+  html[data-display-mode=mobile] #game.phase-select .lobby-v2168 .mode-start-actions .fight-button { min-height: 64px !important; height: auto !important; padding: 8px 6px !important; font-size: 12px !important; }
+  html[data-display-mode=mobile] #game.phase-select .lobby-v2168 .mode-start-actions .fight-button small { font-size: 8px !important; }
+}
+
+/* Quick jump from the roster to the game modes on small screens. */
+.lobby-jump-modes { display: none; }
+html[data-display-mode=mobile] #game.phase-select .lobby-jump-modes {
+  display: flex; position: fixed; right: max(10px, env(safe-area-inset-right)); bottom: max(10px, env(safe-area-inset-bottom)); z-index: 60;
+  align-items: center; gap: 6px; min-height: 48px; padding: 0 16px; border: 2px solid #ffa43d; border-radius: 999px;
+  background: #ff7a1a; color: #140806; font: 900 14px/1 Arial, sans-serif; letter-spacing: .04em; box-shadow: 0 6px 20px rgba(0,0,0,.55);
+  touch-action: manipulation;
+}
+
+/* The mode a controller is on must be obvious, on every screen. */
+#game.phase-select .lobby-games .mode-start-actions .fight-button:focus,
+#game.phase-select .lobby-games button:focus-visible {
+  outline: 4px solid #fff !important; outline-offset: 3px;
+  box-shadow: 0 0 0 7px #ff7a1a, 0 0 28px #ff7a1a !important;
+  transform: scale(1.03) !important; z-index: 2; position: relative;
+}

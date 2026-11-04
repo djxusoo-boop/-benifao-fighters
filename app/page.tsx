@@ -19,6 +19,7 @@ import { FIGHTER_FRAMES } from "./fighter-frames";
 import { attackFacesTarget, clampFighterStep, combatApproachGap, combatContact, directionToOpponent, fighterAttackRange, visibleFighterBounds } from "./combat-contact.mjs";
 import { joystickIntent } from "./touch-joystick.mjs";
 import GameErrorBoundary from "./GameErrorBoundary";
+import LobbyJump from "./LobbyJump";
 import { FIGHTER_PROFILES, defenseMultiplier, pickWinQuote, powerMultiplier, speedMultiplier } from "./fighter-profiles";
 import { ArcadeAudio, type HitKind, type MusicTheme } from "./arcade-audio";
 import { SUPER_MOVES } from "./super-moves";
@@ -151,7 +152,7 @@ const STAGES = [
 
 const GAME_TITLE = "HARDCORE FIGHTERS";
 const GAME_EDITION = "WEB · ARCADE EDITION";
-const GAME_VERSION = "V2.33.0";
+const GAME_VERSION = "V2.34.0";
 
 const ROUND_SECONDS = 99;
 const SUPER_MAX = 100;
@@ -724,11 +725,16 @@ function Home() {
     return () => window.removeEventListener("arcade:lobby", handle);
   }, [arcadeTool, rankingOpen, lobbyLocked]);
 
+  // As soon as a pad picks its fighter, jump to the game modes so ✕ again plays.
+  const anyLobbyLocked = lobbyLocked[0] || lobbyLocked[1];
   useEffect(() => {
-    if (game.phase === "select" && lobbyLocked[0] && (battleMode === "cpu" || lobbyLocked[1])) {
-      document.querySelector<HTMLButtonElement>(".mode-start-actions [data-gamepad-default]")?.focus();
-    }
-  }, [game.phase, lobbyLocked, battleMode]);
+    if (game.phase !== "select" || !anyLobbyLocked) return;
+    const target = document.querySelector<HTMLButtonElement>(".mode-start-actions [data-gamepad-default]:not(:disabled)")
+      ?? document.querySelector<HTMLButtonElement>(".lobby-games button:not(:disabled)");
+    if (!target || target.contains(document.activeElement) || document.activeElement?.closest(".lobby-games")) return;
+    target.focus({ preventScroll: true });
+    target.scrollIntoView({ block: "center", behavior: "smooth" });
+  }, [game.phase, anyLobbyLocked]);
 
   const later = useCallback((callback: () => void, delay: number, runWhilePaused = false) => {
     let timer = 0;
@@ -3018,9 +3024,9 @@ function Home() {
                 ))}
               </div>
               <div className="lobby-help" aria-live="polite">
-                <strong>{lobbyLocked[0] && (battleMode === "cpu" || lobbyLocked[1]) ? "2 · ELIGE EL MODO DE JUEGO" : "1 · CONFIRMA TU PERSONAJE"}</strong>
+                <strong>{anyLobbyLocked ? "2 · ELIGE EL MODO DE JUEGO · ✕ JUGAR" : "1 · CONFIRMA TU PERSONAJE CON ✕"}</strong>
                 <span>Los dos jugadores eligen en las imágenes: P1 naranja · P2 azul.</span>
-                <span>Cruceta: mover · ✕: confirmar · ○: cambiar personaje · SHARE: mapear</span>
+                <span>Cruceta: mover · ✕: elegir y saltar a los modos · ✕ otra vez: jugar · ○: volver</span>
                 <button type="button" onClick={() => { setLobbyLocked([true, true]); document.querySelector<HTMLButtonElement>(".mode-start-actions [data-gamepad-default]")?.focus(); }}>IR A LOS JUEGOS →</button>
               </div>
             </div>
@@ -3067,6 +3073,7 @@ function Home() {
                 </aside>
               );
             })()}
+            <LobbyJump />
             <div className="lobby-games">
               <h2>MODOS DE JUEGO <small>ELIGE CÓMO QUIERES JUGAR</small></h2>
               <div className="mode-start-actions">

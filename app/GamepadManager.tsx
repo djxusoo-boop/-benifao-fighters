@@ -113,6 +113,18 @@ const activateMenuFocus = () => {
   return true;
 };
 
+// How many columns a lobby grid shows right now (it changes with the screen).
+const gridColumns = (root: HTMLElement, selector: string, fallback: number) => {
+  try {
+    const grid = root.querySelector?.<HTMLElement>(selector);
+    if (!grid || typeof getComputedStyle !== "function") return fallback;
+    const count = getComputedStyle(grid).gridTemplateColumns.split(" ").filter(Boolean).length;
+    return count > 0 ? count : fallback;
+  } catch {
+    return fallback;
+  }
+};
+
 export default function GamepadManager() {
   const [open, setOpen] = useState(false);
   const [pads, setPads] = useState<PadInfo[]>([]);
@@ -343,6 +355,8 @@ export default function GamepadManager() {
             button: justPressed,
             horizontal: directions.left && !previousDirections.left ? -1 : directions.right && !previousDirections.right ? 1 : 0,
             vertical: directions.up && !previousDirections.up ? -1 : directions.down && !previousDirections.down ? 1 : 0,
+            columns: gridColumns(lobby, ".character-cards", 2),
+            modeColumns: gridColumns(lobby, ".mode-start-actions", 1),
           });
           if (["confirm", "back", "move"].includes(intent.action)) {
             window.dispatchEvent(new CustomEvent("arcade:lobby", { detail: { slot, ...intent } }));
@@ -354,10 +368,10 @@ export default function GamepadManager() {
               ? buttons[current < 0 ? 0 : (current + intent.direction + buttons.length) % buttons.length]
               : buttons[current < 0 ? 0 : current];
             target?.focus({ preventScroll: true });
-            target?.scrollIntoView({ block: "nearest", inline: "nearest" });
+            target?.scrollIntoView({ block: "center", inline: "nearest" });
             if (intent.action === "start") target?.click();
           }
-          liveLabels[slot] = lobby.dataset[slot === 0 ? "p1Locked" : "p2Locked"] === "true" ? "ELIGE MODO · ○ VOLVER" : "ELIGE PERSONAJE · ✕ LISTO";
+          liveLabels[slot] = lobby.dataset[slot === 0 ? "p1Locked" : "p2Locked"] === "true" ? "ELIGE MODO · ✕ JUGAR · ○ VOLVER" : "ELIGE PERSONAJE · ✕ LISTO";
           return;
         }
 
