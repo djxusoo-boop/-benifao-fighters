@@ -21,6 +21,7 @@ import { joystickIntent } from "./touch-joystick.mjs";
 import { FIGHTER_PROFILES, defenseMultiplier, pickWinQuote, powerMultiplier, speedMultiplier } from "./fighter-profiles";
 import { ArcadeAudio, type HitKind, type MusicTheme } from "./arcade-audio";
 import { SUPER_MOVES } from "./super-moves";
+import { SUPER_ANIM, companionFrame, superFrame, superFramesFor } from "./super-anim";
 
 type FighterId = "maletilla" | "vanessa" | "josevictor" | "cristian" | "cesaret" | "borja" | "bacora" | "bonviure" | "elchica" | "ogalla" | "xuso" | "bomba" | "rafeta" | "tonimassama" | "nova";
 type Phase = "select" | "intro" | "fight" | "ko" | "over" | "orbs" | "platform" | "coop" | "prison-slug" | "campaign-final";
@@ -39,6 +40,7 @@ type FighterStyle = "classic" | "neon" | "gold";
 type ArcadeTool = "moves" | "profile" | "controls" | null;
 type DamagePop = { id: number; side: Side; x: number; amount: number; kind: "normal" | "special" | "super" | "guard" | "counter" };
 type SuperFlash = { id: number; side: Side; fighter: FighterId } | null;
+type SuperAnim = { id: number; fighter: FighterId; frame: number; companion: number; companionX: number; origin: number; target: number; laneTop: number; laneHeight: number };
 type SuperFx = { id: number; side: Side; fighter: FighterId; origin: number; target: number } | null;
 type MatchStats = { hits: number; damage: number; specials: number; supers: number; perfectGuards: number; maxCombo: number; perfectRounds: number };
 const freshMatchStats = (): MatchStats => ({ hits: 0, damage: 0, specials: 0, supers: 0, perfectGuards: 0, maxCombo: 0, perfectRounds: 0 });
@@ -144,7 +146,7 @@ const STAGES = [
 
 const GAME_TITLE = "HARDCORE FIGHTERS";
 const GAME_EDITION = "WEB · ARCADE EDITION";
-const GAME_VERSION = "V2.23.0";
+const GAME_VERSION = "V2.24.0";
 
 const ROUND_SECONDS = 99;
 const SUPER_MAX = 100;
@@ -287,7 +289,7 @@ const cssFramesFor = (fighter: string): string[] => {
   return [...found].filter((url) => !/portrait|result|orb-|platform-|coop-|lobby|card/i.test(url));
 };
 
-function SuperEffect({ fx }: { fx: NonNullable<SuperFx> }) {
+function SuperEffect({ fx, minimal = false }: { fx: NonNullable<SuperFx>; minimal?: boolean }) {
   const move = SUPER_MOVES[fx.fighter];
   const color = FIGHTERS[fx.fighter].color;
   const dir = fx.target >= fx.origin ? 1 : -1;
@@ -295,7 +297,9 @@ function SuperEffect({ fx }: { fx: NonNullable<SuperFx> }) {
   const clamp = (value: number) => Math.max(3, Math.min(97, value));
   type Unit = { left: number; top: number; delay: number; size: number; to?: number; spin?: number };
   let units: Unit[] = [];
-  if (move.pattern === "rain") {
+  if (minimal) {
+    // The companion animation carries the attack; keep only the flash, shockwave, crack and name.
+  } else if (move.pattern === "rain") {
     units = Array.from({ length: 16 }, (_, i) => ({ left: clamp(fx.target + ((i * 37) % 11 - 5) * 3.2), top: 54 + (i % 3) * 5, delay: 0.42 + i * 0.045, size: 1 + (i % 3) * 0.25, spin: i % 2 ? 1 : -1 }));
   } else if (move.pattern === "barrage") {
     units = Array.from({ length: 14 }, (_, i) => ({ left: fx.origin, to: clamp(fx.target + dir * (4 + (i % 4) * 3)), top: 34 + ((i * 29) % 7) * 4.5, delay: 0.42 + i * 0.05, size: 0.9 + (i % 3) * 0.2, spin: dir }));
@@ -309,15 +313,15 @@ function SuperEffect({ fx }: { fx: NonNullable<SuperFx> }) {
   return (
     <div className={`super-fx super-pattern-${move.pattern} super-fx-${fx.side} ${dir > 0 ? "toward-right" : "toward-left"}`} style={{ "--super-color": color, "--target-x": `${fx.target}%` } as CSSProperties} aria-hidden="true">
       <span className="super-fx-flash" />
-      {move.pattern === "beam" && (
+      {!minimal && move.pattern === "beam" && (
         <span className="super-beam" style={{ left: `${Math.min(fx.origin, fx.target)}%`, width: `${Math.max(6, Math.abs(fx.target - fx.origin))}%`, transformOrigin: dir > 0 ? "left center" : "right center" }} />
       )}
-      {move.pattern === "summon" && (
+      {!minimal && move.pattern === "summon" && (
         <span className="super-summon" style={{ left: `${fx.target}%` }}>
           <Image src={asset(0)} alt="" width={360} height={360} unoptimized />
         </span>
       )}
-      {move.pattern === "summon" && move.assets[1] && (
+      {!minimal && move.pattern === "summon" && move.assets[1] && (
         <span className="super-summon-chain" style={{ left: `${fx.target}%` }}><Image src={move.assets[1]} alt="" width={200} height={200} unoptimized /></span>
       )}
       {(move.pattern === "quake" || move.pattern === "summon") && <span className="super-crack" style={{ left: `${fx.target}%` }} />}
@@ -328,7 +332,7 @@ function SuperEffect({ fx }: { fx: NonNullable<SuperFx> }) {
           <Image src={asset(index)} alt="" width={140} height={140} unoptimized />
         </span>
       ))}
-      <b className="super-fx-name" style={{ left: `${Math.max(24, Math.min(76, fx.target))}%` }}>{move.name}</b>
+      <b className="super-fx-name" style={{ left: `${Math.max(24, Math.min(76, fx.target))}%` }}>{SUPER_ANIM[fx.fighter]?.name ?? move.name}</b>
     </div>
   );
 }
@@ -422,6 +426,7 @@ export default function Home() {
   const [damagePops, setDamagePops] = useState<DamagePop[]>([]);
   const [superFlash, setSuperFlash] = useState<SuperFlash>(null);
   const [superFx, setSuperFx] = useState<SuperFx>(null);
+  const [superAnim, setSuperAnim] = useState<Record<Side, SuperAnim | null>>({ player: null, cpu: null });
   const [stunned, setStunned] = useState<Record<Side, boolean>>({ player: false, cpu: false });
   const [lowAttack, setLowAttack] = useState<Record<Side, boolean>>({ player: false, cpu: false });
   const [passiveBadge, setPassiveBadge] = useState<Record<Side, { text: string; id: number } | null>>({ player: null, cpu: null });
@@ -595,7 +600,7 @@ export default function Home() {
   useEffect(() => {
     // CSS swaps whole images during an action. Prepare only the active pair so
     // the first punch or jump doesn't show an empty image while it downloads.
-    const sources = [...new Set([...FIGHTER_FRAMES[selected], ...FIGHTER_FRAMES[opponent], ...cssFramesFor(selected), ...cssFramesFor(opponent)])];
+    const sources = [...new Set([...FIGHTER_FRAMES[selected], ...FIGHTER_FRAMES[opponent], ...cssFramesFor(selected), ...cssFramesFor(opponent), ...superFramesFor(selected), ...superFramesFor(opponent)])];
     // Keep decoded images referenced so the browser doesn't evict them mid-fight.
     const keep: HTMLImageElement[] = [];
     preloadedFramesRef.current = keep;
@@ -1082,12 +1087,12 @@ export default function Home() {
         ? directionToOpponent(snapshot.playerX, snapshot.cpuX)
         : directionToOpponent(snapshot.cpuX, snapshot.playerX);
       const extendedNewKick = normalMove === "kick" && ["borja", "bacora", "bonviure", "elchica", "ogalla"].includes(fighter);
-      const baseActionDuration = isSuper ? 1180 : level > 0 ? (level === 2 ? 980 : 820) : normalMove === "kick" ? (extendedNewKick ? 760 : 620) : 480;
+      const baseActionDuration = isSuper ? 1400 : level > 0 ? (level === 2 ? 980 : 820) : normalMove === "kick" ? (extendedNewKick ? 760 : 620) : 480;
       const passiveSpeed = (passive === "rhythmRush" && level === 0) ? .8 : (passive === "quickTrigger" && level > 0 && !isSuper) ? .75 : 1;
       const actionDuration = Math.round(baseActionDuration * passiveSpeed);
       cooldownRef.current[side] = now + actionDuration;
       // Normals connect sooner than before so the controls feel snappy.
-      const impactDelay = Math.round(actionDuration * (isSuper ? .6 : level > 0 ? .38 : extendedNewKick ? .4 : normalMove === "punch" ? .34 : .42));
+      const impactDelay = Math.round(actionDuration * (isSuper ? .62 : level > 0 ? .38 : extendedNewKick ? .4 : normalMove === "punch" ? .34 : .42));
       // Attacking from a crouch: a low jab that reaches crouching rivals, or a sweep that trips them.
       const isLowAttack = level === 0 && !airborne && (ownAction === "crouch" || crouchHeldRef.current[side]);
       const isKnockdownAttack = level === 2 || comboFinisher || (isLowAttack && normalMove === "kick");
@@ -1103,7 +1108,28 @@ export default function Home() {
         setSuperFx({ id: now, side, fighter, origin: side === "player" ? snapshot.playerX : snapshot.cpuX, target: side === "player" ? snapshot.cpuX : snapshot.playerX });
         later(() => setSuperFx((current) => current?.id === now ? null : current), 2000, true);
         superArmorUntilRef.current = { ...superArmorUntilRef.current, [side]: now + impactDelay + 120 };
-        later(() => setSuperFlash((current) => current?.id === now ? null : current), 900, true);
+        later(() => setSuperFlash((current) => current?.id === now ? null : current), 600, true);
+        // Play the 8-frame super of the fighter and send its companion across the arena.
+        if (SUPER_ANIM[fighter]) {
+          const element = side === "player" ? playerFighterRef.current : cpuFighterRef.current;
+          const originX = side === "player" ? snapshot.playerX : snapshot.cpuX;
+          const targetX = side === "player" ? snapshot.cpuX : snapshot.playerX;
+          const step = actionDuration / 8;
+          const base: SuperAnim = { id: now, fighter, frame: 1, companion: 0, companionX: originX, origin: originX, target: targetX, laneTop: element?.offsetTop ?? 0, laneHeight: element?.offsetHeight ?? 0 };
+          setSuperAnim((current) => ({ ...current, [side]: base }));
+          const update = (patch: Partial<SuperAnim>) => setSuperAnim((current) => current[side]?.id === now ? { ...current, [side]: { ...current[side]!, ...patch } } : current);
+          for (let index = 1; index < 8; index += 1) later(() => update({ frame: index + 1 }), Math.round(index * step));
+          // Companion: appears on the launch frame, travels for 3 frames, then plays its impact at the rival.
+          for (let index = 0; index < 8; index += 1) {
+            later(() => {
+              const current = gameRef.current;
+              const liveTarget = side === "player" ? current.cpuX : current.playerX;
+              const progress = Math.min(1, index / 3);
+              update({ companion: index + 1, companionX: originX + (liveTarget - originX) * progress });
+            }, Math.round((2 + index * 0.9) * step));
+          }
+          later(() => setSuperAnim((current) => current[side]?.id === now ? { ...current, [side]: null } : current), Math.round((2 + 8 * 0.9) * step) + 60);
+        }
         if (soundOn) getAudio().superRiser();
         haptic([20, 30, 20, 30, 60]);
       }
@@ -1726,6 +1752,7 @@ export default function Home() {
     setDamagePops([]);
     setSuperFlash(null);
     setSuperFx(null);
+    setSuperAnim({ player: null, cpu: null });
     setStunned({ player: false, cpu: false });
     setPassiveBadge({ player: null, cpu: null });
   }, []);
@@ -2708,8 +2735,10 @@ export default function Home() {
         )}
 
         {game.phase !== "select" && <>
-          <div ref={playerFighterRef} className={`fighter motion-rig ${selected} ${game.playerAction} ${game.playerMove ?? ""} combo-step-${game.playerAttackVariant} pose-phase-${game.playerPosePhase} ${playerVictory ? "winner-dance" : cpuVictory ? "defeated" : ""} ${game.playerAirborne ? "airborne" : ""} ${game.playerAction === "walk" ? `${playerWalkIntent} gear-${movementGear.player}` : ""} ${facing.player} ${immuneClock < immuneUntil.player ? "immune" : ""} ${stunned.player ? "stunned" : ""} ${lowAttack.player && (game.playerAction === "punch" || game.playerAction === "kick") ? "low-attack" : ""}`} style={{ left: `${game.playerX}%` }} aria-label={`${playerData.name}, jugador`} role="img">
-            <div className="fighter-motion"><div className="fighter-pose">
+          <div ref={playerFighterRef} className={`fighter motion-rig ${selected} ${game.playerAction} ${game.playerMove ?? ""} combo-step-${game.playerAttackVariant} pose-phase-${game.playerPosePhase} ${playerVictory ? "winner-dance" : cpuVictory ? "defeated" : ""} ${game.playerAirborne ? "airborne" : ""} ${game.playerAction === "walk" ? `${playerWalkIntent} gear-${movementGear.player}` : ""} ${facing.player} ${immuneClock < immuneUntil.player ? "immune" : ""} ${stunned.player ? "stunned" : ""} ${superAnim.player ? "super-anim" : ""} ${lowAttack.player && (game.playerAction === "punch" || game.playerAction === "kick") ? "low-attack" : ""}`} style={{ left: `${game.playerX}%` }} aria-label={`${playerData.name}, jugador`} role="img">
+            <div className="fighter-motion">{superAnim.player && (
+              <span className="super-body" aria-hidden="true" style={{ height: `${SUPER_ANIM[superAnim.player.fighter].size * 100}%`, bottom: `${SUPER_ANIM[superAnim.player.fighter].bottom * 100}%`, backgroundImage: `url("${superFrame(superAnim.player.fighter, superAnim.player.frame)}")` }} />
+            )}<div className="fighter-pose">
               <div className={`fighter-art ${selected} ${facing.player}`}>{!(["cesaret", "borja", "bacora", "bonviure", "elchica", "ogalla", "xuso", "bomba", "tonimassama"] as FighterId[]).includes(selected) && <FighterWalkLayers />}</div>
               {stunned.player && <b className="stun-word">★ ¡MAREADO! ★</b>}
               {passiveBadge.player && <b key={passiveBadge.player.id} className="passive-word">{passiveBadge.player.text}</b>}
@@ -2719,8 +2748,10 @@ export default function Home() {
             </div></div>
             <span className="fighter-shadow" />
           </div>
-          <div ref={cpuFighterRef} className={`fighter motion-rig ${opponent} cpu ${battleMode === "cpu" ? "cpu-ai" : ""} ${game.cpuAction} ${game.cpuMove ?? ""} combo-step-${game.cpuAttackVariant} pose-phase-${game.cpuPosePhase} ${cpuVictory ? "winner-dance" : playerVictory ? "defeated" : ""} ${game.cpuAirborne ? "airborne" : ""} ${game.cpuAction === "walk" ? `${cpuWalkIntent} gear-${movementGear.cpu}` : ""} ${facing.cpu} ${immuneClock < immuneUntil.cpu ? "immune" : ""} ${stunned.cpu ? "stunned" : ""} ${lowAttack.cpu && (game.cpuAction === "punch" || game.cpuAction === "kick") ? "low-attack" : ""}`} style={{ left: `${game.cpuX}%` }} aria-label={`${cpuData.name}, rival`} role="img">
-            <div className="fighter-motion"><div className="fighter-pose">
+          <div ref={cpuFighterRef} className={`fighter motion-rig ${opponent} cpu ${battleMode === "cpu" ? "cpu-ai" : ""} ${game.cpuAction} ${game.cpuMove ?? ""} combo-step-${game.cpuAttackVariant} pose-phase-${game.cpuPosePhase} ${cpuVictory ? "winner-dance" : playerVictory ? "defeated" : ""} ${game.cpuAirborne ? "airborne" : ""} ${game.cpuAction === "walk" ? `${cpuWalkIntent} gear-${movementGear.cpu}` : ""} ${facing.cpu} ${immuneClock < immuneUntil.cpu ? "immune" : ""} ${stunned.cpu ? "stunned" : ""} ${superAnim.cpu ? "super-anim" : ""} ${lowAttack.cpu && (game.cpuAction === "punch" || game.cpuAction === "kick") ? "low-attack" : ""}`} style={{ left: `${game.cpuX}%` }} aria-label={`${cpuData.name}, rival`} role="img">
+            <div className="fighter-motion">{superAnim.cpu && (
+              <span className="super-body" aria-hidden="true" style={{ height: `${SUPER_ANIM[superAnim.cpu.fighter].size * 100}%`, bottom: `${SUPER_ANIM[superAnim.cpu.fighter].bottom * 100}%`, backgroundImage: `url("${superFrame(superAnim.cpu.fighter, superAnim.cpu.frame)}")` }} />
+            )}<div className="fighter-pose">
               <div className={`fighter-art ${opponent} ${facing.cpu}`}>{!(["cesaret", "borja", "bacora", "bonviure", "elchica", "ogalla", "xuso", "bomba", "tonimassama"] as FighterId[]).includes(opponent) && <FighterWalkLayers />}</div>
               {stunned.cpu && <b className="stun-word">★ ¡MAREADO! ★</b>}
               {passiveBadge.cpu && <b key={passiveBadge.cpu.id} className="passive-word">{passiveBadge.cpu.text}</b>}
@@ -2764,11 +2795,23 @@ export default function Home() {
         {(game.phase === "fight" || game.phase === "ko") && damagePops.map((pop) => (
           <b key={pop.id} className={`damage-pop pop-${pop.kind} pop-${pop.side}`} style={{ left: `${pop.x}%` }} aria-hidden="true">{pop.kind === "guard" ? `-${pop.amount} ◆` : `-${pop.amount}`}</b>
         ))}
-        {superFx && <SuperEffect key={superFx.id} fx={superFx} />}
+        {superFx && <SuperEffect key={superFx.id} fx={superFx} minimal={Boolean(SUPER_ANIM[superFx.fighter])} />}
+        {(["player", "cpu"] as Side[]).map((side) => {
+          const anim = superAnim[side];
+          if (!anim || !anim.companion) return null;
+          const data = SUPER_ANIM[anim.fighter];
+          const right = anim.target >= anim.origin;
+          const mirror = right ? data.mirror[anim.companion - 1] : !data.mirror[anim.companion - 1];
+          return (
+            <span key={`${side}-${anim.id}`} className="super-companion" aria-hidden="true" style={{ left: `${anim.companionX}%`, top: `${anim.laneTop}px`, height: `${anim.laneHeight}px` }}>
+              <i style={{ height: `${data.size * 100}%`, bottom: `${data.bottom * 100}%`, backgroundImage: `url("${companionFrame(anim.fighter, anim.companion)}")`, transform: `translateX(-50%) scaleX(${mirror ? -1 : 1})` }} />
+            </span>
+          );
+        })}
         {superFlash && (
           <div key={superFlash.id} className={`super-cinematic super-${superFlash.side}`} aria-live="assertive">
             <span className={`super-cinematic-portrait portrait ${superFlash.fighter}`} />
-            <div className="super-cinematic-copy"><small>{FIGHTERS[superFlash.fighter].name}</small><strong>SUPER<br />HARDCORE</strong><em>{SUPER_MOVES[superFlash.fighter].name}</em></div>
+            <div className="super-cinematic-copy"><small>{FIGHTERS[superFlash.fighter].name}</small><strong>SUPER<br />HARDCORE</strong><em>{SUPER_ANIM[superFlash.fighter]?.name ?? SUPER_MOVES[superFlash.fighter].name}</em></div>
           </div>
         )}
         {fightCall && <div key={fightCall.id} className={`fight-technique-call technique-${fightCall.side}`} aria-live="polite">{fightCall.text}</div>}

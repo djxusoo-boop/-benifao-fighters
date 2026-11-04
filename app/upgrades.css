@@ -860,3 +860,33 @@ html:fullscreen .game-shell, html:-webkit-full-screen .game-shell { min-height: 
 @media (prefers-reduced-motion: reduce) {
   .arena .fighter .fighter-motion { rotate: none !important; translate: none !important; scale: none !important; transition: none; }
 }
+
+/* ===== V2.24 SUPER frame animation + companion ===== */
+.arena .fighter .super-body {
+  position: absolute;
+  left: 50%;
+  z-index: 3;
+  aspect-ratio: 1;
+  transform: translateX(-50%);
+  background: no-repeat center bottom / contain;
+  pointer-events: none;
+  filter: drop-shadow(0 0 14px rgba(255, 220, 120, .55)) drop-shadow(6px 10px 8px rgba(0, 0, 0, .55));
+}
+.arena .fighter.face-left .super-body { transform: translateX(-50%) scaleX(-1); }
+.arena .fighter.super-anim .fighter-pose .fighter-art,
+.arena .fighter.super-anim .fighter-pose .fighter-walk-layers { opacity: 0 !important; }
+.arena .super-companion {
+  position: absolute;
+  z-index: 46;
+  width: 0;
+  pointer-events: none;
+  transition: left 150ms linear;
+}
+.arena .super-companion > i {
+  position: absolute;
+  left: 0;
+  aspect-ratio: 1;
+  background: no-repeat center bottom / contain;
+  filter: drop-shadow(0 0 16px rgba(255, 240, 160, .6));
+}
+.super-cinematic { animation-duration: 560ms !important; }

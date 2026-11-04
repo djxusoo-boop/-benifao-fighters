@@ -95,6 +95,8 @@ export default function FighterVisibilityGuard() {
       const arena = document.querySelector(".arena.phase-fight, .arena.phase-ko, .arena.phase-intro");
       if (!arena) return;
       arena.querySelectorAll<HTMLElement>(":scope > .fighter").forEach((fighter) => {
+        // During a SUPER the body is drawn by its own frame layer.
+        if (fighter.classList.contains("super-anim")) return;
         const art = fighter.querySelector<HTMLElement>(".fighter-art");
         if (!art) return;
         // Measure the fighter's natural state; style changes inside one task never paint.
