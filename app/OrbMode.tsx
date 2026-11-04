@@ -5,6 +5,7 @@ import type { PointerEvent as ReactPointerEvent } from "react";
 import ArcadeCrowd from "./ArcadeCrowd";
 import FighterWalkLayers from "./FighterWalkLayers";
 import TouchStick from "./TouchStick";
+import { preloadCoopFrames } from "./coop-preload";
 
 type FighterId = "maletilla" | "vanessa" | "josevictor" | "cristian" | "cesaret" | "borja" | "bacora" | "bonviure" | "elchica" | "ogalla" | "xuso" | "bomba" | "rafeta" | "tonimassama" | "nova" | "estefy";
 type OrbStatus = "playing" | "won" | "lost";
@@ -110,6 +111,8 @@ export default function OrbMode({ fighter, fighterName, soundOn, difficulty, cam
   useEffect(() => {
     onExitRef.current = onExit;
   }, [onExit]);
+  // Load and decode the hero's frames up front so pose changes never blink.
+  useEffect(() => { preloadCoopFrames([fighter], true, "orb-hero"); }, [fighter]);
   useEffect(() => { onCompleteRef.current = onComplete; }, [onComplete]);
 
   useEffect(() => {
@@ -285,6 +288,14 @@ export default function OrbMode({ fighter, fighterName, soundOn, difficulty, cam
       playTone(fighter === "vanessa" ? 330 : 210, 0.07, fighter === "vanessa" ? "sine" : "square");
     };
     fireRef.current = () => fire();
+
+    const shakeScreen = (strong: boolean) => {
+      const node = canvas.parentElement;
+      if (!node) return;
+      node.classList.remove("orb-shake", "orb-shake-strong");
+      void node.offsetWidth;
+      node.classList.add(strong ? "orb-shake-strong" : "orb-shake");
+    };
 
     const burst = (ball: OrbBall) => {
       const color = `hsl(${ball.hue} 95% 62%)`;
@@ -602,6 +613,7 @@ export default function OrbMode({ fighter, fighterName, soundOn, difficulty, cam
               score += (ball.tier === 2 ? 150 : ball.tier === 1 ? 250 : 400) * multiplier;
               orbCountChanged = true;
               playTone(ball.tier === 0 ? 510 : 390, 0.055, "triangle");
+              if (ball.tier === 2) shakeScreen(false);
               break;
             }
           }
@@ -687,6 +699,7 @@ export default function OrbMode({ fighter, fighterName, soundOn, difficulty, cam
                 { duration: 480, easing: "ease-out" },
               );
               playTone(82, 0.18, "sawtooth");
+              shakeScreen(true);
               if (lives <= 0) finish("lost");
               break;
             }

@@ -6,9 +6,9 @@ const urlPattern = /url\(["']?([^"')]+)["']?\)/g;
 const started = new Set<string>();
 const keep: HTMLImageElement[] = [];
 
-const framesFor = (fighter: string) => {
+const framesFor = (fighter: string, root = "coop-player") => {
   const urls = new Set<string>();
-  const selector = `.coop-player.${fighter}`;
+  const selector = `.${root}.${fighter}`;
   const keyframeNames = [`coop-walk-${fighter}`, `${fighter}-v3-walk`];
   const visit = (rules: CSSRuleList) => {
     for (const rule of Array.from(rules)) {
@@ -29,9 +29,9 @@ const framesFor = (fighter: string) => {
 
 // Heroes: load and decode (kept in memory). Clones: only warm the download
 // cache, so a phone never holds every fighter's bitmaps at once.
-export const preloadCoopFrames = (fighters: string[], decode = true) => {
+export const preloadCoopFrames = (fighters: string[], decode = true, root = "coop-player") => {
   fighters.forEach((fighter) => {
-    framesFor(fighter).forEach((url) => {
+    framesFor(fighter, root).forEach((url) => {
       if (started.has(url)) return;
       started.add(url);
       const image = new Image();

@@ -1,0 +1,25 @@
+/* ===== V2.33 Rompeobjetos: square hero box, real walk cycles (reuses the coop walk keyframes) ===== */
+#game .orb-mode .orb-hero { width:auto!important; aspect-ratio:1/1!important; }
+#game .orb-mode .orb-hero .fighter-art { left:0!important; width:100%!important; background-size:contain!important; background-position:center bottom!important; background-repeat:no-repeat!important; mix-blend-mode:normal!important; }
+#game .orb-mode .orb-hero .fighter-walk-layers { display:none!important; }
+#game .orb-mode .orb-hero.maletilla.orb-moving:not(.orb-firing) .fighter-art.maletilla { animation:coop-walk-maletilla 520ms steps(1,end) infinite!important; }
+#game .orb-mode .orb-hero.vanessa.orb-moving:not(.orb-firing) .fighter-art.vanessa { animation:coop-walk-vanessa 520ms steps(1,end) infinite!important; }
+#game .orb-mode .orb-hero.josevictor.orb-moving:not(.orb-firing) .fighter-art.josevictor { animation:coop-walk-josevictor 520ms steps(1,end) infinite!important; }
+#game .orb-mode .orb-hero.cristian.orb-moving:not(.orb-firing) .fighter-art.cristian { animation:coop-walk-cristian 520ms steps(1,end) infinite!important; }
+#game .orb-mode .orb-hero.borja.orb-moving:not(.orb-firing) .fighter-art.borja { animation:coop-walk-borja 520ms steps(1,end) infinite!important; }
+#game .orb-mode .orb-hero.bacora.orb-moving:not(.orb-firing) .fighter-art.bacora { animation:coop-walk-bacora 520ms steps(1,end) infinite!important; }
+#game .orb-mode .orb-hero.bonviure.orb-moving:not(.orb-firing) .fighter-art.bonviure { animation:coop-walk-bonviure 520ms steps(1,end) infinite!important; }
+#game .orb-mode .orb-hero.elchica.orb-moving:not(.orb-firing) .fighter-art.elchica { animation:coop-walk-elchica 520ms steps(1,end) infinite!important; }
+#game .orb-mode .orb-hero.ogalla.orb-moving:not(.orb-firing) .fighter-art.ogalla { animation:coop-walk-ogalla 520ms steps(1,end) infinite!important; }
+#game .orb-mode .orb-hero.bomba.orb-moving:not(.orb-firing) .fighter-art.bomba { animation:coop-walk-bomba 520ms steps(1,end) infinite!important; }
+#game .orb-mode .orb-hero.tonimassama.orb-moving:not(.orb-firing) .fighter-art.tonimassama { animation:coop-walk-tonimassama 520ms steps(1,end) infinite!important; }
+#game .orb-mode .orb-hero.nova.orb-moving:not(.orb-firing) .fighter-art.nova { animation:coop-walk-nova 520ms steps(1,end) infinite!important; }
+#game .orb-mode .orb-hero.estefy.orb-moving:not(.orb-firing) .fighter-art.estefy { animation:coop-walk-estefy 520ms steps(1,end) infinite!important; }
+#game .orb-mode .orb-hero.xuso.orb-moving:not(.orb-firing) .fighter-art.xuso { animation:xuso-v3-walk 560ms steps(1,end) infinite!important; }
+#game .orb-mode .orb-hero.orb-moving.orb-walk-fast:not(.orb-firing) .fighter-art { animation-duration:360ms!important; }
+
+/* Screen shake for heavy moments in Cooperativa and Rompeobjetos */
+#game .coop-mode.coop-shake, #game .orb-mode.orb-shake { animation:mode-shake 180ms linear; }
+#game .coop-mode.coop-shake-strong, #game .orb-mode.orb-shake-strong { animation:mode-shake-strong 300ms linear; }
+@keyframes mode-shake { 0%,100% { translate:0 0; } 25% { translate:-4px 2px; } 50% { translate:4px -2px; } 75% { translate:-3px -1px; } }
+@keyframes mode-shake-strong { 0%,100% { translate:0 0; } 15% { translate:-9px 4px; } 35% { translate:8px -5px; } 55% { translate:-6px 3px; } 75% { translate:5px -2px; } 90% { translate:-2px 1px; } }

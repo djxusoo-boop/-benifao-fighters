@@ -237,6 +237,16 @@ export default function CoopMode({ playerOne, playerTwo, aiPlayerTwo = false, so
     } catch { /* Audio is optional. */ }
   }, [soundOn]);
 
+  const modeRef = useRef<HTMLDivElement>(null);
+  // Short screen shake for heavy moments (getting hit, a boss going down).
+  const shake = useCallback((strong = false) => {
+    const node = modeRef.current;
+    if (!node) return;
+    node.classList.remove("coop-shake", "coop-shake-strong");
+    void node.offsetWidth;
+    node.classList.add(strong ? "coop-shake-strong" : "coop-shake");
+  }, []);
+
   const haptic = useCallback((pattern: number | number[]) => {
     try { navigator.vibrate?.(pattern); } catch { /* Optional on supported devices. */ }
   }, []);
@@ -409,8 +419,9 @@ export default function CoopMode({ playerOne, playerTwo, aiPlayerTwo = false, so
         setPickups(pickupsRef.current);
       }
       haptic(defeated.boss ? [40, 30, 80] : [20, 18, 30]);
+      if (defeated.boss || defeated.role === "tank") shake(defeated.boss);
     }
-  }, [addProjectile, beep, difficulty, haptic, later]);
+  }, [addProjectile, beep, difficulty, haptic, later, shake]);
 
   const fire = useCallback((slot: PlayerSlot, special = false) => {
     if (statusRef.current !== "playing") return;
@@ -425,8 +436,8 @@ export default function CoopMode({ playerOne, playerTwo, aiPlayerTwo = false, so
     delete queuedAttackRef.current[slot];
     const sorted = [...enemiesRef.current].sort((a, b) => Math.abs(a.x - player.x) - Math.abs(b.x - player.x));
     if (!sorted.length) return;
-    cooldownRef.current[slot] = now + (special ? 820 : 540);
-    setAction(slot, special ? "special" : "fire", special ? 820 : 540);
+    cooldownRef.current[slot] = now + (special ? 820 : 420);
+    setAction(slot, special ? "special" : "fire", special ? 820 : 420);
     const count = special ? 4 : 3;
     const kind: Projectile["kind"] = special
       ? fighter === "nova" ? "prism" : fighter === "estefy" ? "leaves" : fighter === "cesaret" ? "fish" : fighter === "borja" ? "venom" : fighter === "bacora" ? "staff" : fighter === "bonviure" ? "chain" : fighter === "elchica" ? "amber" : fighter === "ogalla" ? "artichokes" : fighter === "xuso" ? "dog" : fighter === "bomba" ? "hoe" : fighter === "rafeta" ? "flagSweep" : fighter === "tonimassama" ? "peineta" : fighter === "maletilla" ? "mushroom" : fighter === "vanessa" ? "ear" : fighter === "josevictor" ? "money" : "speaker"
@@ -710,7 +721,7 @@ export default function CoopMode({ playerOne, playerTwo, aiPlayerTwo = false, so
           return next;
         });
         setSync((value) => Math.max(0, value - 7));
-        haptic(28); beep(68, 0.1, "sawtooth");
+        haptic(28); beep(68, 0.1, "sawtooth"); shake();
         later(() => setPlayers((current) => current[fighter].health > 0 && current[fighter].action === "hit" ? { ...current, [fighter]: { ...current[fighter], action: "idle" } } : current), 420);
       });
       rangedIncoming.forEach(({ fighter, damage, delay }) => {
@@ -728,7 +739,7 @@ export default function CoopMode({ playerOne, playerTwo, aiPlayerTwo = false, so
             playersRef.current = next;
             return next;
           });
-          haptic(18); beep(76, .08, "sawtooth");
+          haptic(18); beep(76, .08, "sawtooth"); shake();
           later(() => setPlayers((current) => current[fighter].health > 0 && current[fighter].action === "hit" ? { ...current, [fighter]: { ...current[fighter], action: "idle" } } : current), 360);
         }, delay);
       });
@@ -736,7 +747,7 @@ export default function CoopMode({ playerOne, playerTwo, aiPlayerTwo = false, so
     };
     frameId = window.requestAnimationFrame(movement);
     return () => window.cancelAnimationFrame(frameId);
-  }, [aiPlayerTwo, beep, difficulty, fire, haptic, later]);
+  }, [aiPlayerTwo, beep, difficulty, fire, haptic, later, shake]);
 
   useEffect(() => {
     if (status !== "playing" || enemies.length > 0 || transitioningRef.current) return;
@@ -824,7 +835,7 @@ export default function CoopMode({ playerOne, playerTwo, aiPlayerTwo = false, so
   };
 
   return (
-    <div className={`coop-mode coop-stage-${wave} status-${status} combo-${comboFlash % 2} ${aiPlayerTwo ? "coop-ai-partner" : "coop-human-duo"}`} key={gameKey} aria-label={`Aventura cooperativa de ${PLAYER_NAMES[playerOne]} y ${PLAYER_NAMES[playerTwo]}`}>
+    <div ref={modeRef} className={`coop-mode coop-stage-${wave} status-${status} combo-${comboFlash % 2} ${aiPlayerTwo ? "coop-ai-partner" : "coop-human-duo"}`} key={gameKey} aria-label={`Aventura cooperativa de ${PLAYER_NAMES[playerOne]} y ${PLAYER_NAMES[playerTwo]}`}>
       {status === "playing" && <ArcadeCrowd mode="coop" seed={wave - 1} phase={status} react={Boolean(comboFlash % 2)} cue={crowdBossCue} />}
       <div className="coop-hud">
         {(["p1", "p2"] as PlayerSlot[]).map((slot, index) => (
