@@ -144,7 +144,7 @@ const STAGES = [
 
 const GAME_TITLE = "HARDCORE FIGHTERS";
 const GAME_EDITION = "WEB · ARCADE EDITION";
-const GAME_VERSION = "V2.22.0";
+const GAME_VERSION = "V2.23.0";
 
 const ROUND_SECONDS = 99;
 const SUPER_MAX = 100;
@@ -423,6 +423,7 @@ export default function Home() {
   const [superFlash, setSuperFlash] = useState<SuperFlash>(null);
   const [superFx, setSuperFx] = useState<SuperFx>(null);
   const [stunned, setStunned] = useState<Record<Side, boolean>>({ player: false, cpu: false });
+  const [lowAttack, setLowAttack] = useState<Record<Side, boolean>>({ player: false, cpu: false });
   const [passiveBadge, setPassiveBadge] = useState<Record<Side, { text: string; id: number } | null>>({ player: null, cpu: null });
   const [matchStats, setMatchStats] = useState<MatchStats>(freshMatchStats);
   const [roundEndKind, setRoundEndKind] = useState<"ko" | "perfect" | "time">("ko");
@@ -1087,7 +1088,10 @@ export default function Home() {
       cooldownRef.current[side] = now + actionDuration;
       // Normals connect sooner than before so the controls feel snappy.
       const impactDelay = Math.round(actionDuration * (isSuper ? .6 : level > 0 ? .38 : extendedNewKick ? .4 : normalMove === "punch" ? .34 : .42));
-      const isKnockdownAttack = level === 2 || comboFinisher;
+      // Attacking from a crouch: a low jab that reaches crouching rivals, or a sweep that trips them.
+      const isLowAttack = level === 0 && !airborne && (ownAction === "crouch" || crouchHeldRef.current[side]);
+      const isKnockdownAttack = level === 2 || comboFinisher || (isLowAttack && normalMove === "kick");
+      setLowAttack((current) => current[side] === isLowAttack ? current : { ...current, [side]: isLowAttack });
       const knockback = (isSuper ? 24 : level === 2 ? 18 : comboFinisher ? 8.5 : level === 1 ? 4.5 : normalMove === "kick" ? 3.4 : 2.1) + (airborne ? 2.4 : 0);
       swing(level > 0 ? "special" : normalMove === "kick" ? "heavy" : "light");
       if (side === "cpu" && battleMode === "cpu" && level > 0) cpuSpecialReadyAtRef.current = now + CPU_SPECIAL_COOLDOWN[difficulty];
@@ -1195,7 +1199,7 @@ export default function Home() {
             range: specialRange,
             evading: Date.now() < evadeUntilRef.current[targetSide],
             crouching: liveTargetAction === "crouch",
-            normalPunch: level === 0 && normalMove === "punch",
+            normalPunch: level === 0 && normalMove === "punch" && !isLowAttack,
           });
           if (Date.now() < superArmorUntilRef.current[targetSide]) {
             comboCountRef.current[side] = 0;
@@ -1302,6 +1306,7 @@ export default function Home() {
             showFightCall(superMove.bonusCall, side);
             applySuperBonus(side, targetSide, fighter, dealtDamage);
           }
+          else if (isLowAttack && normalMove === "kick" && !targetGuarded) showFightCall("¡BARRIDA!", side);
           else if (comboFinisher && !targetGuarded) showFightCall("¡REMATE DE COMBO!", side);
           else if (counterHit && !targetGuarded) showFightCall("¡CONTRAATAQUE!", side);
           haptic(level > 0 ? [24, 35, 38] : normalMove === "kick" ? 28 : 16);
@@ -1349,6 +1354,7 @@ export default function Home() {
 
       later(() => {
         if (attackTokenRef.current[side] !== attackToken) return;
+        setLowAttack((current) => current[side] ? { ...current, [side]: false } : current);
         const currentAction = side === "player" ? gameRef.current.playerAction : gameRef.current.cpuAction;
         const expectedAction: Action = level > 0 ? "special" : normalMove;
         if (currentAction !== expectedAction) {
@@ -2176,6 +2182,8 @@ export default function Home() {
         performAttack("cpu", 0, Math.random() > 0.48 ? "kick" : "punch");
       } else if (decision > 0.12) {
         setGame((value) => ({ ...value, cpuAction: "crouch" }));
+        // Sometimes follow the crouch with a sweep or a low jab.
+        if (distance < 22 && Math.random() < (difficulty === "easy" ? .25 : .5)) later(() => performAttackRef.current("cpu", 0, Math.random() < .6 ? "kick" : "punch"), 170);
         later(() => setGame((value) => value.cpuAction === "crouch" ? { ...value, cpuAction: "idle" } : value), 430);
       } else {
         guardStartedRef.current.cpu = Date.now();
@@ -2700,7 +2708,7 @@ export default function Home() {
         )}
 
         {game.phase !== "select" && <>
-          <div ref={playerFighterRef} className={`fighter motion-rig ${selected} ${game.playerAction} ${game.playerMove ?? ""} combo-step-${game.playerAttackVariant} pose-phase-${game.playerPosePhase} ${playerVictory ? "winner-dance" : cpuVictory ? "defeated" : ""} ${game.playerAirborne ? "airborne" : ""} ${game.playerAction === "walk" ? `${playerWalkIntent} gear-${movementGear.player}` : ""} ${facing.player} ${immuneClock < immuneUntil.player ? "immune" : ""} ${stunned.player ? "stunned" : ""}`} style={{ left: `${game.playerX}%` }} aria-label={`${playerData.name}, jugador`} role="img">
+          <div ref={playerFighterRef} className={`fighter motion-rig ${selected} ${game.playerAction} ${game.playerMove ?? ""} combo-step-${game.playerAttackVariant} pose-phase-${game.playerPosePhase} ${playerVictory ? "winner-dance" : cpuVictory ? "defeated" : ""} ${game.playerAirborne ? "airborne" : ""} ${game.playerAction === "walk" ? `${playerWalkIntent} gear-${movementGear.player}` : ""} ${facing.player} ${immuneClock < immuneUntil.player ? "immune" : ""} ${stunned.player ? "stunned" : ""} ${lowAttack.player && (game.playerAction === "punch" || game.playerAction === "kick") ? "low-attack" : ""}`} style={{ left: `${game.playerX}%` }} aria-label={`${playerData.name}, jugador`} role="img">
             <div className="fighter-motion"><div className="fighter-pose">
               <div className={`fighter-art ${selected} ${facing.player}`}>{!(["cesaret", "borja", "bacora", "bonviure", "elchica", "ogalla", "xuso", "bomba", "tonimassama"] as FighterId[]).includes(selected) && <FighterWalkLayers />}</div>
               {stunned.player && <b className="stun-word">★ ¡MAREADO! ★</b>}
@@ -2711,7 +2719,7 @@ export default function Home() {
             </div></div>
             <span className="fighter-shadow" />
           </div>
-          <div ref={cpuFighterRef} className={`fighter motion-rig ${opponent} cpu ${battleMode === "cpu" ? "cpu-ai" : ""} ${game.cpuAction} ${game.cpuMove ?? ""} combo-step-${game.cpuAttackVariant} pose-phase-${game.cpuPosePhase} ${cpuVictory ? "winner-dance" : playerVictory ? "defeated" : ""} ${game.cpuAirborne ? "airborne" : ""} ${game.cpuAction === "walk" ? `${cpuWalkIntent} gear-${movementGear.cpu}` : ""} ${facing.cpu} ${immuneClock < immuneUntil.cpu ? "immune" : ""} ${stunned.cpu ? "stunned" : ""}`} style={{ left: `${game.cpuX}%` }} aria-label={`${cpuData.name}, rival`} role="img">
+          <div ref={cpuFighterRef} className={`fighter motion-rig ${opponent} cpu ${battleMode === "cpu" ? "cpu-ai" : ""} ${game.cpuAction} ${game.cpuMove ?? ""} combo-step-${game.cpuAttackVariant} pose-phase-${game.cpuPosePhase} ${cpuVictory ? "winner-dance" : playerVictory ? "defeated" : ""} ${game.cpuAirborne ? "airborne" : ""} ${game.cpuAction === "walk" ? `${cpuWalkIntent} gear-${movementGear.cpu}` : ""} ${facing.cpu} ${immuneClock < immuneUntil.cpu ? "immune" : ""} ${stunned.cpu ? "stunned" : ""} ${lowAttack.cpu && (game.cpuAction === "punch" || game.cpuAction === "kick") ? "low-attack" : ""}`} style={{ left: `${game.cpuX}%` }} aria-label={`${cpuData.name}, rival`} role="img">
             <div className="fighter-motion"><div className="fighter-pose">
               <div className={`fighter-art ${opponent} ${facing.cpu}`}>{!(["cesaret", "borja", "bacora", "bonviure", "elchica", "ogalla", "xuso", "bomba", "tonimassama"] as FighterId[]).includes(opponent) && <FighterWalkLayers />}</div>
               {stunned.cpu && <b className="stun-word">★ ¡MAREADO! ★</b>}
@@ -2924,6 +2932,7 @@ export default function Home() {
                   <b>{playerData.specialOne}</b><span>Sin recarga · ESPECIAL 1</span>
                   <b>{playerData.specialTwo}</b><span>Sin recarga · ESPECIAL 2</span>
                   <b>SUPER · {SUPER_MOVES[selected].name}</b><span>{SUPER_MOVES[selected].description}. Llena la barra SUPER golpeando y recibiendo golpes; con la barra llena, ESPECIAL 2 lo lanza</span>
+                  <b>BARRIDA / PUÑO BAJO</b><span>Agáchate y pulsa patada para tirar al rival al suelo, o puño para golpear a un rival agachado</span>
                   <b>AGARRE</b><span>Mantén bloqueo y pulsa puño cerca del rival: rompe su guardia y lo tira al suelo</span>
                   <b>HABILIDAD · {FIGHTER_PROFILES[selected].passive.name}</b><span>{FIGHTER_PROFILES[selected].passive.description}</span>
                   <b>ESQUIVA</b><span>Mantén bloqueo y pulsa una dirección</span>
