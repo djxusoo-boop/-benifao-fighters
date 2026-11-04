@@ -86,6 +86,12 @@ const clearRescue = (fighter: HTMLElement, art: HTMLElement) => {
 export default function FighterVisibilityGuard() {
   useEffect(() => {
     const lastGood = new WeakMap<HTMLElement, Frame>();
+    // A CSS action swaps frames on purpose.  An image can be decoded a few
+    // frames after the class changes, but the browser keeps painting the last
+    // valid background meanwhile.  Treating that short decode window as a
+    // disappearance used to pin an inline `animation:none`, which randomly
+    // cancelled kicks (most noticeably Vanessa's).
+    const invisibleChecks = new WeakMap<HTMLElement, number>();
     let frame = 0;
     let tick = 0;
     const check = () => {
@@ -103,12 +109,20 @@ export default function FighterVisibilityGuard() {
         const wasRescued = fighter.classList.contains("art-rescue");
         if (wasRescued) clearRescue(fighter, art);
         const frames = visibleFrames(fighter);
-        const ready = frames.find((item) => isLoaded(item.url));
         const opacity = chainOpacity(fighter);
-        if (ready && opacity > 0.15) {
-          lastGood.set(fighter, ready);
+        const ready = frames.find((item) => isLoaded(item.url));
+        // A visible frame is already a safe state, even while its replacement
+        // is decoding. Never override an active combat animation in that case.
+        if (frames.length > 0 && opacity > 0.15) {
+          if (ready) lastGood.set(fighter, ready);
+          invisibleChecks.delete(fighter);
           return;
         }
+        const misses = (invisibleChecks.get(fighter) ?? 0) + 1;
+        invisibleChecks.set(fighter, misses);
+        // A single layout/paint frame can transiently report no art. Wait long
+        // enough to distinguish that from a real vanished fighter.
+        if (misses < 6) return;
         const fallback = lastGood.get(fighter) ?? frames[0];
         if (!fallback || !isLoaded(fallback.url)) return;
         applyRescue(fighter, art, fallback);
