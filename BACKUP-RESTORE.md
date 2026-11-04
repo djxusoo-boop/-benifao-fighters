@@ -4,8 +4,8 @@ Esta copia contiene el código fuente, los personajes, frames, fondos, tests y l
 
 ## Estado guardado
 
-- Versión visible: `V2.18.56`
-- Commit: `153b53074ad82bd3b5dd1a78c46da32578278c75`
+- Versión visible: `V2.34.1`
+- Commit: se actualiza al crear la copia
 - Juego publicado: https://benifaio-fighters-v2-3-1.kaleb-padberg93.chatgpt.site/
 - Project ID de Sites: `appgprj_6a8dc270baa0819184c04a656557af82`
 

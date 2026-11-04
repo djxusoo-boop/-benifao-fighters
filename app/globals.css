@@ -10105,6 +10105,26 @@ html[data-display-mode=mobile] .select-screen.lobby-v2168 .character-card small 
 .coop-player.ogalla.walk .coop-player-art, .orb-hero.orb-moving .fighter-art.ogalla { background-image:url('/assets/new-fighters/ogalla-walk-v2.webp')!important; }
 .coop-player.xuso:is(.fire,.special) .coop-player-art, .orb-hero.orb-firing .fighter-art.xuso { background-image:url('/assets/new-fighters/xuso-dog-attack-v2.webp')!important; }
 .coop-player.bomba:is(.fire,.special) .coop-player-art, .orb-hero.orb-firing .fighter-art.bomba { background-image:url('/assets/new-fighters/bomba-hoe-attack-v2.webp')!important; }
+
+/* V2.34.1 · Paco/El Bomba gets a readable three-beat sequence for every
+   close attack: wind-up, contact and planted recovery. These rules live last
+   because the shared transparent-rig contract above otherwise replaces them. */
+#game .fighter.motion-rig.bomba:is(.punch,.kick,.special) .fighter-pose .fighter-art.bomba {
+  animation:none!important;
+  background-repeat:no-repeat!important;
+  background-size:300% 100%!important;
+  background-position:0% bottom!important;
+}
+#game .fighter.motion-rig.bomba.punch .fighter-pose .fighter-art.bomba { background-image:url('/assets/new-fighters/bomba-punch-strip-v21857.png')!important; }
+#game .fighter.motion-rig.bomba.kick .fighter-pose .fighter-art.bomba { background-image:url('/assets/new-fighters/bomba-kick-strip-v21857.png')!important; }
+#game .fighter.motion-rig.bomba.special:is(.hoe,.hoeSweep) .fighter-pose .fighter-art.bomba {
+  background-image:url('/assets/new-fighters/bomba-hoe-strip-v21857.png')!important;
+  left:0!important;
+  width:100%!important;
+}
+#game .fighter.motion-rig.bomba:is(.punch,.kick,.special).pose-phase-1 .fighter-pose .fighter-art.bomba { background-position:0% bottom!important; }
+#game .fighter.motion-rig.bomba:is(.punch,.kick,.special).pose-phase-2 .fighter-pose .fighter-art.bomba { background-position:50% bottom!important; }
+#game .fighter.motion-rig.bomba:is(.punch,.kick,.special):is(.pose-phase-3,.pose-phase-4) .fighter-pose .fighter-art.bomba { background-position:100% bottom!important; }
 .coop-player.ogalla:is(.fire,.special) .coop-player-art, .orb-hero.orb-firing .fighter-art.ogalla { background-image:url('/assets/new-fighters/ogalla-artichoke-attack-v2.webp')!important; }
 @keyframes signature-attack-right {
   0% { opacity:0; transform:translateX(0) scale(.5); }

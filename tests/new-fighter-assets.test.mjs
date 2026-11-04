@@ -2,6 +2,22 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 
+test("Paco El Bomba has planted three-stage sheets for punch, kick and hoe attacks", async () => {
+  const css = `${await readFile(new URL("../app/globals.css", import.meta.url), "utf8")}\n${await readFile(new URL("../app/pose-map.css", import.meta.url), "utf8")}`;
+  for (const move of ["punch", "kick", "hoe"]) {
+    const name = `bomba-${move}-strip-v21857.png`;
+    const png = await readFile(new URL(`../public/assets/new-fighters/${name}`, import.meta.url));
+    assert.equal(png.subarray(1, 4).toString(), "PNG", `${name} must be a PNG`);
+    assert.ok(png.readUInt32BE(16) > 1500 && png.readUInt32BE(20) > 650, `${name} needs three detailed frames`);
+    assert.equal(png[25], 6, `${name} must keep its transparent cutout`);
+    assert.ok(css.includes(name), `${name} must be used by the fight`);
+  }
+  assert.match(css, /bomba:is\(\.punch,\.kick,\.special\)\.pose-phase-2[\s\S]*?background-position:50% bottom!important/,
+    "the impact phase must use the middle frame");
+  assert.match(css, /bomba:is\(\.punch,\.kick,\.special\):is\(\.pose-phase-3,\.pose-phase-4\)[\s\S]*?background-position:100% bottom!important/,
+    "the final phase must use the grounded recovery frame");
+});
+
 test("new attack poses referenced by the fight exist as transparent PNGs", async () => {
   const css = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
   const names = new Set([...css.matchAll(/\/assets\/new-fighters\/((?:bacora|borja|bonviure|elchica|ogalla)-(?:punch-[1234]|kick-[1234]|punch-contact-v2|bottle-special-v2|throw-special-v2|staff-special-v2|release-shield-v1)\.webp)/g)].map((match) => match[1]));

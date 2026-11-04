@@ -60,28 +60,17 @@
 #game .fighter.motion-rig.bomba.knockdown .fighter-pose .fighter-art.bomba,
 #game .fighter.motion-rig.bomba.defeated .fighter-pose .fighter-art.bomba { background-image:url('/assets/new-fighters/bomba-guard-v2.webp')!important; animation:none!important; }
 #game .fighter.motion-rig.bomba.getup .fighter-pose .fighter-art.bomba { background-image:url('/assets/new-fighters/bomba-crouch-v21849.webp')!important; animation:none!important; }
-#game .fighter.motion-rig.bomba.punch.pose-phase-0 .fighter-pose .fighter-art.bomba,
-#game .fighter.motion-rig.bomba.punch.pose-phase-4 .fighter-pose .fighter-art.bomba { background-image:url('/assets/new-fighters/bomba-guard-v2.webp')!important; animation:none!important; }
-#game .fighter.motion-rig.bomba.punch.pose-phase-1 .fighter-pose .fighter-art.bomba,
-#game .fighter.motion-rig.bomba.punch.pose-phase-2 .fighter-pose .fighter-art.bomba,
-#game .fighter.motion-rig.bomba.punch.pose-phase-3 .fighter-pose .fighter-art.bomba,
-#game .fighter.motion-rig.bomba.punch.airborne .fighter-pose .fighter-art.bomba { background-image:url('/assets/new-fighters/bomba-rig-v21847-punch.webp')!important; animation:none!important; }
-#game .fighter.motion-rig.bomba.kick.pose-phase-0 .fighter-pose .fighter-art.bomba,
-#game .fighter.motion-rig.bomba.kick.pose-phase-4 .fighter-pose .fighter-art.bomba { background-image:url('/assets/new-fighters/bomba-guard-v2.webp')!important; animation:none!important; }
-#game .fighter.motion-rig.bomba.kick.pose-phase-1 .fighter-pose .fighter-art.bomba,
-#game .fighter.motion-rig.bomba.kick.pose-phase-2 .fighter-pose .fighter-art.bomba,
-#game .fighter.motion-rig.bomba.kick.pose-phase-3 .fighter-pose .fighter-art.bomba,
-#game .fighter.motion-rig.bomba.kick.airborne .fighter-pose .fighter-art.bomba { background-image:url('/assets/new-fighters/bomba-rig-v21847-kick.webp')!important; animation:none!important; }
-#game .fighter.motion-rig.bomba.special.hoe.pose-phase-0 .fighter-pose .fighter-art.bomba,
-#game .fighter.motion-rig.bomba.special.hoe.pose-phase-4 .fighter-pose .fighter-art.bomba { background-image:url('/assets/new-fighters/bomba-guard-v2.webp')!important; animation:none!important; }
-#game .fighter.motion-rig.bomba.special.hoe.pose-phase-1 .fighter-pose .fighter-art.bomba,
-#game .fighter.motion-rig.bomba.special.hoe.pose-phase-2 .fighter-pose .fighter-art.bomba,
-#game .fighter.motion-rig.bomba.special.hoe.pose-phase-3 .fighter-pose .fighter-art.bomba { background-image:url('/assets/new-fighters/bomba-hoe-attack-v2.webp')!important; animation:none!important; }
-#game .fighter.motion-rig.bomba.special.hoeSweep.pose-phase-0 .fighter-pose .fighter-art.bomba,
-#game .fighter.motion-rig.bomba.special.hoeSweep.pose-phase-4 .fighter-pose .fighter-art.bomba { background-image:url('/assets/new-fighters/bomba-guard-v2.webp')!important; animation:none!important; }
-#game .fighter.motion-rig.bomba.special.hoeSweep.pose-phase-1 .fighter-pose .fighter-art.bomba,
-#game .fighter.motion-rig.bomba.special.hoeSweep.pose-phase-2 .fighter-pose .fighter-art.bomba,
-#game .fighter.motion-rig.bomba.special.hoeSweep.pose-phase-3 .fighter-pose .fighter-art.bomba { background-image:url('/assets/new-fighters/bomba-hoe-attack-v2.webp')!important; animation:none!important; }
+#game .fighter.motion-rig.bomba:is(.punch,.kick,.special) .fighter-pose .fighter-art.bomba {
+  animation:none!important;
+  background-repeat:no-repeat!important;
+  background-size:300% 100%!important;
+  background-position:0% bottom!important;
+}
+#game .fighter.motion-rig.bomba.punch .fighter-pose .fighter-art.bomba { background-image:url('/assets/new-fighters/bomba-punch-strip-v21857.png')!important; }
+#game .fighter.motion-rig.bomba.kick .fighter-pose .fighter-art.bomba { background-image:url('/assets/new-fighters/bomba-kick-strip-v21857.png')!important; }
+#game .fighter.motion-rig.bomba.special:is(.hoe,.hoeSweep) .fighter-pose .fighter-art.bomba { background-image:url('/assets/new-fighters/bomba-hoe-strip-v21857.png')!important; }
+#game .fighter.motion-rig.bomba:is(.punch,.kick,.special).pose-phase-2 .fighter-pose .fighter-art.bomba { background-position:50% bottom!important; }
+#game .fighter.motion-rig.bomba:is(.punch,.kick,.special):is(.pose-phase-3,.pose-phase-4) .fighter-pose .fighter-art.bomba { background-position:100% bottom!important; }
 #game .fighter.motion-rig.bomba.low-attack.punch .fighter-pose .fighter-art.bomba { background-image:url('/assets/new-fighters/bomba-crouch-v21849.webp')!important; animation:none!important; }
 /* nova */
 #game .fighter.motion-rig.nova .fighter-pose .fighter-art.nova { background-size:contain!important; background-position:center bottom!important; background-repeat:no-repeat!important; }
