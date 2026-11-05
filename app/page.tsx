@@ -426,6 +426,9 @@ function Home() {
   const [controlSize, setControlSize] = useState<ControlSize>("xl");
   const [fighterStyle, setFighterStyle] = useState<FighterStyle>("classic");
   const [lobbyEditorOpen, setLobbyEditorOpen] = useState(false);
+  const [editorPinOpen, setEditorPinOpen] = useState(false);
+  const [editorPin, setEditorPin] = useState("");
+  const [editorPinError, setEditorPinError] = useState(false);
   const [lobbyDesign, setLobbyDesign] = useState<LobbyDesign>(() => {
     if (typeof window === "undefined") return DEFAULT_LOBBY_DESIGN;
     try {
@@ -2047,7 +2050,7 @@ function Home() {
     const onKeyDown = (event: KeyboardEvent) => {
       // Text fields must never double as arcade controls. In particular, the
       // lobby editor needs normal typing for letters such as A, S, D, H or L.
-      if (lobbyEditorOpen || event.target instanceof HTMLElement && event.target.closest("input, textarea, select, [contenteditable=true]")) return;
+      if (lobbyEditorOpen || editorPinOpen || event.target instanceof HTMLElement && event.target.closest("input, textarea, select, [contenteditable=true]")) return;
       if (gameRef.current.phase === "orbs" || gameRef.current.phase === "platform" || gameRef.current.phase === "coop" || gameRef.current.phase === "prison-slug") return;
       const key = event.key.toLowerCase();
       if (["arrowleft", "arrowright", "arrowup", "arrowdown", " ", "a", "c", "d", "w", "s", "h", "j", "k", "l", "i", "o", "1", "2", "3", "4", "enter", "escape", "p"].includes(key)) {
@@ -2100,7 +2103,7 @@ function Home() {
       if ((key === "enter" || key === " ") && gameRef.current.phase === "select" && !(event.target instanceof HTMLElement && event.target.closest("button, input, select, textarea, a"))) startRound();
     };
     const onKeyUp = (event: KeyboardEvent) => {
-      if (lobbyEditorOpen || event.target instanceof HTMLElement && event.target.closest("input, textarea, select, [contenteditable=true]")) return;
+      if (lobbyEditorOpen || editorPinOpen || event.target instanceof HTMLElement && event.target.closest("input, textarea, select, [contenteditable=true]")) return;
       const key = event.key.toLowerCase();
       keysRef.current.delete(key);
       if (key === "s") setGuard(false);
@@ -2114,7 +2117,7 @@ function Home() {
       window.removeEventListener("keydown", onKeyDown);
       window.removeEventListener("keyup", onKeyUp);
     };
-  }, [battleMode, directionalPress, jump, lobbyEditorOpen, performAttack, resumeGame, setCpuCrouch, setCpuGuard, setCrouch, setGuard, startRound]);
+  }, [battleMode, directionalPress, editorPinOpen, jump, lobbyEditorOpen, performAttack, resumeGame, setCpuCrouch, setCpuGuard, setCrouch, setGuard, startRound]);
 
   useEffect(() => {
     let frame = 0;
@@ -2849,7 +2852,7 @@ function Home() {
           <button className="sound-button" type="button" onClick={() => setMusicOn((value) => !value)} aria-pressed={musicOn}>{musicOn ? "MÚSICA ON" : "MÚSICA OFF"}</button>
           <GamepadManager />
           <ArcadeDeviceManager />
-          {game.phase === "select" && <button className="sound-button lobby-editor-toggle" type="button" onClick={() => setLobbyEditorOpen(true)}>✎ EDITAR MENÚ</button>}
+          {game.phase === "select" && <button className="sound-button lobby-editor-toggle" type="button" onClick={() => { setEditorPin(""); setEditorPinError(false); setEditorPinOpen(true); }}>✎ EDITAR MENÚ</button>}
           <button className="sound-button" type="button" onClick={() => setSoundOn((value) => !value)} aria-pressed={soundOn}>
             {soundOn ? "SONIDO ON" : "SONIDO OFF"}
           </button>
@@ -3162,6 +3165,15 @@ function Home() {
             ["arcade", "MODO ARCADE"], ["fight", "MODO LUCHA"], ["coop", "AVENTURA COOPERATIVA"], ["orbs", "MODO ROMPEOBJETOS"], ["central", "AVENTURA CENTRAL"], ["slug", "PRISON SLUG"], ["tournament", "TORNEO DE LA RIBERA"], ["training", "ENTRENAMIENTO"], ["ranking", "RANKING MUNDIAL"], ["moves", "MOVIMIENTOS"], ["profile", "PERFIL Y PREMIOS"],
           ].map(([id, name]) => ({ id, name }))}
         />}
+
+        {game.phase === "select" && editorPinOpen && <div className="editor-pin-backdrop" role="dialog" aria-modal="true" aria-label="PIN del editor">
+          <form className="editor-pin-panel" onSubmit={(event) => { event.preventDefault(); if (editorPin === "9030") { setEditorPinOpen(false); setLobbyEditorOpen(true); } else { setEditorPinError(true); setEditorPin(""); } }}>
+            <small>ZONA DE EDICIÓN</small><h2>INTRODUCE EL PIN</h2><p>Solo quien tenga el PIN puede modificar el menú.</p>
+            <input inputMode="numeric" pattern="[0-9]*" maxLength={8} type="password" value={editorPin} onChange={event => { setEditorPin(event.target.value.replace(/\D/g, "")); setEditorPinError(false); }} aria-label="PIN del editor" />
+            {editorPinError && <b className="editor-pin-error">PIN INCORRECTO</b>}
+            <div><button type="button" onClick={() => setEditorPinOpen(false)}>CANCELAR</button><button type="submit">ENTRAR AL EDITOR</button></div>
+          </form>
+        </div>}
 
         {game.phase === "select" && arcadeTool && (
           <div className="arcade-tools-overlay" role="dialog" aria-modal="true" aria-label={arcadeTool === "moves" ? "Guía de movimientos" : arcadeTool === "profile" ? "Perfil y premios" : "Tamaño de controles"}>
