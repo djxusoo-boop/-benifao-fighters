@@ -3,6 +3,8 @@
 import { useRef } from "react";
 
 export type LobbyDesign = {
+  brandName: string;
+  brandKicker: string;
   heading: string;
   eyebrow: string;
   modesHeading: string;
@@ -14,12 +16,21 @@ export type LobbyDesign = {
   cardHeight: number;
   columns: number;
   nameSize: number;
+  logoScale: number;
+  cardGap: number;
+  backgroundImage: string;
+  backgroundDim: number;
   fighterNames: Record<string, string>;
   fighterTitles: Record<string, string>;
+  portraitUrls: Record<string, string>;
   modeNames: Record<string, string>;
+  modeSubtitles: Record<string, string>;
+  labels: Record<string, string>;
 };
 
 export const DEFAULT_LOBBY_DESIGN: LobbyDesign = {
+  brandName: "HARDCORE FIGHTERS",
+  brandKicker: "ARCADE DE LA RIBERA",
   heading: "ELIGE TU LUCHADOR",
   eyebrow: "LUCHADORES DISPONIBLES",
   modesHeading: "MODOS DE JUEGO",
@@ -31,9 +42,16 @@ export const DEFAULT_LOBBY_DESIGN: LobbyDesign = {
   cardHeight: 214,
   columns: 3,
   nameSize: 100,
+  logoScale: 100,
+  cardGap: 10,
+  backgroundImage: "",
+  backgroundDim: 78,
   fighterNames: {},
   fighterTitles: {},
+  portraitUrls: {},
   modeNames: {},
+  modeSubtitles: {},
+  labels: {},
 };
 
 type Props = {
@@ -64,7 +82,7 @@ export default function LobbyEditor({ value, onChange, onClose, onReset, fighter
     reader.onload = () => {
       try {
         const parsed = JSON.parse(String(reader.result));
-        onChange({ ...DEFAULT_LOBBY_DESIGN, ...parsed, fighterNames: parsed.fighterNames ?? {}, fighterTitles: parsed.fighterTitles ?? {}, modeNames: parsed.modeNames ?? {} });
+        onChange({ ...DEFAULT_LOBBY_DESIGN, ...parsed, fighterNames: parsed.fighterNames ?? {}, fighterTitles: parsed.fighterTitles ?? {}, portraitUrls: parsed.portraitUrls ?? {}, modeNames: parsed.modeNames ?? {}, modeSubtitles: parsed.modeSubtitles ?? {}, labels: parsed.labels ?? {} });
       } catch { window.alert("Ese archivo no es una configuración válida del menú."); }
     };
     reader.readAsText(file);
@@ -74,6 +92,8 @@ export default function LobbyEditor({ value, onChange, onClose, onReset, fighter
       <header><div><small>EDITOR VISUAL</small><h2>PERSONALIZA EL MENÚ</h2><p>Todo se ve al momento. Se guarda solo en este dispositivo.</p></div><button type="button" onClick={onClose}>✕ CERRAR</button></header>
       <div className="lobby-editor-grid">
         <fieldset><legend>TÍTULOS</legend>
+          <label>Marca del juego<input value={value.brandName} onChange={e => onChange(set(value, "brandName", e.target.value))} /></label>
+          <label>Frase sobre la marca<input value={value.brandKicker} onChange={e => onChange(set(value, "brandKicker", e.target.value))} /></label>
           <label>Título principal<input value={value.heading} onChange={e => onChange(set(value, "heading", e.target.value))} /></label>
           <label>Texto pequeño<input value={value.eyebrow} onChange={e => onChange(set(value, "eyebrow", e.target.value))} /></label>
           <label>Título de modos<input value={value.modesHeading} onChange={e => onChange(set(value, "modesHeading", e.target.value))} /></label>
@@ -87,9 +107,13 @@ export default function LobbyEditor({ value, onChange, onClose, onReset, fighter
           <label>Alto de tarjetas <output>{value.cardHeight}px</output><input type="range" min="135" max="330" value={value.cardHeight} onChange={e => onChange(set(value, "cardHeight", Number(e.target.value)))} /></label>
           <label>Columnas <output>{value.columns}</output><input type="range" min="2" max="5" value={value.columns} onChange={e => onChange(set(value, "columns", Number(e.target.value)))} /></label>
           <label>Tamaño de nombres <output>{value.nameSize}%</output><input type="range" min="70" max="150" value={value.nameSize} onChange={e => onChange(set(value, "nameSize", Number(e.target.value)))} /></label>
+          <label>Tamaño del logo PRISON <output>{value.logoScale}%</output><input type="range" min="55" max="180" value={value.logoScale} onChange={e => onChange(set(value, "logoScale", Number(e.target.value)))} /></label>
+          <label>Separación entre tarjetas <output>{value.cardGap}px</output><input type="range" min="0" max="28" value={value.cardGap} onChange={e => onChange(set(value, "cardGap", Number(e.target.value)))} /></label>
+          <label>Foto de fondo (URL opcional)<input placeholder="https://..." value={value.backgroundImage} onChange={e => onChange(set(value, "backgroundImage", e.target.value))} /></label>
+          <label>Oscuridad del fondo <output>{value.backgroundDim}%</output><input type="range" min="20" max="100" value={value.backgroundDim} onChange={e => onChange(set(value, "backgroundDim", Number(e.target.value)))} /></label>
         </fieldset>
-        <fieldset><legend>Luchadores</legend><div className="lobby-editor-list">{fighters.map(fighter => <div key={fighter.id}><b>{fighter.name}</b><input aria-label={`Nombre de ${fighter.name}`} value={value.fighterNames[fighter.id] ?? fighter.name} onChange={e => onChange({ ...value, fighterNames: { ...value.fighterNames, [fighter.id]: e.target.value } })} /><input aria-label={`Título de ${fighter.name}`} value={value.fighterTitles[fighter.id] ?? fighter.title} onChange={e => onChange({ ...value, fighterTitles: { ...value.fighterTitles, [fighter.id]: e.target.value } })} /></div>)}</div></fieldset>
-        <fieldset><legend>MODOS</legend><div className="lobby-editor-list">{modes.map(mode => <label key={mode.id}>{mode.name}<input value={value.modeNames[mode.id] ?? mode.name} onChange={e => onChange({ ...value, modeNames: { ...value.modeNames, [mode.id]: e.target.value } })} /></label>)}</div></fieldset>
+        <fieldset><legend>Luchadores</legend><div className="lobby-editor-list">{fighters.map(fighter => <div key={fighter.id}><b>{fighter.name}</b><input aria-label={`Nombre de ${fighter.name}`} value={value.fighterNames[fighter.id] ?? fighter.name} onChange={e => onChange({ ...value, fighterNames: { ...value.fighterNames, [fighter.id]: e.target.value } })} /><input aria-label={`Título de ${fighter.name}`} value={value.fighterTitles[fighter.id] ?? fighter.title} onChange={e => onChange({ ...value, fighterTitles: { ...value.fighterTitles, [fighter.id]: e.target.value } })} /><input aria-label={`Foto de ${fighter.name}`} placeholder="URL de foto" value={value.portraitUrls[fighter.id] ?? ""} onChange={e => onChange({ ...value, portraitUrls: { ...value.portraitUrls, [fighter.id]: e.target.value } })} /></div>)}</div></fieldset>
+        <fieldset><legend>MODOS Y AJUSTES</legend><div className="lobby-editor-list">{modes.map(mode => <div key={mode.id}><b>{mode.name}</b><input aria-label={`Nombre de ${mode.name}`} value={value.modeNames[mode.id] ?? mode.name} onChange={e => onChange({ ...value, modeNames: { ...value.modeNames, [mode.id]: e.target.value } })} /><input aria-label={`Subtítulo de ${mode.name}`} placeholder="Subtítulo" value={value.modeSubtitles[mode.id] ?? ""} onChange={e => onChange({ ...value, modeSubtitles: { ...value.modeSubtitles, [mode.id]: e.target.value } })} /></div>)}<label>Configuración de partida<input value={value.labels.settings ?? "CONFIGURACIÓN DE PARTIDA"} onChange={e => onChange({ ...value, labels: { ...value.labels, settings: e.target.value } })} /></label><label>Subtítulo configuración<input value={value.labels.settingsSub ?? "AJUSTA TU COMBATE"} onChange={e => onChange({ ...value, labels: { ...value.labels, settingsSub: e.target.value } })} /></label></div></fieldset>
       </div>
       <footer><button type="button" onClick={exportDesign}>DESCARGAR COPIA</button><button type="button" onClick={() => importRef.current?.click()}>CARGAR COPIA</button><input ref={importRef} hidden type="file" accept="application/json" onChange={e => importDesign(e.target.files?.[0])} /><button type="button" className="danger" onClick={onReset}>RESTABLECER DISEÑO</button></footer>
     </section>

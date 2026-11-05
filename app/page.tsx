@@ -432,7 +432,7 @@ function Home() {
       const saved = window.localStorage.getItem("hardcore-lobby-design-v1");
       if (!saved) return DEFAULT_LOBBY_DESIGN;
       const parsed = JSON.parse(saved) as Partial<LobbyDesign>;
-      return { ...DEFAULT_LOBBY_DESIGN, ...parsed, fighterNames: parsed.fighterNames ?? {}, fighterTitles: parsed.fighterTitles ?? {}, modeNames: parsed.modeNames ?? {} };
+      return { ...DEFAULT_LOBBY_DESIGN, ...parsed, fighterNames: parsed.fighterNames ?? {}, fighterTitles: parsed.fighterTitles ?? {}, portraitUrls: parsed.portraitUrls ?? {}, modeNames: parsed.modeNames ?? {}, modeSubtitles: parsed.modeSubtitles ?? {}, labels: parsed.labels ?? {} };
     } catch { return DEFAULT_LOBBY_DESIGN; }
   });
   const [musicOn, setMusicOn] = useState(false);
@@ -544,6 +544,8 @@ function Home() {
     title: lobbyDesign.fighterTitles[fighter]?.trim() || FIGHTERS[fighter].title,
   });
   const lobbyMode = (id: string, label: string) => lobbyDesign.modeNames[id]?.trim() || label;
+  const lobbyModeSubtitle = (id: string, label: string) => lobbyDesign.modeSubtitles[id]?.trim() || label;
+  const lobbyLabel = (id: string, label: string) => lobbyDesign.labels[id]?.trim() || label;
   const lobbyStyle = {
     "--lobby-accent": lobbyDesign.accent,
     "--lobby-panel": lobbyDesign.panel,
@@ -552,6 +554,10 @@ function Home() {
     "--lobby-card-height": `${lobbyDesign.cardHeight}px`,
     "--lobby-columns": String(lobbyDesign.columns),
     "--lobby-name-scale": `${lobbyDesign.nameSize / 100}`,
+    "--lobby-logo-scale": `${lobbyDesign.logoScale / 100}`,
+    "--lobby-card-gap": `${lobbyDesign.cardGap}px`,
+    "--lobby-background": lobbyDesign.backgroundImage ? `url("${lobbyDesign.backgroundImage.replace(/"/g, "")}")` : "none",
+    "--lobby-dim": `${lobbyDesign.backgroundDim / 100}`,
   } as CSSProperties;
 
   // In 1P mode the rival can be chosen too; a mirror match falls back to the next fighter.
@@ -2828,8 +2834,8 @@ function Home() {
       <AutoFullscreen />
       <header className="topbar">
         <a className="brand" href="#game" aria-label="Hardcore Fighters, ir al juego">
-          <span className="brand-kicker">ARCADE DE LA RIBERA</span>
-          <span className="brand-name">HARDCORE <i>FIGHTERS</i></span>
+          <span className="brand-kicker">{lobbyDesign.brandKicker}</span>
+          <span className="brand-name">{lobbyDesign.brandName}</span>
           <span className="raspberry-edition-badge">{GAME_EDITION}</span>
         </a>
         <div className="topbar-actions">
@@ -3044,7 +3050,7 @@ function Home() {
                       (touchSlot === 0 ? setSelected : setLocalOpponent)(fighter);
                       setLobbyLocked(current => current.map((value, index) => index === touchSlot ? false : value) as [boolean, boolean]);
                     }}>
-                    <span className={`portrait ${fighter}`} />
+                    <span className={`portrait ${fighter}`} style={lobbyDesign.portraitUrls[fighter] ? { backgroundImage: `url("${lobbyDesign.portraitUrls[fighter].replace(/"/g, "")}")` } : undefined} />
                     <b>{lobbyFighter(fighter).name}</b>
                     <span className="card-player-tags">
                       {selected === fighter && <em className="tag-p1">P1 {lobbyLocked[0] ? "✓" : ""}</em>}
@@ -3073,7 +3079,7 @@ function Home() {
                   </div>
                   <div className="showcase-top">
                     <span className="showcase-tag">{tag}</span>
-                    <div className="showcase-portrait"><span className={`portrait ${shown}`} /></div>
+                    <div className="showcase-portrait"><span className={`portrait ${shown}`} style={lobbyDesign.portraitUrls[shown] ? { backgroundImage: `url("${lobbyDesign.portraitUrls[shown].replace(/"/g, "")}")` } : undefined} /></div>
                     <div className="showcase-identity">
                       <strong>{lobbyFighter(shown).name}</strong>
                       <em>{lobbyFighter(shown).title}</em>
@@ -3107,19 +3113,19 @@ function Home() {
             <div className="lobby-games">
               <h2>{lobbyDesign.modesHeading} <small>{lobbyDesign.modesSubtitle}</small></h2>
               <div className="mode-start-actions">
-                <button className="fight-button arcade-ladder-button" type="button" onClick={startArcade} disabled={!fightersReady}>{lobbyMode("arcade", "MODO ARCADE")} <span>♜</span><small className="mode-sub">6 RIVALES SEGUIDOS · TU FINAL</small></button>
-                <button className="fight-button" type="button" onClick={startRound} disabled={!fightReady} data-gamepad-default="true">{lobbyMode("fight", "MODO LUCHA")} <span>↗</span><small className="mode-sub">PARTIDAS RÁPIDAS CONTRA LA IA O UN AMIGO</small></button>
-                <button className="fight-button coop-mode-button" type="button" onClick={startCoopMode} disabled={!fightersReady}>{lobbyMode("coop", "AVENTURA COOPERATIVA")} <span>∞</span><small className="mode-sub">HASTA 2 JUGADORES</small></button>
-                <button className="fight-button orb-mode-button" type="button" onClick={startOrbMode} disabled={!fightersReady}>{lobbyMode("orbs", "MODO ROMPEOBJETOS")} <span>◆</span><small className="mode-sub">DESTRUYE Y CONSIGUE PUNTOS</small></button>
-                <button className="fight-button platform-mode-button" type="button" onClick={startPlatformMode} disabled={!fightersReady}>{lobbyMode("central", "AVENTURA CENTRAL")} <span>★</span><small className="mode-sub">HISTORIA PRINCIPAL</small></button>
-                <button className="fight-button prison-slug-mode-button" type="button" onClick={startPrisonSlugMode} disabled={!fightersReady}>{lobbyMode("slug", "PRISON SLUG")} <span>▶</span><small className="mode-sub">SUPERVIVENCIA EXTREMA</small></button>
-                <button className="fight-button campaign-mode-button" type="button" onClick={startCampaign} disabled={!fightReady}>{lobbyMode("tournament", "TORNEO DE LA RIBERA")} <span>♛</span><small className="mode-sub">COMPITE Y DEMUESTRA TU VALOR</small></button>
-                <button className="fight-button training-menu-button" type="button" onClick={startTraining} disabled={!fightReady}>{lobbyMode("training", "ENTRENAMIENTO")} <span>∞</span><small className="mode-sub">PRACTICA TUS MOVIMIENTOS</small></button>
-                <button className="fight-button ranking-menu-button" type="button" onClick={() => setRankingOpen(true)}>{lobbyMode("ranking", "RANKING MUNDIAL")}<small className="mode-sub">ESCALA POSICIONES EN LÍNEA</small></button>
-                <button className="fight-button arcade-tool-button" type="button" onClick={() => setArcadeTool("moves")}>{lobbyMode("moves", "MOVIMIENTOS")}<small className="mode-sub">LISTA COMPLETA DE COMBOS</small></button>
-                <button className="fight-button arcade-tool-button" type="button" onClick={() => setArcadeTool("profile")}>{lobbyMode("profile", "PERFIL Y PREMIOS")}<small className="mode-sub">LOGROS Y RECOMPENSAS</small></button>
+                <button className="fight-button arcade-ladder-button" type="button" onClick={startArcade} disabled={!fightersReady}>{lobbyMode("arcade", "MODO ARCADE")} <span>♜</span><small className="mode-sub">{lobbyModeSubtitle("arcade", "6 RIVALES SEGUIDOS · TU FINAL")}</small></button>
+                <button className="fight-button" type="button" onClick={startRound} disabled={!fightReady} data-gamepad-default="true">{lobbyMode("fight", "MODO LUCHA")} <span>↗</span><small className="mode-sub">{lobbyModeSubtitle("fight", "PARTIDAS RÁPIDAS CONTRA LA IA O UN AMIGO")}</small></button>
+                <button className="fight-button coop-mode-button" type="button" onClick={startCoopMode} disabled={!fightersReady}>{lobbyMode("coop", "AVENTURA COOPERATIVA")} <span>∞</span><small className="mode-sub">{lobbyModeSubtitle("coop", "HASTA 2 JUGADORES")}</small></button>
+                <button className="fight-button orb-mode-button" type="button" onClick={startOrbMode} disabled={!fightersReady}>{lobbyMode("orbs", "MODO ROMPEOBJETOS")} <span>◆</span><small className="mode-sub">{lobbyModeSubtitle("orbs", "DESTRUYE Y CONSIGUE PUNTOS")}</small></button>
+                <button className="fight-button platform-mode-button" type="button" onClick={startPlatformMode} disabled={!fightersReady}>{lobbyMode("central", "AVENTURA CENTRAL")} <span>★</span><small className="mode-sub">{lobbyModeSubtitle("central", "HISTORIA PRINCIPAL")}</small></button>
+                <button className="fight-button prison-slug-mode-button" type="button" onClick={startPrisonSlugMode} disabled={!fightersReady}>{lobbyMode("slug", "PRISON SLUG")} <span>▶</span><small className="mode-sub">{lobbyModeSubtitle("slug", "SUPERVIVENCIA EXTREMA")}</small></button>
+                <button className="fight-button campaign-mode-button" type="button" onClick={startCampaign} disabled={!fightReady}>{lobbyMode("tournament", "TORNEO DE LA RIBERA")} <span>♛</span><small className="mode-sub">{lobbyModeSubtitle("tournament", "COMPITE Y DEMUESTRA TU VALOR")}</small></button>
+                <button className="fight-button training-menu-button" type="button" onClick={startTraining} disabled={!fightReady}>{lobbyMode("training", "ENTRENAMIENTO")} <span>∞</span><small className="mode-sub">{lobbyModeSubtitle("training", "PRACTICA TUS MOVIMIENTOS")}</small></button>
+                <button className="fight-button ranking-menu-button" type="button" onClick={() => setRankingOpen(true)}>{lobbyMode("ranking", "RANKING MUNDIAL")}<small className="mode-sub">{lobbyModeSubtitle("ranking", "ESCALA POSICIONES EN LÍNEA")}</small></button>
+                <button className="fight-button arcade-tool-button" type="button" onClick={() => setArcadeTool("moves")}>{lobbyMode("moves", "MOVIMIENTOS")}<small className="mode-sub">{lobbyModeSubtitle("moves", "LISTA COMPLETA DE COMBOS")}</small></button>
+                <button className="fight-button arcade-tool-button" type="button" onClick={() => setArcadeTool("profile")}>{lobbyMode("profile", "PERFIL Y PREMIOS")}<small className="mode-sub">{lobbyModeSubtitle("profile", "LOGROS Y RECOMPENSAS")}</small></button>
               </div>
-              <div className="match-settings-heading"><span>⚙</span><div><b>CONFIGURACIÓN DE PARTIDA</b><small>AJUSTA TU COMBATE</small></div></div>
+              <div className="match-settings-heading"><span>⚙</span><div><b>{lobbyLabel("settings", "CONFIGURACIÓN DE PARTIDA")}</b><small>{lobbyLabel("settingsSub", "AJUSTA TU COMBATE")}</small></div></div>
               <button className="control-size-button" type="button" onClick={() => setArcadeTool("controls")}><span>▣</span>TAMAÑO DE BOTONES</button>
               <div className="battle-mode-picker" aria-label="Tipo de combate">
                 <button type="button" className={battleMode === "cpu" ? "active" : ""} onClick={() => { setBattleMode("cpu"); setTouchSlot(0); }}>1 JUGADOR + IA</button>
