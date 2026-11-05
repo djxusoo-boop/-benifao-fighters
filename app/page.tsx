@@ -24,6 +24,7 @@ import { FIGHTER_PROFILES, defenseMultiplier, pickWinQuote, powerMultiplier, spe
 import { ArcadeAudio, type HitKind, type MusicTheme } from "./arcade-audio";
 import { SUPER_MOVES } from "./super-moves";
 import { SUPER_ANIM, companionFrame, superFrame, superFramesFor } from "./super-anim";
+import LobbyEditor, { DEFAULT_LOBBY_DESIGN, type LobbyDesign } from "./LobbyEditor";
 
 type FighterId = "maletilla" | "vanessa" | "josevictor" | "cristian" | "cesaret" | "borja" | "bacora" | "bonviure" | "elchica" | "ogalla" | "xuso" | "bomba" | "rafeta" | "tonimassama" | "nova" | "estefy";
 type Phase = "select" | "intro" | "fight" | "ko" | "over" | "orbs" | "platform" | "coop" | "prison-slug" | "campaign-final";
@@ -424,6 +425,16 @@ function Home() {
   const [arcadeTool, setArcadeTool] = useState<ArcadeTool>(null);
   const [controlSize, setControlSize] = useState<ControlSize>("xl");
   const [fighterStyle, setFighterStyle] = useState<FighterStyle>("classic");
+  const [lobbyEditorOpen, setLobbyEditorOpen] = useState(false);
+  const [lobbyDesign, setLobbyDesign] = useState<LobbyDesign>(() => {
+    if (typeof window === "undefined") return DEFAULT_LOBBY_DESIGN;
+    try {
+      const saved = window.localStorage.getItem("hardcore-lobby-design-v1");
+      if (!saved) return DEFAULT_LOBBY_DESIGN;
+      const parsed = JSON.parse(saved) as Partial<LobbyDesign>;
+      return { ...DEFAULT_LOBBY_DESIGN, ...parsed, fighterNames: parsed.fighterNames ?? {}, fighterTitles: parsed.fighterTitles ?? {}, modeNames: parsed.modeNames ?? {} };
+    } catch { return DEFAULT_LOBBY_DESIGN; }
+  });
   const [musicOn, setMusicOn] = useState(false);
   const [progress, setProgress] = useState<ArcadeProgress>({ fights: 0, adventures: 0, orbs: 0, bestCombo: 0 });
   const [campaignStep, setCampaignStep] = useState<CampaignStep>(0);
@@ -524,6 +535,24 @@ function Home() {
   const bossDodgeUntilRef = useRef(0);
   const bossRewardedRef = useRef(false);
   const rankingCapturedRef = useRef(false);
+
+  useEffect(() => {
+    window.localStorage.setItem("hardcore-lobby-design-v1", JSON.stringify(lobbyDesign));
+  }, [lobbyDesign]);
+  const lobbyFighter = (fighter: FighterId) => ({
+    name: lobbyDesign.fighterNames[fighter]?.trim() || FIGHTERS[fighter].name,
+    title: lobbyDesign.fighterTitles[fighter]?.trim() || FIGHTERS[fighter].title,
+  });
+  const lobbyMode = (id: string, label: string) => lobbyDesign.modeNames[id]?.trim() || label;
+  const lobbyStyle = {
+    "--lobby-accent": lobbyDesign.accent,
+    "--lobby-panel": lobbyDesign.panel,
+    "--lobby-ink": lobbyDesign.ink,
+    "--lobby-scale": `${lobbyDesign.scale / 100}`,
+    "--lobby-card-height": `${lobbyDesign.cardHeight}px`,
+    "--lobby-columns": String(lobbyDesign.columns),
+    "--lobby-name-scale": `${lobbyDesign.nameSize / 100}`,
+  } as CSSProperties;
 
   // In 1P mode the rival can be chosen too; a mirror match falls back to the next fighter.
   const opponent: FighterId = battleMode === "local" || localOpponent !== selected ? localOpponent : FIGHTER_ORDER[(FIGHTER_ORDER.indexOf(selected) + 1) % FIGHTER_ORDER.length];
@@ -2794,7 +2823,7 @@ function Home() {
   };
 
   return (
-    <main className="game-shell">
+    <main className="game-shell" style={lobbyStyle}>
       <FighterVisibilityGuard />
       <AutoFullscreen />
       <header className="topbar">
@@ -2810,6 +2839,7 @@ function Home() {
           <button className="sound-button" type="button" onClick={() => setMusicOn((value) => !value)} aria-pressed={musicOn}>{musicOn ? "MÚSICA ON" : "MÚSICA OFF"}</button>
           <GamepadManager />
           <ArcadeDeviceManager />
+          {game.phase === "select" && <button className="sound-button lobby-editor-toggle" type="button" onClick={() => setLobbyEditorOpen(true)}>✎ EDITAR MENÚ</button>}
           <button className="sound-button" type="button" onClick={() => setSoundOn((value) => !value)} aria-pressed={soundOn}>
             {soundOn ? "SONIDO ON" : "SONIDO OFF"}
           </button>
@@ -2984,8 +3014,8 @@ function Home() {
             data-all-ready={lobbyLocked[0] && (battleMode === "cpu" || lobbyLocked[1])}>
             <header className="lobby-heading">
               <div className="lobby-heading-copy">
-                <h1>ELIGE TU LUCHADOR</h1>
-                <span className="lobby-eyebrow">{FIGHTER_ORDER.length} LUCHADORES DISPONIBLES</span>
+                <h1>{lobbyDesign.heading}</h1>
+                <span className="lobby-eyebrow">{FIGHTER_ORDER.length} {lobbyDesign.eyebrow}</span>
               </div>
               <div className="lobby-prison-mark">
                 <Image className="prison-logo prison-logo-clean" src="/assets/new-fighters/prison-logo-clean.webp" width={1689} height={374} alt="PRISON" unoptimized priority />
@@ -3015,7 +3045,7 @@ function Home() {
                       setLobbyLocked(current => current.map((value, index) => index === touchSlot ? false : value) as [boolean, boolean]);
                     }}>
                     <span className={`portrait ${fighter}`} />
-                    <b>{FIGHTERS[fighter].name}</b>
+                    <b>{lobbyFighter(fighter).name}</b>
                     <span className="card-player-tags">
                       {selected === fighter && <em className="tag-p1">P1 {lobbyLocked[0] ? "✓" : ""}</em>}
                       {opponent === fighter && <em className="tag-p2">{battleMode === "local" ? `P2 ${lobbyLocked[1] ? "✓" : ""}` : "CPU"}</em>}
@@ -3045,8 +3075,8 @@ function Home() {
                     <span className="showcase-tag">{tag}</span>
                     <div className="showcase-portrait"><span className={`portrait ${shown}`} /></div>
                     <div className="showcase-identity">
-                      <strong>{FIGHTERS[shown].name}</strong>
-                      <em>{FIGHTERS[shown].title}</em>
+                      <strong>{lobbyFighter(shown).name}</strong>
+                      <em>{lobbyFighter(shown).title}</em>
                       <q>{profile.motto}</q>
                       <div className="showcase-stats">
                         {stats.map(([label, value]) => (
@@ -3075,19 +3105,19 @@ function Home() {
             })()}
             <LobbyJump />
             <div className="lobby-games">
-              <h2>MODOS DE JUEGO <small>ELIGE CÓMO QUIERES JUGAR</small></h2>
+              <h2>{lobbyDesign.modesHeading} <small>{lobbyDesign.modesSubtitle}</small></h2>
               <div className="mode-start-actions">
-                <button className="fight-button arcade-ladder-button" type="button" onClick={startArcade} disabled={!fightersReady}>MODO ARCADE <span>♜</span><small className="mode-sub">6 RIVALES SEGUIDOS · TU FINAL</small></button>
-                <button className="fight-button" type="button" onClick={startRound} disabled={!fightReady} data-gamepad-default="true">MODO LUCHA <span>↗</span><small className="mode-sub">PARTIDAS RÁPIDAS CONTRA LA IA O UN AMIGO</small></button>
-                <button className="fight-button coop-mode-button" type="button" onClick={startCoopMode} disabled={!fightersReady}>AVENTURA COOPERATIVA <span>∞</span><small className="mode-sub">HASTA 2 JUGADORES</small></button>
-                <button className="fight-button orb-mode-button" type="button" onClick={startOrbMode} disabled={!fightersReady}>MODO ROMPEOBJETOS <span>◆</span><small className="mode-sub">DESTRUYE Y CONSIGUE PUNTOS</small></button>
-                <button className="fight-button platform-mode-button" type="button" onClick={startPlatformMode} disabled={!fightersReady}>AVENTURA CENTRAL <span>★</span><small className="mode-sub">HISTORIA PRINCIPAL</small></button>
-                <button className="fight-button prison-slug-mode-button" type="button" onClick={startPrisonSlugMode} disabled={!fightersReady}>PRISON SLUG <span>▶</span><small className="mode-sub">SUPERVIVENCIA EXTREMA</small></button>
-                <button className="fight-button campaign-mode-button" type="button" onClick={startCampaign} disabled={!fightReady}>TORNEO DE LA RIBERA <span>♛</span><small className="mode-sub">COMPITE Y DEMUESTRA TU VALOR</small></button>
-                <button className="fight-button training-menu-button" type="button" onClick={startTraining} disabled={!fightReady}>ENTRENAMIENTO <span>∞</span><small className="mode-sub">PRACTICA TUS MOVIMIENTOS</small></button>
-                <button className="fight-button ranking-menu-button" type="button" onClick={() => setRankingOpen(true)}>RANKING MUNDIAL<small className="mode-sub">ESCALA POSICIONES EN LÍNEA</small></button>
-                <button className="fight-button arcade-tool-button" type="button" onClick={() => setArcadeTool("moves")}>MOVIMIENTOS<small className="mode-sub">LISTA COMPLETA DE COMBOS</small></button>
-                <button className="fight-button arcade-tool-button" type="button" onClick={() => setArcadeTool("profile")}>PERFIL Y PREMIOS<small className="mode-sub">LOGROS Y RECOMPENSAS</small></button>
+                <button className="fight-button arcade-ladder-button" type="button" onClick={startArcade} disabled={!fightersReady}>{lobbyMode("arcade", "MODO ARCADE")} <span>♜</span><small className="mode-sub">6 RIVALES SEGUIDOS · TU FINAL</small></button>
+                <button className="fight-button" type="button" onClick={startRound} disabled={!fightReady} data-gamepad-default="true">{lobbyMode("fight", "MODO LUCHA")} <span>↗</span><small className="mode-sub">PARTIDAS RÁPIDAS CONTRA LA IA O UN AMIGO</small></button>
+                <button className="fight-button coop-mode-button" type="button" onClick={startCoopMode} disabled={!fightersReady}>{lobbyMode("coop", "AVENTURA COOPERATIVA")} <span>∞</span><small className="mode-sub">HASTA 2 JUGADORES</small></button>
+                <button className="fight-button orb-mode-button" type="button" onClick={startOrbMode} disabled={!fightersReady}>{lobbyMode("orbs", "MODO ROMPEOBJETOS")} <span>◆</span><small className="mode-sub">DESTRUYE Y CONSIGUE PUNTOS</small></button>
+                <button className="fight-button platform-mode-button" type="button" onClick={startPlatformMode} disabled={!fightersReady}>{lobbyMode("central", "AVENTURA CENTRAL")} <span>★</span><small className="mode-sub">HISTORIA PRINCIPAL</small></button>
+                <button className="fight-button prison-slug-mode-button" type="button" onClick={startPrisonSlugMode} disabled={!fightersReady}>{lobbyMode("slug", "PRISON SLUG")} <span>▶</span><small className="mode-sub">SUPERVIVENCIA EXTREMA</small></button>
+                <button className="fight-button campaign-mode-button" type="button" onClick={startCampaign} disabled={!fightReady}>{lobbyMode("tournament", "TORNEO DE LA RIBERA")} <span>♛</span><small className="mode-sub">COMPITE Y DEMUESTRA TU VALOR</small></button>
+                <button className="fight-button training-menu-button" type="button" onClick={startTraining} disabled={!fightReady}>{lobbyMode("training", "ENTRENAMIENTO")} <span>∞</span><small className="mode-sub">PRACTICA TUS MOVIMIENTOS</small></button>
+                <button className="fight-button ranking-menu-button" type="button" onClick={() => setRankingOpen(true)}>{lobbyMode("ranking", "RANKING MUNDIAL")}<small className="mode-sub">ESCALA POSICIONES EN LÍNEA</small></button>
+                <button className="fight-button arcade-tool-button" type="button" onClick={() => setArcadeTool("moves")}>{lobbyMode("moves", "MOVIMIENTOS")}<small className="mode-sub">LISTA COMPLETA DE COMBOS</small></button>
+                <button className="fight-button arcade-tool-button" type="button" onClick={() => setArcadeTool("profile")}>{lobbyMode("profile", "PERFIL Y PREMIOS")}<small className="mode-sub">LOGROS Y RECOMPENSAS</small></button>
               </div>
               <div className="match-settings-heading"><span>⚙</span><div><b>CONFIGURACIÓN DE PARTIDA</b><small>AJUSTA TU COMBATE</small></div></div>
               <button className="control-size-button" type="button" onClick={() => setArcadeTool("controls")}><span>▣</span>TAMAÑO DE BOTONES</button>
@@ -3111,6 +3141,17 @@ function Home() {
             </div>
           </div>
         )}
+
+        {game.phase === "select" && lobbyEditorOpen && <LobbyEditor
+          value={lobbyDesign}
+          onChange={setLobbyDesign}
+          onClose={() => setLobbyEditorOpen(false)}
+          onReset={() => setLobbyDesign(DEFAULT_LOBBY_DESIGN)}
+          fighters={FIGHTER_ORDER.map((id) => ({ id, name: FIGHTERS[id].name, title: FIGHTERS[id].title }))}
+          modes={[
+            ["arcade", "MODO ARCADE"], ["fight", "MODO LUCHA"], ["coop", "AVENTURA COOPERATIVA"], ["orbs", "MODO ROMPEOBJETOS"], ["central", "AVENTURA CENTRAL"], ["slug", "PRISON SLUG"], ["tournament", "TORNEO DE LA RIBERA"], ["training", "ENTRENAMIENTO"], ["ranking", "RANKING MUNDIAL"], ["moves", "MOVIMIENTOS"], ["profile", "PERFIL Y PREMIOS"],
+          ].map(([id, name]) => ({ id, name }))}
+        />}
 
         {game.phase === "select" && arcadeTool && (
           <div className="arcade-tools-overlay" role="dialog" aria-modal="true" aria-label={arcadeTool === "moves" ? "Guía de movimientos" : arcadeTool === "profile" ? "Perfil y premios" : "Tamaño de controles"}>
