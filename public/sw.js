@@ -1,5 +1,5 @@
 const CACHE_PREFIX = "hardcore-fighters-";
-const CACHE_NAME = `${CACHE_PREFIX}ipad-v2-34-2`;
+const CACHE_NAME = `${CACHE_PREFIX}ipad-v2-34-3`;
 
 const OFFLINE_CORE = [
   "/",
@@ -7,6 +7,9 @@ const OFFLINE_CORE = [
   "/favicon.svg",
   "/icon-180.png",
   "/icon-512.png",
+  "/editor.html",
+  "/editor.css",
+  "/editor.js",
 ];
 
 self.addEventListener("install", (event) => {
@@ -49,11 +52,11 @@ self.addEventListener("fetch", (event) => {
         const response = await fetch(request, { cache: "no-store" });
         if (response.ok) {
           const cache = await caches.open(CACHE_NAME);
-          await cache.put("/", response.clone());
+          await cache.put(url.pathname === "/" ? "/" : request, response.clone());
         }
         return response;
       } catch {
-        return await caches.match(request) || await caches.match("/") || Response.error();
+        return await caches.match(request) || (url.pathname === "/" ? await caches.match("/") : undefined) || Response.error();
       }
     })());
     return;

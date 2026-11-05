@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#081321">
+  <title>Editor del menú · Hardcore Fighters</title>
+  <link rel="stylesheet" href="/editor.css">
+  <script defer src="/editor.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <div><span class="kicker">HARDCORE FIGHTERS</span><strong>Editor del menú</strong></div>
+    <a class="back-link" href="/">← Volver al juego</a>
+  </header>
+  <main>
+    <section class="unlock panel" id="unlock">
+      <span class="badge">EDITOR INDEPENDIENTE</span>
+      <h1>Entra en tu editor</h1>
+      <p>Introduce el PIN para personalizar el menú.</p>
+      <form id="pin-form">
+        <label for="pin">PIN del editor</label>
+        <input id="pin" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="8" autocomplete="off" required>
+        <p class="error" id="pin-error" role="alert" hidden>El PIN no es correcto. Inténtalo otra vez.</p>
+        <button class="primary" type="submit">Entrar al editor</button>
+      </form>
+    </section>
+
+    <section id="editor" hidden>
+      <div class="intro panel">
+        <div><span class="badge">TU MENÚ, A TU GUSTO</span><h1>Toca lo que quieras cambiar</h1>
+          <p>Pulsa un texto o un personaje, escribe el cambio y guárdalo. También puedes ajustar los colores y tamaños.</p></div>
+        <div class="actions"><button id="save" type="button" class="primary">Guardar cambios</button><button id="save-return" type="button" class="secondary">Guardar y volver al juego</button></div>
+        <p class="status" id="status" role="status" aria-live="polite"></p>
+        <p class="notice">Los cambios se guardan en este navegador y dispositivo. Si juegas desde el icono instalado en iPhone, abre el editor desde ese mismo icono.</p>
+      </div>
+
+      <div class="workspace">
+        <section class="preview panel" aria-label="Vista editable del menú">
+          <div class="preview-top"><span>VISTA DEL MENÚ</span><span>Pulsa ✎ para editar</span></div>
+          <div class="preview-brand"><button type="button" class="edit-text brand" data-group="field" data-key="brandName" data-label="Marca del juego"></button><button type="button" class="edit-text tiny" data-group="field" data-key="brandKicker" data-label="Frase de la marca"></button></div>
+          <div class="preview-heading"><div><button type="button" class="edit-text heading" data-group="field" data-key="heading" data-label="Título principal"></button><div><span>14 </span><button type="button" class="edit-text tiny" data-group="field" data-key="eyebrow" data-label="Texto bajo el título"></button></div></div><div class="prison"><strong>PRISON</strong><button type="button" class="edit-text tiny" data-group="labels" data-key="prisonTagline" data-default="LUCHA · SUPERVIVENCIA · SIN LÍMITES" data-label="Frase bajo PRISON"></button></div></div>
+          <div class="preview-columns">
+            <section><div class="section-row"><button type="button" class="edit-text tiny" data-group="labels" data-key="rosterHeading" data-default="SELECCIONA TU PERSONAJE" data-label="Título de personajes"></button><button type="button" class="edit-text tiny" data-group="labels" data-key="rosterHint" data-default="P1 / P2 · ELIGE EN LAS TARJETAS" data-label="Frase de selección"></button></div><div class="cards" id="fighters"></div></section>
+            <section><button type="button" class="edit-text section-title" data-group="field" data-key="modesHeading" data-label="Título de modos"></button><button type="button" class="edit-text tiny" data-group="field" data-key="modesSubtitle" data-label="Frase de modos"></button><div class="modes" id="modes"></div>
+              <div class="settings-preview"><button type="button" class="edit-text section-title" data-group="labels" data-key="settings" data-default="CONFIGURACIÓN DE PARTIDA" data-label="Título de configuración"></button><button type="button" class="edit-text tiny" data-group="labels" data-key="settingsSub" data-default="AJUSTA TU COMBATE" data-label="Frase de configuración"></button><div class="settings-labels" id="settings-labels"></div></div>
+            </section>
+          </div>
+        </section>
+        <aside class="options panel"><h2>Colores y tamaños</h2><p>Ajusta las opciones y pulsa «Guardar cambios».</p>
+          <label>Color principal <input type="color" data-style="accent"></label>
+          <label>Fondo del menú <input type="color" data-style="panel"></label>
+          <label>Color de las letras <input type="color" data-style="ink"></label>
+          <label>Tamaño de títulos <output data-output="scale"></output><input type="range" min="80" max="130" data-style="scale"></label>
+          <label>Altura de las tarjetas <output data-output="cardHeight"></output><input type="range" min="135" max="330" data-style="cardHeight"></label>
+          <label>Columnas de personajes <output data-output="columns"></output><input type="range" min="2" max="5" data-style="columns"></label>
+          <label>Tamaño de nombres <output data-output="nameSize"></output><input type="range" min="70" max="150" data-style="nameSize"></label>
+          <label>Tamaño del logo <output data-output="logoScale"></output><input type="range" min="55" max="180" data-style="logoScale"></label>
+          <label>Separación de tarjetas <output data-output="cardGap"></output><input type="range" min="0" max="28" data-style="cardGap"></label>
+          <label>Foto de fondo (URL opcional)<input type="url" data-style="backgroundImage" placeholder="https://..."></label>
+          <label>Oscuridad del fondo <output data-output="backgroundDim"></output><input type="range" min="20" max="100" data-style="backgroundDim"></label>
+          <div class="backup"><button id="export" type="button" class="secondary">Descargar copia</button><label class="file-button">Cargar copia<input id="import" type="file" accept="application/json,.json"></label></div>
+          <p>La copia permite llevar estos ajustes a otro navegador.</p>
+        </aside>
+      </div>
+    </section>
+  </main>
+  <div class="dialog-backdrop" id="dialog" hidden>
+    <form class="dialog panel" id="edit-form" role="dialog" aria-modal="true" aria-labelledby="edit-title">
+      <h2 id="edit-title">Editar texto</h2><label for="edit-input">Escribe aquí</label><input id="edit-input" type="text" maxlength="180" autocomplete="off">
+      <div id="fighter-options" hidden><label for="title-input">Frase del personaje</label><input id="title-input" type="text" maxlength="180" autocomplete="off"><label for="portrait-input">Foto personalizada (URL opcional)</label><input id="portrait-input" type="url" autocomplete="off" placeholder="https://..."></div>
+      <div class="dialog-actions"><button id="cancel" class="secondary" type="button">Cancelar</button><button class="primary" type="submit">Aceptar</button></div>
+    </form>
+  </div>
+</body>
+</html>

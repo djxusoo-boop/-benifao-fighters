@@ -10207,3 +10207,14 @@ html[data-display-mode=mobile] .select-screen.lobby-v2168 .character-card small 
 @media (max-width:1023px), (orientation:portrait) {
   .select-screen.lobby-v2168.lobby-v220.lobby-editing { grid-template-areas:"editor" "head" "roster" "showcase" "games" "footer"; }
 }
+/* Custom portraits must also override the !important sprite atlases. */
+.select-screen.lobby-v2168 .character-card .portrait[data-custom-portrait="true"],
+.select-screen.lobby-v2168 .fighter-showcase .showcase-portrait .portrait[data-custom-portrait="true"] { background-image:var(--custom-portrait)!important; background-size:cover!important; background-position:center top!important; }
+/* Respect explicit editor choices without changing the default responsive layout. */
+html .select-screen.lobby-v2168[data-custom-height="true"] .character-card { height:var(--lobby-card-height)!important; }
+html .select-screen.lobby-v2168[data-custom-columns="true"] .character-cards { grid-template-columns:repeat(var(--lobby-columns),minmax(0,1fr))!important; }
+html .select-screen.lobby-v2168[data-custom-gap="true"] .character-cards { gap:var(--lobby-card-gap)!important; }
+.select-screen.lobby-v2168[data-custom-name-size="true"] .character-card b { font-size:calc(clamp(14px,1.45vw,21px) * var(--lobby-name-scale))!important; }
+.select-screen.lobby-v2168[data-custom-panel="true"] { background:var(--lobby-panel)!important; }
+.select-screen.lobby-v2168[data-custom-accent="true"] { --lobby-orange:var(--lobby-accent); }
+.select-screen.lobby-v2168[data-custom-ink="true"] .character-card b { color:var(--lobby-ink)!important; }

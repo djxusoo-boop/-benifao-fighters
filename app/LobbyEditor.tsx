@@ -26,6 +26,7 @@ export type LobbyDesign = {
   modeNames: Record<string, string>;
   modeSubtitles: Record<string, string>;
   labels: Record<string, string>;
+  styleOverrides?: Record<string, boolean>;
 };
 
 export const DEFAULT_LOBBY_DESIGN: LobbyDesign = {

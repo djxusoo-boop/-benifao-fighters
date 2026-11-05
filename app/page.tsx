@@ -156,7 +156,7 @@ const STAGES = [
 
 const GAME_TITLE = "HARDCORE FIGHTERS";
 const GAME_EDITION = "WEB · ARCADE EDITION";
-const GAME_VERSION = "V2.34.2";
+const GAME_VERSION = "V2.34.3";
 
 const ROUND_SECONDS = 99;
 const SUPER_MAX = 100;
@@ -562,6 +562,18 @@ function Home() {
     try { window.localStorage.setItem("hardcore-lobby-design-v1", JSON.stringify(lobbyDesign)); }
     catch { /* The editor remains usable if storage is unavailable. */ }
   }, [lobbyDesign, lobbyDesignLoaded]);
+  useEffect(() => {
+    // The lightweight editor can be open in a second tab of the same browser.
+    const syncDesign = (event: StorageEvent) => {
+      if (event.key !== "hardcore-lobby-design-v1" || !event.newValue) return;
+      try {
+        const parsed = JSON.parse(event.newValue) as Partial<LobbyDesign>;
+        setLobbyDesign({ ...DEFAULT_LOBBY_DESIGN, ...parsed, fighterNames: parsed.fighterNames ?? {}, fighterTitles: parsed.fighterTitles ?? {}, portraitUrls: parsed.portraitUrls ?? {}, modeNames: parsed.modeNames ?? {}, modeSubtitles: parsed.modeSubtitles ?? {}, labels: parsed.labels ?? {} });
+      } catch { /* Ignore an invalid update and keep the current menu. */ }
+    };
+    window.addEventListener("storage", syncDesign);
+    return () => window.removeEventListener("storage", syncDesign);
+  }, []);
   useEffect(() => { if (editTarget) editInputRef.current?.focus(); }, [editTarget]);
   const lobbyFighter = (fighter: FighterId) => ({
     name: lobbyDesign.fighterNames[fighter]?.trim() || FIGHTERS[fighter].name,
@@ -570,6 +582,7 @@ function Home() {
   const lobbyMode = (id: string, label: string) => lobbyDesign.modeNames[id]?.trim() || label;
   const lobbyModeSubtitle = (id: string, label: string) => lobbyDesign.modeSubtitles[id]?.trim() || label;
   const lobbyLabel = (id: string, label: string) => lobbyDesign.labels[id]?.trim() || label;
+  const customLobbyStyle = (key: keyof LobbyDesign) => lobbyDesign.styleOverrides?.[key] === true || lobbyDesign[key] !== DEFAULT_LOBBY_DESIGN[key];
   const editAttrs = (group: LobbyEditGroup, key: string, label: string, value: string) => ({ "data-edit-group": group, "data-edit-key": key, "data-edit-label": label, "data-edit-value": value });
   const handleLobbyEditClick = (event: ReactMouseEvent<HTMLElement>) => {
     if (!lobbyEditorOpen || advancedEditorOpen) return;
@@ -2919,7 +2932,12 @@ function Home() {
           <button className="sound-button" type="button" onClick={() => setMusicOn((value) => !value)} aria-pressed={musicOn}>{musicOn ? "MÚSICA ON" : "MÚSICA OFF"}</button>
           <GamepadManager />
           <ArcadeDeviceManager />
-          {game.phase === "select" && !lobbyEditorOpen && <button className="sound-button lobby-editor-toggle" type="button" onClick={() => { setEditorPin(""); setEditorPinError(false); setEditorPinOpen(true); }}>✎ EDITAR MENÚ</button>}
+          {game.phase === "select" && !lobbyEditorOpen && <a className="sound-button lobby-editor-toggle" href="/editor.html" target="_blank" rel="noopener noreferrer" onClick={(event) => {
+            // An installed iOS app has separate storage from Safari. Keep its
+            // editor in the same app so the saved design stays with the game.
+            const installed = Boolean((navigator as Navigator & { standalone?: boolean }).standalone) || window.matchMedia("(display-mode: standalone)").matches;
+            if (installed) { event.preventDefault(); window.location.assign("/editor.html"); }
+          }}>✎ EDITAR MENÚ</a>}
           {game.phase === "select" && <button className="sound-button" type="button" onClick={() => setDiagnosticsOpen(true)}>🩺 DIAGNÓSTICO</button>}
           <button className="sound-button" type="button" onClick={() => setSoundOn((value) => !value)} aria-pressed={soundOn}>
             {soundOn ? "SONIDO ON" : "SONIDO OFF"}
@@ -3091,6 +3109,14 @@ function Home() {
 
         {game.phase === "select" && (
           <div className={`modal-layer select-screen lobby-v2168 lobby-v220 ${lobbyEditorOpen ? "lobby-editing" : ""}`} role="application" aria-label="Menú principal"
+            style={customLobbyStyle("ink") ? { "--lobby-ink": lobbyDesign.ink } as CSSProperties : undefined}
+            data-custom-height={customLobbyStyle("cardHeight") || undefined}
+            data-custom-columns={customLobbyStyle("columns") || undefined}
+            data-custom-gap={customLobbyStyle("cardGap") || undefined}
+            data-custom-name-size={customLobbyStyle("nameSize") || undefined}
+            data-custom-panel={customLobbyStyle("panel") || undefined}
+            data-custom-accent={customLobbyStyle("accent") || undefined}
+            data-custom-ink={customLobbyStyle("ink") || undefined}
             onClickCapture={handleLobbyEditClick}
             data-p1-locked={lobbyLocked[0]} data-p2-locked={lobbyLocked[1]}
             data-all-ready={lobbyLocked[0] && (battleMode === "cpu" || lobbyLocked[1])}>
@@ -3130,7 +3156,7 @@ function Home() {
                       (touchSlot === 0 ? setSelected : setLocalOpponent)(fighter);
                       setLobbyLocked(current => current.map((value, index) => index === touchSlot ? false : value) as [boolean, boolean]);
                     }}>
-                    <span className={`portrait ${fighter}`} style={lobbyDesign.portraitUrls[fighter] ? { backgroundImage: `url("${lobbyDesign.portraitUrls[fighter].replace(/"/g, "")}")` } : undefined} />
+                    <span className={`portrait ${fighter}`} data-custom-portrait={lobbyDesign.portraitUrls[fighter] ? "true" : undefined} style={lobbyDesign.portraitUrls[fighter] ? { "--custom-portrait": `url("${lobbyDesign.portraitUrls[fighter].replace(/"/g, "")}")` } as CSSProperties : undefined} />
                     <b>{lobbyFighter(fighter).name}</b>
                     <span className="card-player-tags">
                       {selected === fighter && <em className="tag-p1">P1 {lobbyLocked[0] ? "✓" : ""}</em>}
@@ -3159,7 +3185,7 @@ function Home() {
                   </div>
                   <div className="showcase-top">
                     <span className="showcase-tag">{tag}</span>
-                    <div className="showcase-portrait"><span className={`portrait ${shown}`} style={lobbyDesign.portraitUrls[shown] ? { backgroundImage: `url("${lobbyDesign.portraitUrls[shown].replace(/"/g, "")}")` } : undefined} /></div>
+                    <div className="showcase-portrait"><span className={`portrait ${shown}`} data-custom-portrait={lobbyDesign.portraitUrls[shown] ? "true" : undefined} style={lobbyDesign.portraitUrls[shown] ? { "--custom-portrait": `url("${lobbyDesign.portraitUrls[shown].replace(/"/g, "")}")` } as CSSProperties : undefined} /></div>
                     <div className="showcase-identity">
                       <strong>{lobbyFighter(shown).name}</strong>
                       <em>{lobbyFighter(shown).title}</em>

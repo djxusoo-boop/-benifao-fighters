@@ -23,7 +23,7 @@ export default function AutoFullscreen() {
     const onGesture = (event: Event) => {
       if (optedOut() || isFullscreen()) return;
       // Don't hijack typing in the ranking name field.
-      if (event.target instanceof HTMLElement && event.target.closest("input, textarea, select")) return;
+      if (event.target instanceof HTMLElement && event.target.closest('input, textarea, select, a[href="/editor.html"]')) return;
       void enterFullscreen();
     };
     window.addEventListener("pointerup", onGesture, { capture: true });
