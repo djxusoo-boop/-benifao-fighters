@@ -48,6 +48,7 @@
           </div>
         </section>
         <aside class="options panel"><h2>Colores y tamaños</h2><p>Ajusta las opciones y pulsa «Guardar cambios».</p>
+          <div class="theme-presets" aria-label="Plantillas de colores"><span>PLANTILLAS RÁPIDAS</span><div><button type="button" data-theme="arcade">Arcade</button><button type="button" data-theme="prison">Prison azul</button><button type="button" data-theme="neon">Neón</button><button type="button" data-theme="gold">Oro</button></div><button type="button" id="reset-colors" class="text-action">Restablecer colores</button></div>
           <label>Color principal <input type="color" data-style="accent"></label>
           <label>Fondo del menú <input type="color" data-style="panel"></label>
           <label>Color de las letras <input type="color" data-style="ink"></label>
@@ -57,6 +58,8 @@
           <label>Tamaño de nombres <output data-output="nameSize"></output><input type="range" min="70" max="150" data-style="nameSize"></label>
           <label>Tamaño del logo <output data-output="logoScale"></output><input type="range" min="55" max="180" data-style="logoScale"></label>
           <label>Separación de tarjetas <output data-output="cardGap"></output><input type="range" min="0" max="28" data-style="cardGap"></label>
+          <label>Esquinas de tarjetas <output data-output="cardRadius"></output><input type="range" min="0" max="32" data-style="cardRadius"></label>
+          <label>Separación de modos <output data-output="modeGap"></output><input type="range" min="0" max="28" data-style="modeGap"></label>
           <label>Foto de fondo (URL opcional)<input type="url" data-style="backgroundImage" placeholder="https://..."></label>
           <label>Oscuridad del fondo <output data-output="backgroundDim"></output><input type="range" min="20" max="100" data-style="backgroundDim"></label>
           <div class="backup"><button id="export" type="button" class="secondary">Descargar copia</button><label class="file-button">Cargar copia<input id="import" type="file" accept="application/json,.json"></label></div>
@@ -70,10 +73,13 @@
     <p id="selection-hint">Arrastra títulos y bloques. Arrastra tarjetas para cambiar su orden.</p>
     <label for="element-picker">Seleccionar elemento <select id="element-picker"><option value="">Elige o toca un elemento</option></select></label>
     <div id="selection-tools" hidden>
+      <label>Paso de movimiento <select id="nudge-step"><option value="1">Fino · 1</option><option value="5" selected>Normal · 5</option><option value="10">Rápido · 10</option></select></label>
       <div class="arrange-move" id="nudge-controls" aria-label="Mover elemento"><button type="button" data-nudge="left" aria-label="Mover a la izquierda">←</button><button type="button" data-nudge="up" aria-label="Mover arriba">↑</button><button type="button" data-nudge="down" aria-label="Mover abajo">↓</button><button type="button" data-nudge="right" aria-label="Mover a la derecha">→</button></div>
+      <div class="coordinate-controls" id="coordinate-controls"><label>X <input id="element-x" type="number" min="-300" max="300" step="1"></label><label>Y <input id="element-y" type="number" min="-2500" max="2500" step="1"></label></div>
       <div class="arrange-move" id="order-controls" hidden><button type="button" id="order-before">← Poner antes</button><button type="button" id="order-after">Poner después →</button></div>
       <label>Tamaño <output id="size-output">100%</output><input id="element-size" type="range" min="60" max="160" value="100"></label>
       <label>Ancho <output id="width-output">100%</output><input id="element-width" type="range" min="60" max="160" value="100"></label>
+      <fieldset id="text-style-tools"><legend>Estilo de este texto</legend><div class="style-colors"><label>Color<input id="text-color" type="color"></label><label>Fondo<input id="text-background" type="color"></label></div><label>Opacidad <output id="opacity-output">100%</output><input id="text-opacity" type="range" min="25" max="100" value="100"></label><label>Tamaño de letra <output id="font-size-output">100%</output><input id="text-font-size" type="range" min="60" max="180" value="100"></label><label>Espaciado entre letras <output id="letter-spacing-output">0</output><input id="text-letter-spacing" type="range" min="-4" max="16" value="0"></label><label>Alineación <select id="text-align"><option value="left">Izquierda</option><option value="center">Centro</option><option value="right">Derecha</option></select></label><label class="check-label"><input id="text-hidden" type="checkbox"> Ocultar este elemento</label><div class="text-style-actions"><button type="button" id="clear-text-background" class="secondary">Quitar fondo</button><button type="button" id="reset-text-style" class="secondary">Restablecer estilo</button></div></fieldset>
       <button type="button" id="reset-element" class="secondary">Restablecer este elemento</button>
     </div>
     <button type="button" id="reset-layout" class="secondary">Restablecer toda la organización</button>

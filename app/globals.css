@@ -10233,3 +10233,10 @@ html .select-screen.lobby-v2168[data-custom-gap="true"] .character-cards { gap:v
 .lobby-games[data-modes-reordered="true"] .mode-start-actions .fight-button[data-edit-key="ranking"]::before { content:"↗"; }
 .lobby-games[data-modes-reordered="true"] .mode-start-actions .fight-button[data-edit-key="moves"]::before { content:"⚙"; }
 .lobby-games[data-modes-reordered="true"] .mode-start-actions .fight-button[data-edit-key="profile"]::before { content:"✪"; }
+
+/* V2.34.5: safe per-element typography from the independent menu editor. */
+html .select-screen.lobby-v2168[data-custom-card-radius="true"] .character-card { border-radius:var(--lobby-card-radius)!important; }
+html .select-screen.lobby-v2168[data-custom-mode-gap="true"] .mode-start-actions { gap:var(--lobby-mode-gap)!important; }
+html .game-shell [data-lobby-text-style="true"] { color:var(--menu-text-color)!important; opacity:var(--menu-text-opacity); letter-spacing:calc(var(--menu-text-spacing) * .08em); text-align:var(--menu-text-align); background-color:var(--menu-text-background); border-radius:4px; }
+html .game-shell :is(h1,h2,b,small,span,button)[data-lobby-text-style="true"] { font-size:calc(1em * var(--menu-text-size))!important; }
+html .select-screen.lobby-v2168 .character-card[data-lobby-text-style="true"] > b { font-size:calc(clamp(14px,1.45vw,21px) * var(--lobby-name-scale) * var(--menu-text-size))!important; }

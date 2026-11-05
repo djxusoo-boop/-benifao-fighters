@@ -18,6 +18,8 @@ export type LobbyDesign = {
   nameSize: number;
   logoScale: number;
   cardGap: number;
+  cardRadius: number;
+  modeGap: number;
   backgroundImage: string;
   backgroundDim: number;
   fighterNames: Record<string, string>;
@@ -28,6 +30,7 @@ export type LobbyDesign = {
   labels: Record<string, string>;
   styleOverrides?: Record<string, boolean>;
   placements?: Record<string, { x: number; y: number; size: number; width: number }>;
+  textStyles?: Record<string, { color?: string; background?: string; opacity?: number; fontSize?: number; letterSpacing?: number; align?: "left" | "center" | "right"; hidden?: boolean }>;
   fighterOrder?: string[];
   modeOrder?: string[];
 };
@@ -48,6 +51,8 @@ export const DEFAULT_LOBBY_DESIGN: LobbyDesign = {
   nameSize: 100,
   logoScale: 100,
   cardGap: 10,
+  cardRadius: 10,
+  modeGap: 10,
   backgroundImage: "",
   backgroundDim: 78,
   fighterNames: {},
@@ -56,6 +61,7 @@ export const DEFAULT_LOBBY_DESIGN: LobbyDesign = {
   modeNames: {},
   modeSubtitles: {},
   labels: {},
+  textStyles: {},
 };
 
 type Props = {

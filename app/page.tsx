@@ -159,7 +159,7 @@ const STAGES = [
 
 const GAME_TITLE = "HARDCORE FIGHTERS";
 const GAME_EDITION = "WEB · ARCADE EDITION";
-const GAME_VERSION = "V2.34.4";
+const GAME_VERSION = "V2.34.5";
 
 const ROUND_SECONDS = 99;
 const SUPER_MAX = 100;
@@ -588,9 +588,31 @@ function Home() {
   const lobbyModeSubtitle = (id: string, label: string) => lobbyDesign.modeSubtitles[id]?.trim() || label;
   const lobbyLabel = (id: string, label: string) => lobbyDesign.labels[id]?.trim() || label;
   const customLobbyStyle = (key: keyof LobbyDesign) => lobbyDesign.styleOverrides?.[key] === true || lobbyDesign[key] !== DEFAULT_LOBBY_DESIGN[key];
+  const textStyleAttrs = (group: string, key: string) => {
+    const raw = lobbyDesign.textStyles?.[`${group}:${key}`];
+    if (!raw || typeof raw !== "object") return {};
+    const number = (value: unknown, fallback: number, min: number, max: number) => {
+      const n = Number(value); return Number.isFinite(n) ? Math.max(min, Math.min(max, n)) : fallback;
+    };
+    const color = typeof raw.color === "string" && /^#[0-9a-f]{6}$/i.test(raw.color) ? raw.color : "inherit";
+    const background = typeof raw.background === "string" && /^#[0-9a-f]{6}$/i.test(raw.background) ? raw.background : "transparent";
+    const align = raw.align === "center" || raw.align === "right" ? raw.align : "left";
+    return {
+      "data-lobby-text-style": "true",
+      hidden: raw.hidden === true || undefined,
+      style: {
+        "--menu-text-color": color, "--menu-text-background": background,
+        "--menu-text-opacity": String(number(raw.opacity, 100, 25, 100) / 100),
+        "--menu-text-size": String(number(raw.fontSize, 100, 60, 180) / 100),
+        "--menu-text-spacing": String(number(raw.letterSpacing, 0, -4, 16)),
+        "--menu-text-align": align,
+      } as CSSProperties,
+    };
+  };
   const placementAttrs = (group: string, key: string) => {
     const placement = lobbyDesign.placements?.[`${group}:${key}`];
-    if (!placement || typeof placement !== "object") return {};
+    const textStyle = textStyleAttrs(group, key);
+    if (!placement || typeof placement !== "object") return textStyle;
     const number = (value: unknown, fallback: number, min: number, max: number) => {
       const n = Number(value); return Number.isFinite(n) ? Math.max(min, Math.min(max, n)) : fallback;
     };
@@ -599,7 +621,7 @@ function Home() {
     const width = number(placement.width, 100, 60, 160) / 100;
     if (group === "field" && (key === "heading" || key === "modesHeading")) size *= lobbyDesign.scale / 100;
     if (group === "logo") size *= lobbyDesign.logoScale / 100;
-    return { "data-lobby-placement": "true", style: { "--place-x": `${x}%`, "--place-y": `${y}%`, "--place-scale-x": String(size * width), "--place-scale-y": String(size) } as CSSProperties };
+    return { ...textStyle, "data-lobby-placement": "true", style: { ...(textStyle.style as CSSProperties), "--place-x": `${x}%`, "--place-y": `${y}%`, "--place-scale-x": String(size * width), "--place-scale-y": String(size) } as CSSProperties };
   };
   const editAttrs = (group: LobbyEditGroup, key: string, label: string, value: string) => ({ "data-edit-group": group, "data-edit-key": key, "data-edit-label": label, "data-edit-value": value, ...placementAttrs(group, key) });
   const handleLobbyEditClick = (event: ReactMouseEvent<HTMLElement>) => {
@@ -641,6 +663,8 @@ function Home() {
     "--lobby-name-scale": `${lobbyDesign.nameSize / 100}`,
     "--lobby-logo-scale": `${lobbyDesign.logoScale / 100}`,
     "--lobby-card-gap": `${lobbyDesign.cardGap}px`,
+    "--lobby-card-radius": `${lobbyDesign.cardRadius}px`,
+    "--lobby-mode-gap": `${lobbyDesign.modeGap}px`,
     "--lobby-background": lobbyDesign.backgroundImage ? `url("${lobbyDesign.backgroundImage.replace(/"/g, "")}")` : "none",
     "--lobby-dim": `${lobbyDesign.backgroundDim / 100}`,
   } as CSSProperties;
@@ -3131,6 +3155,8 @@ function Home() {
             data-custom-height={customLobbyStyle("cardHeight") || undefined}
             data-custom-columns={customLobbyStyle("columns") || undefined}
             data-custom-gap={customLobbyStyle("cardGap") || undefined}
+            data-custom-card-radius={customLobbyStyle("cardRadius") || undefined}
+            data-custom-mode-gap={customLobbyStyle("modeGap") || undefined}
             data-custom-name-size={customLobbyStyle("nameSize") || undefined}
             data-custom-panel={customLobbyStyle("panel") || undefined}
             data-custom-accent={customLobbyStyle("accent") || undefined}

@@ -6,9 +6,9 @@
     heading: "ELIGE TU LUCHADOR", eyebrow: "LUCHADORES DISPONIBLES",
     modesHeading: "MODOS DE JUEGO", modesSubtitle: "ELIGE CÓMO QUIERES JUGAR",
     accent: "#ff9a34", panel: "#0c1520", ink: "#f5f2e9", scale: 100,
-    cardHeight: 214, columns: 3, nameSize: 100, logoScale: 100, cardGap: 10,
+    cardHeight: 214, columns: 3, nameSize: 100, logoScale: 100, cardGap: 10, cardRadius: 10, modeGap: 10,
     backgroundImage: "", backgroundDim: 78, fighterNames: {}, fighterTitles: {},
-    portraitUrls: {}, modeNames: {}, modeSubtitles: {}, labels: {}, styleOverrides: {}, placements: {}, fighterOrder: [], modeOrder: [],
+    portraitUrls: {}, modeNames: {}, modeSubtitles: {}, labels: {}, styleOverrides: {}, placements: {}, textStyles: {}, fighterOrder: [], modeOrder: [],
   };
   const fighters = [
     ["maletilla", "MALETILLA", "EL AMO DEL RUIDO"], ["vanessa", "VANESSA", "HARDCORE GIRL"],
@@ -41,7 +41,7 @@
     ["playerHelp", "Los dos jugadores eligen en las imágenes: P1 naranja · P2 azul."],
     ["controlHelp", "Cruceta: mover · ✕: elegir y saltar a los modos · ✕ otra vez: jugar · ○: volver"],
   ];
-  const numeric = { scale: [80, 130], cardHeight: [135, 330], columns: [2, 5], nameSize: [70, 150], logoScale: [55, 180], cardGap: [0, 28], backgroundDim: [20, 100] };
+  const numeric = { scale: [80, 130], cardHeight: [135, 330], columns: [2, 5], nameSize: [70, 150], logoScale: [55, 180], cardGap: [0, 28], cardRadius: [0, 32], modeGap: [0, 28], backgroundDim: [20, 100] };
   const maps = ["fighterNames", "fighterTitles", "portraitUrls", "modeNames", "modeSubtitles", "labels"];
   const $ = (id) => document.getElementById(id);
   const status = (message, error = false) => { $("status").textContent = message; $("status").style.color = error ? "#ff9999" : ""; };
@@ -69,6 +69,20 @@
     result.placements = {};
     if (isObject(value.placements)) Object.entries(value.placements).forEach(([id, item]) => {
       if (/^(field|labels|fighterNames|modeNames|modeSubtitles|section|logo):[\w-]+$/.test(id) && isObject(item)) result.placements[id] = normalizePlacement(item);
+    });
+    result.textStyles = {};
+    if (isObject(value.textStyles)) Object.entries(value.textStyles).forEach(([id, item]) => {
+      if (!/^(field|labels|fighterNames|modeNames|modeSubtitles):[\w-]+$/.test(id) || !isObject(item)) return;
+      const style = {
+        color: /^#[0-9a-f]{6}$/i.test(item.color) ? item.color : "",
+        background: /^#[0-9a-f]{6}$/i.test(item.background) ? item.background : "",
+        opacity: number(item.opacity, 100, 25, 100),
+        fontSize: number(item.fontSize, 100, 60, 180),
+        letterSpacing: number(item.letterSpacing, 0, -4, 16),
+        align: ["left", "center", "right"].includes(item.align) ? item.align : "left",
+        hidden: item.hidden === true,
+      };
+      if (style.color || style.background || style.opacity !== 100 || style.fontSize !== 100 || style.letterSpacing !== 0 || style.align !== "left" || style.hidden) result.textStyles[id] = style;
     });
     result.fighterOrder = ordered(fighters.map(([id]) => id), value.fighterOrder);
     result.modeOrder = ordered(modes.map(([id]) => id), value.modeOrder);
@@ -149,10 +163,12 @@
     preview.style.setProperty("--logo-size", String(draft.logoScale / 100));
     preview.style.setProperty("--card-height", `${Math.round(draft.cardHeight * 0.4)}px`);
     preview.style.setProperty("--card-gap", `${draft.cardGap}px`);
+    preview.style.setProperty("--card-radius", `${draft.cardRadius}px`);
+    preview.style.setProperty("--mode-gap", `${draft.modeGap}px`);
     document.querySelectorAll("[data-style]").forEach((input) => {
       const key = input.dataset.style; input.value = String(draft[key]);
       const output = document.querySelector(`[data-output="${key}"]`);
-      if (output) output.textContent = `${draft[key]}${key === "cardHeight" || key === "cardGap" ? " px" : key === "columns" ? "" : "%"}`;
+      if (output) output.textContent = `${draft[key]}${["cardHeight", "cardGap", "cardRadius", "modeGap"].includes(key) ? " px" : key === "columns" ? "" : "%"}`;
     });
     draft.fighterOrder.forEach((id) => {
       const card = $("fighters").querySelector(`[data-key="${id}"]`);
@@ -162,7 +178,7 @@
       const card = $("modes").querySelector(`[data-mode-id="${id}"]`);
       if (card) $("modes").append(card);
     });
-    document.querySelectorAll(".preview [data-group]").forEach((button) => applyPlacement(button));
+    document.querySelectorAll(".preview [data-group]").forEach((button) => { applyPlacement(button); applyTextStyle(button); });
   }
   function itemFor(button) {
     if (button.dataset.group === "section") return button.closest("[data-section]");
@@ -171,6 +187,23 @@
     return button;
   }
   function placementId(button) { return `${button.dataset.group}:${button.dataset.key}`; }
+  function defaultTextStyle() { return { color: "", background: "", opacity: 100, fontSize: 100, letterSpacing: 0, align: "left", hidden: false }; }
+  function textStyleFor(button) { return { ...defaultTextStyle(), ...draft.textStyles[placementId(button)] }; }
+  function styleable(button) { return !["section", "logo"].includes(button.dataset.group); }
+  function applyTextStyle(button) {
+    const item = itemFor(button);
+    if (!item || !styleable(button)) return;
+    const style = textStyleFor(button);
+    const active = style.color || style.background || style.opacity !== 100 || style.fontSize !== 100 || style.letterSpacing !== 0 || style.align !== "left" || style.hidden;
+    item.dataset.textStyle = active ? "true" : "";
+    item.style.setProperty("--text-color", style.color || "inherit");
+    item.style.setProperty("--text-background", style.background || "transparent");
+    item.style.setProperty("--text-opacity", String(style.opacity / 100));
+    item.style.setProperty("--text-size", String(style.fontSize / 100));
+    item.style.setProperty("--text-letter-spacing", String(style.letterSpacing));
+    item.style.setProperty("--text-align", style.align);
+    item.hidden = style.hidden;
+  }
   function applyPlacement(button) {
     const item = itemFor(button);
     if (!item) return;
@@ -191,7 +224,9 @@
     $("selection-hint").textContent = isCard ? "Arrastra la tarjeta sobre otra o usa los botones para cambiar su orden." : "Arrastra el elemento o usa las flechas para colocarlo.";
     $("selection-tools").hidden = false;
     $("nudge-controls").hidden = isCard;
+    $("coordinate-controls").hidden = isCard;
     $("order-controls").hidden = !isCard;
+    $("text-style-tools").hidden = !styleable(button);
     refreshSelection();
   }
   function refreshSelection() {
@@ -199,6 +234,16 @@
     const p = normalizePlacement(draft.placements[placementId(selection)] || basePlacement());
     $("element-size").value = String(p.size); $("size-output").textContent = `${p.size}%`;
     $("element-width").value = String(p.width); $("width-output").textContent = `${p.width}%`;
+    $("element-x").value = String(p.x); $("element-y").value = String(p.y);
+    if (styleable(selection)) {
+      const style = textStyleFor(selection);
+      $("text-color").value = style.color || draft.ink;
+      $("text-background").value = style.background || draft.panel;
+      $("text-opacity").value = String(style.opacity); $("opacity-output").textContent = `${style.opacity}%`;
+      $("text-font-size").value = String(style.fontSize); $("font-size-output").textContent = `${style.fontSize}%`;
+      $("text-letter-spacing").value = String(style.letterSpacing); $("letter-spacing-output").textContent = String(style.letterSpacing);
+      $("text-align").value = style.align; $("text-hidden").checked = style.hidden;
+    }
   }
   function setPlacement(changes) {
     if (!selection) return;
@@ -206,6 +251,16 @@
     draft.placements[id] = normalizePlacement({ ...basePlacement(), ...draft.placements[id], ...changes });
     applyPlacement(selection); refreshSelection();
     status("Cambio preparado. Pulsa «Guardar cambios» para aplicarlo.");
+  }
+  function setTextStyle(changes) {
+    if (!selection || !styleable(selection)) return;
+    const id = placementId(selection);
+    const next = { ...defaultTextStyle(), ...draft.textStyles[id], ...changes };
+    const defaultStyle = defaultTextStyle();
+    if (JSON.stringify(next) === JSON.stringify(defaultStyle)) delete draft.textStyles[id];
+    else draft.textStyles[id] = next;
+    applyTextStyle(selection); refreshSelection();
+    status("Estilo preparado. Pulsa «Guardar cambios» para aplicarlo.");
   }
   function moveCard(group, key, target) {
     const orderKey = group === "fighterNames" ? "fighterOrder" : "modeOrder";
@@ -318,7 +373,8 @@
     if (!selection) return;
     const p = normalizePlacement(draft.placements[placementId(selection)] || basePlacement());
     const direction = button.dataset.nudge;
-    setPlacement({ x: p.x + (direction === "left" ? -10 : direction === "right" ? 10 : 0), y: p.y + (direction === "up" ? -10 : direction === "down" ? 10 : 0) });
+    const step = Number($("nudge-step").value) || 5;
+    setPlacement({ x: p.x + (direction === "left" ? -step : direction === "right" ? step : 0), y: p.y + (direction === "up" ? -step : direction === "down" ? step : 0) });
   }));
   ["before", "after"].forEach((direction) => $(`order-${direction}`).addEventListener("click", () => {
     if (!selection) return;
@@ -328,6 +384,21 @@
   }));
   $("element-size").addEventListener("input", (event) => setPlacement({ size: Number(event.target.value) }));
   $("element-width").addEventListener("input", (event) => setPlacement({ width: Number(event.target.value) }));
+  $("element-x").addEventListener("input", (event) => setPlacement({ x: Number(event.target.value) }));
+  $("element-y").addEventListener("input", (event) => setPlacement({ y: Number(event.target.value) }));
+  $("text-color").addEventListener("input", (event) => setTextStyle({ color: event.target.value }));
+  $("text-background").addEventListener("input", (event) => setTextStyle({ background: event.target.value }));
+  $("text-opacity").addEventListener("input", (event) => setTextStyle({ opacity: Number(event.target.value) }));
+  $("text-font-size").addEventListener("input", (event) => setTextStyle({ fontSize: Number(event.target.value) }));
+  $("text-letter-spacing").addEventListener("input", (event) => setTextStyle({ letterSpacing: Number(event.target.value) }));
+  $("text-align").addEventListener("change", (event) => setTextStyle({ align: event.target.value }));
+  $("text-hidden").addEventListener("change", (event) => setTextStyle({ hidden: event.target.checked }));
+  $("clear-text-background").addEventListener("click", () => setTextStyle({ background: "" }));
+  $("reset-text-style").addEventListener("click", () => {
+    if (!selection || !styleable(selection)) return;
+    delete draft.textStyles[placementId(selection)]; applyTextStyle(selection); refreshSelection();
+    status("Estilo restablecido. Pulsa «Guardar cambios» para aplicarlo.");
+  });
   $("reset-element").addEventListener("click", () => {
     if (!selection) return;
     delete draft.placements[placementId(selection)]; applyPlacement(selection); refreshSelection();
@@ -349,6 +420,21 @@
     if (input.type !== "url") updatePreview();
     status("Cambio preparado. Pulsa «Guardar cambios» para aplicarlo.");
   }));
+  const themes = {
+    arcade: { accent: "#ff9a34", panel: "#0c1520", ink: "#f5f2e9", backgroundDim: 78 },
+    prison: { accent: "#72ddff", panel: "#061b2d", ink: "#e9f8ff", backgroundDim: 82 },
+    neon: { accent: "#ff5cce", panel: "#170b2a", ink: "#fff0fd", backgroundDim: 74 },
+    gold: { accent: "#e9be4f", panel: "#21180c", ink: "#fff5d8", backgroundDim: 80 },
+  };
+  document.querySelectorAll("[data-theme]").forEach((button) => button.addEventListener("click", () => {
+    Object.assign(draft, themes[button.dataset.theme]);
+    Object.keys(themes.arcade).forEach((key) => { draft.styleOverrides[key] = true; });
+    updatePreview(); status("Plantilla preparada. Pulsa «Guardar cambios» para aplicarla.");
+  }));
+  $("reset-colors").addEventListener("click", () => {
+    ["accent", "panel", "ink", "backgroundDim"].forEach((key) => { draft[key] = defaults[key]; delete draft.styleOverrides[key]; });
+    updatePreview(); status("Colores restablecidos. Pulsa «Guardar cambios» para aplicarlos.");
+  });
   $("save").addEventListener("click", save);
   $("save-return").addEventListener("click", () => { if (save()) window.location.assign("/"); });
   $("export").addEventListener("click", () => {
