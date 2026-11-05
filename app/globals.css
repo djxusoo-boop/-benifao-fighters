@@ -10169,3 +10169,41 @@ html[data-display-mode=mobile] .select-screen.lobby-v2168 .character-card small 
   }
   .arena:not(.phase-select) .touch-controls .touch-actions-redesign button { width:48px!important;height:48px!important; }
 }
+
+/* Direct, lightweight editing on the actual selector. Avoid backdrop blur:
+   on iOS a blurred full-screen layer can be very expensive to composite. */
+.editor-pin-backdrop, .lobby-editor-backdrop { -webkit-backdrop-filter:none; backdrop-filter:none; }
+.select-screen.lobby-v2168.lobby-v220.lobby-editing {
+  grid-template-areas:"editor editor" "head head" "roster showcase" "games games" "footer footer";
+  overflow:visible;
+}
+.select-screen.lobby-v2168 .direct-editor-toolbar {
+  grid-area:editor; position:sticky!important; top:0; z-index:30!important;
+  display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between;
+  gap:10px; padding:10px 12px; border:1px solid #ffad45; border-radius:8px;
+  background:#172330; color:#fff; box-shadow:0 4px 12px #0008;
+  font:14px/1.3 system-ui,-apple-system,sans-serif;
+}
+.direct-editor-toolbar > div { display:flex; flex-wrap:wrap; align-items:center; gap:8px; }
+.direct-editor-toolbar span { color:#d5e0e9; }
+.direct-editor-toolbar button, .direct-text-editor button, .diagnostics-panel button {
+  min-height:40px; padding:8px 12px; border:1px solid #8095a8; border-radius:7px;
+  color:#fff; background:#1b3142; font:700 14px system-ui,-apple-system,sans-serif;
+}
+.direct-editor-toolbar button:last-child, .direct-text-editor button[type=submit] { background:#ffad45; color:#181006; border-color:#ffad45; }
+.lobby-editing [data-edit-group] { cursor:pointer; outline:1px dashed #ffb854; outline-offset:2px; }
+.lobby-editing .mode-sub[data-edit-group] { outline-color:#86d9f0; }
+.direct-text-editor {
+  position:fixed; z-index:1100; bottom:max(10px,env(safe-area-inset-bottom)); left:50%; transform:translateX(-50%);
+  width:min(460px,calc(100vw - 24px)); box-sizing:border-box; display:grid; gap:9px; padding:14px;
+  border:1px solid #ffad45; border-radius:10px; background:#101c28; color:#fff;
+  box-shadow:0 4px 20px #000b; font:600 15px system-ui,-apple-system,sans-serif;
+}
+.direct-text-editor input { width:100%; box-sizing:border-box; padding:10px; border:1px solid #8ba0b2; border-radius:6px; background:#07111b; color:#fff; font:400 16px system-ui,-apple-system,sans-serif; }
+.direct-text-editor > div { display:flex; justify-content:flex-end; gap:8px; }
+.diagnostics-overlay { position:fixed; inset:0; z-index:1200; display:grid; place-items:center; padding:12px; background:#04090fe8; }
+.diagnostics-panel { width:min(480px,100%); max-height:calc(100dvh - 24px); overflow:auto; box-sizing:border-box; padding:18px; border:1px solid #728ba0; border-radius:10px; color:#f3f7fa; background:#101d29; font:14px/1.4 system-ui,-apple-system,sans-serif; }
+.diagnostics-panel header { display:flex; align-items:center; justify-content:space-between; gap:10px; }.diagnostics-panel h2 { margin:2px 0; font-size:21px; }.diagnostics-panel p { color:#bdcad4; }.diagnostics-panel ul { list-style:none; padding:0; margin:12px 0; }.diagnostics-panel li { display:flex; gap:10px; padding:8px 0; border-bottom:1px solid #354858; }.diagnostics-panel li > span { color:#ffc16f; font-size:18px; }.diagnostics-panel li div { display:grid; gap:2px; }.diagnostics-panel li small { color:#b9c8d5; overflow-wrap:anywhere; }.diagnostics-note { font-size:12px; }
+@media (max-width:1023px), (orientation:portrait) {
+  .select-screen.lobby-v2168.lobby-v220.lobby-editing { grid-template-areas:"editor" "head" "roster" "showcase" "games" "footer"; }
+}
