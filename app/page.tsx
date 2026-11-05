@@ -2045,6 +2045,9 @@ function Home() {
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
+      // Text fields must never double as arcade controls. In particular, the
+      // lobby editor needs normal typing for letters such as A, S, D, H or L.
+      if (lobbyEditorOpen || event.target instanceof HTMLElement && event.target.closest("input, textarea, select, [contenteditable=true]")) return;
       if (gameRef.current.phase === "orbs" || gameRef.current.phase === "platform" || gameRef.current.phase === "coop" || gameRef.current.phase === "prison-slug") return;
       const key = event.key.toLowerCase();
       if (["arrowleft", "arrowright", "arrowup", "arrowdown", " ", "a", "c", "d", "w", "s", "h", "j", "k", "l", "i", "o", "1", "2", "3", "4", "enter", "escape", "p"].includes(key)) {
@@ -2097,6 +2100,7 @@ function Home() {
       if ((key === "enter" || key === " ") && gameRef.current.phase === "select" && !(event.target instanceof HTMLElement && event.target.closest("button, input, select, textarea, a"))) startRound();
     };
     const onKeyUp = (event: KeyboardEvent) => {
+      if (lobbyEditorOpen || event.target instanceof HTMLElement && event.target.closest("input, textarea, select, [contenteditable=true]")) return;
       const key = event.key.toLowerCase();
       keysRef.current.delete(key);
       if (key === "s") setGuard(false);
@@ -2110,7 +2114,7 @@ function Home() {
       window.removeEventListener("keydown", onKeyDown);
       window.removeEventListener("keyup", onKeyUp);
     };
-  }, [battleMode, directionalPress, jump, performAttack, resumeGame, setCpuCrouch, setCpuGuard, setCrouch, setGuard, startRound]);
+  }, [battleMode, directionalPress, jump, lobbyEditorOpen, performAttack, resumeGame, setCpuCrouch, setCpuGuard, setCrouch, setGuard, startRound]);
 
   useEffect(() => {
     let frame = 0;
