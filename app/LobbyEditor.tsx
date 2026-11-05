@@ -27,6 +27,9 @@ export type LobbyDesign = {
   modeSubtitles: Record<string, string>;
   labels: Record<string, string>;
   styleOverrides?: Record<string, boolean>;
+  placements?: Record<string, { x: number; y: number; size: number; width: number }>;
+  fighterOrder?: string[];
+  modeOrder?: string[];
 };
 
 export const DEFAULT_LOBBY_DESIGN: LobbyDesign = {

@@ -10218,3 +10218,18 @@ html .select-screen.lobby-v2168[data-custom-gap="true"] .character-cards { gap:v
 .select-screen.lobby-v2168[data-custom-panel="true"] { background:var(--lobby-panel)!important; }
 .select-screen.lobby-v2168[data-custom-accent="true"] { --lobby-orange:var(--lobby-accent); }
 .select-screen.lobby-v2168[data-custom-ink="true"] .character-card b { color:var(--lobby-ink)!important; }
+/* The independent editor stores bounded, individual placement adjustments. */
+.game-shell [data-lobby-placement="true"] { transform:translate(var(--place-x),var(--place-y)) scale(var(--place-scale-x),var(--place-scale-y))!important; transform-origin:center center!important; }
+.game-shell :is(span,b,small)[data-lobby-placement="true"] { display:inline-block; }
+/* Keep each mode's icon when cards are rearranged. */
+.lobby-games[data-modes-reordered="true"] .mode-start-actions .fight-button[data-edit-key="arcade"]::before { content:"⚔"; }
+.lobby-games[data-modes-reordered="true"] .mode-start-actions .fight-button[data-edit-key="fight"]::before { content:"♟"; }
+.lobby-games[data-modes-reordered="true"] .mode-start-actions .fight-button[data-edit-key="coop"]::before { content:"⬡"; }
+.lobby-games[data-modes-reordered="true"] .mode-start-actions .fight-button[data-edit-key="orbs"]::before { content:"✦"; }
+.lobby-games[data-modes-reordered="true"] .mode-start-actions .fight-button[data-edit-key="central"]::before { content:"▥"; }
+.lobby-games[data-modes-reordered="true"] .mode-start-actions .fight-button[data-edit-key="slug"]::before { content:"♛"; }
+.lobby-games[data-modes-reordered="true"] .mode-start-actions .fight-button[data-edit-key="tournament"]::before { content:"◎"; }
+.lobby-games[data-modes-reordered="true"] .mode-start-actions .fight-button[data-edit-key="training"]::before { content:"▤"; }
+.lobby-games[data-modes-reordered="true"] .mode-start-actions .fight-button[data-edit-key="ranking"]::before { content:"↗"; }
+.lobby-games[data-modes-reordered="true"] .mode-start-actions .fight-button[data-edit-key="moves"]::before { content:"⚙"; }
+.lobby-games[data-modes-reordered="true"] .mode-start-actions .fight-button[data-edit-key="profile"]::before { content:"✪"; }

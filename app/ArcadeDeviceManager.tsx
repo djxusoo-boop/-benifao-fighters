@@ -10,7 +10,7 @@ type InstallPromptEvent = Event & {
 
 type WakeLockHandle = { release: () => Promise<void>; released?: boolean };
 
-const BUILD_VERSION = "V2.34.3";
+const BUILD_VERSION = "V2.34.4";
 const BUILD_STORAGE_KEY = "hardcore-fighters-current-build";
 const BUILD_RELOAD_KEY = "hardcore-fighters-build-reload";
 

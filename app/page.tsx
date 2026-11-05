@@ -26,6 +26,7 @@ import { SUPER_MOVES } from "./super-moves";
 import { SUPER_ANIM, companionFrame, superFrame, superFramesFor } from "./super-anim";
 import LobbyEditor, { DEFAULT_LOBBY_DESIGN, type LobbyDesign } from "./LobbyEditor";
 import GameDiagnostics from "./GameDiagnostics";
+import { arrangedOrder } from "./lobby-order.mjs";
 
 type FighterId = "maletilla" | "vanessa" | "josevictor" | "cristian" | "cesaret" | "borja" | "bacora" | "bonviure" | "elchica" | "ogalla" | "xuso" | "bomba" | "rafeta" | "tonimassama" | "nova" | "estefy";
 type Phase = "select" | "intro" | "fight" | "ko" | "over" | "orbs" | "platform" | "coop" | "prison-slug" | "campaign-final";
@@ -134,6 +135,8 @@ const FIGHTERS: Record<FighterId, { name: string; title: string; specialOne: str
 
 // Rafeta is temporarily unavailable; keep his assets and definition for a later return.
 const FIGHTER_ORDER: FighterId[] = ["maletilla", "vanessa", "josevictor", "cristian", "borja", "bacora", "bonviure", "elchica", "ogalla", "xuso", "bomba", "tonimassama", "nova", "estefy"];
+const MODE_ORDER = ["arcade", "fight", "coop", "orbs", "central", "slug", "tournament", "training", "ranking", "moves", "profile"] as const;
+type LobbyModeId = typeof MODE_ORDER[number];
 const SHORT_SPECIALS: Record<FighterId, [string, string]> = {
   maletilla: ["CLORETILO", "SETAS"], vanessa: ["MICRO", "OREJAS"],
   josevictor: ["BOLSAS", "BILLETES"], cristian: ["VINILOS", "KRK 8"],
@@ -156,7 +159,7 @@ const STAGES = [
 
 const GAME_TITLE = "HARDCORE FIGHTERS";
 const GAME_EDITION = "WEB · ARCADE EDITION";
-const GAME_VERSION = "V2.34.3";
+const GAME_VERSION = "V2.34.4";
 
 const ROUND_SECONDS = 99;
 const SUPER_MAX = 100;
@@ -439,6 +442,8 @@ function Home() {
   const editInputRef = useRef<HTMLInputElement | null>(null);
   const [lobbyDesign, setLobbyDesign] = useState<LobbyDesign>(DEFAULT_LOBBY_DESIGN);
   const [lobbyDesignLoaded, setLobbyDesignLoaded] = useState(false);
+  const orderedFighters = useMemo(() => arrangedOrder(FIGHTER_ORDER, lobbyDesign.fighterOrder), [lobbyDesign.fighterOrder]);
+  const orderedModes = useMemo(() => arrangedOrder(MODE_ORDER, lobbyDesign.modeOrder), [lobbyDesign.modeOrder]);
   const [musicOn, setMusicOn] = useState(false);
   const [progress, setProgress] = useState<ArcadeProgress>({ fights: 0, adventures: 0, orbs: 0, bestCombo: 0 });
   const [campaignStep, setCampaignStep] = useState<CampaignStep>(0);
@@ -583,7 +588,20 @@ function Home() {
   const lobbyModeSubtitle = (id: string, label: string) => lobbyDesign.modeSubtitles[id]?.trim() || label;
   const lobbyLabel = (id: string, label: string) => lobbyDesign.labels[id]?.trim() || label;
   const customLobbyStyle = (key: keyof LobbyDesign) => lobbyDesign.styleOverrides?.[key] === true || lobbyDesign[key] !== DEFAULT_LOBBY_DESIGN[key];
-  const editAttrs = (group: LobbyEditGroup, key: string, label: string, value: string) => ({ "data-edit-group": group, "data-edit-key": key, "data-edit-label": label, "data-edit-value": value });
+  const placementAttrs = (group: string, key: string) => {
+    const placement = lobbyDesign.placements?.[`${group}:${key}`];
+    if (!placement || typeof placement !== "object") return {};
+    const number = (value: unknown, fallback: number, min: number, max: number) => {
+      const n = Number(value); return Number.isFinite(n) ? Math.max(min, Math.min(max, n)) : fallback;
+    };
+    const x = number(placement.x, 0, -300, 300), y = number(placement.y, 0, -2500, 2500);
+    let size = number(placement.size, 100, 60, 160) / 100;
+    const width = number(placement.width, 100, 60, 160) / 100;
+    if (group === "field" && (key === "heading" || key === "modesHeading")) size *= lobbyDesign.scale / 100;
+    if (group === "logo") size *= lobbyDesign.logoScale / 100;
+    return { "data-lobby-placement": "true", style: { "--place-x": `${x}%`, "--place-y": `${y}%`, "--place-scale-x": String(size * width), "--place-scale-y": String(size) } as CSSProperties };
+  };
+  const editAttrs = (group: LobbyEditGroup, key: string, label: string, value: string) => ({ "data-edit-group": group, "data-edit-key": key, "data-edit-label": label, "data-edit-value": value, ...placementAttrs(group, key) });
   const handleLobbyEditClick = (event: ReactMouseEvent<HTMLElement>) => {
     if (!lobbyEditorOpen || advancedEditorOpen) return;
     const target = event.target instanceof Element ? event.target : null;
@@ -628,7 +646,7 @@ function Home() {
   } as CSSProperties;
 
   // In 1P mode the rival can be chosen too; a mirror match falls back to the next fighter.
-  const opponent: FighterId = battleMode === "local" || localOpponent !== selected ? localOpponent : FIGHTER_ORDER[(FIGHTER_ORDER.indexOf(selected) + 1) % FIGHTER_ORDER.length];
+  const opponent: FighterId = battleMode === "local" || localOpponent !== selected ? localOpponent : orderedFighters[(orderedFighters.indexOf(selected) + 1) % orderedFighters.length];
   const framePair = `${selected}:${opponent}`;
   const fightReady = fightersReady && readyFramePair === framePair;
   // Scale the new fighters' approach spacing to their actual rendered width.
@@ -825,13 +843,13 @@ function Home() {
         setLobbyLocked(current => current.map((value, index) => index === slot ? action === "confirm" : value) as [boolean, boolean]);
       } else if (action === "move" && !lobbyLocked[slot]) {
         if (slot === 1) setBattleMode("local");
-        const cycle = (current: FighterId) => FIGHTER_ORDER[(FIGHTER_ORDER.indexOf(current) + direction + FIGHTER_ORDER.length) % FIGHTER_ORDER.length];
+        const cycle = (current: FighterId) => orderedFighters[(orderedFighters.indexOf(current) + direction + orderedFighters.length) % orderedFighters.length];
         (slot === 0 ? setSelected : setLocalOpponent)(cycle);
       }
     };
     window.addEventListener("arcade:lobby", handle);
     return () => window.removeEventListener("arcade:lobby", handle);
-  }, [arcadeTool, rankingOpen, lobbyLocked]);
+  }, [arcadeTool, rankingOpen, lobbyLocked, orderedFighters]);
 
   // As soon as a pad picks its fighter, jump to the game modes so ✕ again plays.
   const anyLobbyLocked = lobbyLocked[0] || lobbyLocked[1];
@@ -3126,16 +3144,16 @@ function Home() {
             </div>}
             <header className="lobby-heading">
               <div className="lobby-heading-copy">
-                <h1 data-edit-group="field" data-edit-key="heading" data-edit-label="Título principal" data-edit-value={lobbyDesign.heading} role={lobbyEditorOpen ? "button" : undefined} tabIndex={lobbyEditorOpen ? 0 : undefined}>{lobbyDesign.heading}</h1>
-                <span className="lobby-eyebrow">{FIGHTER_ORDER.length} <span data-edit-group="field" data-edit-key="eyebrow" data-edit-label="Texto bajo el título" data-edit-value={lobbyDesign.eyebrow} role={lobbyEditorOpen ? "button" : undefined} tabIndex={lobbyEditorOpen ? 0 : undefined}>{lobbyDesign.eyebrow}</span></span>
+                <h1 {...editAttrs("field", "heading", "Título principal", lobbyDesign.heading)} role={lobbyEditorOpen ? "button" : undefined} tabIndex={lobbyEditorOpen ? 0 : undefined}>{lobbyDesign.heading}</h1>
+                <span className="lobby-eyebrow">{FIGHTER_ORDER.length} <span {...editAttrs("field", "eyebrow", "Texto bajo el título", lobbyDesign.eyebrow)} role={lobbyEditorOpen ? "button" : undefined} tabIndex={lobbyEditorOpen ? 0 : undefined}>{lobbyDesign.eyebrow}</span></span>
               </div>
               <div className="lobby-prison-mark">
-                <Image className="prison-logo prison-logo-clean" src="/assets/new-fighters/prison-logo-clean.webp" width={1689} height={374} alt="PRISON" unoptimized priority />
-                <span data-edit-group="labels" data-edit-key="prisonTagline" data-edit-label="Frase bajo PRISON" data-edit-value={lobbyLabel("prisonTagline", "LUCHA · SUPERVIVENCIA · SIN LÍMITES")} role={lobbyEditorOpen ? "button" : undefined} tabIndex={lobbyEditorOpen ? 0 : undefined}>{lobbyLabel("prisonTagline", "LUCHA · SUPERVIVENCIA · SIN LÍMITES")}</span>
+                <Image {...placementAttrs("logo", "prison")} className="prison-logo prison-logo-clean" src="/assets/new-fighters/prison-logo-clean.webp" width={1689} height={374} alt="PRISON" unoptimized priority />
+                <span {...editAttrs("labels", "prisonTagline", "Frase bajo PRISON", lobbyLabel("prisonTagline", "LUCHA · SUPERVIVENCIA · SIN LÍMITES"))} role={lobbyEditorOpen ? "button" : undefined} tabIndex={lobbyEditorOpen ? 0 : undefined}>{lobbyLabel("prisonTagline", "LUCHA · SUPERVIVENCIA · SIN LÍMITES")}</span>
               </div>
             </header>
-            <div className="lobby-roster">
-              <div className="roster-heading"><span data-edit-group="labels" data-edit-key="rosterHeading" data-edit-label="Título de personajes" data-edit-value={lobbyLabel("rosterHeading", "SELECCIONA TU PERSONAJE")} role={lobbyEditorOpen ? "button" : undefined} tabIndex={lobbyEditorOpen ? 0 : undefined}>{lobbyLabel("rosterHeading", "SELECCIONA TU PERSONAJE")}</span><b data-edit-group="labels" data-edit-key="rosterHint" data-edit-label="Frase de selección" data-edit-value={lobbyLabel("rosterHint", "P1 / P2 · ELIGE EN LAS TARJETAS")} role={lobbyEditorOpen ? "button" : undefined} tabIndex={lobbyEditorOpen ? 0 : undefined}>{lobbyLabel("rosterHint", "P1 / P2 · ELIGE EN LAS TARJETAS")}</b></div>
+            <div className="lobby-roster" {...placementAttrs("section", "roster")}>
+              <div className="roster-heading"><span {...editAttrs("labels", "rosterHeading", "Título de personajes", lobbyLabel("rosterHeading", "SELECCIONA TU PERSONAJE"))} role={lobbyEditorOpen ? "button" : undefined} tabIndex={lobbyEditorOpen ? 0 : undefined}>{lobbyLabel("rosterHeading", "SELECCIONA TU PERSONAJE")}</span><b {...editAttrs("labels", "rosterHint", "Frase de selección", lobbyLabel("rosterHint", "P1 / P2 · ELIGE EN LAS TARJETAS"))} role={lobbyEditorOpen ? "button" : undefined} tabIndex={lobbyEditorOpen ? 0 : undefined}>{lobbyLabel("rosterHint", "P1 / P2 · ELIGE EN LAS TARJETAS")}</b></div>
               <div className="lobby-slots" aria-label="Jugador que elige con la pantalla">
                 <button type="button" aria-pressed={touchSlot === 0} onClick={() => setTouchSlot(0)}>ELEGIR P1 · {lobbyFighter(selected).name} {lobbyLocked[0] ? "✓ LISTO" : "ELIGIENDO"}</button>
                 {battleMode === "local"
@@ -3147,8 +3165,8 @@ function Home() {
                 }}>🎲 RIVAL ALEATORIO</button>
               </div>
               <div className="character-cards" role="group" aria-label="Selecciona en las imágenes">
-                {FIGHTER_ORDER.map(fighter => (
-                  <button type="button" key={fighter} data-fighter={fighter} data-edit-group="fighterNames" data-edit-key={fighter} data-edit-label={`Nombre de ${FIGHTERS[fighter].name}`} data-edit-value={lobbyFighter(fighter).name}
+                {orderedFighters.map(fighter => (
+                  <button {...placementAttrs("fighterNames", fighter)} type="button" key={fighter} data-fighter={fighter} data-edit-group="fighterNames" data-edit-key={fighter} data-edit-label={`Nombre de ${FIGHTERS[fighter].name}`} data-edit-value={lobbyFighter(fighter).name}
                     className={`character-card ${fighter} ${selected === fighter ? "selected-p1" : ""} ${opponent === fighter ? "selected-p2" : ""}`}
                     aria-label={`Elegir ${lobbyFighter(fighter).name} para P${touchSlot + 1}`}
                     aria-pressed={(touchSlot === 0 ? selected : opponent) === fighter}
@@ -3216,20 +3234,22 @@ function Home() {
               );
             })()}
             <LobbyJump />
-            <div className="lobby-games">
+            <div className="lobby-games" data-modes-reordered={orderedModes.some((id, index) => id !== MODE_ORDER[index]) || undefined} {...placementAttrs("section", "games")}>
               <h2 {...editAttrs("field", "modesHeading", "Título de los modos", lobbyDesign.modesHeading)} role={lobbyEditorOpen ? "button" : undefined} tabIndex={lobbyEditorOpen ? 0 : undefined}>{lobbyDesign.modesHeading} <small {...editAttrs("field", "modesSubtitle", "Frase de los modos", lobbyDesign.modesSubtitle)} role={lobbyEditorOpen ? "button" : undefined} tabIndex={lobbyEditorOpen ? 0 : undefined}>{lobbyDesign.modesSubtitle}</small></h2>
               <div className="mode-start-actions">
-                <button {...editAttrs("modeNames", "arcade", "Nombre de Modo Arcade", lobbyMode("arcade", "MODO ARCADE"))} className="fight-button arcade-ladder-button" type="button" onClick={startArcade} disabled={!fightersReady && !lobbyEditorOpen}>{lobbyMode("arcade", "MODO ARCADE")} <span>♜</span><small {...editAttrs("modeSubtitles", "arcade", "Frase de Modo Arcade", lobbyModeSubtitle("arcade", "6 RIVALES SEGUIDOS · TU FINAL"))} className="mode-sub">{lobbyModeSubtitle("arcade", "6 RIVALES SEGUIDOS · TU FINAL")}</small></button>
-                <button {...editAttrs("modeNames", "fight", "Nombre de Modo Lucha", lobbyMode("fight", "MODO LUCHA"))} className="fight-button" type="button" onClick={startRound} disabled={!fightReady && !lobbyEditorOpen} data-gamepad-default="true">{lobbyMode("fight", "MODO LUCHA")} <span>↗</span><small {...editAttrs("modeSubtitles", "fight", "Frase de Modo Lucha", lobbyModeSubtitle("fight", "PARTIDAS RÁPIDAS CONTRA LA IA O UN AMIGO"))} className="mode-sub">{lobbyModeSubtitle("fight", "PARTIDAS RÁPIDAS CONTRA LA IA O UN AMIGO")}</small></button>
-                <button {...editAttrs("modeNames", "coop", "Nombre de Aventura Cooperativa", lobbyMode("coop", "AVENTURA COOPERATIVA"))} className="fight-button coop-mode-button" type="button" onClick={startCoopMode} disabled={!fightersReady && !lobbyEditorOpen}>{lobbyMode("coop", "AVENTURA COOPERATIVA")} <span>∞</span><small {...editAttrs("modeSubtitles", "coop", "Frase de Aventura Cooperativa", lobbyModeSubtitle("coop", "HASTA 2 JUGADORES"))} className="mode-sub">{lobbyModeSubtitle("coop", "HASTA 2 JUGADORES")}</small></button>
-                <button {...editAttrs("modeNames", "orbs", "Nombre de Rompeobjetos", lobbyMode("orbs", "MODO ROMPEOBJETOS"))} className="fight-button orb-mode-button" type="button" onClick={startOrbMode} disabled={!fightersReady && !lobbyEditorOpen}>{lobbyMode("orbs", "MODO ROMPEOBJETOS")} <span>◆</span><small {...editAttrs("modeSubtitles", "orbs", "Frase de Rompeobjetos", lobbyModeSubtitle("orbs", "DESTRUYE Y CONSIGUE PUNTOS"))} className="mode-sub">{lobbyModeSubtitle("orbs", "DESTRUYE Y CONSIGUE PUNTOS")}</small></button>
-                <button {...editAttrs("modeNames", "central", "Nombre de Aventura Central", lobbyMode("central", "AVENTURA CENTRAL"))} className="fight-button platform-mode-button" type="button" onClick={startPlatformMode} disabled={!fightersReady && !lobbyEditorOpen}>{lobbyMode("central", "AVENTURA CENTRAL")} <span>★</span><small {...editAttrs("modeSubtitles", "central", "Frase de Aventura Central", lobbyModeSubtitle("central", "HISTORIA PRINCIPAL"))} className="mode-sub">{lobbyModeSubtitle("central", "HISTORIA PRINCIPAL")}</small></button>
-                <button {...editAttrs("modeNames", "slug", "Nombre de Prison Slug", lobbyMode("slug", "PRISON SLUG"))} className="fight-button prison-slug-mode-button" type="button" onClick={startPrisonSlugMode} disabled={!fightersReady && !lobbyEditorOpen}>{lobbyMode("slug", "PRISON SLUG")} <span>▶</span><small {...editAttrs("modeSubtitles", "slug", "Frase de Prison Slug", lobbyModeSubtitle("slug", "SUPERVIVENCIA EXTREMA"))} className="mode-sub">{lobbyModeSubtitle("slug", "SUPERVIVENCIA EXTREMA")}</small></button>
-                <button {...editAttrs("modeNames", "tournament", "Nombre del torneo", lobbyMode("tournament", "TORNEO DE LA RIBERA"))} className="fight-button campaign-mode-button" type="button" onClick={startCampaign} disabled={!fightReady && !lobbyEditorOpen}>{lobbyMode("tournament", "TORNEO DE LA RIBERA")} <span>♛</span><small {...editAttrs("modeSubtitles", "tournament", "Frase del torneo", lobbyModeSubtitle("tournament", "COMPITE Y DEMUESTRA TU VALOR"))} className="mode-sub">{lobbyModeSubtitle("tournament", "COMPITE Y DEMUESTRA TU VALOR")}</small></button>
-                <button {...editAttrs("modeNames", "training", "Nombre de Entrenamiento", lobbyMode("training", "ENTRENAMIENTO"))} className="fight-button training-menu-button" type="button" onClick={startTraining} disabled={!fightReady && !lobbyEditorOpen}>{lobbyMode("training", "ENTRENAMIENTO")} <span>∞</span><small {...editAttrs("modeSubtitles", "training", "Frase de Entrenamiento", lobbyModeSubtitle("training", "PRACTICA TUS MOVIMIENTOS"))} className="mode-sub">{lobbyModeSubtitle("training", "PRACTICA TUS MOVIMIENTOS")}</small></button>
-                <button {...editAttrs("modeNames", "ranking", "Nombre del ranking", lobbyMode("ranking", "RANKING MUNDIAL"))} className="fight-button ranking-menu-button" type="button" onClick={() => setRankingOpen(true)}>{lobbyMode("ranking", "RANKING MUNDIAL")}<small {...editAttrs("modeSubtitles", "ranking", "Frase del ranking", lobbyModeSubtitle("ranking", "ESCALA POSICIONES EN LÍNEA"))} className="mode-sub">{lobbyModeSubtitle("ranking", "ESCALA POSICIONES EN LÍNEA")}</small></button>
-                <button {...editAttrs("modeNames", "moves", "Nombre de Movimientos", lobbyMode("moves", "MOVIMIENTOS"))} className="fight-button arcade-tool-button" type="button" onClick={() => setArcadeTool("moves")}>{lobbyMode("moves", "MOVIMIENTOS")}<small {...editAttrs("modeSubtitles", "moves", "Frase de Movimientos", lobbyModeSubtitle("moves", "LISTA COMPLETA DE COMBOS"))} className="mode-sub">{lobbyModeSubtitle("moves", "LISTA COMPLETA DE COMBOS")}</small></button>
-                <button {...editAttrs("modeNames", "profile", "Nombre de Perfil y premios", lobbyMode("profile", "PERFIL Y PREMIOS"))} className="fight-button arcade-tool-button" type="button" onClick={() => setArcadeTool("profile")}>{lobbyMode("profile", "PERFIL Y PREMIOS")}<small {...editAttrs("modeSubtitles", "profile", "Frase de Perfil y premios", lobbyModeSubtitle("profile", "LOGROS Y RECOMPENSAS"))} className="mode-sub">{lobbyModeSubtitle("profile", "LOGROS Y RECOMPENSAS")}</small></button>
+                {[
+                  <button key="arcade" {...editAttrs("modeNames", "arcade", "Nombre de Modo Arcade", lobbyMode("arcade", "MODO ARCADE"))} className="fight-button arcade-ladder-button" type="button" onClick={startArcade} disabled={!fightersReady && !lobbyEditorOpen}>{lobbyMode("arcade", "MODO ARCADE")} <span>♜</span><small {...editAttrs("modeSubtitles", "arcade", "Frase de Modo Arcade", lobbyModeSubtitle("arcade", "6 RIVALES SEGUIDOS · TU FINAL"))} className="mode-sub">{lobbyModeSubtitle("arcade", "6 RIVALES SEGUIDOS · TU FINAL")}</small></button>,
+                  <button key="fight" {...editAttrs("modeNames", "fight", "Nombre de Modo Lucha", lobbyMode("fight", "MODO LUCHA"))} className="fight-button" type="button" onClick={startRound} disabled={!fightReady && !lobbyEditorOpen} data-gamepad-default="true">{lobbyMode("fight", "MODO LUCHA")} <span>↗</span><small {...editAttrs("modeSubtitles", "fight", "Frase de Modo Lucha", lobbyModeSubtitle("fight", "PARTIDAS RÁPIDAS CONTRA LA IA O UN AMIGO"))} className="mode-sub">{lobbyModeSubtitle("fight", "PARTIDAS RÁPIDAS CONTRA LA IA O UN AMIGO")}</small></button>,
+                  <button key="coop" {...editAttrs("modeNames", "coop", "Nombre de Aventura Cooperativa", lobbyMode("coop", "AVENTURA COOPERATIVA"))} className="fight-button coop-mode-button" type="button" onClick={startCoopMode} disabled={!fightersReady && !lobbyEditorOpen}>{lobbyMode("coop", "AVENTURA COOPERATIVA")} <span>∞</span><small {...editAttrs("modeSubtitles", "coop", "Frase de Aventura Cooperativa", lobbyModeSubtitle("coop", "HASTA 2 JUGADORES"))} className="mode-sub">{lobbyModeSubtitle("coop", "HASTA 2 JUGADORES")}</small></button>,
+                  <button key="orbs" {...editAttrs("modeNames", "orbs", "Nombre de Rompeobjetos", lobbyMode("orbs", "MODO ROMPEOBJETOS"))} className="fight-button orb-mode-button" type="button" onClick={startOrbMode} disabled={!fightersReady && !lobbyEditorOpen}>{lobbyMode("orbs", "MODO ROMPEOBJETOS")} <span>◆</span><small {...editAttrs("modeSubtitles", "orbs", "Frase de Rompeobjetos", lobbyModeSubtitle("orbs", "DESTRUYE Y CONSIGUE PUNTOS"))} className="mode-sub">{lobbyModeSubtitle("orbs", "DESTRUYE Y CONSIGUE PUNTOS")}</small></button>,
+                  <button key="central" {...editAttrs("modeNames", "central", "Nombre de Aventura Central", lobbyMode("central", "AVENTURA CENTRAL"))} className="fight-button platform-mode-button" type="button" onClick={startPlatformMode} disabled={!fightersReady && !lobbyEditorOpen}>{lobbyMode("central", "AVENTURA CENTRAL")} <span>★</span><small {...editAttrs("modeSubtitles", "central", "Frase de Aventura Central", lobbyModeSubtitle("central", "HISTORIA PRINCIPAL"))} className="mode-sub">{lobbyModeSubtitle("central", "HISTORIA PRINCIPAL")}</small></button>,
+                  <button key="slug" {...editAttrs("modeNames", "slug", "Nombre de Prison Slug", lobbyMode("slug", "PRISON SLUG"))} className="fight-button prison-slug-mode-button" type="button" onClick={startPrisonSlugMode} disabled={!fightersReady && !lobbyEditorOpen}>{lobbyMode("slug", "PRISON SLUG")} <span>▶</span><small {...editAttrs("modeSubtitles", "slug", "Frase de Prison Slug", lobbyModeSubtitle("slug", "SUPERVIVENCIA EXTREMA"))} className="mode-sub">{lobbyModeSubtitle("slug", "SUPERVIVENCIA EXTREMA")}</small></button>,
+                  <button key="tournament" {...editAttrs("modeNames", "tournament", "Nombre del torneo", lobbyMode("tournament", "TORNEO DE LA RIBERA"))} className="fight-button campaign-mode-button" type="button" onClick={startCampaign} disabled={!fightReady && !lobbyEditorOpen}>{lobbyMode("tournament", "TORNEO DE LA RIBERA")} <span>♛</span><small {...editAttrs("modeSubtitles", "tournament", "Frase del torneo", lobbyModeSubtitle("tournament", "COMPITE Y DEMUESTRA TU VALOR"))} className="mode-sub">{lobbyModeSubtitle("tournament", "COMPITE Y DEMUESTRA TU VALOR")}</small></button>,
+                  <button key="training" {...editAttrs("modeNames", "training", "Nombre de Entrenamiento", lobbyMode("training", "ENTRENAMIENTO"))} className="fight-button training-menu-button" type="button" onClick={startTraining} disabled={!fightReady && !lobbyEditorOpen}>{lobbyMode("training", "ENTRENAMIENTO")} <span>∞</span><small {...editAttrs("modeSubtitles", "training", "Frase de Entrenamiento", lobbyModeSubtitle("training", "PRACTICA TUS MOVIMIENTOS"))} className="mode-sub">{lobbyModeSubtitle("training", "PRACTICA TUS MOVIMIENTOS")}</small></button>,
+                  <button key="ranking" {...editAttrs("modeNames", "ranking", "Nombre del ranking", lobbyMode("ranking", "RANKING MUNDIAL"))} className="fight-button ranking-menu-button" type="button" onClick={() => setRankingOpen(true)}>{lobbyMode("ranking", "RANKING MUNDIAL")}<small {...editAttrs("modeSubtitles", "ranking", "Frase del ranking", lobbyModeSubtitle("ranking", "ESCALA POSICIONES EN LÍNEA"))} className="mode-sub">{lobbyModeSubtitle("ranking", "ESCALA POSICIONES EN LÍNEA")}</small></button>,
+                  <button key="moves" {...editAttrs("modeNames", "moves", "Nombre de Movimientos", lobbyMode("moves", "MOVIMIENTOS"))} className="fight-button arcade-tool-button" type="button" onClick={() => setArcadeTool("moves")}>{lobbyMode("moves", "MOVIMIENTOS")}<small {...editAttrs("modeSubtitles", "moves", "Frase de Movimientos", lobbyModeSubtitle("moves", "LISTA COMPLETA DE COMBOS"))} className="mode-sub">{lobbyModeSubtitle("moves", "LISTA COMPLETA DE COMBOS")}</small></button>,
+                  <button key="profile" {...editAttrs("modeNames", "profile", "Nombre de Perfil y premios", lobbyMode("profile", "PERFIL Y PREMIOS"))} className="fight-button arcade-tool-button" type="button" onClick={() => setArcadeTool("profile")}>{lobbyMode("profile", "PERFIL Y PREMIOS")}<small {...editAttrs("modeSubtitles", "profile", "Frase de Perfil y premios", lobbyModeSubtitle("profile", "LOGROS Y RECOMPENSAS"))} className="mode-sub">{lobbyModeSubtitle("profile", "LOGROS Y RECOMPENSAS")}</small></button>,
+                ].sort((a, b) => orderedModes.indexOf(a.key as LobbyModeId) - orderedModes.indexOf(b.key as LobbyModeId))}
               </div>
               <div className="match-settings-heading"><span>⚙</span><div><b {...editAttrs("labels", "settings", "Título de configuración", lobbyLabel("settings", "CONFIGURACIÓN DE PARTIDA"))} role={lobbyEditorOpen ? "button" : undefined} tabIndex={lobbyEditorOpen ? 0 : undefined}>{lobbyLabel("settings", "CONFIGURACIÓN DE PARTIDA")}</b><small {...editAttrs("labels", "settingsSub", "Frase de configuración", lobbyLabel("settingsSub", "AJUSTA TU COMBATE"))} role={lobbyEditorOpen ? "button" : undefined} tabIndex={lobbyEditorOpen ? 0 : undefined}>{lobbyLabel("settingsSub", "AJUSTA TU COMBATE")}</small></div></div>
               <button {...editAttrs("labels", "controlSize", "Botón de tamaño", lobbyLabel("controlSize", "TAMAÑO DE BOTONES"))} className="control-size-button" type="button" onClick={() => setArcadeTool("controls")}><span>▣</span>{lobbyLabel("controlSize", "TAMAÑO DE BOTONES")}</button>
