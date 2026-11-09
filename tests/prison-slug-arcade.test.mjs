@@ -33,3 +33,14 @@ test("Prison Slug has original arcade mission pacing feedback", async () => {
   assert.match(html, /id="rushReadout"/, "the player needs an on-screen RUSH readout");
   assert.match(css, /\.rush-readout\.hot/, "an active RUSH chain should be visibly distinct");
 });
+
+test("Prison Slug treats a long touch as game input, never selected text", async () => {
+  const [game, css] = await Promise.all([readFile(gameUrl, "utf8"), readFile(cssUrl, "utf8")]);
+
+  assert.match(css, /\.app-shell, \.app-shell \* \{[\s\S]*?-webkit-user-select: none;[\s\S]*?user-select: none;[\s\S]*?-webkit-touch-callout: none;/,
+    "the game shell should opt out of iOS text selection and callouts");
+  assert.match(game, /document\.addEventListener\("selectstart", \(event\) => \{\s*if \(state\?\.status === "playing"\) event\.preventDefault\(\);/,
+    "a gameplay hold must cancel browser text selection");
+  assert.match(game, /document\.addEventListener\("dragstart", \(event\) => \{\s*if \(state\?\.status === "playing"\) event\.preventDefault\(\);/,
+    "a gameplay hold must not begin a drag gesture");
+});

@@ -1705,6 +1705,14 @@ document.querySelectorAll("[data-key]").forEach((button) => {
 window.addEventListener("pointerup", () => { input.left = false; input.right = false; input.crouch = false; });
 window.addEventListener("blur", releaseInputs);
 document.addEventListener("visibilitychange", () => { if (document.hidden) releaseInputs(); });
+// Mobile Safari can start text selection after a long press. Prison Slug has
+// no editable text, so while it is open that gesture is always a control hold.
+document.addEventListener("selectstart", (event) => {
+  if (state?.status === "playing") event.preventDefault();
+});
+document.addEventListener("dragstart", (event) => {
+  if (state?.status === "playing") event.preventDefault();
+});
 ui.start.addEventListener("click", beginMission);
 ui.resume.addEventListener("click", () => setPaused(false));
 ui.quit.addEventListener("click", exitToLobby);

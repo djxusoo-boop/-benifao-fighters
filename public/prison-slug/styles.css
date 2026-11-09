@@ -10,6 +10,15 @@
 
 * { box-sizing: border-box; }
 
+/* Long presses are gameplay input here, never text-selection input. Safari
+   otherwise paints the whole page blue while a player keeps fire pressed. */
+.app-shell, .app-shell * {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
 body {
   min-width: 320px;
   min-height: 100vh;
@@ -23,7 +32,7 @@ body {
   letter-spacing: .035em;
 }
 
-button { font: inherit; color: inherit; cursor: pointer; }
+button { font: inherit; color: inherit; cursor: pointer; -webkit-user-drag: none; }
 button:focus-visible { outline: 3px solid var(--cyan); outline-offset: 3px; }
 
 .app-shell { width: min(1440px, 100%); min-height: 100vh; margin: 0 auto; padding: 0 clamp(12px, 3vw, 42px) 28px; }
