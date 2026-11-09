@@ -95,6 +95,7 @@ const ui = {
   health: document.querySelector("#healthMeter"),
   lives: document.querySelector("#livesReadout"),
   weapon: document.querySelector("#weaponReadout"),
+  rush: document.querySelector("#rushReadout"),
   energy: document.querySelector("#energyMeter"),
   ability: document.querySelector("#abilityReadout"),
   score: document.querySelector("#scoreReadout"),
@@ -305,7 +306,10 @@ let selectedId = characters.some((hero) => hero.id === requestedFighter) ? reque
 let state = null;
 let soundOn = false;
 let audioContext = null;
-const input = { left: false, right: false, jump: false, crouch: false, fire: false, special: false, activate: false };
+// `fire` records a tap; `fireHeld` keeps firing at every weapon's cadence.
+// Keeping them separate means a very quick touch tap cannot be swallowed by
+// the pointer-up event in the same frame.
+const input = { left: false, right: false, jump: false, crouch: false, fire: false, fireHeld: false, special: false, activate: false };
 const pressed = new Set();
 let lastFrame = 0;
 
@@ -392,6 +396,8 @@ function initialState(hero) {
     finalBossType: null,
     spawnClock: 0,
     waves: 0,
+    sector: 1,
+    rush: { chain: 0, timer: 0, multiplier: 1, best: 0 },
   };
 }
 
@@ -405,7 +411,7 @@ function beginMission() {
   ui.ability.textContent = hero.ability;
   ui.objective.textContent = "RUMBO A LA FURGONETA";
   ui.pause.classList.add("hidden");
-  banner("MISIÓN 01 · RECUPERA LA FURGONETA", "#f6f1de", 2200);
+  banner("MISIÓN 01 · SECTOR 01 · RECUPERA LA FURGONETA", "#f6f1de", 2200);
   lastFrame = performance.now();
   requestAnimationFrame(loop);
   blip(180, .11);
@@ -560,6 +566,35 @@ function detonate(x, y, damage, radius, color) {
   state.props.forEach((prop) => {
     if (prop.hp > 0 && distance(prop.x + prop.w / 2, x) <= radius) prop.hp -= Math.round(damage * .75);
   });
+}
+
+function rushMultiplier() {
+  if (!state?.rush) return 1;
+  return Math.min(5, 1 + Math.floor(Math.max(0, state.rush.chain - 1) / 3));
+}
+
+function registerDefeat(enemy) {
+  const rush = state.rush;
+  rush.chain = rush.timer > 0 ? rush.chain + 1 : 1;
+  rush.timer = 1.65;
+  rush.best = Math.max(rush.best, rush.chain);
+  rush.multiplier = rushMultiplier();
+  const isBoss = ["sprayboss", "juiceboss", "rockboss", "birdboss", "wolfboss", "drumboss"].includes(enemy.type);
+  const baseScore = isBoss ? 1500 : enemy.type === "tanklet" ? 650 : enemy.type === "brute" ? 250 : enemy.type === "speaker" ? 180 : 100;
+  state.score += baseScore * rush.multiplier;
+  if (rush.chain > 1 && (rush.chain === 2 || rush.chain % 3 === 0)) {
+    banner(`RUSH ×${rush.multiplier} · ${rush.chain} BAJAS`, rush.multiplier > 1 ? "#ffb449" : "#7dff38", 700);
+  }
+}
+
+function updateSector() {
+  const x = state.player.x;
+  const nextSector = x < 1450 ? 1 : x < 2850 ? 2 : x < 4300 ? 3 : x < 5300 ? 4 : 5;
+  if (nextSector > state.sector) {
+    state.sector = nextSector;
+    banner(`SECTOR ${String(nextSector).padStart(2, "0")} · RUTA ASEGURADA`, "#4defff", 1250);
+    state.score += 250;
+  }
 }
 
 function special() {
@@ -736,9 +771,11 @@ function update(dt) {
   state.hitFlash = Math.max(0, state.hitFlash - dt);
   state.van.damageFlash = Math.max(0, state.van.damageFlash - dt);
   state.van.beamCooldown = Math.max(0, state.van.beamCooldown - dt);
+  state.rush.timer = Math.max(0, state.rush.timer - dt);
+  if (state.rush.timer === 0 && state.rush.chain) { state.rush.chain = 0; state.rush.multiplier = 1; }
   state.props.forEach((prop) => { prop.hit = Math.max(0, prop.hit - dt); });
   const player = state.player;
-  if (input.fire) { fire(); input.fire = false; }
+  if (input.fire || input.fireHeld) { fire(); input.fire = false; }
   if (input.special) { special(); input.special = false; }
   if (input.activate) { activateVan(); input.activate = false; }
   player.fireCooldown = Math.max(0, player.fireCooldown - dt);
@@ -775,6 +812,7 @@ function update(dt) {
     state.checkpoint = Math.max(...state.checkpoints.filter((mark) => player.x >= mark));
     banner("PUNTO DE CONTROL", "#4defff", 900);
   }
+  updateSector();
   state.camera += ((clamp(player.x - W * .34, 0, WORLD_END - W)) - state.camera) * Math.min(1, dt * 3.7);
   }
 
@@ -904,8 +942,17 @@ function updateEnemies(dt) {
     if (enemy.type === "grenadier" && gap < 250) enemy.x -= enemy.dir * 40 * dt;
     enemy.y = terrainAt(enemy.x) - enemy.h;
     enemy.shot -= dt;
+    const isBoss = ["sprayboss", "juiceboss", "rockboss", "birdboss", "wolfboss", "drumboss"].includes(enemy.type);
+    if (isBoss && !enemy.enraged && enemy.hp <= enemy.maxHp * .5) {
+      enemy.enraged = true;
+      enemy.shot = Math.min(enemy.shot, .25);
+      banner(`¡${BOSS_SPRITE_FRAMES[enemy.type]?.label ?? "JEFE"} EN FURIA!`, "#ff7048", 1050);
+      state.cameraShake = Math.max(state.cameraShake, 12);
+      spark(enemy.x + enemy.w / 2, enemy.y + enemy.h * .32, "#ff7048", 18);
+    }
     if (gap < 530 && enemy.shot <= 0) {
-      enemy.shot = enemy.type === "sprayboss" ? 1.15 : enemy.type === "rockboss" ? 1.65 : enemy.type === "birdboss" ? 1.35 : enemy.type === "wolfboss" ? 1.08 : enemy.type === "drumboss" ? .9 : enemy.type === "tanklet" ? 2.1 : enemy.type === "turret" ? 1.15 : enemy.type === "speaker" ? .68 : enemy.type === "grenadier" ? 1.7 : 1.4 + Math.random() * .8;
+      const cooldown = enemy.type === "sprayboss" ? 1.15 : enemy.type === "rockboss" ? 1.65 : enemy.type === "birdboss" ? 1.35 : enemy.type === "wolfboss" ? 1.08 : enemy.type === "drumboss" ? .9 : enemy.type === "tanklet" ? 2.1 : enemy.type === "turret" ? 1.15 : enemy.type === "speaker" ? .68 : enemy.type === "grenadier" ? 1.7 : 1.4 + Math.random() * .8;
+      enemy.shot = enemy.enraged ? cooldown * .68 : cooldown;
       if (enemy.type === "sprayboss") {
         for (let sprayIndex = 0; sprayIndex < 5; sprayIndex += 1) {
           state.bullets.push({ x: enemy.x + (enemy.dir < 0 ? -12 : enemy.w + 12), y: enemy.y + 72 + (sprayIndex - 2) * 12, vx: enemy.dir * (290 + sprayIndex * 22), vy: (sprayIndex - 2) * 26, w: 24, h: 18, life: 3, friendly: false, spray: true, color: sprayIndex % 2 ? "#4defff" : "#ff9a31" });
@@ -950,7 +997,7 @@ function updateEnemies(dt) {
     if (enemy.hp <= 0) {
       if (BOSS_SPRITE_FRAMES[enemy.type]) state.deathSprites.push({ ...enemy, life: .72 });
       const isBoss = ["sprayboss", "juiceboss", "rockboss", "birdboss", "wolfboss", "drumboss"].includes(enemy.type);
-      state.score += isBoss ? 1500 : enemy.type === "tanklet" ? 650 : enemy.type === "brute" ? 250 : enemy.type === "speaker" ? 180 : 100;
+      registerDefeat(enemy);
       player.energy = clamp(player.energy + (isBoss ? 30 : enemy.type === "tanklet" ? 22 : enemy.type === "brute" ? 18 : 10), 0, 100);
       spark(enemy.x + enemy.w / 2, enemy.y + enemy.h / 2, enemy.type === "speaker" ? "#4defff" : "#ffb449", 20);
       smoke(enemy.x + enemy.w / 2, enemy.y + enemy.h * .45, enemy.type === "tanklet" ? 14 : 5, enemy.type === "tanklet" ? "#7f8e7f" : "#8e978e");
@@ -998,6 +1045,9 @@ function updateHud() {
   const weapon = WEAPONS[player.weapon] ?? WEAPONS.pistol;
   ui.weapon.textContent = `${weapon.label} · ${player.weapon === "pistol" ? "∞" : Math.max(0, player.ammo)}`;
   ui.weapon.style.color = weapon.color;
+  const rushActive = state.rush.chain > 1 && state.rush.timer > 0;
+  ui.rush.textContent = rushActive ? `RUSH ×${state.rush.multiplier} · ${state.rush.chain} BAJAS` : "RUSH · LISTO";
+  ui.rush.classList.toggle("hot", rushActive && state.rush.multiplier > 1);
   ui.score.textContent = formatScore(state.score);
   if (state.van.boarded && !state.van.charged) ui.objective.textContent = `CONDUCE ${Math.min(100, Math.floor(state.van.charge / 11 * 100)).toString().padStart(2, "0")}% · VAN ${Math.ceil(state.van.hp)}%`;
   else if (state.van.active && !state.van.charged) ui.objective.textContent = `CARGA SONORA ${Math.min(100, Math.floor(state.van.charge / 11 * 100)).toString().padStart(2, "0")}%`;
@@ -1590,9 +1640,17 @@ function blip(frequency, duration) {
   } catch { /* audio is optional */ }
 }
 
-function setInput(key, value) { if (key in input) input[key] = value; }
+function setInput(key, value) {
+  if (!(key in input)) return;
+  if (key === "fire") {
+    if (value) { input.fire = true; input.fireHeld = true; }
+    else input.fireHeld = false;
+    return;
+  }
+  input[key] = value;
+}
 function releaseInputs() {
-  input.left = false; input.right = false; input.crouch = false; input.jump = false; input.fire = false; input.special = false; input.activate = false;
+  input.left = false; input.right = false; input.crouch = false; input.jump = false; input.fire = false; input.fireHeld = false; input.special = false; input.activate = false;
   pressed.clear();
 }
 
@@ -1627,7 +1685,7 @@ if (joystick) {
   joystick.addEventListener("lostpointercapture", resetJoystick);
 }
 const keyMap = { a: "left", arrowleft: "left", d: "right", arrowright: "right", s: "crouch", c: "crouch", arrowdown: "crouch", w: "jump", arrowup: "jump", " ": "jump", j: "fire", x: "fire", k: "special", z: "special", f: "activate" };
-const heldActions = new Set(["left", "right", "crouch"]);
+const heldActions = new Set(["left", "right", "crouch", "fire"]);
 window.addEventListener("keydown", (event) => {
   const key = event.key.toLowerCase();
   if (key === "p" && state) { setPaused(state.status === "playing"); return; }
