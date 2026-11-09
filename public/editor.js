@@ -102,6 +102,31 @@
   let arranging = false;
   let selection = null;
   let pointer = null;
+  let editorSessionPin = "";
+  let history = [];
+  let historyIndex = -1;
+  function syncHistory() {
+    $("undo").disabled = historyIndex <= 0;
+    $("redo").disabled = historyIndex < 0 || historyIndex >= history.length - 1;
+  }
+  function resetHistory() {
+    history = [JSON.stringify(draft)]; historyIndex = 0; syncHistory();
+  }
+  function remember() {
+    if (pointer) { pointer.changed = true; return; }
+    const next = JSON.stringify(draft);
+    if (history[historyIndex] === next) return;
+    history.splice(historyIndex + 1);
+    history.push(next);
+    if (history.length > 36) history.shift();
+    historyIndex = history.length - 1;
+    syncHistory();
+  }
+  function restoreHistory(index) {
+    if (index < 0 || index >= history.length) return;
+    try { draft = normalize(JSON.parse(history[index])); historyIndex = index; updatePreview(); refreshSelection(); syncHistory(); status("Cambio recuperado. Guarda cuando estés conforme."); }
+    catch { status("No se ha podido recuperar ese cambio.", true); }
+  }
   function readSaved() {
     try {
       const stored = localStorage.getItem(storageKey);
@@ -250,6 +275,7 @@
     const id = placementId(selection);
     draft.placements[id] = normalizePlacement({ ...basePlacement(), ...draft.placements[id], ...changes });
     applyPlacement(selection); refreshSelection();
+    remember();
     status("Cambio preparado. Pulsa «Guardar cambios» para aplicarlo.");
   }
   function setTextStyle(changes) {
@@ -260,6 +286,7 @@
     if (JSON.stringify(next) === JSON.stringify(defaultStyle)) delete draft.textStyles[id];
     else draft.textStyles[id] = next;
     applyTextStyle(selection); refreshSelection();
+    remember();
     status("Estilo preparado. Pulsa «Guardar cambios» para aplicarlo.");
   }
   function moveCard(group, key, target) {
@@ -269,6 +296,7 @@
     if (from < 0 || to < 0 || from === to) return;
     order.splice(from, 1); order.splice(to, 0, key); draft[orderKey] = order;
     updatePreview();
+    remember();
     status("Orden preparado. Pulsa «Guardar cambios» para aplicarlo.");
   }
   function setArrangeMode(enabled) {
@@ -300,12 +328,33 @@
     $("dialog").hidden = true; editing = null;
     if (previousFocus) previousFocus.focus();
   }
-  $("pin-form").addEventListener("submit", (event) => {
+  async function loadPublishedDesign() {
+    try {
+      const response = await fetch("/api/menu-design", { cache: "no-store" });
+      if (!response.ok) return null;
+      const data = await response.json();
+      return isObject(data.design) ? normalize(data.design) : null;
+    } catch { return null; }
+  }
+  $("pin-form").addEventListener("submit", async (event) => {
     event.preventDefault();
-    if ($("pin").value !== "9030") { $("pin-error").hidden = false; $("pin").value = ""; $("pin").focus(); return; }
+    const enteredPin = $("pin").value;
+    try {
+      const response = await fetch("/api/admin", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ pin: enteredPin }) });
+      if (!response.ok) throw new Error("PIN incorrecto");
+    } catch {
+      $("pin-error").hidden = false; $("pin").value = ""; $("pin").focus(); return;
+    }
+    editorSessionPin = enteredPin;
     $("pin-error").hidden = true; $("pin").value = "";
+    const hasSaved = Boolean(localStorage.getItem(storageKey));
     const saved = readSaved();
-    if (saved) draft = saved;
+    if (hasSaved && saved) draft = saved;
+    else {
+      const published = await loadPublishedDesign();
+      if (published) draft = published;
+    }
+    resetHistory();
     $("unlock").hidden = true; $("editor").hidden = false; updatePreview();
   });
   document.querySelector(".preview").addEventListener("click", (event) => {
@@ -335,7 +384,7 @@
       draft.fighterTitles[editing.key] = $("title-input").value;
       draft.portraitUrls[editing.key] = $("portrait-input").value;
     }
-    updatePreview(); closeDialog(); status("Cambio preparado. Pulsa «Guardar cambios» para aplicarlo.");
+    updatePreview(); remember(); closeDialog(); status("Cambio preparado. Pulsa «Guardar cambios» para aplicarlo.");
   });
   $("cancel").addEventListener("click", closeDialog);
   $("text-mode").addEventListener("click", () => setArrangeMode(false));
@@ -366,7 +415,12 @@
     const sy = pointer.placement.size / 100;
     setPlacement({ x: Math.round(pointer.placement.x + (event.clientX - pointer.x) * 100 * sx / Math.max(1, pointer.rect.width)), y: Math.round(pointer.placement.y + (event.clientY - pointer.y) * 100 * sy / Math.max(1, pointer.rect.height)) });
   });
-  const finishPointer = (event) => { if (pointer?.id === event.pointerId) pointer = null; };
+  const finishPointer = (event) => {
+    if (pointer?.id !== event.pointerId) return;
+    const changed = pointer.changed;
+    pointer = null;
+    if (changed) remember();
+  };
   preview.addEventListener("pointerup", finishPointer);
   preview.addEventListener("pointercancel", finishPointer);
   document.querySelectorAll("[data-nudge]").forEach((button) => button.addEventListener("click", () => {
@@ -397,11 +451,13 @@
   $("reset-text-style").addEventListener("click", () => {
     if (!selection || !styleable(selection)) return;
     delete draft.textStyles[placementId(selection)]; applyTextStyle(selection); refreshSelection();
+    remember();
     status("Estilo restablecido. Pulsa «Guardar cambios» para aplicarlo.");
   });
   $("reset-element").addEventListener("click", () => {
     if (!selection) return;
     delete draft.placements[placementId(selection)]; applyPlacement(selection); refreshSelection();
+    remember();
     status("Elemento restablecido. Pulsa «Guardar cambios» para aplicarlo.");
   });
   $("element-picker").addEventListener("change", (event) => {
@@ -410,14 +466,14 @@
   });
   $("reset-layout").addEventListener("click", () => {
     draft.placements = {}; draft.fighterOrder = fighters.map(([id]) => id); draft.modeOrder = modes.map(([id]) => id);
-    updatePreview(); refreshSelection();
+    updatePreview(); refreshSelection(); remember();
     status("Organización restablecida. Pulsa «Guardar cambios» para aplicarla.");
   });
   document.addEventListener("keydown", (event) => { if (event.key === "Escape" && !$("dialog").hidden) closeDialog(); });
   document.querySelectorAll("[data-style]").forEach((input) => input.addEventListener("input", () => {
     const key = input.dataset.style; draft[key] = numeric[key] ? Number(input.value) : input.value;
     draft.styleOverrides[key] = true;
-    if (input.type !== "url") updatePreview();
+    if (input.type !== "url") updatePreview(); remember();
     status("Cambio preparado. Pulsa «Guardar cambios» para aplicarlo.");
   }));
   const themes = {
@@ -429,13 +485,22 @@
   document.querySelectorAll("[data-theme]").forEach((button) => button.addEventListener("click", () => {
     Object.assign(draft, themes[button.dataset.theme]);
     Object.keys(themes.arcade).forEach((key) => { draft.styleOverrides[key] = true; });
-    updatePreview(); status("Plantilla preparada. Pulsa «Guardar cambios» para aplicarla.");
+    updatePreview(); remember(); status("Plantilla preparada. Pulsa «Guardar cambios» para aplicarla.");
   }));
   $("reset-colors").addEventListener("click", () => {
     ["accent", "panel", "ink", "backgroundDim"].forEach((key) => { draft[key] = defaults[key]; delete draft.styleOverrides[key]; });
-    updatePreview(); status("Colores restablecidos. Pulsa «Guardar cambios» para aplicarlos.");
+    updatePreview(); remember(); status("Colores restablecidos. Pulsa «Guardar cambios» para aplicarlos.");
   });
   $("save").addEventListener("click", save);
+  $("publish").addEventListener("click", async () => {
+    if (!editorSessionPin) { status("Vuelve a entrar con el PIN antes de publicar.", true); return; }
+    try {
+      const response = await fetch("/api/menu-design", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ pin: editorSessionPin, design: draft }) });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "No se ha podido publicar.");
+      save(); status("Menú publicado. Los jugadores nuevos ya verán este diseño.");
+    } catch (error) { status(error?.message || "No se ha podido publicar el menú.", true); }
+  });
   $("save-return").addEventListener("click", () => { if (save()) window.location.assign("/"); });
   $("export").addEventListener("click", () => {
     const url = URL.createObjectURL(new Blob([JSON.stringify(draft, null, 2)], { type: "application/json" }));
@@ -449,7 +514,7 @@
       if (file.size > 1_000_000) throw new Error("Archivo demasiado grande");
       const parsed = JSON.parse(await file.text());
       if (!isObject(parsed) || !("heading" in parsed || "fighterNames" in parsed || "modeNames" in parsed)) throw new Error("Archivo incorrecto");
-      draft = normalize(parsed); updatePreview(); status("Copia cargada. Pulsa «Guardar cambios» para aplicarla.");
+      draft = normalize(parsed); updatePreview(); resetHistory(); status("Copia cargada. Pulsa «Guardar cambios» para aplicarla.");
     } catch { status("No se ha podido cargar esa copia. Comprueba el archivo.", true); }
     event.target.value = "";
   });
@@ -457,5 +522,25 @@
   document.querySelectorAll(".preview [data-group]").forEach((button) => {
     const option = document.createElement("option"); option.value = placementId(button); option.textContent = button.dataset.label;
     $("element-picker").append(option);
+  });
+  const profiles = {
+    desktop: { columns: 3, cardHeight: 214, cardGap: 10, modeGap: 10, nameSize: 100 },
+    tablet: { columns: 3, cardHeight: 190, cardGap: 8, modeGap: 8, nameSize: 96 },
+    phone: { columns: 2, cardHeight: 180, cardGap: 7, modeGap: 7, nameSize: 94 },
+  };
+  document.querySelectorAll("[data-profile]").forEach((button) => button.addEventListener("click", () => {
+    Object.assign(draft, profiles[button.dataset.profile]); Object.keys(profiles[button.dataset.profile]).forEach((key) => { draft.styleOverrides[key] = true; });
+    updatePreview(); remember(); status("Perfil preparado. Ajusta lo que quieras y guarda.");
+  }));
+  document.querySelectorAll("[data-viewport]").forEach((button) => button.addEventListener("click", () => {
+    document.querySelectorAll("[data-viewport]").forEach((item) => item.classList.toggle("active", item === button));
+    document.querySelector(".preview").dataset.viewport = button.dataset.viewport;
+  }));
+  $("undo").addEventListener("click", () => restoreHistory(historyIndex - 1));
+  $("redo").addEventListener("click", () => restoreHistory(historyIndex + 1));
+  document.addEventListener("keydown", (event) => {
+    if (!(event.metaKey || event.ctrlKey) || event.altKey || document.activeElement?.matches("input,textarea,select")) return;
+    if (event.key.toLowerCase() === "z") { event.preventDefault(); restoreHistory(event.shiftKey ? historyIndex + 1 : historyIndex - 1); }
+    if (event.key.toLowerCase() === "y") { event.preventDefault(); restoreHistory(historyIndex + 1); }
   });
 })();

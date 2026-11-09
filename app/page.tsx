@@ -63,6 +63,8 @@ type ArcadeProgress = { fights: number; adventures: number; orbs: number; bestCo
 type CampaignStep = 0 | 1 | 2 | 3 | 4;
 type ArcadePickupKind = 0 | 1 | 2;
 type FightPickup = { kind: ArcadePickupKind; x: number; expiresAt: number };
+type AnalyticsConsent = "unknown" | "accepted" | "limited";
+type ActivityMode = "arcade" | "fight" | "training" | "orbs" | "central" | "coop" | "slug" | "tournament";
 
 type GameState = {
   phase: Phase;
@@ -159,7 +161,7 @@ const STAGES = [
 
 const GAME_TITLE = "HARDCORE FIGHTERS";
 const GAME_EDITION = "WEB · ARCADE EDITION";
-const GAME_VERSION = "V2.34.5";
+const GAME_VERSION = "V2.34.6";
 
 const ROUND_SECONDS = 99;
 const SUPER_MAX = 100;
@@ -203,6 +205,23 @@ const freshGame = (): GameState => ({
   impact: 0,
   impactLevel: 0,
 });
+
+const isLobbyObject = (value: unknown): value is Record<string, unknown> => Boolean(value) && typeof value === "object" && !Array.isArray(value);
+const lobbyDesignFrom = (value: unknown): LobbyDesign => {
+  const source = isLobbyObject(value) ? value : {};
+  const map = (key: keyof Pick<LobbyDesign, "fighterNames" | "fighterTitles" | "portraitUrls" | "modeNames" | "modeSubtitles" | "labels">) => isLobbyObject(source[key]) ? source[key] as Record<string, string> : {};
+  return {
+    ...DEFAULT_LOBBY_DESIGN,
+    ...source,
+    fighterNames: map("fighterNames"), fighterTitles: map("fighterTitles"), portraitUrls: map("portraitUrls"),
+    modeNames: map("modeNames"), modeSubtitles: map("modeSubtitles"), labels: map("labels"),
+    styleOverrides: isLobbyObject(source.styleOverrides) ? source.styleOverrides as Record<string, boolean> : {},
+    placements: isLobbyObject(source.placements) ? source.placements as LobbyDesign["placements"] : {},
+    textStyles: isLobbyObject(source.textStyles) ? source.textStyles as LobbyDesign["textStyles"] : {},
+    fighterOrder: Array.isArray(source.fighterOrder) ? source.fighterOrder.filter((id): id is string => typeof id === "string") : [],
+    modeOrder: Array.isArray(source.modeOrder) ? source.modeOrder.filter((id): id is string => typeof id === "string") : [],
+  };
+};
 
 const specialFor = (fighter: FighterId, level: Exclude<AttackLevel, 0>): SpecialMove => {
   if (fighter === "cesaret") return level === 1 ? "fish" : "fishstorm";
@@ -442,6 +461,10 @@ function Home() {
   const editInputRef = useRef<HTMLInputElement | null>(null);
   const [lobbyDesign, setLobbyDesign] = useState<LobbyDesign>(DEFAULT_LOBBY_DESIGN);
   const [lobbyDesignLoaded, setLobbyDesignLoaded] = useState(false);
+  const hasLocalDesignRef = useRef(false);
+  const [analyticsConsent, setAnalyticsConsent] = useState<AnalyticsConsent>("unknown");
+  const [analyticsReady, setAnalyticsReady] = useState(false);
+  const [analyticsNoticeOpen, setAnalyticsNoticeOpen] = useState(true);
   const orderedFighters = useMemo(() => arrangedOrder(FIGHTER_ORDER, lobbyDesign.fighterOrder), [lobbyDesign.fighterOrder]);
   const orderedModes = useMemo(() => arrangedOrder(MODE_ORDER, lobbyDesign.modeOrder), [lobbyDesign.modeOrder]);
   const [musicOn, setMusicOn] = useState(false);
@@ -544,6 +567,8 @@ function Home() {
   const bossDodgeUntilRef = useRef(0);
   const bossRewardedRef = useRef(false);
   const rankingCapturedRef = useRef(false);
+  const visitRecordedRef = useRef(false);
+  const matchActivityRef = useRef<{ mode: ActivityMode; fighter: FighterId; reported: boolean } | null>(null);
 
   useEffect(() => {
     // The server and the initial client render must match. Restore the saved
@@ -555,11 +580,23 @@ function Home() {
         const saved = window.localStorage.getItem("hardcore-lobby-design-v1");
         if (saved) {
           const parsed = JSON.parse(saved) as Partial<LobbyDesign>;
-          setLobbyDesign({ ...DEFAULT_LOBBY_DESIGN, ...parsed, fighterNames: parsed.fighterNames ?? {}, fighterTitles: parsed.fighterTitles ?? {}, portraitUrls: parsed.portraitUrls ?? {}, modeNames: parsed.modeNames ?? {}, modeSubtitles: parsed.modeSubtitles ?? {}, labels: parsed.labels ?? {} });
+          hasLocalDesignRef.current = true;
+          setLobbyDesign(lobbyDesignFrom(parsed));
         }
       } catch { /* A damaged or unavailable saved design must not block play. */ }
       setLobbyDesignLoaded(true);
     });
+    return () => { active = false; };
+  }, []);
+  useEffect(() => {
+    let active = true;
+    void fetch("/api/menu-design", { cache: "no-store" })
+      .then((response) => response.ok ? response.json() : null)
+      .then((data) => {
+        if (!active || hasLocalDesignRef.current || !data?.design) return;
+        setLobbyDesign(lobbyDesignFrom(data.design));
+      })
+      .catch(() => undefined);
     return () => { active = false; };
   }, []);
   useEffect(() => {
@@ -573,11 +610,43 @@ function Home() {
       if (event.key !== "hardcore-lobby-design-v1" || !event.newValue) return;
       try {
         const parsed = JSON.parse(event.newValue) as Partial<LobbyDesign>;
-        setLobbyDesign({ ...DEFAULT_LOBBY_DESIGN, ...parsed, fighterNames: parsed.fighterNames ?? {}, fighterTitles: parsed.fighterTitles ?? {}, portraitUrls: parsed.portraitUrls ?? {}, modeNames: parsed.modeNames ?? {}, modeSubtitles: parsed.modeSubtitles ?? {}, labels: parsed.labels ?? {} });
+        hasLocalDesignRef.current = true;
+        setLobbyDesign(lobbyDesignFrom(parsed));
       } catch { /* Ignore an invalid update and keep the current menu. */ }
     };
     window.addEventListener("storage", syncDesign);
     return () => window.removeEventListener("storage", syncDesign);
+  }, []);
+  useEffect(() => {
+    const restore = window.setTimeout(() => {
+      try {
+        const choice = window.localStorage.getItem("hardcore-analytics-choice-v1");
+        if (choice === "accepted" || choice === "limited") {
+          setAnalyticsConsent(choice);
+          setAnalyticsNoticeOpen(false);
+        }
+      } catch { /* The choice only affects optional detailed statistics. */ }
+      setAnalyticsReady(true);
+    }, 0);
+    return () => window.clearTimeout(restore);
+  }, []);
+  const recordActivity = useCallback((eventType: "visit" | "mode_start" | "match_start" | "match_end", values: { mode?: ActivityMode; fighter?: FighterId; outcome?: "victory" | "defeat" | "draw" } = {}, force = false) => {
+    if (!force && analyticsConsent !== "accepted") return;
+    // Recording can never delay controls or a match.
+    void fetch("/api/activity", {
+      method: "POST", headers: { "Content-Type": "application/json" }, keepalive: true,
+      body: JSON.stringify({ eventType, ...values }),
+    }).catch(() => undefined);
+  }, [analyticsConsent]);
+  useEffect(() => {
+    if (!analyticsReady || visitRecordedRef.current) return;
+    visitRecordedRef.current = true;
+    // This is an aggregate counter only. It has no identifier or player data.
+    recordActivity("visit", {}, true);
+  }, [analyticsReady, recordActivity]);
+  const chooseAnalytics = useCallback((choice: Exclude<AnalyticsConsent, "unknown">) => {
+    try { window.localStorage.setItem("hardcore-analytics-choice-v1", choice); } catch { /* Optional preference. */ }
+    setAnalyticsConsent(choice); setAnalyticsNoticeOpen(false);
   }, []);
   useEffect(() => { if (editTarget) editInputRef.current?.focus(); }, [editTarget]);
   const lobbyFighter = (fighter: FighterId) => ({
@@ -1993,7 +2062,14 @@ function Home() {
     return () => window.clearInterval(timer);
   }, [applyExtraHit, game.phase, opponent, selected, showPassive]);
 
-  const startRound = useCallback(() => {
+  const startRound = useCallback((modeOverride?: ActivityMode) => {
+    // React passes its click event to an onClick callback. Only accept known
+    // mode strings here so an event can never leak into telemetry or gameplay.
+    const mode = modeOverride === "arcade" || modeOverride === "fight" || modeOverride === "tournament"
+      ? modeOverride
+      : arcadeRun ? "arcade" : campaignStep > 0 ? "tournament" : "fight";
+    matchActivityRef.current = { mode, fighter: selected, reported: false };
+    recordActivity("match_start", { mode, fighter: selected });
     setTrainingMode(false);
     resetMatchMeters();
     rankingCapturedRef.current = false;
@@ -2001,9 +2077,10 @@ function Home() {
     setRoundNumber(1);
     setRoundWins({ player: 0, cpu: 0 });
     launchFightRound(1);
-  }, [launchFightRound, resetMatchMeters]);
+  }, [arcadeRun, campaignStep, launchFightRound, recordActivity, resetMatchMeters, selected]);
 
   const startTraining = useCallback(() => {
+    recordActivity("mode_start", { mode: "training", fighter: selected });
     setTrainingMode(true);
     resetMatchMeters();
     setBattleMode("cpu");
@@ -2017,7 +2094,7 @@ function Home() {
       return next;
     });
     launchFightRound(1);
-  }, [launchFightRound, resetMatchMeters]);
+  }, [launchFightRound, recordActivity, resetMatchMeters, selected]);
 
   useEffect(() => {
     if (game.phase !== "fight" || fightPickup) return;
@@ -2058,6 +2135,7 @@ function Home() {
 
   // ARCADE: a ladder of rivals with rising difficulty, continues and the fighter's ending.
   const startArcade = useCallback(() => {
+    recordActivity("mode_start", { mode: "arcade", fighter: selected });
     const pool = FIGHTER_ORDER.filter((fighter) => fighter !== selected);
     for (let index = pool.length - 1; index > 0; index -= 1) {
       const swap = Math.floor(Math.random() * (index + 1));
@@ -2070,7 +2148,7 @@ function Home() {
     setLocalOpponent(rivals[0]);
     setDifficulty(arcadeDifficultyFor(0));
     setArcadeRun({ rivals, index: 0, score: 0, continues: 3, savedDifficulty: difficulty, status: "fighting", pendingStart: true, lastScore: 0 });
-  }, [difficulty, selected]);
+  }, [difficulty, recordActivity, selected]);
 
   const nextArcadeFight = useCallback(() => {
     setArcadeRun((run) => {
@@ -2089,6 +2167,7 @@ function Home() {
 
   const startCampaign = useCallback(() => {
     if (!fightReady) return;
+    recordActivity("mode_start", { mode: "tournament", fighter: selected });
     setPendingRanking(null);
     setBattleMode("cpu");
     setCampaignScore(0);
@@ -2105,11 +2184,12 @@ function Home() {
     setBossPlayerHit(false);
     setUltimateCharge(50);
     setFinalFlash(0);
-    startRound();
-  }, [fightReady, startRound]);
+    startRound("tournament");
+  }, [fightReady, recordActivity, selected, startRound]);
 
   const startOrbMode = useCallback(() => {
     if (!fightersReady) return;
+    recordActivity("mode_start", { mode: "orbs", fighter: selected });
     setPendingRanking(null);
     clearTransientTimers();
     if (introTimerRef.current) clearTimeout(introTimerRef.current);
@@ -2117,10 +2197,11 @@ function Home() {
     setPlayerWalkIntent("neutral");
     setRoundCall("");
     setGame({ ...freshGame(), phase: "orbs" });
-  }, [clearTransientTimers, fightersReady]);
+  }, [clearTransientTimers, fightersReady, recordActivity, selected]);
 
   const startPlatformMode = useCallback(() => {
     if (!fightersReady) return;
+    recordActivity("mode_start", { mode: "central", fighter: selected });
     setPendingRanking(null);
     clearTransientTimers();
     if (introTimerRef.current) clearTimeout(introTimerRef.current);
@@ -2128,10 +2209,11 @@ function Home() {
     setPlayerWalkIntent("neutral");
     setRoundCall("");
     setGame({ ...freshGame(), phase: "platform" });
-  }, [clearTransientTimers, fightersReady]);
+  }, [clearTransientTimers, fightersReady, recordActivity, selected]);
 
   const startCoopMode = useCallback(() => {
     if (!fightersReady) return;
+    recordActivity("mode_start", { mode: "coop", fighter: selected });
     setPendingRanking(null);
     clearTransientTimers();
     if (introTimerRef.current) clearTimeout(introTimerRef.current);
@@ -2143,10 +2225,11 @@ function Home() {
     setCoopPlayerTwo(localOpponent);
     setCoopHumanPlayers(battleMode === "local" ? 2 : 1);
     setGame({ ...freshGame(), phase: "coop" });
-  }, [clearTransientTimers, fightersReady, selected, localOpponent, battleMode]);
+  }, [clearTransientTimers, fightersReady, selected, localOpponent, battleMode, recordActivity]);
 
   const startPrisonSlugMode = useCallback(() => {
     if (!fightersReady) return;
+    recordActivity("mode_start", { mode: "slug", fighter: selected });
     setPendingRanking(null);
     clearTransientTimers();
     if (introTimerRef.current) clearTimeout(introTimerRef.current);
@@ -2156,7 +2239,7 @@ function Home() {
     setRoundCall("");
     setCampaignStep(0);
     setGame({ ...freshGame(), phase: "prison-slug" });
-  }, [clearTransientTimers, fightersReady]);
+  }, [clearTransientTimers, fightersReady, recordActivity, selected]);
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -2541,6 +2624,18 @@ function Home() {
     const timeout = setTimeout(() => endRound(winner), 0);
     return () => clearTimeout(timeout);
   }, [endRound, game.phase, game.winner]);
+
+  useEffect(() => {
+    if (game.phase !== "over" || !game.winner) return;
+    const match = matchActivityRef.current;
+    if (!match || match.reported) return;
+    match.reported = true;
+    recordActivity("match_end", {
+      mode: match.mode,
+      fighter: match.fighter,
+      outcome: game.winner === "player" ? "victory" : game.winner === "cpu" ? "defeat" : "draw",
+    });
+  }, [game.phase, game.winner, recordActivity]);
 
   useEffect(() => {
     if (campaignStep !== 0 || arcadeRun || game.phase !== "over" || game.winner !== "player" || rankingCapturedRef.current) return;
@@ -2981,11 +3076,17 @@ function Home() {
             if (installed) { event.preventDefault(); window.location.assign("/editor.html"); }
           }}>✎ EDITAR MENÚ</a>}
           {game.phase === "select" && <button className="sound-button" type="button" onClick={() => setDiagnosticsOpen(true)}>🩺 DIAGNÓSTICO</button>}
+          {game.phase === "select" && <button className="sound-button" type="button" onClick={() => setAnalyticsNoticeOpen(true)}>◌ PRIVACIDAD</button>}
           <button className="sound-button" type="button" onClick={() => setSoundOn((value) => !value)} aria-pressed={soundOn}>
             {soundOn ? "SONIDO ON" : "SONIDO OFF"}
           </button>
         </div>
       </header>
+
+      {game.phase === "select" && analyticsNoticeOpen && <aside className="activity-consent" role="dialog" aria-label="Estadísticas anónimas del juego">
+        <div><b>ESTADÍSTICAS DEL JUEGO</b><p>Siempre contamos un acceso anónimo para saber cuánta gente entra. No guardamos IP, nombre, cuenta, móvil ni identificador. Si aceptas, también sumamos en total las partidas, victorias, modos y luchadores usados.</p></div>
+        <div className="activity-consent-actions"><button type="button" className="secondary-choice" onClick={() => chooseAnalytics("limited")}>Solo contar entrada</button><button type="button" className="primary-choice" onClick={() => chooseAnalytics("accepted")}>Aceptar estadísticas</button></div>
+      </aside>}
 
       <section ref={arenaRef} id="game" className={`arena phase-${game.phase} style-${fighterStyle} impact-level-${game.impactLevel} ${trainingMode ? "training-mode" : ""} ${campaignStep > 0 ? "campaign-active" : ""} ${(progress.crowns ?? 0) >= 2 ? "champion-aura" : ""} ${paused ? "game-paused" : ""} ${superFlash ? `super-active super-${superFlash.side}` : ""} ${game.playerMove || game.cpuMove ? "special-casting" : ""} ${game.phase === "orbs" ? "orb-active" : ""} ${game.phase === "platform" ? "platform-active" : ""} ${game.phase === "coop" ? "coop-active" : ""} ${game.impact ? (game.impact % 2 ? "impact-a" : "impact-b") : ""}`} aria-label={game.phase === "orbs" ? `Rompeobjetos con ${playerData.name}` : game.phase === "platform" ? `Aventura Central con ${playerData.name}` : game.phase === "coop" ? `Aventura cooperativa de ${FIGHTERS[coopPlayerOne].name} y ${FIGHTERS[coopPlayerTwo].name}` : `Combate en ${stage.name}`}>
         <div className="stage-slideshow" aria-hidden="true">
@@ -3265,7 +3366,7 @@ function Home() {
               <div className="mode-start-actions">
                 {[
                   <button key="arcade" {...editAttrs("modeNames", "arcade", "Nombre de Modo Arcade", lobbyMode("arcade", "MODO ARCADE"))} className="fight-button arcade-ladder-button" type="button" onClick={startArcade} disabled={!fightersReady && !lobbyEditorOpen}>{lobbyMode("arcade", "MODO ARCADE")} <span>♜</span><small {...editAttrs("modeSubtitles", "arcade", "Frase de Modo Arcade", lobbyModeSubtitle("arcade", "6 RIVALES SEGUIDOS · TU FINAL"))} className="mode-sub">{lobbyModeSubtitle("arcade", "6 RIVALES SEGUIDOS · TU FINAL")}</small></button>,
-                  <button key="fight" {...editAttrs("modeNames", "fight", "Nombre de Modo Lucha", lobbyMode("fight", "MODO LUCHA"))} className="fight-button" type="button" onClick={startRound} disabled={!fightReady && !lobbyEditorOpen} data-gamepad-default="true">{lobbyMode("fight", "MODO LUCHA")} <span>↗</span><small {...editAttrs("modeSubtitles", "fight", "Frase de Modo Lucha", lobbyModeSubtitle("fight", "PARTIDAS RÁPIDAS CONTRA LA IA O UN AMIGO"))} className="mode-sub">{lobbyModeSubtitle("fight", "PARTIDAS RÁPIDAS CONTRA LA IA O UN AMIGO")}</small></button>,
+                  <button key="fight" {...editAttrs("modeNames", "fight", "Nombre de Modo Lucha", lobbyMode("fight", "MODO LUCHA"))} className="fight-button" type="button" onClick={() => startRound()} disabled={!fightReady && !lobbyEditorOpen} data-gamepad-default="true">{lobbyMode("fight", "MODO LUCHA")} <span>↗</span><small {...editAttrs("modeSubtitles", "fight", "Frase de Modo Lucha", lobbyModeSubtitle("fight", "PARTIDAS RÁPIDAS CONTRA LA IA O UN AMIGO"))} className="mode-sub">{lobbyModeSubtitle("fight", "PARTIDAS RÁPIDAS CONTRA LA IA O UN AMIGO")}</small></button>,
                   <button key="coop" {...editAttrs("modeNames", "coop", "Nombre de Aventura Cooperativa", lobbyMode("coop", "AVENTURA COOPERATIVA"))} className="fight-button coop-mode-button" type="button" onClick={startCoopMode} disabled={!fightersReady && !lobbyEditorOpen}>{lobbyMode("coop", "AVENTURA COOPERATIVA")} <span>∞</span><small {...editAttrs("modeSubtitles", "coop", "Frase de Aventura Cooperativa", lobbyModeSubtitle("coop", "HASTA 2 JUGADORES"))} className="mode-sub">{lobbyModeSubtitle("coop", "HASTA 2 JUGADORES")}</small></button>,
                   <button key="orbs" {...editAttrs("modeNames", "orbs", "Nombre de Rompeobjetos", lobbyMode("orbs", "MODO ROMPEOBJETOS"))} className="fight-button orb-mode-button" type="button" onClick={startOrbMode} disabled={!fightersReady && !lobbyEditorOpen}>{lobbyMode("orbs", "MODO ROMPEOBJETOS")} <span>◆</span><small {...editAttrs("modeSubtitles", "orbs", "Frase de Rompeobjetos", lobbyModeSubtitle("orbs", "DESTRUYE Y CONSIGUE PUNTOS"))} className="mode-sub">{lobbyModeSubtitle("orbs", "DESTRUYE Y CONSIGUE PUNTOS")}</small></button>,
                   <button key="central" {...editAttrs("modeNames", "central", "Nombre de Aventura Central", lobbyMode("central", "AVENTURA CENTRAL"))} className="fight-button platform-mode-button" type="button" onClick={startPlatformMode} disabled={!fightersReady && !lobbyEditorOpen}>{lobbyMode("central", "AVENTURA CENTRAL")} <span>★</span><small {...editAttrs("modeSubtitles", "central", "Frase de Aventura Central", lobbyModeSubtitle("central", "HISTORIA PRINCIPAL"))} className="mode-sub">{lobbyModeSubtitle("central", "HISTORIA PRINCIPAL")}</small></button>,

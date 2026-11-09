@@ -1,5 +1,5 @@
 declare module "cloudflare:workers" {
-  export const env: { DB?: D1Database };
+  export const env: { DB?: D1Database; HARDCORE_ADMIN_PIN?: string };
   export type Fetcher = import("./worker/cloudflare-env").Fetcher;
   export type D1Database = import("./worker/cloudflare-env").D1Database;
 }

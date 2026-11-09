@@ -1,5 +1,5 @@
 const CACHE_PREFIX = "hardcore-fighters-";
-const CACHE_NAME = `${CACHE_PREFIX}ipad-v2-34-5`;
+const CACHE_NAME = `${CACHE_PREFIX}ipad-v2-34-6`;
 
 const OFFLINE_CORE = [
   "/",
@@ -10,6 +10,9 @@ const OFFLINE_CORE = [
   "/editor.html",
   "/editor.css",
   "/editor.js",
+  "/activity.html",
+  "/activity.css",
+  "/activity.js",
 ];
 
 self.addEventListener("install", (event) => {

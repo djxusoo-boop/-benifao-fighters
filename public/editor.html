@@ -11,7 +11,7 @@
 <body>
   <header class="topbar">
     <div><span class="kicker">HARDCORE FIGHTERS</span><strong>Editor del menú</strong></div>
-    <a class="back-link" href="/">← Volver al juego</a>
+    <div class="topbar-links"><a class="back-link" href="/activity.html" target="_blank" rel="noopener noreferrer">▥ Actividad</a><a class="back-link" href="/">← Volver al juego</a></div>
   </header>
   <main>
     <section class="unlock panel" id="unlock">
@@ -30,9 +30,9 @@
       <div class="intro panel">
         <div><span class="badge">TU MENÚ, A TU GUSTO</span><h1>Toca lo que quieras cambiar</h1>
           <p>Elige «Organizar» para arrastrar elementos, cambiar su tamaño y ordenar las tarjetas. Para escribir, elige «Editar textos».</p></div>
-        <div class="actions"><button id="text-mode" type="button" class="secondary" aria-pressed="true">✎ Editar textos</button><button id="arrange-mode" type="button" class="secondary" aria-pressed="false">✥ Organizar</button><button id="save" type="button" class="primary">Guardar cambios</button><button id="save-return" type="button" class="secondary">Guardar y volver al juego</button></div>
+        <div class="actions"><button id="text-mode" type="button" class="secondary" aria-pressed="true">✎ Editar textos</button><button id="arrange-mode" type="button" class="secondary" aria-pressed="false">✥ Organizar</button><button id="undo" type="button" class="secondary" disabled>↶ Deshacer</button><button id="redo" type="button" class="secondary" disabled>↷ Rehacer</button><button id="save" type="button" class="primary">Guardar en este móvil</button><button id="publish" type="button" class="secondary">☁ Publicar para todos</button><button id="save-return" type="button" class="secondary">Guardar y volver al juego</button></div>
         <p class="status" id="status" role="status" aria-live="polite"></p>
-        <p class="notice">Los cambios se guardan en este navegador y dispositivo. Si juegas desde el icono instalado en iPhone, abre el editor desde ese mismo icono.</p>
+        <p class="notice">«Guardar» cambia solo este dispositivo. «Publicar para todos» actualiza el menú que verán los jugadores nuevos. Si juegas desde el icono instalado en iPhone, abre el editor desde ese mismo icono.</p>
       </div>
 
       <div class="workspace">
@@ -47,7 +47,9 @@
             </section>
           </div>
         </section>
-        <aside class="options panel"><h2>Colores y tamaños</h2><p>Ajusta las opciones y pulsa «Guardar cambios».</p>
+        <aside class="options panel"><h2>Colores y tamaños</h2><p>Ajusta las opciones y guarda cuando estés conforme.</p>
+          <div class="preview-size" aria-label="Tamaño de la vista previa"><span>VISTA PREVIA</span><div><button type="button" data-viewport="desktop" class="active">Ordenador</button><button type="button" data-viewport="landscape">Horizontal</button><button type="button" data-viewport="phone">Móvil</button></div></div>
+          <div class="layout-profiles" aria-label="Perfiles rápidos de tamaño"><span>PERFILES RÁPIDOS</span><div><button type="button" data-profile="desktop">Escritorio</button><button type="button" data-profile="tablet">Tablet</button><button type="button" data-profile="phone">Móvil</button></div></div>
           <div class="theme-presets" aria-label="Plantillas de colores"><span>PLANTILLAS RÁPIDAS</span><div><button type="button" data-theme="arcade">Arcade</button><button type="button" data-theme="prison">Prison azul</button><button type="button" data-theme="neon">Neón</button><button type="button" data-theme="gold">Oro</button></div><button type="button" id="reset-colors" class="text-action">Restablecer colores</button></div>
           <label>Color principal <input type="color" data-style="accent"></label>
           <label>Fondo del menú <input type="color" data-style="panel"></label>
