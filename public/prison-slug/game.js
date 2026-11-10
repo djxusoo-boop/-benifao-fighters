@@ -4,13 +4,20 @@ const W = 1280;
 const H = 720;
 const PLAYER_SPRITE_SCALE = 1.18;
 const ENEMY_SPRITE_SCALE = 1.2;
-const WORLD_END = 6100;
+const WORLD_END = 18000;
 const VAN_X = 4980;
-const EXIT_X = 5880;
+const EXIT_X = 17380;
 const VAN_HOLD_X = 5440;
 const VAN_BEAM_RANGE = 740;
 const ACTION_BUFFER = .13;
-const SECTOR_NAMES = ["BARRIO PRISON", "PASO ELEVADO", "PATIO INDUSTRIAL", "DEPÓSITO SONORO", "SALIDA NORTE"];
+const SECTOR_NAMES = ["BARRIO PRISON", "PASO ELEVADO", "PATIO INDUSTRIAL", "DEPÓSITO SONORO", "CONTROL DEL DEPÓSITO", "AUTOPISTA MUTANTE", "CANAL TÓXICO", "FUNDICIÓN", "FORTALEZA DEL RUIDO", "EXTRACCIÓN"];
+const SECTOR_STARTS = [0, 1450, 2850, 4300, 5300, 6200, 9000, 12000, 15000, 17000];
+const ROAD_GATES = [
+  { x: 7850, boss: "wolfboss", name: "GUARDIÁN DE LA AUTOPISTA" },
+  { x: 10850, boss: "birdboss", name: "REINA DEL CANAL" },
+  { x: 13900, boss: "rockboss", name: "COLOSO DE LA FUNDICIÓN" },
+  { x: 16600, boss: "drumboss", name: "COMANDANTE DE LA FORTALEZA" },
+];
 
 // The route is deliberately hand-authored: the player can read the road,
 // climb over wreckage, and use the high ground instead of running across one
@@ -33,7 +40,22 @@ const TERRAIN = [
   { x1: 4860, x2: 5250, y1: 520, y2: 520, zone: "van-yard" },
   { x1: 5250, x2: 5500, y1: 520, y2: 602, zone: "downhill" },
   { x1: 5500, x2: 5800, y1: 602, y2: 602, zone: "street" },
-  { x1: 5800, x2: WORLD_END, y1: 602, y2: 560, zone: "exit-ramp" },
+  { x1: 5800, x2: 6200, y1: 602, y2: 560, zone: "highway-entry" },
+  { x1: 6200, x2: 7050, y1: 560, y2: 560, zone: "highway" },
+  { x1: 7050, x2: 7480, y1: 560, y2: 475, zone: "highway-ramp" },
+  { x1: 7480, x2: 8350, y1: 475, y2: 475, zone: "highway-bridge" },
+  { x1: 8350, x2: 9000, y1: 475, y2: 590, zone: "canal-entry" },
+  { x1: 9000, x2: 9750, y1: 590, y2: 590, zone: "canal" },
+  { x1: 9750, x2: 10200, y1: 590, y2: 515, zone: "canal-lock" },
+  { x1: 10200, x2: 11400, y1: 515, y2: 515, zone: "toxic-bridge" },
+  { x1: 11400, x2: 12000, y1: 515, y2: 600, zone: "foundry-entry" },
+  { x1: 12000, x2: 12600, y1: 600, y2: 600, zone: "foundry" },
+  { x1: 12600, x2: 13200, y1: 600, y2: 485, zone: "foundry-ramp" },
+  { x1: 13200, x2: 14400, y1: 485, y2: 485, zone: "furnaces" },
+  { x1: 14400, x2: 15000, y1: 485, y2: 580, zone: "fortress-entry" },
+  { x1: 15000, x2: 16000, y1: 580, y2: 540, zone: "fortress" },
+  { x1: 16000, x2: 17000, y1: 540, y2: 540, zone: "fortress-gate" },
+  { x1: 17000, x2: WORLD_END, y1: 540, y2: 540, zone: "extraction" },
 ];
 
 const VEHICLES = [
@@ -54,8 +76,27 @@ const MAP_LANDMARKS = [
   { x: 2860, kind: "factory", label: "IRON YARD", accent: "#ffb449" },
   { x: 3820, kind: "bridge", label: "SKYLINE BRIDGE", accent: "#4defff" },
   { x: 4740, kind: "warehouse", label: "SOUND DEPOT", accent: "#ff3f75" },
-  { x: 5710, kind: "gate", label: "NORTH EXIT", accent: "#7dff38" },
+  { x: 5710, kind: "gate", label: "RUTA NORTE", accent: "#7dff38" },
+  { x: 6650, kind: "bridge", label: "AUTOPISTA MUTANTE", accent: "#ffb449" },
+  { x: 8150, kind: "gate", label: "CONTROL 01", accent: "#ff3f75" },
+  { x: 9430, kind: "factory", label: "CANAL TÓXICO", accent: "#7dff38" },
+  { x: 11150, kind: "bridge", label: "CONTROL 02", accent: "#4defff" },
+  { x: 12300, kind: "factory", label: "FUNDICIÓN PRISON", accent: "#ff7048" },
+  { x: 14200, kind: "gate", label: "CONTROL 03", accent: "#ff7048" },
+  { x: 15400, kind: "warehouse", label: "FORTALEZA DEL RUIDO", accent: "#ba83ff" },
+  { x: 16900, kind: "gate", label: "ÚLTIMO CONTROL", accent: "#ff3f75" },
+  { x: 17500, kind: "tower", label: "EXTRACCIÓN", accent: "#7dff38" },
 ];
+
+VEHICLES.push(
+  { kind: "bus", x: 6540, w: 292, h: 138, tilt: 0 },
+  { kind: "tank", x: 7240, w: 250, h: 104, tilt: 0 },
+  { kind: "truck", x: 9400, w: 270, h: 130, tilt: 0 },
+  { kind: "car", x: 10400, w: 190, h: 78, tilt: 0 },
+  { kind: "tank", x: 12400, w: 250, h: 104, tilt: 0 },
+  { kind: "bus", x: 13400, w: 292, h: 138, tilt: 0 },
+  { kind: "truck", x: 15350, w: 270, h: 130, tilt: 0 },
+);
 
 const WEAPONS = {
   pistol: { label: "PISTOLA", ammo: Infinity, color: "#f6f1de", fireRate: .18, damage: 12 },
@@ -93,6 +134,25 @@ const ROUTE_ENCOUNTERS = [
   { at: 4140, foes: [[4490, "turret", 438], [4570, "speaker"], [4810, "brute"]] },
 ];
 
+// Distances, not a timer, pace the long drive. Each encounter is spawned once.
+const DRIVE_ENCOUNTERS = [
+  { at: 6200, foes: [[6670, "crawler"], [6840, "spitter"], [7000, "bat"]] },
+  { at: 7000, foes: [[7510, "crawler"], [7660, "tanklet"], [7240, "bat"]] },
+  { at: 8300, foes: [[8730, "spitter"], [8920, "crawler"], [8440, "bat"]] },
+  { at: 9100, foes: [[9520, "spitter"], [9670, "spitter"], [9770, "bat"]] },
+  { at: 10000, foes: [[10420, "crawler"], [10650, "brute"], [10380, "bat"]] },
+  { at: 11400, foes: [[11750, "crawler"], [11920, "spitter"], [12020, "bat"]] },
+  { at: 12100, foes: [[12540, "tanklet"], [12660, "crawler"], [12800, "bat"]] },
+  { at: 13000, foes: [[13470, "spitter"], [13630, "brute"], [13360, "bat"]] },
+  { at: 14400, foes: [[14820, "crawler"], [14950, "spitter"], [15070, "bat"]] },
+  { at: 15100, foes: [[15540, "tanklet"], [15720, "spitter"], [15460, "bat"]] },
+  { at: 15900, foes: [[16300, "crawler"], [16410, "brute"], [16520, "bat"]] },
+];
+for (const x of [6500, 8800, 9800, 11650, 12800, 14650, 15750]) {
+  DESTRUCTIBLES.push({ kind: "crate", x, w: 62, h: 58, hp: 24, repair: true, weapon: "laser" });
+  DESTRUCTIBLES.push({ kind: "barrel", x: x + 380, w: 42, h: 65, hp: 20 });
+}
+
 const canvas = document.querySelector("#gameCanvas");
 const ctx = canvas.getContext("2d");
 ctx.imageSmoothingEnabled = true;
@@ -116,6 +176,8 @@ const ui = {
   energy: document.querySelector("#energyMeter"),
   ability: document.querySelector("#abilityReadout"),
   score: document.querySelector("#scoreReadout"),
+  progress: document.querySelector("#routeProgress"),
+  route: document.querySelector("#routeReadout"),
   objective: document.querySelector("#objectiveReadout"),
   banner: document.querySelector("#eventBanner"),
   vanPrompt: document.querySelector("#vanPrompt"),
@@ -434,9 +496,10 @@ function initialState(hero) {
       { x: 2320, y: 468, w: 270, h: 22 }, { x: 3020, y: 414, w: 180, h: 22 }, { x: 3620, y: 500, w: 260, h: 22 },
       { x: 4290, y: 438, w: 230, h: 22 }, { x: 5535, y: 482, w: 260, h: 22 },
     ],
-    checkpoints: [1300, 2900, 4450],
+    checkpoints: [1300, 2900, 4450, 6200, 8500, 9300, 11450, 12200, 14500, 15200, 17000],
     checkpoint: 0,
     van: { active: false, charged: false, destroyed: false, charge: 0, waveClock: .65, pulseCooldown: 1.6, beamCooldown: 0, beamFlash: 0, aim: direction(1, 0), bursts: 0, hp: 100, damageFlash: 0, hurtCooldown: 0, prompt: false, boarded: false, x: VAN_X, vx: 0, driverId: hero.id, roofRiderId: null },
+    driveWave: 0, roadGate: 0, roadBossActive: false, extractionOpen: false,
     finaleSpawned: false,
     finalBossType: null,
     waves: 0,
@@ -489,7 +552,7 @@ function completeMission(won) {
   ui.resultEyebrow.textContent = won ? "SEÑAL RESTAURADA" : "LA RUTA SE CERRÓ";
   ui.resultTitle.textContent = won ? "MISIÓN COMPLETA" : "MISIÓN FALLIDA";
   ui.resultText.textContent = won
-    ? `La Furgoneta Resonante queda operativa. ${state.hero.name} abrió la salida con ${state.score} puntos.`
+    ? `${state.hero.name} cruzó los 10 sectores y derrotó los 4 controles de la ruta norte con ${state.score} puntos.`
     : "La banda de drones expulsó al equipo de la ruta. Vuelve a intentarlo o regresa al menú principal.";
   ui.resultScore.textContent = formatScore(state.score);
   window.dispatchEvent(new CustomEvent("slug-result", { detail: { score: state.score, fighter: state.hero.id } }));
@@ -511,6 +574,9 @@ function banner(message, color = "#f6f1de", duration = 1200) {
 
 function spawnEnemy(x, type = "drone", floor = null) {
   const specs = {
+    crawler: { hp: 44, w: 100, h: 100, shot: 1.5, speed: 105 },
+    spitter: { hp: 58, w: 96, h: 154, shot: 1.2, speed: 24 },
+    bat: { hp: 32, w: 114, h: 86, shot: 1.5, speed: 95 },
     sprayboss: { hp: 180, w: 142, h: 220, shot: 1.2, speed: 0 },
     juiceboss: { hp: 155, w: 132, h: 205, shot: 1.25, speed: 24 },
     rockboss: { hp: 230, w: 210, h: 250, shot: 1.05, speed: 0 },
@@ -645,6 +711,7 @@ function updateDestroyedProps() {
     const x = prop.x + prop.w / 2, y = prop.y + prop.h / 2;
     if (prop.kind === "barrel") detonate(x, y, 36, 135, "#ff9a31");
     else { spark(x, y, "#ffce8c", 15); dust(x, y, 6); }
+    if (prop.repair) state.pickups.push({ x, y: terrainAt(x) - 45, type: "repair", life: 60, bob: 0 });
     if (prop.weapon) state.pickups.push({ x, y: terrainAt(x) - 40, type: "weapon", weapon: prop.weapon, life: 32, bob: 0 });
     state.score += 80;
   }
@@ -671,7 +738,7 @@ function registerDefeat(enemy) {
 
 function updateSector() {
   const x = state.player.x;
-  const nextSector = x < 1450 ? 1 : x < 2850 ? 2 : x < 4300 ? 3 : x < 5300 ? 4 : 5;
+  const nextSector = SECTOR_STARTS.filter(start => x >= start).length;
   if (nextSector > state.sector) {
     state.sector = nextSector;
     banner(`SECTOR ${String(nextSector).padStart(2, "0")} · ${SECTOR_NAMES[nextSector - 1]}`, "#4defff", 1250);
@@ -790,6 +857,64 @@ function vanLayout(worldX) {
   return { vanW, vanH, y, driverGround: y + 315, roofGround: y + 78 };
 }
 
+function travelLimit() {
+  if (!state.van.charged) return VAN_HOLD_X;
+  return ROAD_GATES[state.roadGate]?.x ?? EXIT_X;
+}
+
+function repairVan(amount) {
+  const van = state.van;
+  if (van.destroyed) {
+    van.destroyed = false;
+    van.active = true;
+    van.boarded = true;
+    van.x = clamp(state.player.x - 270, VAN_X, travelLimit());
+    van.vx = 0;
+    van.hp = Math.max(55, amount);
+    van.hurtCooldown = 2;
+    updateVanRide(0);
+    banner("¡FURGONETA REPARADA! · VUELVE A CONDUCIR", "#7dff38", 1800);
+  } else van.hp = Math.min(100, van.hp + amount);
+}
+
+function updateDriveRoute(dt) {
+  if (!state.van.charged) return;
+  const player = state.player;
+  if (state.van.boarded) {
+    state.van.pulseCooldown -= dt;
+    if (state.van.pulseCooldown <= 0) { state.van.pulseCooldown = 2.15; sonicPulse(); }
+  }
+  // Streaming the encounters keeps the longer map inexpensive on mobile.
+  const encounter = DRIVE_ENCOUNTERS[state.driveWave];
+  if (encounter && player.x >= encounter.at && state.enemies.length < 16) {
+    for (const foe of encounter.foes) spawnEnemy(...foe);
+    state.driveWave++;
+    banner("¡MONSTRUOS EN LA CARRETERA!", "#a7ff50", 950);
+  }
+  const gate = ROAD_GATES[state.roadGate];
+  if (!gate) { state.extractionOpen = true; return; }
+  if (!state.roadBossActive && player.x >= gate.x - 180) {
+    const first = state.enemies.length;
+    spawnEnemy(gate.x + 650, gate.boss);
+    spawnEnemy(gate.x + 440, "spitter");
+    spawnEnemy(gate.x + 720, "bat");
+    for (const enemy of state.enemies.slice(first)) enemy.roadGate = state.roadGate;
+    state.roadBossActive = true;
+    banner(`CONTROL ${state.roadGate + 1}/4 · ${gate.name}`, "#ff7048", 2400);
+  } else if (state.roadBossActive && !state.enemies.some(enemy => enemy.roadGate === state.roadGate && enemy.hp > 0)) {
+    state.roadGate++;
+    state.roadBossActive = false;
+    state.score += 1800;
+    player.hp = Math.min(100, player.hp + 35);
+    player.energy = 100;
+    state.checkpoint = gate.x + 300;
+    repairVan(40);
+    state.extractionOpen = state.roadGate === ROAD_GATES.length;
+    banner(state.extractionOpen ? "¡ÚLTIMO CONTROL CAÍDO! · A LA EXTRACCIÓN" : "¡CONTROL LIBERADO! · REPARACIÓN +40 · SIGUE LA RUTA", "#7dff38", 2200);
+    blip(740, .2);
+  }
+}
+
 function updateVanRide(dt) {
   const van = state.van;
   const player = state.player;
@@ -798,7 +923,7 @@ function updateVanRide(dt) {
   if (!steering) van.vx += 38 * dt;
   van.vx *= Math.pow(.35, dt);
   van.vx = clamp(van.vx, -70, 340);
-  van.x = clamp(van.x + van.vx * dt, VAN_X, van.charged ? EXIT_X : VAN_HOLD_X);
+  van.x = clamp(van.x + van.vx * dt, VAN_X, travelLimit());
   const layout = vanLayout(van.x);
   player.x = van.x + layout.vanW * .5 - player.w * .5;
   player.y = layout.driverGround - player.h;
@@ -865,7 +990,7 @@ function updateOnFoot(dt) {
     blip(230, .045);
   }
   player.vy += 1450 * dt;
-  player.x = clamp(player.x + player.vx * dt, 0, WORLD_END);
+  player.x = clamp(player.x + player.vx * dt, 0, travelLimit() + (state.extractionOpen ? 0 : 290));
   player.y += player.vy * dt;
   const feet = player.y + player.h;
   const support = supportAt(player.x + player.w / 2, previousFeet, feet);
@@ -916,14 +1041,14 @@ function update(dt) {
   // activation itself, so a visible F prompt never appears too early.
   state.van.prompt = !state.van.active && !state.van.charged && !state.van.destroyed && distance(player.x, VAN_X + 310) <= 360;
 
-  if (state.van.active && !state.van.charged && !state.van.destroyed) {
-    const movingVanX = vanWorldX();
+  if ((state.van.active || state.van.destroyed) && !state.van.charged) {
+    const movingVanX = state.van.destroyed ? VAN_HOLD_X : vanWorldX();
     state.van.charge += dt;
     state.van.waveClock -= dt;
     state.van.pulseCooldown -= dt;
     if (state.van.pulseCooldown <= 0) {
       state.van.pulseCooldown = 2.15;
-      sonicPulse();
+      if (state.van.boarded) sonicPulse();
     }
     if (state.van.waveClock <= 0 && state.van.bursts < 3 && state.enemies.length <= 2) {
       state.van.bursts += 1;
@@ -944,13 +1069,17 @@ function update(dt) {
     }
     if (state.finaleSpawned && state.enemies.length === 0 && state.van.charge > 11) {
       state.van.charged = true;
-      ui.objective.textContent = "ESCAPA POR LA RUTA NORTE";
-      banner("¡RUTA DE ESCAPE ABIERTA!", "#7dff38", 1600);
+      repairVan(45);
+      state.player.hp = 100;
+      state.player.lives = Math.min(5, state.player.lives + 1);
+      state.checkpoint = 6200;
+      banner("¡ABRE LA AUTOPISTA! · QUEDAN 4 SECTORES · +1 VIDA", "#7dff38", 2800);
       state.score += 1500;
       blip(740, .24);
     }
   }
-  if ((state.van.charged || state.van.destroyed) && (state.van.boarded ? state.van.x >= EXIT_X : player.x >= EXIT_X)) { completeMission(true); return; }
+  updateDriveRoute(dt);
+  if (state.extractionOpen && (state.van.boarded ? state.van.x >= EXIT_X : player.x >= EXIT_X)) { completeMission(true); return; }
 
   updateBullets(dt);
   updateDestroyedProps();
@@ -990,7 +1119,7 @@ function updateBullets(dt) {
         const layout = vanLayout(state.van.x);
         const vanBox = { x: state.van.x + 48, y: layout.y + 36, w: layout.vanW - 90, h: layout.vanH - 70 };
         if (rectsOverlap(bulletBox, vanBox)) {
-          damageVan(bullet.explosive ? 18 : bullet.tankShell ? 20 : 8);
+          damageVan(bullet.tankShell ? 14 : bullet.explosive ? 12 : 5);
           if (bullet.explosive) detonate(bullet.x, bullet.y, 0, 74, bullet.color);
           return false;
         }
@@ -1063,7 +1192,8 @@ function updateEnemies(dt) {
     if (!stationary && gap < 620 && gap > bodySeparation) enemy.x += enemy.dir * enemy.speed * dt;
     if (enemy.type === "grenadier" && gap < 250) enemy.x -= enemy.dir * 40 * dt;
     enemy.y = (enemy.floor ?? terrainAt(enemy.x)) - enemy.h;
-    enemy.shot = gap < 530 ? enemy.shot - dt : Math.max(enemy.shot, .24);
+    if (enemy.type === "bat") enemy.y -= 210 + Math.sin(enemy.phase * 3) * 48;
+    enemy.shot = gap < 630 ? enemy.shot - dt : Math.max(enemy.shot, .24);
     const isBoss = ["sprayboss", "juiceboss", "rockboss", "birdboss", "wolfboss", "drumboss"].includes(enemy.type);
     if (isBoss && !enemy.enraged && enemy.hp <= enemy.maxHp * .5) {
       enemy.enraged = true;
@@ -1072,10 +1202,14 @@ function updateEnemies(dt) {
       state.cameraShake = Math.max(state.cameraShake, 12);
       spark(enemy.x + enemy.w / 2, enemy.y + enemy.h * .32, "#ff7048", 18);
     }
-    if (gap < 530 && enemy.shot <= 0) {
+    if (gap < 630 && enemy.shot <= 0 && enemy.type !== "crawler") {
       const cooldown = enemy.type === "sprayboss" ? 1.15 : enemy.type === "rockboss" ? 1.65 : enemy.type === "birdboss" ? 1.35 : enemy.type === "wolfboss" ? 1.08 : enemy.type === "drumboss" ? .9 : enemy.type === "tanklet" ? 2.1 : enemy.type === "turret" ? 1.15 : enemy.type === "speaker" ? .68 : enemy.type === "grenadier" ? 1.7 : 1.4 + Math.random() * .8;
       enemy.shot = enemy.enraged ? cooldown * .68 : cooldown;
-      if (enemy.type === "sprayboss") {
+      if (enemy.type === "spitter" || enemy.type === "bat") {
+        const x = enemy.x + enemy.w / 2, y = enemy.y + enemy.h * .3;
+        const aim = direction(player.x + player.w / 2 - x, player.y + player.h * .5 - y);
+        state.bullets.push({ x, y, vx: aim.x * 260, vy: aim.y * 260, w: 20, h: 20, life: 3, friendly: false, color: "#b4ff38", damage: 10 });
+      } else if (enemy.type === "sprayboss") {
         for (let sprayIndex = 0; sprayIndex < 5; sprayIndex += 1) {
           state.bullets.push({ x: enemy.x + (enemy.dir < 0 ? -12 : enemy.w + 12), y: enemy.y + 72 + (sprayIndex - 2) * 12, vx: enemy.dir * (290 + sprayIndex * 22), vy: (sprayIndex - 2) * 26, w: 24, h: 18, life: 3, friendly: false, spray: true, color: sprayIndex % 2 ? "#4defff" : "#ff9a31" });
         }
@@ -1112,7 +1246,7 @@ function updateEnemies(dt) {
     const contactRange = ["sprayboss", "juiceboss", "rockboss", "birdboss", "wolfboss", "drumboss"].includes(enemy.type) ? 118 : enemy.type === "tanklet" ? 132 : bodySeparation + 8;
     if (gap < contactRange && Math.abs(player.y - enemy.y) < 82) {
       const contactDamage = ["sprayboss", "juiceboss", "rockboss", "birdboss", "wolfboss", "drumboss"].includes(enemy.type) ? 20 : enemy.type === "brute" || enemy.type === "tanklet" ? 16 : 9;
-      if (state.van.boarded) damageVan(Math.ceil(contactDamage * .45));
+      if (state.van.boarded) damageVan(Math.ceil(contactDamage * .35));
       else hurtPlayer(contactDamage);
     }
   });
@@ -1129,7 +1263,7 @@ function updateEnemies(dt) {
       const weaponDrop = weaponDropFor(enemy);
       if (weaponDrop) state.pickups.push({ x: enemy.x + enemy.w / 2, y: terrainAt(enemy.x) - 44, type: "weapon", weapon: weaponDrop, life: 18, bob: Math.random() * 4 });
       if (Math.random() < .3) state.pickups.push({ x: enemy.x, y: enemy.y, type: Math.random() < .55 ? "energy" : "score", life: 10, bob: Math.random() * 4 });
-    } else survivors.push(enemy);
+    } else if (enemy.roadGate != null || enemy.x > player.x - 1600) survivors.push(enemy);
   });
   state.enemies = survivors;
 }
@@ -1151,8 +1285,9 @@ function updatePickups(dt) {
   const player = state.player;
   state.pickups = state.pickups.filter((pickup) => {
     pickup.life -= dt; pickup.bob += dt * 4;
-    if (distance(pickup.x, player.x + player.w / 2) < 60 && pickup.y > player.y - 15 && pickup.y < player.y + player.h + 20) {
-      if (pickup.type === "weapon") equipWeapon(pickup.weapon);
+    if ((state.van.boarded && pickup.x > state.van.x && pickup.x < state.van.x + 610) || (distance(pickup.x, player.x + player.w / 2) < 60 && pickup.y > player.y - 15 && pickup.y < player.y + player.h + 20)) {
+      if (pickup.type === "repair") { const wasDestroyed = state.van.destroyed; repairVan(28); player.hp = Math.min(100, player.hp + 25); if (!wasDestroyed) banner(state.van.boarded ? "REPARACIÓN +28" : "SALUD +25", "#7dff38", 850); }
+      else if (pickup.type === "weapon") equipWeapon(pickup.weapon);
       else if (pickup.type === "energy") { player.energy = clamp(player.energy + 25, 0, 100); banner("ENERGÍA +25", "#4defff", 500); }
       else state.score += 300;
       blip(820, .05); return false;
@@ -1163,7 +1298,7 @@ function updatePickups(dt) {
 
 function updateHud() {
   const player = state.player;
-  ui.health.style.width = `${clamp(player.hp, 0, 100)}%`;
+  ui.health.style.width = `${clamp(state.van.boarded ? state.van.hp : player.hp, 0, 100)}%`;
   ui.energy.style.width = `${clamp(player.energy, 0, 100)}%`;
   ui.lives.textContent = String(player.lives).padStart(2, "0");
   const weapon = WEAPONS[player.weapon] ?? WEAPONS.pistol;
@@ -1179,12 +1314,16 @@ function updateHud() {
   ui.rush.textContent = rushActive ? `RUSH ×${state.rush.multiplier} · ${state.rush.chain} BAJAS` : "RUSH · LISTO";
   ui.rush.classList.toggle("hot", rushActive && state.rush.multiplier > 1);
   ui.score.textContent = formatScore(state.score);
+  const progress = Math.min(100, Math.floor(player.x / EXIT_X * 100));
+  ui.progress.value = progress;
+  ui.route.textContent = `${SECTOR_NAMES[state.sector - 1]} · ${progress}%`;
   const van = state.van;
   let objective = "RUMBO A LA FURGONETA";
-  if (van.destroyed) objective = "FURGONETA CAÍDA · SIGUE A PIE";
-  else if (van.charged) objective = "ESCAPA POR LA RUTA NORTE";
+  if (van.destroyed) objective = `SIGUE A PIE · ${state.roadGate}/4 CONTROLES`;
+  else if (state.extractionOpen) objective = "RUTA DESPEJADA · A LA EXTRACCIÓN";
+  else if (van.charged) objective = `${state.roadBossActive ? "DESTRUYE EL CONTROL" : SECTOR_NAMES[state.sector - 1]} · ${state.roadGate}/4 · VAN ${Math.ceil(van.hp)}%`;
   else if (van.boarded) {
-    const phase = state.finaleSpawned ? "JEFE FINAL" : `OLEADA ${Math.max(1, van.bursts)}/3`;
+    const phase = state.finaleSpawned ? "JEFE DEL DEPÓSITO" : `OLEADA ${Math.max(1, van.bursts)}/3`;
     objective = `${phase} · VAN ${Math.ceil(van.hp)}%`;
   }
   if (ui.objective.textContent !== objective) ui.objective.textContent = objective;
@@ -1209,7 +1348,8 @@ function draw() {
 
 function drawSky() {
   const gradient = ctx.createLinearGradient(0, 0, 0, H);
-  gradient.addColorStop(0, "#071827"); gradient.addColorStop(.56, "#102d3a"); gradient.addColorStop(1, "#221922");
+  const colors = state.sector >= 9 ? ["#140c29", "#281b3c", "#281a28"] : state.sector >= 8 ? ["#260d12", "#4b2524", "#3d261e"] : state.sector >= 7 ? ["#071b19", "#123931", "#253323"] : ["#071827", "#102d3a", "#221922"];
+  gradient.addColorStop(0, colors[0]); gradient.addColorStop(.56, colors[1]); gradient.addColorStop(1, colors[2]);
   ctx.fillStyle = gradient; ctx.fillRect(0, 0, W, H);
   const moonX = 980 - state.camera * .045;
   const moon = ctx.createRadialGradient(moonX, 115, 6, moonX, 115, 130);
@@ -1238,7 +1378,7 @@ function drawSky() {
   for (let index = 0; index < 17; index += 1) {
     const width = 70 + (index * 29) % 140;
     const height = 90 + (index * 47) % 190;
-    const x = ((index * 188) - state.camera * .18) % 1700 - 100;
+    const x = (((index * 188 - state.camera * .18) % 1700 + 1700) % 1700) - 100;
     const base = 560 + (index % 2) * 12;
     ctx.fillRect(x, base - height, width, height);
     ctx.fillStyle = "rgba(125,255,56,.12)";
@@ -1247,7 +1387,7 @@ function drawSky() {
   }
   ctx.strokeStyle = "rgba(77,239,255,.24)"; ctx.lineWidth = 2;
   for (let tower = 0; tower < 5; tower += 1) {
-    const x = ((tower * 320 + 130) - state.camera * .2) % 1500;
+    const x = ((tower * 320 + 130 - state.camera * .2) % 1500 + 1500) % 1500;
     ctx.beginPath(); ctx.moveTo(x, 470); ctx.lineTo(x + 16, 335); ctx.lineTo(x + 34, 470); ctx.moveTo(x + 7, 405); ctx.lineTo(x + 27, 405); ctx.stroke();
   }
 }
@@ -1330,6 +1470,16 @@ function drawWorld() {
     ctx.fillStyle = "#7dff38"; ctx.fillRect(x, platform.y, platform.w, 4);
     ctx.fillStyle = "rgba(0,0,0,.38)"; ctx.fillRect(x + 10, platform.y + 8, platform.w - 20, 5);
   });
+  const gate = ROAD_GATES[state.roadGate];
+  if (gate && state.van.charged) {
+    const gx = worldX(gate.x + 600), gy = terrainAt(gate.x + 600);
+    if (gx > -100 && gx < W + 100) {
+      ctx.fillStyle = "#27323b"; ctx.fillRect(gx - 12, gy - 300, 24, 300);
+      ctx.fillStyle = "#ff7048";
+      for (let rung = 0; rung < 6; rung++) ctx.fillRect(gx - 55, gy - 260 + rung * 40, 110, 12);
+      ctx.font = "18px Impact"; ctx.textAlign = "center"; ctx.fillText(`CONTROL ${state.roadGate + 1}/4`, gx, gy - 320); ctx.textAlign = "left";
+    }
+  }
   drawRoadsideDetails(left, right);
   drawVehicles();
   drawProps();
@@ -1337,9 +1487,9 @@ function drawWorld() {
   if (vanScreenX > -780 && vanScreenX < W + 160) drawVan(vanScreenX);
   const exit = worldX(EXIT_X);
   if (exit > -100 && exit < W + 100) {
-    ctx.fillStyle = state.van.charged ? "#7dff38" : "#5c1924";
+    ctx.fillStyle = state.extractionOpen ? "#7dff38" : "#5c1924";
     ctx.fillRect(exit, 280, 12, terrainAt(EXIT_X) - 280);
-    ctx.fillStyle = "#f6f1de"; ctx.font = "18px Impact"; ctx.fillText(state.van.charged ? "SALIDA" : "BLOQUEADO", exit - 35, 264);
+    ctx.fillStyle = "#f6f1de"; ctx.font = "18px Impact"; ctx.fillText(state.extractionOpen ? "SALIDA" : "BLOQUEADO", exit - 35, 264);
   }
 }
 
@@ -1410,7 +1560,7 @@ function drawVehicle(vehicle, x, top) {
 }
 
 function drawVan(x) {
-  const active = state.van.active && !state.van.charged && !state.van.destroyed;
+  const active = state.van.active && !state.van.destroyed;
   const image = art.van;
   const { vanW, vanH, y, driverGround, roofGround } = vanLayout(vanWorldX());
   if (active) {
@@ -1429,7 +1579,7 @@ function drawVan(x) {
   }
   const labelX = x + 168;
   ctx.fillStyle = "rgba(2,11,12,.82)"; ctx.fillRect(labelX, y + 320, 280, 34);
-  ctx.fillStyle = state.van.destroyed ? "#ff7048" : "#7dff38"; ctx.font = "20px Impact"; ctx.fillText(state.van.destroyed ? "FURGONETA DESTROZADA" : state.van.charged ? "FURGONETA LISTA" : active ? "CARGANDO SONIDO" : "FURGONETA RESONANTE", labelX + 14, y + 343);
+  ctx.fillStyle = state.van.destroyed ? "#ff7048" : "#7dff38"; ctx.font = "20px Impact"; ctx.fillText(state.van.destroyed ? "FURGONETA DESTROZADA" : state.van.charged ? "FURGONETA EN MARCHA" : active ? "CARGANDO SONIDO" : "FURGONETA RESONANTE", labelX + 14, y + 343);
   if (active) {
     const ratio = clamp(state.van.charge / 11, 0, 1);
     ctx.fillStyle = "#0a1515"; ctx.fillRect(labelX, y + 361, 280, 8);
@@ -1457,7 +1607,7 @@ function drawActors() {
     ctx.shadowColor = ctx.fillStyle; ctx.shadowBlur = weapon ? 18 : 8;
     ctx.fillRect(-14, -14, 28, 28); ctx.shadowBlur = 0;
     ctx.fillStyle = "#071018"; ctx.font = "900 13px Arial"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
-    ctx.fillText(weapon ? ({ machinegun: "M", bomb: "B", rocket: "R", laser: "L" }[pickup.weapon]) : pickup.type === "energy" ? "+" : "$", 0, 1);
+    ctx.fillText(weapon ? ({ machinegun: "M", bomb: "B", rocket: "R", laser: "L" }[pickup.weapon]) : pickup.type === "energy" || pickup.type === "repair" ? "+" : "$", 0, 1);
     ctx.restore();
   });
   state.enemies.forEach(drawEnemy);
@@ -1616,6 +1766,13 @@ function drawEnemy(enemy) {
   ctx.save(); ctx.translate(x + enemy.w / 2, enemy.y + enemy.h / 2 + Math.sin(enemy.phase * 5) * 2);
   if (usesSprite ? enemy.dir > 0 : enemy.dir < 0) ctx.scale(-1, 1);
   const flash = enemy.hit > 0;
+  if (["crawler", "spitter", "bat"].includes(enemy.type)) {
+    drawMonster(enemy, flash);
+    ctx.restore();
+    ctx.fillStyle = "#122018"; ctx.fillRect(x, enemy.y - 12, enemy.w, 5);
+    ctx.fillStyle = "#a7ff50"; ctx.fillRect(x, enemy.y - 12, enemy.w * clamp(enemy.hp / enemy.maxHp, 0, 1), 5);
+    return;
+  }
   if (bossSprite) {
     const sheet = art.bossSheets[bossSprite.image];
     const frame = flash ? 1 : enemy.shot < .28 ? 2 : Math.floor(enemy.phase * 2) % 2;
@@ -1713,6 +1870,43 @@ function drawEnemy(enemy) {
   }
   ctx.restore();
   ctx.fillStyle = "rgba(0,0,0,.7)"; ctx.fillRect(x, enemy.y - 12, enemy.w, 5); ctx.fillStyle = enemy.type === "brute" ? "#ff7844" : "#ffce55"; ctx.fillRect(x, enemy.y - 12, enemy.w * clamp(enemy.hp / enemy.maxHp, 0, 1), 5);
+}
+
+// Original, articulated creatures: claws crawl, wings flap and acid sacks pulse.
+// Kept as vector art so the new enemies add no sprite downloads to mobile play.
+function drawMonster(enemy, flash) {
+  const wing = Math.sin(enemy.phase * 11) * 23;
+  const skin = flash ? "#fffbd1" : enemy.type === "bat" ? "#7c3b95" : enemy.type === "spitter" ? "#406a36" : "#694d34";
+  ctx.lineJoin = "round";
+  if (enemy.type === "bat") {
+    ctx.fillStyle = skin;
+    for (const sign of [-1, 1]) {
+      ctx.beginPath(); ctx.moveTo(0, 7); ctx.lineTo(sign * 59, -32 + wing);
+      ctx.lineTo(sign * 45, 12); ctx.lineTo(sign * 22, -3); ctx.lineTo(sign * 12, 24); ctx.closePath(); ctx.fill();
+      ctx.strokeStyle = "#c56bd5"; ctx.lineWidth = 2; ctx.stroke();
+    }
+    ctx.fillStyle = flash ? "#fffbd1" : "#291d3c"; ctx.beginPath(); ctx.ellipse(0, 4, 18, 27, 0, 0, Math.PI * 2); ctx.fill();
+  } else {
+    ctx.strokeStyle = skin; ctx.lineWidth = 12;
+    for (let leg = -1; leg <= 1; leg++) {
+      const bend = Math.sin(enemy.phase * 9 + leg * 2) * 9;
+      ctx.beginPath(); ctx.moveTo(leg * 20, 12); ctx.lineTo(leg * 25 - 15, 27 + bend); ctx.lineTo(leg * 28 - 6, enemy.h * .47); ctx.stroke();
+    }
+    ctx.fillStyle = skin; ctx.beginPath(); ctx.ellipse(-7, 0, enemy.w * .38, enemy.h * .3, -.2, 0, Math.PI * 2); ctx.fill();
+    if (enemy.type === "spitter") {
+      ctx.fillStyle = "#9edc42"; ctx.globalAlpha = .7 + Math.sin(enemy.phase * 4) * .2;
+      ctx.beginPath(); ctx.ellipse(-20, 6, 26, 32, -.3, 0, Math.PI * 2); ctx.fill(); ctx.globalAlpha = 1;
+    }
+    ctx.fillStyle = "#e4d8b0";
+    for (let spike = 0; spike < 4; spike++) {
+      ctx.beginPath(); ctx.moveTo(-38 + spike * 18, -20); ctx.lineTo(-30 + spike * 18, -48 + spike * 4); ctx.lineTo(-20 + spike * 18, -18); ctx.fill();
+    }
+  }
+  ctx.fillStyle = skin; ctx.beginPath(); ctx.ellipse(24, -18, 26, 22, -.15, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = "#f5ff72"; ctx.beginPath(); ctx.ellipse(34, -25, 8, 5, -.2, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = "#10131b"; ctx.fillRect(37, -29, 3, 9); ctx.fillRect(26, -9, 25, 9);
+  ctx.fillStyle = "#fff0c0";
+  for (let tooth = 0; tooth < 4; tooth++) { ctx.beginPath(); ctx.moveTo(28 + tooth * 6, -9); ctx.lineTo(30 + tooth * 6, -1); ctx.lineTo(33 + tooth * 6, -9); ctx.fill(); }
 }
 
 function drawDeathBoss(enemy) {

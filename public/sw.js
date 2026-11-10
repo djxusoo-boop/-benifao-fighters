@@ -1,5 +1,5 @@
 const CACHE_PREFIX = "hardcore-fighters-";
-const CACHE_NAME = `${CACHE_PREFIX}ipad-v2-35-0`;
+const CACHE_NAME = `${CACHE_PREFIX}ipad-v2-35-1`;
 
 const OFFLINE_CORE = [
   "/",

@@ -20,11 +20,12 @@ async function mission() {
     if (!elements.has(id)) elements.set(id, element());
     return elements.get(id);
   };
-  const win = { ...element(), location: { search: "" }, setTimeout() {} };
+  const win = { ...element(), location: { search: "", origin: "http://localhost" }, setTimeout() {}, dispatchEvent() {} };
+  win.parent = win;
   const fire = select('[data-key="fire"]');
   fire.dataset = { key: "fire" };
   const context = vm.createContext({
-    Image: class {}, URLSearchParams, window: win, performance: { now: () => 0 },
+    Image: class {}, CustomEvent: class { constructor(type, options) { this.type = type; this.detail = options.detail; } }, URLSearchParams, window: win, performance: { now: () => 0 },
     document: { ...element(), createElement: element, querySelector: select, querySelectorAll: () => [fire] },
     requestAnimationFrame: () => 1, cancelAnimationFrame() {},
   });
@@ -125,4 +126,62 @@ test("Prison Slug treats a long touch as game input, never selected text", async
     "a gameplay hold must cancel browser text selection");
   assert.match(game, /document\.addEventListener\("dragstart", \(event\) => \{\s*if \(state\?\.status === "playing"\) event\.preventDefault\(\);/,
     "a gameplay hold must not begin a drag gesture");
+});
+
+test("boarding opens a long road; reaching the former exit cannot finish the mission", async () => {
+  const { run } = await mission();
+  assert.ok(run("WORLD_END >= 18000 && EXIT_X - VAN_X > 12000"));
+  run("state.player.x = VAN_X + 300; activateVan(); state.van.charged = true; state.van.x = 5880; update(1/60)");
+  assert.equal(run("state.status"), "playing");
+  assert.equal(run("state.extractionOpen"), false);
+  assert.ok(run("travelLimit() > 7000"));
+});
+
+test("four checkpoints require their defenders defeated and only then unlock extraction", async () => {
+  const { run } = await mission();
+  run("state.player.x = VAN_X + 300; activateVan(); state.van.charged = true;");
+  for(let gate = 0; gate < 4; gate++) {
+    run(`state.player.x = ROAD_GATES[${gate}].x; updateDriveRoute(1/60)`);
+    assert.equal(run("state.roadBossActive"), true);
+    assert.equal(run("state.roadGate"), gate);
+    assert.equal(run("state.enemies.filter(e => e.roadGate === state.roadGate).length"), 3);
+    run("updateDriveRoute(1/60)");
+    assert.equal(run("state.roadGate"), gate);
+    run("for(const e of state.enemies) if(e.roadGate === state.roadGate) e.hp = 0; updateDriveRoute(1/60)");
+    assert.equal(run("state.roadGate"), gate+1);
+    assert.equal(run("state.extractionOpen"), gate === 3);
+  }
+  run("state.enemies = []; state.driveWave = DRIVE_ENCOUNTERS.length; state.van.x = EXIT_X; update(1/60)");
+  assert.equal(run("state.status"), "complete");
+});
+
+test("destroying the van cannot bypass any checkpoint and the route remains playable on foot", async () => {
+  const { run } = await mission();
+  run("state.player.x = VAN_X + 300; activateVan(); damageVan(100); state.van.charged = true; state.player.x = ROAD_GATES[0].x; updateDriveRoute(1/60)");
+  assert.equal(run("state.van.destroyed && !state.van.boarded"), true);
+  assert.equal(run("state.roadBossActive"), true);
+  assert.equal(run("state.extractionOpen"), false);
+  run("state.player.x = EXIT_X; updateOnFoot(1/60)");
+  assert.ok(run("state.player.x < EXIT_X && state.player.x <= ROAD_GATES[0].x + 290"));
+});
+
+test("road ambushes spawn once, repairs reach the driver, and every terrain joint is continuous", async () => {
+  const { run } = await mission();
+  run("state.player.x = VAN_X + 300; activateVan(); state.van.charged = true; state.player.x = 6200; updateDriveRoute(1/60); updateDriveRoute(1/60)");
+  assert.equal(run("state.driveWave"), 1);
+  assert.equal(run("state.enemies.length"), 3);
+  run("state.van.hp = 20; state.pickups = [{x: state.van.x + 150, y: 10, type: 'repair', life: 60, bob: 0}]; updatePickups(1/60)");
+  assert.equal(run("state.van.hp"), 48);
+  assert.ok(run("TERRAIN.every((segment,i) => i===0 || segment.x1===TERRAIN[i-1].x2 && segment.y1===TERRAIN[i-1].y2)"));
+  assert.ok(run("DRIVE_ENCOUNTERS.length >= 10 && ROAD_GATES.length === 4"));
+});
+
+
+test("a repair kit restores a wrecked van without jumping past the next checkpoint", async () => {
+  const { run } = await mission();
+  run("state.player.x = VAN_X + 300; activateVan(); state.van.charged = true; damageVan(100); state.player.x = 6500; repairVan(28)");
+  assert.ok(run("state.van.boarded && state.van.active && !state.van.destroyed"));
+  assert.equal(run("state.van.hp"), 55);
+  assert.ok(run("state.van.x < ROAD_GATES[0].x && state.player.x > 6200 && state.player.x < 6600"));
+  assert.equal(run("state.roadGate"), 0);
 });

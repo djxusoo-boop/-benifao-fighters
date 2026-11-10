@@ -170,3 +170,13 @@ kbd { display: inline-block; min-width: 18px; margin: 0 2px; padding: 3px 5px; b
 @media (prefers-reduced-motion: reduce) {
   .rush-readout.hot { animation: none; }
 }
+
+.mission-progress { position:absolute; z-index:2; top:100px; left:22px; right:22px; pointer-events:none; display:flex; align-items:center; gap:12px; padding:5px 12px; background:#09141c; font:700 11px system-ui,sans-serif; color:#b8e3cf; }
+.mission-progress span { min-width:160px; }
+.mission-progress progress { width:100%; height:7px; accent-color:#7dff38; }
+#slugRankingForm input { user-select:text; -webkit-user-select:text; padding:10px; color:#fff; background:#142333; border:1px solid #698173; border-radius:6px; max-width:100%; }
+
+@media (max-width: 720px), (max-height: 600px) {
+  .mission-progress { top:82px; left:10px; right:10px; font-size:8px; padding:3px 6px; gap:8px; }
+  .mission-progress span { min-width:125px; }
+}

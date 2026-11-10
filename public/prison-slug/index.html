@@ -6,13 +6,13 @@
     <meta name="theme-color" content="#0b1017" />
     <title>HARDCORE FIGHTERS · PRISON SLUG</title>
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='10' fill='%23071018'/%3E%3Cpath d='M12 12h24c10 0 17 7 17 17S46 46 36 46H25v8H12V12zm13 12v10h10c3 0 5-2 5-5s-2-5-5-5H25z' fill='%237dff38'/%3E%3C/svg%3E" />
-    <link rel="stylesheet" href="styles.css?v=2.35.0" />
+    <link rel="stylesheet" href="styles.css?v=2.35.1" />
   </head>
   <body>
     <main class="app-shell">
       <header class="masthead">
         <div>
-          <p class="eyebrow">PRISON SLUG · MISIÓN 01</p>
+          <p class="eyebrow">PRISON SLUG · RUTA NORTE</p>
           <h1>PRISON <em>SLUG</em></h1>
         </div>
         <span data-online-count>ONLINE · CONECTANDO</span>
@@ -23,7 +23,7 @@
         <div class="mission-copy">
           <p class="eyebrow">RUN &amp; GUN ORIGINAL</p>
           <h2 id="selectTitle">ELIGE A TU HÉROE</h2>
-          <p>Recupera la <strong>Furgoneta Resonante</strong>, activa su muro de altavoces y abre la ruta de escape. Cada héroe tiene un especial distinto.</p>
+          <p>Recupera la <strong>Furgoneta Resonante</strong> y conduce por una misión de 10 sectores. Cruza la autopista mutante, el canal tóxico, la fundición y la fortaleza hasta la extracción. Cada héroe tiene un especial distinto.</p>
         </div>
         <div id="characterCards" class="character-cards" aria-label="Selección de personaje"></div>
         <div class="select-actions">
@@ -53,6 +53,7 @@
           </div>
         </div>
 
+        <div class="mission-progress"><span id="routeReadout">BARRIO PRISON · 0%</span><progress id="routeProgress" max="100" value="0" aria-label="Recorrido de la misión"></progress></div>
         <div class="canvas-frame">
           <canvas id="gameCanvas" width="1280" height="720" aria-label="Aventura lateral de acción"></canvas>
           <div id="eventBanner" class="event-banner" aria-live="assertive"></div>
@@ -96,8 +97,8 @@
         </div>
       </section>
     </main>
-    <script src="/presence.js?v=2.35.0" defer></script>
-    <script src="ranking.js?v=2.35.0" defer></script>
-    <script src="game.js?v=2.35.0"></script>
+    <script src="/presence.js?v=2.35.1" defer></script>
+    <script src="ranking.js?v=2.35.1" defer></script>
+    <script src="game.js?v=2.35.1"></script>
   </body>
 </html>
