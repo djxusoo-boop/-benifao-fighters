@@ -3,6 +3,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import type { CSSProperties, MouseEvent as ReactMouseEvent, PointerEvent as ReactPointerEvent } from "react";
+import GameIntro from "./GameIntro";
+import OnlineCount from "./OnlineCount";
+import OnlineRoom, { type OnlineInput } from "./OnlineRoom";
+import type { RoomRole } from "./online-peer";
 import OrbMode from "./OrbMode";
 import PlatformMode from "./PlatformMode";
 import CoopMode from "./CoopMode";
@@ -161,7 +165,7 @@ const STAGES = [
 
 const GAME_TITLE = "HARDCORE FIGHTERS";
 const GAME_EDITION = "WEB · ARCADE EDITION";
-const GAME_VERSION = "V2.35.1";
+const GAME_VERSION = "V2.35.2";
 
 const ROUND_SECONDS = 99;
 const SUPER_MAX = 100;
@@ -423,11 +427,194 @@ function SpecialEffect({ move, side, origin, target, arenaWidth, direction, airb
   );
 }
 
+
+type FightView = {
+  geometry?: Record<Side, { width: number; height: number; bottom: number }>;
+  stage: typeof STAGES[number]; game: GameState; trainingMode: boolean;
+  playerData: typeof FIGHTERS[FighterId]; cpuData: typeof FIGHTERS[FighterId];
+  superMeter: Record<Side, number>; roundWins: Record<Side, number>; roundNumber: number; battleMode: BattleMode; stageIndex: number;
+  fightPickup: FightPickup | null; selected: FighterId; opponent: FighterId; playerVictory: boolean; cpuVictory: boolean;
+  playerWalkIntent: WalkIntent; cpuWalkIntent: WalkIntent; movementGear: Record<Side, MovementGear>; facing: Record<Side, string>;
+  immuneClock: number; immuneUntil: Record<Side, number>; stunned: Record<Side, boolean>; superAnim: Record<Side, SuperAnim | null>;
+  lowAttack: Record<Side, boolean>; passiveBadge: Record<Side, { text: string; id: number } | null>; combo: Record<Side, number>;
+  damagePops: DamagePop[]; passiveDog: { side: Side; id: number } | null; superFx: SuperFx; superFlash: SuperFlash; fightCall: FightCall; arenaWidth: number;
+};
+function FightScene({ view, playerFighterRef, cpuFighterRef }: { view: FightView; playerFighterRef?: React.RefObject<HTMLDivElement | null>; cpuFighterRef?: React.RefObject<HTMLDivElement | null> }) {
+  const { stage, game, trainingMode, playerData, cpuData, superMeter, roundWins, roundNumber, battleMode, stageIndex, fightPickup, selected, opponent, playerVictory, cpuVictory, playerWalkIntent, cpuWalkIntent, movementGear, facing, immuneClock, immuneUntil, stunned, superAnim, lowAttack, passiveBadge, combo, damagePops, passiveDog, superFx, superFlash, fightCall, arenaWidth } = view;
+  return <>        <div className="stage-slideshow" aria-hidden="true">
+          <div
+            className="stage-backdrop active"
+            key={stage.id}
+            style={{ backgroundImage: `linear-gradient(180deg, rgba(5, 7, 12, 0.01), rgba(12, 5, 3, 0.2)), url("${stage.image}")` }}
+          />
+        </div>
+        <div className="stage-glow" aria-hidden="true" />
+        <div className="stage-sign" key={stage.id} aria-hidden="true">
+          <small>{stage.eyebrow}</small>
+          <strong>{stage.name}</strong>
+          <span>{stage.detail}</span>
+        </div>
+
+        <div className="hud" aria-label="Marcador del combate">
+          <div className={`fighter-hud player-hud ${game.playerAction === "hit" || game.playerAction === "launched" ? "damaged" : ""}`}>
+            <div className="hud-name"><span>1P · {Math.ceil(game.playerHealth)}%</span>{playerData.name}</div>
+            <div className={`health-track ${game.playerHealth <= 25 ? "critical" : ""}`}><i className="health-trail" style={{ width: `${game.playerHealth}%` }} /><span style={{ width: `${game.playerHealth}%` }} /></div>
+            <div className={`super-meter ${superMeter.player >= SUPER_MAX ? "full" : ""}`} aria-label={`Barra de super ${Math.round(superMeter.player)}%`}><span style={{ width: `${superMeter.player}%` }} /><b>{superMeter.player >= SUPER_MAX ? "¡SUPER LISTO! · L" : `SUPER ${Math.round(superMeter.player)}%`}</b></div>
+            <div className="round-pips" aria-label={`${roundWins.player} rondas ganadas`}><i className={roundWins.player >= 1 ? "won" : ""} /><i className={roundWins.player >= 2 ? "won" : ""} /></div>
+          </div>
+          <div className="timer" aria-label={trainingMode ? "Entrenamiento sin límite" : `${game.timer} segundos`}><small>{trainingMode ? "TRAIN" : `R${roundNumber}`}</small><span>{trainingMode ? "∞" : String(game.timer).padStart(2, "0")}</span></div>
+          <div className={`fighter-hud cpu-hud ${game.cpuAction === "hit" || game.cpuAction === "launched" ? "damaged" : ""}`}>
+            <div className="hud-name">{cpuData.name}<span>{battleMode === "local" ? "2P" : "CPU"} · {Math.ceil(game.cpuHealth)}%</span></div>
+            <div className={`health-track ${game.cpuHealth <= 25 ? "critical" : ""}`}><i className="health-trail" style={{ width: `${game.cpuHealth}%` }} /><span style={{ width: `${game.cpuHealth}%` }} /></div>
+            <div className={`super-meter ${superMeter.cpu >= SUPER_MAX ? "full" : ""}`} aria-label={`Barra de super rival ${Math.round(superMeter.cpu)}%`}><span style={{ width: `${superMeter.cpu}%` }} /><b>{superMeter.cpu >= SUPER_MAX ? "¡SUPER LISTO!" : `SUPER ${Math.round(superMeter.cpu)}%`}</b></div>
+            <div className="round-pips" aria-label={`${roundWins.cpu} rondas ganadas`}><i className={roundWins.cpu >= 1 ? "won" : ""} /><i className={roundWins.cpu >= 2 ? "won" : ""} /></div>
+          </div>
+        </div>
+
+        <div className="ground-mark ground-mark-one" aria-hidden="true" />
+        <div className="ground-mark ground-mark-two" aria-hidden="true" />
+
+        {(game.phase === "intro" || game.phase === "fight" || game.phase === "ko") && (
+          <ArcadeCrowd
+            mode="fight"
+            seed={stageIndex}
+            phase={game.phase}
+            react={game.phase === "fight" && Boolean(game.impact)}
+            cue={fightPickup && game.phase === "fight" ? {
+              direction: fightPickup.x < 46 ? "left" : fightPickup.x > 54 ? "right" : "center",
+              label: ARCADE_PICKUPS[fightPickup.kind].label,
+            } : null}
+          />
+        )}
+
+        {(game.phase === "intro" || game.phase === "fight" || game.phase === "ko") && (
+          <div className={`fight-referee ${game.phase === "intro" ? "start" : game.phase === "fight" ? "watch" : "ko"} ${game.phase === "fight" && game.impact ? (game.impact % 2 ? "react-a" : "react-b") : ""}`} aria-label="Árbitro del combate" role="img">
+            <span className="fight-referee-art" />
+            <b>{game.phase === "intro" ? "¡PREPARADOS!" : game.phase === "ko" ? "¡COMBATE TERMINADO!" : "ÁRBITRO"}</b>
+          </div>
+        )}
+
+        {fightPickup && game.phase === "fight" && (
+          <div className={`fight-pickup pickup-${fightPickup.kind}`} style={{ left: `${fightPickup.x}%` }} aria-label={`${ARCADE_PICKUPS[fightPickup.kind].label}, objeto de inmunidad`} role="img">
+            <Image src={ARCADE_PICKUPS[fightPickup.kind].image} alt="" width={120} height={120} unoptimized />
+            <b>¡INMUNIDAD!</b>
+          </div>
+        )}
+
+        {game.phase !== "select" && <>
+          <div ref={playerFighterRef} className={`fighter motion-rig ${selected} ${game.playerAction} ${game.playerMove ?? ""} combo-step-${game.playerAttackVariant} pose-phase-${game.playerPosePhase} ${playerVictory ? "winner-dance" : cpuVictory ? "defeated" : ""} ${game.playerAirborne ? "airborne" : ""} ${game.playerAction === "walk" ? `${playerWalkIntent} gear-${movementGear.player}` : ""} ${facing.player} ${immuneClock < immuneUntil.player ? "immune" : ""} ${stunned.player ? "stunned" : ""} ${superAnim.player ? "super-anim" : ""} ${lowAttack.player && (game.playerAction === "punch" || game.playerAction === "kick") ? "low-attack" : ""}`} style={{ left: `${game.playerX}%`, "--remote-width": `${view.geometry?.player.width ?? 20}%`, "--remote-height": `${view.geometry?.player.height ?? 50}%`, "--remote-bottom": `${view.geometry?.player.bottom ?? 12}%` } as CSSProperties} aria-label={`${playerData.name}, jugador`} role="img">
+            <div className="fighter-motion">{superAnim.player && (
+              <span className="super-body" aria-hidden="true" style={{ height: `${SUPER_ANIM[superAnim.player.fighter].size * 100}%`, bottom: `${SUPER_ANIM[superAnim.player.fighter].bottom * 100}%`, backgroundImage: `url("${superFrame(superAnim.player.fighter, superAnim.player.frame)}")` }} />
+            )}<div className="fighter-pose">
+              <div className={`fighter-art ${selected} ${facing.player}`}>{!(["cesaret", "borja", "bacora", "bonviure", "elchica", "ogalla", "xuso", "bomba", "tonimassama"] as FighterId[]).includes(selected) && <FighterWalkLayers />}</div>
+              {stunned.player && <b className="stun-word">★ ¡MAREADO! ★</b>}
+              {passiveBadge.player && <b key={passiveBadge.player.id} className="passive-word">{passiveBadge.player.text}</b>}
+              {immuneClock < immuneUntil.player && <b className="immune-word">INMUNE · {Math.max(1, Math.ceil((immuneUntil.player - immuneClock) / 1000))}s</b>}
+              {game.playerAirborne && (game.playerAction === "punch" || game.playerAction === "kick" || game.playerAction === "special") && <b className="air-attack-word">¡AÉREO!</b>}
+              {(game.playerAction === "hit" || game.playerAction === "launched" || game.playerAction === "knockdown") && <b className="hit-word">{game.playerAction === "launched" ? "¡VUELA!" : game.playerAction === "knockdown" ? "¡AL SUELO!" : "CRASH!"}</b>}
+            </div></div>
+            <span className="fighter-shadow" />
+          </div>
+          <div ref={cpuFighterRef} className={`fighter motion-rig ${opponent} cpu ${battleMode === "cpu" ? "cpu-ai" : ""} ${game.cpuAction} ${game.cpuMove ?? ""} combo-step-${game.cpuAttackVariant} pose-phase-${game.cpuPosePhase} ${cpuVictory ? "winner-dance" : playerVictory ? "defeated" : ""} ${game.cpuAirborne ? "airborne" : ""} ${game.cpuAction === "walk" ? `${cpuWalkIntent} gear-${movementGear.cpu}` : ""} ${facing.cpu} ${immuneClock < immuneUntil.cpu ? "immune" : ""} ${stunned.cpu ? "stunned" : ""} ${superAnim.cpu ? "super-anim" : ""} ${lowAttack.cpu && (game.cpuAction === "punch" || game.cpuAction === "kick") ? "low-attack" : ""}`} style={{ left: `${game.cpuX}%`, "--remote-width": `${view.geometry?.cpu.width ?? 20}%`, "--remote-height": `${view.geometry?.cpu.height ?? 50}%`, "--remote-bottom": `${view.geometry?.cpu.bottom ?? 12}%` } as CSSProperties} aria-label={`${cpuData.name}, rival`} role="img">
+            <div className="fighter-motion">{superAnim.cpu && (
+              <span className="super-body" aria-hidden="true" style={{ height: `${SUPER_ANIM[superAnim.cpu.fighter].size * 100}%`, bottom: `${SUPER_ANIM[superAnim.cpu.fighter].bottom * 100}%`, backgroundImage: `url("${superFrame(superAnim.cpu.fighter, superAnim.cpu.frame)}")` }} />
+            )}<div className="fighter-pose">
+              <div className={`fighter-art ${opponent} ${facing.cpu}`}>{!(["cesaret", "borja", "bacora", "bonviure", "elchica", "ogalla", "xuso", "bomba", "tonimassama"] as FighterId[]).includes(opponent) && <FighterWalkLayers />}</div>
+              {stunned.cpu && <b className="stun-word">★ ¡MAREADO! ★</b>}
+              {passiveBadge.cpu && <b key={passiveBadge.cpu.id} className="passive-word">{passiveBadge.cpu.text}</b>}
+              {immuneClock < immuneUntil.cpu && <b className="immune-word">INMUNE · {Math.max(1, Math.ceil((immuneUntil.cpu - immuneClock) / 1000))}s</b>}
+              {game.cpuAirborne && (game.cpuAction === "punch" || game.cpuAction === "kick" || game.cpuAction === "special") && <b className="air-attack-word">¡AÉREO!</b>}
+              {(game.cpuAction === "hit" || game.cpuAction === "launched" || game.cpuAction === "knockdown") && <b className="hit-word">{game.cpuAction === "launched" ? "¡VUELA!" : game.cpuAction === "knockdown" ? "¡AL SUELO!" : "BAM!"}</b>}
+            </div></div>
+            <span className="fighter-shadow" />
+          </div>
+        </>}
+
+        {game.playerMove && (
+          <SpecialEffect
+            move={game.playerMove}
+            side="player"
+            origin={game.playerX}
+            target={game.cpuX}
+            arenaWidth={arenaWidth}
+            direction={game.playerAttackDirection}
+            airborne={game.playerAirborne}
+            color={playerData.color}
+            heavy={game.playerMove === specialFor(selected, 2)}
+          />
+        )}
+        {game.cpuMove && (
+          <SpecialEffect
+            move={game.cpuMove}
+            side="cpu"
+            origin={game.cpuX}
+            target={game.playerX}
+            arenaWidth={arenaWidth}
+            direction={game.cpuAttackDirection}
+            airborne={game.cpuAirborne}
+            color={cpuData.color}
+            heavy={game.cpuMove === specialFor(opponent, 2)}
+          />
+        )}
+
+        {combo.player >= 2 && <div className="combo-callout combo-player"><strong>{combo.player} GOLPES</strong><span>COMBO</span></div>}
+        {combo.cpu >= 2 && <div className="combo-callout combo-cpu"><strong>{combo.cpu} GOLPES</strong><span>{battleMode === "local" ? "COMBO P2" : "COMBO RIVAL"}</span></div>}
+        {(game.phase === "fight" || game.phase === "ko") && damagePops.map((pop) => (
+          <b key={`pop-${pop.id}`} className={`damage-pop pop-${pop.kind} pop-${pop.side}`} style={{ left: `${pop.x}%` }} aria-hidden="true">{pop.kind === "guard" ? `-${pop.amount} ◆` : `-${pop.amount}`}</b>
+        ))}
+        {passiveDog && game.phase === "fight" && (
+          <DogSpecial key={`passive-dog-${passiveDog.id}`} move="dog" side={passiveDog.side}
+            origin={passiveDog.side === "player" ? game.playerX : game.cpuX} target={passiveDog.side === "player" ? game.cpuX : game.playerX}
+            direction={directionToOpponent(passiveDog.side === "player" ? game.playerX : game.cpuX, passiveDog.side === "player" ? game.cpuX : game.playerX)} />
+        )}
+        {superFx && <SuperEffect key={`superfx-${superFx.id}`} fx={superFx} minimal={Boolean(SUPER_ANIM[superFx.fighter])} />}
+        {(["player", "cpu"] as Side[]).map((side) => {
+          const anim = superAnim[side];
+          if (!anim || !anim.companion) return null;
+          const data = SUPER_ANIM[anim.fighter];
+          const right = anim.target >= anim.origin;
+          const mirror = right ? data.mirror[anim.companion - 1] : !data.mirror[anim.companion - 1];
+          return (
+            <span key={`${side}-${anim.id}`} className="super-companion" aria-hidden="true" style={{ left: `${anim.companionX}%`, top: `${anim.laneTop}px`, height: `${anim.laneHeight}px` }}>
+              <i style={{ height: `${(data.companionSize ?? data.size) * 100}%`, bottom: `${(data.companionBottom ?? data.bottom) * 100}%`, backgroundImage: `url("${companionFrame(anim.fighter, anim.companion)}")`, transform: `translateX(-50%) scaleX(${mirror ? -1 : 1})` }} />
+            </span>
+          );
+        })}
+        {superFlash && (
+          <div key={`superflash-${superFlash.id}`} className={`super-cinematic super-${superFlash.side}`} aria-live="assertive">
+            <span className={`super-cinematic-portrait portrait ${superFlash.fighter}`} />
+            <div className="super-cinematic-copy"><small>{FIGHTERS[superFlash.fighter].name}</small><strong>SUPER<br />HARDCORE</strong><em>{SUPER_ANIM[superFlash.fighter]?.name ?? SUPER_MOVES[superFlash.fighter].name}</em></div>
+          </div>
+        )}
+        {fightCall && <div key={`call-${fightCall.id}`} className={`fight-technique-call technique-${fightCall.side}`} aria-live="polite">{fightCall.text}</div>}
+        {game.phase === "fight" && game.impact > 0 && (
+          <div
+            key={game.impact}
+            className={`impact-burst ${(game.playerAction === "hit" || game.playerAction === "launched" || game.playerAction === "knockdown" || game.playerAction === "block") ? "target-player" : "target-cpu"} ${(game.playerAction === "block" || game.cpuAction === "block") ? "guard-burst" : "hit-burst"}`}
+            style={{
+              left: `${(game.playerAction === "hit" || game.playerAction === "launched" || game.playerAction === "knockdown" || game.playerAction === "block") ? game.playerX : game.cpuX}%`,
+              top: `${(game.playerAirborne || game.cpuAirborne) ? 34 : 42}%`,
+            }}
+            aria-hidden="true"
+          >
+            <span />
+            <b>{(game.playerAction === "block" || game.cpuAction === "block") ? "CLANG" : "POW"}</b>
+          </div>
+        )}
+
+</>;
+}
+
 export default function Page() {
   return <GameErrorBoundary>{(resetKey) => <Home key={resetKey} />}</GameErrorBoundary>;
 }
 
 function Home() {
+  const [onlineOpen, setOnlineOpen] = useState(false);
+  const [onlineRole, setOnlineRole] = useState<RoomRole | null>(null);
+  const onlineRoleRef = useRef<RoomRole | null>(null);
+  const [onlineStartPending, setOnlineStartPending] = useState(false);
+
   const [selected, setSelected] = useState<FighterId>("maletilla");
   const [localOpponent, setLocalOpponent] = useState<FighterId>("vanessa");
   const [coopPlayerOne, setCoopPlayerOne] = useState<FighterId>("maletilla");
@@ -2079,6 +2266,33 @@ function Home() {
     launchFightRound(1);
   }, [arcadeRun, campaignStep, launchFightRound, recordActivity, resetMatchMeters, selected]);
 
+  useEffect(() => {
+    if (!onlineStartPending || !fightReady || battleMode !== "local") return;
+    const frame = requestAnimationFrame(() => { setOnlineStartPending(false); startRound("fight"); });
+    return () => cancelAnimationFrame(frame);
+  }, [onlineStartPending, fightReady, battleMode, startRound]);
+
+  const receiveOnlineInput = useCallback((action: OnlineInput, down: boolean) => {
+    if (onlineRoleRef.current !== "host") return;
+    if (action === "left" || action === "right") {
+      const key = action === "left" ? "touch-cpu-left" : "touch-cpu-right";
+      if (down) { keysRef.current.add(key); directionalPress("cpu", action === "left" ? -1 : 1); }
+      else keysRef.current.delete(key);
+    } else if (action === "block") setCpuGuard(down);
+    else if (action === "crouch") setCpuCrouch(down);
+    else if (down && action === "jump") jump("cpu");
+    else if (down && action === "punch") performAttack("cpu", 0, "punch");
+    else if (down && action === "kick") performAttack("cpu", 0, "kick");
+    else if (down && action === "special1") performAttack("cpu", 1);
+    else if (down && action === "special2") performAttack("cpu", 2);
+  }, [directionalPress, jump, performAttack, setCpuCrouch, setCpuGuard]);
+
+  const disconnectOnline = useCallback(() => {
+    keysRef.current.delete("touch-cpu-left"); keysRef.current.delete("touch-cpu-right");
+    setCpuGuard(false); setCpuCrouch(false);
+    if (onlineRoleRef.current === "host" && gameRef.current.phase === "fight") setPaused(true);
+  }, [setCpuGuard, setCpuCrouch]);
+
   const startTraining = useCallback(() => {
     recordActivity("mode_start", { mode: "training", fighter: selected });
     setTrainingMode(true);
@@ -2246,6 +2460,7 @@ function Home() {
     const onKeyDown = (event: KeyboardEvent) => {
       // Text fields must never double as arcade controls. In particular, the
       // lobby editor needs normal typing for letters such as A, S, D, H or L.
+      if (onlineRoleRef.current === "guest") return;
       const active = document.activeElement;
       const writing = active instanceof HTMLInputElement || active instanceof HTMLTextAreaElement || active instanceof HTMLSelectElement || active instanceof HTMLElement && Boolean(active.closest("[contenteditable=true]"));
       if (lobbyEditorOpen && !advancedEditorOpen && !editTarget && event.target instanceof HTMLElement && event.target.matches("[data-edit-group]:not(button)") && (event.key === "Enter" || event.key === " ")) {
@@ -2306,6 +2521,7 @@ function Home() {
       if ((key === "enter" || key === " ") && gameRef.current.phase === "select" && !(event.target instanceof HTMLElement && event.target.closest("button, input, select, textarea, a"))) startRound();
     };
     const onKeyUp = (event: KeyboardEvent) => {
+      if (onlineRoleRef.current === "guest") return;
       const active = document.activeElement;
       const writing = active instanceof HTMLInputElement || active instanceof HTMLTextAreaElement || active instanceof HTMLSelectElement || active instanceof HTMLElement && Boolean(active.closest("[contenteditable=true]"));
       if (lobbyEditorOpen || editorPinOpen || diagnosticsOpen || writing || event.target instanceof HTMLElement && event.target.closest("input, textarea, select, [contenteditable=true]")) return;
@@ -3062,8 +3278,33 @@ function Home() {
     window.localStorage.setItem("hardcore-fighter-style", value);
   };
 
+  const fightView: FightView = { stage, game, trainingMode, playerData, cpuData, superMeter, roundWins, roundNumber, battleMode, stageIndex, fightPickup, selected, opponent, playerVictory, cpuVictory, playerWalkIntent, cpuWalkIntent, movementGear, facing, immuneClock, immuneUntil, stunned, superAnim, lowAttack, passiveBadge, combo, damagePops, passiveDog, superFx, superFlash, fightCall, arenaWidth };
   return (
-    <main className="game-shell" style={lobbyStyle}>
+    <main className={`game-shell ${onlineRole ? `online-${onlineRole}` : ""}`} style={lobbyStyle}>
+      <OnlineRoom open={onlineOpen} onClose={() => { setOnlineOpen(false); if (onlineRoleRef.current) resetToSelect(); }}
+        fighters={FIGHTER_ORDER.map(id => ({ id, name: FIGHTERS[id].name }))} selected={selected}
+        onRole={role => { onlineRoleRef.current = role; setOnlineRole(role); }}
+        onStart={(host, guest) => { if (!FIGHTER_ORDER.includes(host as FighterId) || !FIGHTER_ORDER.includes(guest as FighterId)) return; setSelected(host as FighterId); setLocalOpponent(guest as FighterId); setBattleMode("local"); setCampaignStep(0); setArcadeRun(null); setOnlineStartPending(true); }}
+        onInput={receiveOnlineInput} onDisconnect={disconnectOnline}
+        getSnapshot={() => {
+          const arena = arenaRef.current;
+          const measure = (fighter: HTMLDivElement | null) => ({ width: arena && fighter ? fighter.offsetWidth / arena.clientWidth * 100 : 20, height: arena && fighter ? fighter.offsetHeight / arena.clientHeight * 100 : 50, bottom: arena && fighter ? parseFloat(getComputedStyle(fighter).bottom) / arena.clientHeight * 100 : 12 });
+          return { view: { ...fightView, game: gameRef.current, geometry: { player: measure(playerFighterRef.current), cpu: measure(cpuFighterRef.current) } }, roundCall, paused, fighterStyle, aspect: arena ? arena.clientWidth / arena.clientHeight : 16/9 };
+        }}
+        renderSnapshot={snapshot => {
+          if (!snapshot || typeof snapshot !== "object" || !("view" in snapshot)) return <p>Preparando combate…</p>;
+          const data = snapshot as { view: FightView; roundCall: string; paused: boolean; fighterStyle: FighterStyle; aspect: number };
+          const v = data.view;
+          if (!v?.game || !FIGHTER_ORDER.includes(v.selected) || !FIGHTER_ORDER.includes(v.opponent) || !Number.isFinite(v.game.playerX) || !Number.isFinite(v.game.cpuX)) return <p>Esperando una partida válida…</p>;
+          const safeView = { ...v, stage: STAGES[Math.max(0, Math.min(STAGES.length - 1, Math.trunc(v.stageIndex)))] ?? STAGES[0], playerData: FIGHTERS[v.selected], cpuData: FIGHTERS[v.opponent] };
+          return <section id="game" style={{ aspectRatio: Number.isFinite(data.aspect) ? Math.max(1, Math.min(3, data.aspect)) : 16/9 }} className={`arena online-arena phase-${v.game.phase} style-classic impact-level-${v.game.impactLevel} ${data.paused ? "game-paused" : ""}`} aria-label="Combate online · jugador dos">
+            <FightScene view={safeView} />
+            {data.roundCall && <div className="online-round-call">{data.roundCall}</div>}
+            {data.paused && <div className="online-round-call">PARTIDA EN PAUSA</div>}
+            {v.game.phase === "over" && <div className="online-round-call">{v.game.winner === "cpu" ? "¡HAS GANADO!" : v.game.winner === "draw" ? "EMPATE" : "FIN DEL COMBATE"}<small>Tu amigo puede iniciar la revancha.</small></div>}
+          </section>;
+        }} />
+      <GameIntro />
       <FighterVisibilityGuard />
       <AutoFullscreen />
       <GameDiagnostics open={diagnosticsOpen} onClose={() => setDiagnosticsOpen(false)} />
@@ -3074,7 +3315,8 @@ function Home() {
           <span className="raspberry-edition-badge">{GAME_EDITION}</span>
         </a>
         <div className="topbar-actions">
-          <span className="build-chip" data-online-count="" aria-label="Jugadores conectados">ONLINE · CONECTANDO</span>
+          <button className="sound-button" type="button" onClick={() => setOnlineOpen(true)} disabled={game.phase !== "select" || Boolean(onlineRole)}>JUGAR ONLINE</button>
+          <OnlineCount />
           <span className="streak"><b>{streak}</b> victorias</span>
           <span className="profile-level">NIVEL {1 + progress.fights + progress.adventures * 2 + progress.orbs}</span>
           <span className="build-chip" aria-label={`Versión ${GAME_VERSION}`}>{GAME_VERSION}</span>
@@ -3100,167 +3342,8 @@ function Home() {
         <div className="activity-consent-actions"><button type="button" className="secondary-choice" onClick={() => chooseAnalytics("limited")}>Solo contar entrada</button><button type="button" className="primary-choice" onClick={() => chooseAnalytics("accepted")}>Aceptar estadísticas</button></div>
       </aside>}
 
-      <section ref={arenaRef} id="game" className={`arena phase-${game.phase} style-${fighterStyle} impact-level-${game.impactLevel} ${trainingMode ? "training-mode" : ""} ${campaignStep > 0 ? "campaign-active" : ""} ${(progress.crowns ?? 0) >= 2 ? "champion-aura" : ""} ${paused ? "game-paused" : ""} ${superFlash ? `super-active super-${superFlash.side}` : ""} ${game.playerMove || game.cpuMove ? "special-casting" : ""} ${game.phase === "orbs" ? "orb-active" : ""} ${game.phase === "platform" ? "platform-active" : ""} ${game.phase === "coop" ? "coop-active" : ""} ${game.impact ? (game.impact % 2 ? "impact-a" : "impact-b") : ""}`} aria-label={game.phase === "orbs" ? `Rompeobjetos con ${playerData.name}` : game.phase === "platform" ? `Aventura Central con ${playerData.name}` : game.phase === "coop" ? `Aventura cooperativa de ${FIGHTERS[coopPlayerOne].name} y ${FIGHTERS[coopPlayerTwo].name}` : `Combate en ${stage.name}`}>
-        <div className="stage-slideshow" aria-hidden="true">
-          <div
-            className="stage-backdrop active"
-            key={stage.id}
-            style={{ backgroundImage: `linear-gradient(180deg, rgba(5, 7, 12, 0.01), rgba(12, 5, 3, 0.2)), url("${stage.image}")` }}
-          />
-        </div>
-        <div className="stage-glow" aria-hidden="true" />
-        <div className="stage-sign" key={stage.id} aria-hidden="true">
-          <small>{stage.eyebrow}</small>
-          <strong>{stage.name}</strong>
-          <span>{stage.detail}</span>
-        </div>
-
-        <div className="hud" aria-label="Marcador del combate">
-          <div className={`fighter-hud player-hud ${game.playerAction === "hit" || game.playerAction === "launched" ? "damaged" : ""}`}>
-            <div className="hud-name"><span>1P · {Math.ceil(game.playerHealth)}%</span>{playerData.name}</div>
-            <div className={`health-track ${game.playerHealth <= 25 ? "critical" : ""}`}><i className="health-trail" style={{ width: `${game.playerHealth}%` }} /><span style={{ width: `${game.playerHealth}%` }} /></div>
-            <div className={`super-meter ${superMeter.player >= SUPER_MAX ? "full" : ""}`} aria-label={`Barra de super ${Math.round(superMeter.player)}%`}><span style={{ width: `${superMeter.player}%` }} /><b>{superMeter.player >= SUPER_MAX ? "¡SUPER LISTO! · L" : `SUPER ${Math.round(superMeter.player)}%`}</b></div>
-            <div className="round-pips" aria-label={`${roundWins.player} rondas ganadas`}><i className={roundWins.player >= 1 ? "won" : ""} /><i className={roundWins.player >= 2 ? "won" : ""} /></div>
-          </div>
-          <div className="timer" aria-label={trainingMode ? "Entrenamiento sin límite" : `${game.timer} segundos`}><small>{trainingMode ? "TRAIN" : `R${roundNumber}`}</small><span>{trainingMode ? "∞" : String(game.timer).padStart(2, "0")}</span></div>
-          <div className={`fighter-hud cpu-hud ${game.cpuAction === "hit" || game.cpuAction === "launched" ? "damaged" : ""}`}>
-            <div className="hud-name">{cpuData.name}<span>{battleMode === "local" ? "2P" : "CPU"} · {Math.ceil(game.cpuHealth)}%</span></div>
-            <div className={`health-track ${game.cpuHealth <= 25 ? "critical" : ""}`}><i className="health-trail" style={{ width: `${game.cpuHealth}%` }} /><span style={{ width: `${game.cpuHealth}%` }} /></div>
-            <div className={`super-meter ${superMeter.cpu >= SUPER_MAX ? "full" : ""}`} aria-label={`Barra de super rival ${Math.round(superMeter.cpu)}%`}><span style={{ width: `${superMeter.cpu}%` }} /><b>{superMeter.cpu >= SUPER_MAX ? "¡SUPER LISTO!" : `SUPER ${Math.round(superMeter.cpu)}%`}</b></div>
-            <div className="round-pips" aria-label={`${roundWins.cpu} rondas ganadas`}><i className={roundWins.cpu >= 1 ? "won" : ""} /><i className={roundWins.cpu >= 2 ? "won" : ""} /></div>
-          </div>
-        </div>
-
-        <div className="ground-mark ground-mark-one" aria-hidden="true" />
-        <div className="ground-mark ground-mark-two" aria-hidden="true" />
-
-        {(game.phase === "intro" || game.phase === "fight" || game.phase === "ko") && (
-          <ArcadeCrowd
-            mode="fight"
-            seed={stageIndex}
-            phase={game.phase}
-            react={game.phase === "fight" && Boolean(game.impact)}
-            cue={fightPickup && game.phase === "fight" ? {
-              direction: fightPickup.x < 46 ? "left" : fightPickup.x > 54 ? "right" : "center",
-              label: ARCADE_PICKUPS[fightPickup.kind].label,
-            } : null}
-          />
-        )}
-
-        {(game.phase === "intro" || game.phase === "fight" || game.phase === "ko") && (
-          <div className={`fight-referee ${game.phase === "intro" ? "start" : game.phase === "fight" ? "watch" : "ko"} ${game.phase === "fight" && game.impact ? (game.impact % 2 ? "react-a" : "react-b") : ""}`} aria-label="Árbitro del combate" role="img">
-            <span className="fight-referee-art" />
-            <b>{game.phase === "intro" ? "¡PREPARADOS!" : game.phase === "ko" ? "¡COMBATE TERMINADO!" : "ÁRBITRO"}</b>
-          </div>
-        )}
-
-        {fightPickup && game.phase === "fight" && (
-          <div className={`fight-pickup pickup-${fightPickup.kind}`} style={{ left: `${fightPickup.x}%` }} aria-label={`${ARCADE_PICKUPS[fightPickup.kind].label}, objeto de inmunidad`} role="img">
-            <Image src={ARCADE_PICKUPS[fightPickup.kind].image} alt="" width={120} height={120} unoptimized />
-            <b>¡INMUNIDAD!</b>
-          </div>
-        )}
-
-        {game.phase !== "select" && <>
-          <div ref={playerFighterRef} className={`fighter motion-rig ${selected} ${game.playerAction} ${game.playerMove ?? ""} combo-step-${game.playerAttackVariant} pose-phase-${game.playerPosePhase} ${playerVictory ? "winner-dance" : cpuVictory ? "defeated" : ""} ${game.playerAirborne ? "airborne" : ""} ${game.playerAction === "walk" ? `${playerWalkIntent} gear-${movementGear.player}` : ""} ${facing.player} ${immuneClock < immuneUntil.player ? "immune" : ""} ${stunned.player ? "stunned" : ""} ${superAnim.player ? "super-anim" : ""} ${lowAttack.player && (game.playerAction === "punch" || game.playerAction === "kick") ? "low-attack" : ""}`} style={{ left: `${game.playerX}%` }} aria-label={`${playerData.name}, jugador`} role="img">
-            <div className="fighter-motion">{superAnim.player && (
-              <span className="super-body" aria-hidden="true" style={{ height: `${SUPER_ANIM[superAnim.player.fighter].size * 100}%`, bottom: `${SUPER_ANIM[superAnim.player.fighter].bottom * 100}%`, backgroundImage: `url("${superFrame(superAnim.player.fighter, superAnim.player.frame)}")` }} />
-            )}<div className="fighter-pose">
-              <div className={`fighter-art ${selected} ${facing.player}`}>{!(["cesaret", "borja", "bacora", "bonviure", "elchica", "ogalla", "xuso", "bomba", "tonimassama"] as FighterId[]).includes(selected) && <FighterWalkLayers />}</div>
-              {stunned.player && <b className="stun-word">★ ¡MAREADO! ★</b>}
-              {passiveBadge.player && <b key={passiveBadge.player.id} className="passive-word">{passiveBadge.player.text}</b>}
-              {immuneClock < immuneUntil.player && <b className="immune-word">INMUNE · {Math.max(1, Math.ceil((immuneUntil.player - immuneClock) / 1000))}s</b>}
-              {game.playerAirborne && (game.playerAction === "punch" || game.playerAction === "kick" || game.playerAction === "special") && <b className="air-attack-word">¡AÉREO!</b>}
-              {(game.playerAction === "hit" || game.playerAction === "launched" || game.playerAction === "knockdown") && <b className="hit-word">{game.playerAction === "launched" ? "¡VUELA!" : game.playerAction === "knockdown" ? "¡AL SUELO!" : "CRASH!"}</b>}
-            </div></div>
-            <span className="fighter-shadow" />
-          </div>
-          <div ref={cpuFighterRef} className={`fighter motion-rig ${opponent} cpu ${battleMode === "cpu" ? "cpu-ai" : ""} ${game.cpuAction} ${game.cpuMove ?? ""} combo-step-${game.cpuAttackVariant} pose-phase-${game.cpuPosePhase} ${cpuVictory ? "winner-dance" : playerVictory ? "defeated" : ""} ${game.cpuAirborne ? "airborne" : ""} ${game.cpuAction === "walk" ? `${cpuWalkIntent} gear-${movementGear.cpu}` : ""} ${facing.cpu} ${immuneClock < immuneUntil.cpu ? "immune" : ""} ${stunned.cpu ? "stunned" : ""} ${superAnim.cpu ? "super-anim" : ""} ${lowAttack.cpu && (game.cpuAction === "punch" || game.cpuAction === "kick") ? "low-attack" : ""}`} style={{ left: `${game.cpuX}%` }} aria-label={`${cpuData.name}, rival`} role="img">
-            <div className="fighter-motion">{superAnim.cpu && (
-              <span className="super-body" aria-hidden="true" style={{ height: `${SUPER_ANIM[superAnim.cpu.fighter].size * 100}%`, bottom: `${SUPER_ANIM[superAnim.cpu.fighter].bottom * 100}%`, backgroundImage: `url("${superFrame(superAnim.cpu.fighter, superAnim.cpu.frame)}")` }} />
-            )}<div className="fighter-pose">
-              <div className={`fighter-art ${opponent} ${facing.cpu}`}>{!(["cesaret", "borja", "bacora", "bonviure", "elchica", "ogalla", "xuso", "bomba", "tonimassama"] as FighterId[]).includes(opponent) && <FighterWalkLayers />}</div>
-              {stunned.cpu && <b className="stun-word">★ ¡MAREADO! ★</b>}
-              {passiveBadge.cpu && <b key={passiveBadge.cpu.id} className="passive-word">{passiveBadge.cpu.text}</b>}
-              {immuneClock < immuneUntil.cpu && <b className="immune-word">INMUNE · {Math.max(1, Math.ceil((immuneUntil.cpu - immuneClock) / 1000))}s</b>}
-              {game.cpuAirborne && (game.cpuAction === "punch" || game.cpuAction === "kick" || game.cpuAction === "special") && <b className="air-attack-word">¡AÉREO!</b>}
-              {(game.cpuAction === "hit" || game.cpuAction === "launched" || game.cpuAction === "knockdown") && <b className="hit-word">{game.cpuAction === "launched" ? "¡VUELA!" : game.cpuAction === "knockdown" ? "¡AL SUELO!" : "BAM!"}</b>}
-            </div></div>
-            <span className="fighter-shadow" />
-          </div>
-        </>}
-
-        {game.playerMove && (
-          <SpecialEffect
-            move={game.playerMove}
-            side="player"
-            origin={game.playerX}
-            target={game.cpuX}
-            arenaWidth={arenaWidth}
-            direction={game.playerAttackDirection}
-            airborne={game.playerAirborne}
-            color={playerData.color}
-            heavy={game.playerMove === specialFor(selected, 2)}
-          />
-        )}
-        {game.cpuMove && (
-          <SpecialEffect
-            move={game.cpuMove}
-            side="cpu"
-            origin={game.cpuX}
-            target={game.playerX}
-            arenaWidth={arenaWidth}
-            direction={game.cpuAttackDirection}
-            airborne={game.cpuAirborne}
-            color={cpuData.color}
-            heavy={game.cpuMove === specialFor(opponent, 2)}
-          />
-        )}
-
-        {combo.player >= 2 && <div className="combo-callout combo-player"><strong>{combo.player} GOLPES</strong><span>COMBO</span></div>}
-        {combo.cpu >= 2 && <div className="combo-callout combo-cpu"><strong>{combo.cpu} GOLPES</strong><span>{battleMode === "local" ? "COMBO P2" : "COMBO RIVAL"}</span></div>}
-        {(game.phase === "fight" || game.phase === "ko") && damagePops.map((pop) => (
-          <b key={`pop-${pop.id}`} className={`damage-pop pop-${pop.kind} pop-${pop.side}`} style={{ left: `${pop.x}%` }} aria-hidden="true">{pop.kind === "guard" ? `-${pop.amount} ◆` : `-${pop.amount}`}</b>
-        ))}
-        {passiveDog && game.phase === "fight" && (
-          <DogSpecial key={`passive-dog-${passiveDog.id}`} move="dog" side={passiveDog.side}
-            origin={passiveDog.side === "player" ? game.playerX : game.cpuX} target={passiveDog.side === "player" ? game.cpuX : game.playerX}
-            direction={directionToOpponent(passiveDog.side === "player" ? game.playerX : game.cpuX, passiveDog.side === "player" ? game.cpuX : game.playerX)} />
-        )}
-        {superFx && <SuperEffect key={`superfx-${superFx.id}`} fx={superFx} minimal={Boolean(SUPER_ANIM[superFx.fighter])} />}
-        {(["player", "cpu"] as Side[]).map((side) => {
-          const anim = superAnim[side];
-          if (!anim || !anim.companion) return null;
-          const data = SUPER_ANIM[anim.fighter];
-          const right = anim.target >= anim.origin;
-          const mirror = right ? data.mirror[anim.companion - 1] : !data.mirror[anim.companion - 1];
-          return (
-            <span key={`${side}-${anim.id}`} className="super-companion" aria-hidden="true" style={{ left: `${anim.companionX}%`, top: `${anim.laneTop}px`, height: `${anim.laneHeight}px` }}>
-              <i style={{ height: `${(data.companionSize ?? data.size) * 100}%`, bottom: `${(data.companionBottom ?? data.bottom) * 100}%`, backgroundImage: `url("${companionFrame(anim.fighter, anim.companion)}")`, transform: `translateX(-50%) scaleX(${mirror ? -1 : 1})` }} />
-            </span>
-          );
-        })}
-        {superFlash && (
-          <div key={`superflash-${superFlash.id}`} className={`super-cinematic super-${superFlash.side}`} aria-live="assertive">
-            <span className={`super-cinematic-portrait portrait ${superFlash.fighter}`} />
-            <div className="super-cinematic-copy"><small>{FIGHTERS[superFlash.fighter].name}</small><strong>SUPER<br />HARDCORE</strong><em>{SUPER_ANIM[superFlash.fighter]?.name ?? SUPER_MOVES[superFlash.fighter].name}</em></div>
-          </div>
-        )}
-        {fightCall && <div key={`call-${fightCall.id}`} className={`fight-technique-call technique-${fightCall.side}`} aria-live="polite">{fightCall.text}</div>}
-        {game.phase === "fight" && game.impact > 0 && (
-          <div
-            key={game.impact}
-            className={`impact-burst ${(game.playerAction === "hit" || game.playerAction === "launched" || game.playerAction === "knockdown" || game.playerAction === "block") ? "target-player" : "target-cpu"} ${(game.playerAction === "block" || game.cpuAction === "block") ? "guard-burst" : "hit-burst"}`}
-            style={{
-              left: `${(game.playerAction === "hit" || game.playerAction === "launched" || game.playerAction === "knockdown" || game.playerAction === "block") ? game.playerX : game.cpuX}%`,
-              top: `${(game.playerAirborne || game.cpuAirborne) ? 34 : 42}%`,
-            }}
-            aria-hidden="true"
-          >
-            <span />
-            <b>{(game.playerAction === "block" || game.cpuAction === "block") ? "CLANG" : "POW"}</b>
-          </div>
-        )}
+      <section ref={arenaRef} id={onlineRole === "guest" ? "game-background" : "game"} className={`arena phase-${game.phase} style-${fighterStyle} impact-level-${game.impactLevel} ${trainingMode ? "training-mode" : ""} ${campaignStep > 0 ? "campaign-active" : ""} ${(progress.crowns ?? 0) >= 2 ? "champion-aura" : ""} ${paused ? "game-paused" : ""} ${superFlash ? `super-active super-${superFlash.side}` : ""} ${game.playerMove || game.cpuMove ? "special-casting" : ""} ${game.phase === "orbs" ? "orb-active" : ""} ${game.phase === "platform" ? "platform-active" : ""} ${game.phase === "coop" ? "coop-active" : ""} ${game.impact ? (game.impact % 2 ? "impact-a" : "impact-b") : ""}`} aria-label={game.phase === "orbs" ? `Rompeobjetos con ${playerData.name}` : game.phase === "platform" ? `Aventura Central con ${playerData.name}` : game.phase === "coop" ? `Aventura cooperativa de ${FIGHTERS[coopPlayerOne].name} y ${FIGHTERS[coopPlayerTwo].name}` : `Combate en ${stage.name}`}>
+        <FightScene view={fightView} playerFighterRef={playerFighterRef} cpuFighterRef={cpuFighterRef} />
 
         {game.phase === "select" && (
           <div className={`modal-layer select-screen lobby-v2168 lobby-v220 ${lobbyEditorOpen ? "lobby-editing" : ""}`} role="application" aria-label="Menú principal"
@@ -3286,6 +3369,7 @@ function Home() {
                 <h1 {...editAttrs("field", "heading", "Título principal", lobbyDesign.heading)} role={lobbyEditorOpen ? "button" : undefined} tabIndex={lobbyEditorOpen ? 0 : undefined}>{lobbyDesign.heading}</h1>
                 <span className="lobby-eyebrow">{FIGHTER_ORDER.length} <span {...editAttrs("field", "eyebrow", "Texto bajo el título", lobbyDesign.eyebrow)} role={lobbyEditorOpen ? "button" : undefined} tabIndex={lobbyEditorOpen ? 0 : undefined}>{lobbyDesign.eyebrow}</span></span>
               </div>
+              <div className="lobby-online-panel"><OnlineCount prominent /><button type="button" onClick={() => setOnlineOpen(true)}>JUGAR ONLINE · CÓDIGO DE 4 CIFRAS</button></div>
               <div className="lobby-prison-mark">
                 <Image {...placementAttrs("logo", "prison")} className="prison-logo prison-logo-clean" src="/assets/new-fighters/prison-logo-clean.webp" width={1689} height={374} alt="PRISON" unoptimized priority />
                 <span {...editAttrs("labels", "prisonTagline", "Frase bajo PRISON", lobbyLabel("prisonTagline", "LUCHA · SUPERVIVENCIA · SIN LÍMITES"))} role={lobbyEditorOpen ? "button" : undefined} tabIndex={lobbyEditorOpen ? 0 : undefined}>{lobbyLabel("prisonTagline", "LUCHA · SUPERVIVENCIA · SIN LÍMITES")}</span>

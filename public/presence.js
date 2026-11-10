@@ -29,17 +29,20 @@
       });
       if (!response.ok) throw new Error('offline');
       const data = await response.json();
-      await flushScores();
+
+      window.dispatchEvent(new CustomEvent('hf-presence', { detail: { online: data.online } }));
       document.querySelectorAll('[data-online-count]').forEach(el => {
         el.textContent = `${data.online} ONLINE`;
         el.title = 'Conexiones activas en el último minuto. Las pestañas del mismo navegador se agrupan.';
       });
+      void flushScores();
     } catch {
+      window.dispatchEvent(new CustomEvent('hf-presence', { detail: { offline: true } }));
       document.querySelectorAll('[data-online-count]').forEach(el => { el.textContent = 'ONLINE · SIN CONEXIÓN'; });
     } finally { inFlight = false; }
   }
   // Embedded Slug is already counted by the parent page.
   if (window.parent !== window) return;
-  const start = () => { void ping(); setInterval(ping, 20000); document.addEventListener('visibilitychange', ping); };
+  const start = () => { void ping(); setInterval(ping, 20000); document.addEventListener('visibilitychange', ping); window.addEventListener('hf-presence-refresh', ping); };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start, { once: true }); else start();
 })();

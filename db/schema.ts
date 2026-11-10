@@ -43,3 +43,13 @@ export const liveSessions = sqliteTable("live_sessions", {
   token: text("token").primaryKey(),
   expiresAt: integer("expires_at").notNull(),
 }, (table) => [index("live_sessions_expiry_idx").on(table.expiresAt)]);
+
+// Ephemeral WebRTC signalling; never used for game state or player tracking.
+export const onlineRooms = sqliteTable('online_rooms', {
+  code: text('code').primaryKey(),
+  hostToken: text('host_token').notNull(),
+  guestToken: text('guest_token'),
+  offer: text('offer').notNull(),
+  answer: text('answer'),
+  expiresAt: integer('expires_at').notNull(),
+}, table => [uniqueIndex('online_room_host_idx').on(table.hostToken), index('online_room_expiry_idx').on(table.expiresAt)]);
