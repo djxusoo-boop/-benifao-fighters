@@ -10252,18 +10252,59 @@ html .select-screen.lobby-v2168 .character-card[data-lobby-text-style="true"] > 
 .leaderboard-panel { max-height: 92dvh; overflow-y: auto; }
 
 /* Online room controls remain separate from the local player's input surface. */
-.online-room { position:fixed; inset:0; z-index:18000; overflow:auto; background:#08121cf5; color:#edf4fb; padding:20px; font:600 15px/1.5 system-ui,sans-serif; }
-.online-room header { display:flex; align-items:center; justify-content:space-between; gap:12px; }
-.online-room header strong { color:#ffba55; letter-spacing:.14em; }
+.online-room { position:fixed; inset:0; z-index:18000; overflow:auto; background:radial-gradient(circle at 50% -20%,#163a53 0,#08121cf7 46%,#05090efb 100%); color:#edf4fb; padding:clamp(12px,3vw,34px); font:600 15px/1.5 system-ui,sans-serif; }
+.online-room-header { max-width:1180px; margin:auto; display:flex; align-items:center; justify-content:space-between; gap:12px; }
+.online-room-header strong { display:block; color:#ffba55; font-size:clamp(18px,2.3vw,28px); letter-spacing:.14em; }
+.online-eyebrow,.online-room-kicker,.online-section-kicker { display:block; color:#68dcff; font-size:10px; letter-spacing:.18em; font-weight:900; }
+.online-header-actions { display:flex; align-items:center; gap:10px; }
 .online-room button,.online-room input,.online-room select { padding:12px 16px; border:1px solid #53708a; border-radius:10px; background:#182c3e; color:#fff; font:inherit; }
 .online-room button { cursor:pointer; touch-action:none; user-select:none; }
 .online-room button:disabled { opacity:.45; cursor:default; }
-.online-room-card { max-width:480px; margin:30px auto; display:grid; gap:16px; padding:24px; border:1px solid #456079; border-radius:18px; background:#10202e; }
+.online-status { max-width:1180px; margin:12px auto 0; color:#a9bac7; font-size:12px; }
+.online-status i { display:inline-block; width:8px; height:8px; margin-right:8px; border-radius:50%; background:#ff9a52; box-shadow:0 0 10px #ff9a52; }
+.online-status.is-connected { color:#b4ffd7; }
+.online-status.is-connected i { background:#54f29a; box-shadow:0 0 10px #54f29a; }
+.online-room-card { max-width:1180px; margin:clamp(16px,4vw,42px) auto; display:grid; gap:24px; padding:clamp(18px,4vw,42px); border:1px solid #34566c; border-radius:24px; background:linear-gradient(145deg,#102738f2,#0a1724f2); box-shadow:0 20px 80px #0007; }
 .online-room-card h2,.online-room-card p { margin:0; }
+.online-room-intro { max-width:620px; }
+.online-room-intro h1 { margin:5px 0 4px; font-size:clamp(30px,6vw,64px); line-height:1; letter-spacing:-.04em; color:#fff; }
+.online-room-intro p { color:#b7cad8; font-size:clamp(14px,2vw,18px); font-weight:500; }
+.online-entry-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; }
+.online-entry-card { display:grid; gap:10px; padding:20px; border:1px solid #2e526a; border-radius:16px; background:#0b1c2a; }
+.online-card-icon { color:#ffbd58; font-size:32px; line-height:1; }
+.online-entry-card h2 { font-size:20px; }
+.online-entry-card p { color:#a7bdcc; font-size:13px; font-weight:500; }
+.online-entry-card label { display:grid; gap:5px; margin-top:5px; color:#c7d7e2; font-size:12px; }
+.online-primary,.online-launch { border-color:#f4a64d!important; background:linear-gradient(100deg,#ef8429,#ffc35e)!important; color:#1a1108!important; font-weight:900!important; letter-spacing:.06em; }
+.online-primary { margin-top:4px; }
+.online-code-input { font-size:24px!important; letter-spacing:.35em; text-align:center; }
 .online-room-card label { display:grid; gap:6px; }
-.online-room-card input { font-size:28px; letter-spacing:.3em; }
 .online-room-card small { color:#afbfcd; font-weight:400; }
 .online-room-code { text-align:center; font-size:64px; letter-spacing:.2em; color:#ffba55; }
+.online-lobby { display:grid; gap:22px; }
+.online-code-panel { display:grid; justify-items:center; gap:4px; padding:18px; border:1px solid #5f6d5a; border-radius:16px; background:linear-gradient(135deg,#1d2d2b,#14221e); }
+.online-code-panel > span { color:#bcdfc9; font-size:11px; letter-spacing:.16em; }
+.online-code-panel button { padding:8px 12px; font-size:11px; }
+.online-seats { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+.online-seat { display:grid; gap:3px; padding:14px 16px; border:1px dashed #476174; border-radius:13px; color:#9ab0bf; }
+.online-seat.ready { border-style:solid; border-color:#3a8f80; background:#0c2b2a; color:#fff; }
+.online-seat small { color:#70d4e9; font-size:10px; letter-spacing:.1em; }
+.online-seat b { font-size:18px; }
+.online-seat span { color:#65edac; font-size:10px; letter-spacing:.1em; }
+.online-mode-picker { display:grid; gap:12px; }
+.online-mode-picker h2 { font-size:24px; }
+.online-mode-grid { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:9px; }
+.online-mode-grid button { display:grid; gap:7px; min-height:120px; padding:13px 11px; text-align:left; background:#0b1b29; }
+.online-mode-grid button.selected { border-color:#ffb653; background:linear-gradient(150deg,#3b2a18,#132536); box-shadow:0 0 0 1px #ffb65355 inset; }
+.online-mode-grid b { display:grid; gap:8px; color:#fff; }
+.online-mode-grid b i { color:#ffba55; font-size:25px; font-style:normal; }
+.online-mode-grid small { color:#9fb4c2; font-size:11px; line-height:1.3; }
+.online-mode-note { color:#ffc878; font-size:12px; }
+.online-launch { width:100%; min-height:54px; }
+.online-waiting { display:grid; gap:2px; justify-items:center; padding:20px; border:1px solid #42617e; border-radius:14px; background:#071824; text-align:center; }
+.online-waiting strong { color:#63e9b1; letter-spacing:.1em; }
+.online-waiting span { color:#a9c0ce; font-size:13px; }
+.online-footnote { text-align:center; }
 .online-playing { background:transparent; pointer-events:none; padding:6px 14px; }
 .online-playing header { background:#07121eee; border:1px solid #42617e; border-radius:10px; padding:4px 10px; pointer-events:auto; }
 .online-playing > p { background:#07121eee; padding:2px 8px; display:inline-block; font-size:11px; margin:3px 0; }
@@ -10285,6 +10326,12 @@ html .select-screen.lobby-v2168 .character-card[data-lobby-text-style="true"] > 
  .online-controls button,.online-stick { pointer-events:auto; opacity:.85; }
  .online-stick { width:90px; height:90px; }
  .online-remote-scene .arena { max-height:calc(100dvh - 64px); }
+}
+@media (max-width:760px) {
+ .online-entry-grid,.online-seats { grid-template-columns:1fr; }
+ .online-mode-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+ .online-mode-grid button:last-child { grid-column:span 2; }
+ .online-room-code { font-size:50px; }
 }
 .online-guest .online-playing { height:100dvh; box-sizing:border-box; overflow:hidden; }
 .online-remote-scene { justify-items:center; }
