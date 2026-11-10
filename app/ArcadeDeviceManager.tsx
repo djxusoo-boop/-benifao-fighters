@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { enterFullscreen, exitFullscreen, isFullscreen, setOptOut } from "./fullscreen";
+import { layoutViewport, protectPinchClicks } from "./viewport-guard.mjs";
 
 type InstallPromptEvent = Event & {
   prompt: () => Promise<void>;
@@ -56,9 +57,8 @@ export default function ArcadeDeviceManager() {
 
   useEffect(() => {
     const update = () => {
-      const width = window.innerWidth;
-      const height = window.visualViewport?.height || window.innerHeight;
-      const mobile = displayMode === "mobile" || displayMode === "auto" && (width <= 680 || Math.min(width, height) <= 600 && matchMedia("(pointer: coarse)").matches);
+      const viewport = window.visualViewport;
+      const { mobile, height } = layoutViewport(window.innerWidth, window.innerHeight, viewport?.height, viewport?.scale ?? 1, matchMedia("(pointer: coarse)").matches, displayMode);
       document.documentElement.dataset.displayMode = mobile ? "mobile" : "tablet";
       document.documentElement.style.setProperty("--visible-height", `${height}px`);
     };
@@ -67,6 +67,8 @@ export default function ArcadeDeviceManager() {
     window.visualViewport?.addEventListener("resize", update);
     return () => { window.removeEventListener("resize", update); window.visualViewport?.removeEventListener("resize", update); };
   }, [displayMode]);
+
+  useEffect(() => protectPinchClicks(document), []);
 
   const requestWakeLock = useCallback(async () => {
     const wakeLock = (navigator as Navigator & { wakeLock?: { request: (kind: "screen") => Promise<WakeLockHandle> } }).wakeLock;
