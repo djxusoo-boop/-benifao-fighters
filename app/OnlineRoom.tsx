@@ -112,7 +112,7 @@ export default function OnlineRoom(props: Props) {
   };
   const releaseStick = () => { for (const action of ['left', 'right', 'jump', 'crouch'] as OnlineInput[]) input(action, false); };
   if (!props.open && !role) return null;
-  if (started) return null;
+  if (started && role === 'host') return null;
   const control = (action: OnlineInput, label: string) => <button key={action} type="button" disabled={!connected} onPointerDown={event => { event.preventDefault(); try { event.currentTarget.setPointerCapture(event.pointerId); } catch { /* Pointer input still works without capture on older WebViews. */ } input(action, true); }} onPointerUp={() => input(action, false)} onPointerCancel={() => input(action, false)} onLostPointerCapture={() => input(action, false)}>{label}</button>;
   return <section className={`online-room ${started ? 'online-playing' : ''}`} aria-label="Sala online">
     <header><strong>{code ? `SALA ${code}` : 'JUGAR ONLINE'}</strong><OnlineCount /><button type="button" onClick={leave}>SALIR DE LA SALA</button></header>
