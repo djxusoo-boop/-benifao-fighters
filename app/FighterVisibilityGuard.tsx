@@ -23,6 +23,11 @@ const isLoaded = (url: string) => {
     image = new Image();
     image.decoding = "async";
     image.src = url;
+    // Do not retain every frame ever seen for the whole session.
+    if (imageCache.size >= 12) {
+      const oldest = imageCache.keys().next().value;
+      if (oldest) imageCache.delete(oldest);
+    }
     imageCache.set(url, image);
   }
   const ready = image.complete && image.naturalWidth > 0;

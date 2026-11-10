@@ -18,6 +18,7 @@ import FighterWalkLayers from "./FighterWalkLayers";
 import FighterVisibilityGuard from "./FighterVisibilityGuard";
 import AutoFullscreen from "./AutoFullscreen";
 import { markFrameLoaded } from "./frame-registry";
+import { isAppleMobile, retainPreloadImage } from "./mobile-resources.mjs";
 import { FIGHTER_FRAMES } from "./fighter-frames";
 import { attackFacesTarget, clampFighterStep, combatApproachGap, combatContact, directionToOpponent, fighterAttackRange, visibleFighterBounds } from "./combat-contact.mjs";
 import { joystickIntent } from "./touch-joystick.mjs";
@@ -1049,7 +1050,9 @@ function Home() {
     // CSS swaps whole images during an action. Prepare only the active pair so
     // the first punch or jump doesn't show an empty image while it downloads.
     const sources = [...new Set([...FIGHTER_FRAMES[selected], ...FIGHTER_FRAMES[opponent], ...cssFramesFor(selected), ...cssFramesFor(opponent), ...superFramesFor(selected), ...superFramesFor(opponent)])];
-    // Keep decoded images referenced so the browser doesn't evict them mid-fight.
+    // iOS WebKit can terminate the page when many decoded images are retained.
+    // Keep a small working set there and let the browser manage the rest.
+    const appleMobile = isAppleMobile(navigator.userAgent, navigator.platform, navigator.maxTouchPoints);
     const keep: HTMLImageElement[] = [];
     preloadedFramesRef.current = keep;
     let cancelled = false;
@@ -1069,9 +1072,9 @@ function Home() {
       } };
       active.add(item);
       image.decoding = "async";
-      keep.push(image);
+      retainPreloadImage(keep, image, appleMobile ? 8 : Infinity);
       const onLoaded = () => {
-        if (typeof image.decode === "function") void image.decode().catch(() => undefined).finally(item.finish);
+        if (!appleMobile && typeof image.decode === "function") void image.decode().catch(() => undefined).finally(item.finish);
         else item.finish();
       };
       image.onload = onLoaded;
@@ -1087,7 +1090,7 @@ function Home() {
     };
     // A failed network request must not prevent anyone from entering a match.
     const fallback = window.setTimeout(() => { if (!cancelled) setReadyFramePair(framePair); }, 10000);
-    void Promise.all(Array.from({ length: 4 }, worker)).then(() => {
+    void Promise.all(Array.from({ length: appleMobile ? 2 : 4 }, worker)).then(() => {
       if (!cancelled) { window.clearTimeout(fallback); setReadyFramePair(framePair); }
     });
     return () => {

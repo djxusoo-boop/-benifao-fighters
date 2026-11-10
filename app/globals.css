@@ -6167,6 +6167,22 @@ footer p { margin: 0; }
   transition:opacity 500ms ease;
   will-change:auto;
 }
+
+/* Keep zooming readable without allocating extra animated filter layers. */
+html.arcade-zoomed .stage-backdrop {
+  filter:none !important;
+  transform:none !important;
+  will-change:auto !important;
+}
+html.arcade-zoomed :is(.arcade-crowd-person, .arcade-crowd-art, .fight-spectator, .fight-spectator-art, .stage-glow) {
+  animation-play-state:paused !important;
+  filter:none !important;
+  will-change:auto !important;
+}
+html.arcade-zoomed :is(.modal-layer, .topbar, .select-screen) {
+  -webkit-backdrop-filter:none !important;
+  backdrop-filter:none !important;
+}
 .arcade-performance-lite .stage-backdrop.active { transform:none; }
 .arcade-performance-lite .arena::before,
 .arcade-performance-lite .coop-mode::before,

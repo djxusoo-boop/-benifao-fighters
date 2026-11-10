@@ -11,7 +11,7 @@ type InstallPromptEvent = Event & {
 
 type WakeLockHandle = { release: () => Promise<void>; released?: boolean };
 
-const BUILD_VERSION = "V2.35.2";
+const BUILD_VERSION = "V2.35.3";
 const BUILD_STORAGE_KEY = "hardcore-fighters-current-build";
 const BUILD_RELOAD_KEY = "hardcore-fighters-build-reload";
 
@@ -60,12 +60,13 @@ export default function ArcadeDeviceManager() {
       const viewport = window.visualViewport;
       const { mobile, height } = layoutViewport(window.innerWidth, window.innerHeight, viewport?.height, viewport?.scale ?? 1, matchMedia("(pointer: coarse)").matches, displayMode);
       document.documentElement.dataset.displayMode = mobile ? "mobile" : "tablet";
+      document.documentElement.classList.toggle("arcade-zoomed", (viewport?.scale ?? 1) > 1.01);
       document.documentElement.style.setProperty("--visible-height", `${height}px`);
     };
     update();
     window.addEventListener("resize", update);
     window.visualViewport?.addEventListener("resize", update);
-    return () => { window.removeEventListener("resize", update); window.visualViewport?.removeEventListener("resize", update); };
+    return () => { window.removeEventListener("resize", update); window.visualViewport?.removeEventListener("resize", update); document.documentElement.classList.remove("arcade-zoomed"); };
   }, [displayMode]);
 
   useEffect(() => protectPinchClicks(document), []);
