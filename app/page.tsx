@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import type { CSSProperties, MouseEvent as ReactMouseEvent, PointerEvent as ReactPointerEvent } from "react";
-import GameIntro from "./GameIntro";
 import OnlineCount from "./OnlineCount";
 import OnlineRoom, { type OnlineInput, type OnlineMode } from "./OnlineRoom";
 import type { RoomRole } from "./online-peer";
@@ -3331,7 +3330,6 @@ function Home() {
             {v.game.phase === "over" && <div className="online-round-call">{v.game.winner === "cpu" ? "¡HAS GANADO!" : v.game.winner === "draw" ? "EMPATE" : "FIN DEL COMBATE"}<small>Tu amigo puede iniciar la revancha.</small></div>}
           </section>;
         }} />
-      <GameIntro />
       <FighterVisibilityGuard />
       <AutoFullscreen />
       <GameDiagnostics open={diagnosticsOpen} onClose={() => setDiagnosticsOpen(false)} />
