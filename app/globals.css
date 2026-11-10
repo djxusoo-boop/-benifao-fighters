@@ -10345,14 +10345,23 @@ html .select-screen.lobby-v2168 .character-card[data-lobby-text-style="true"] > 
 }
 html[data-display-mode] .online-remote-scene .arena.online-arena { min-height:0!important; height:auto!important; flex:none!important; }
 html[data-display-mode] .online-arena .fighter.motion-rig { width:var(--remote-width)!important; height:var(--remote-height)!important; max-width:none!important; max-height:none!important; bottom:var(--remote-bottom)!important; }
-.game-intro { position:fixed; inset:0; z-index:30000; display:grid; place-items:center; width:100dvw; height:100dvh; min-width:100vw; min-height:100vh; overflow:hidden; background:#000; }
-.game-intro video { display:block; width:100dvw; height:100dvh; max-width:none; max-height:none; object-fit:contain; background:#000; }
+.game-intro { position:fixed; inset:0; z-index:30000; display:grid; place-items:center; width:100vw; width:100dvw; height:100vh; height:100dvh; min-width:100vw; min-height:100vh; overflow:hidden; background:#000; touch-action:none; }
+.game-intro video { display:block; width:100vw; width:100dvw; height:100vh; height:100dvh; max-width:none; max-height:none; object-fit:contain; background:#000; opacity:0; pointer-events:none; transition:opacity .25s ease; }
+.game-intro video.is-playing { opacity:1; }
 .game-intro-logo { position:absolute; z-index:1; width:min(72vw,420px); max-height:28vh; object-fit:contain; opacity:1; transition:opacity .35s ease; filter:drop-shadow(0 0 18px #35dfff66); }
 .game-intro-logo.is-hidden, .game-intro-loader.is-hidden { opacity:0; pointer-events:none; }
 .game-intro-loader { position:absolute; z-index:1; top:calc(50% + min(18vh,150px)); display:flex; align-items:center; gap:10px; color:#c9f7ff; font:800 11px/1 system-ui,sans-serif; letter-spacing:.18em; transition:opacity .35s ease; }
 .game-intro-loader i { width:12px; height:12px; border:2px solid #35dfff55; border-top-color:#35dfff; border-radius:50%; animation:intro-spin .75s linear infinite; }
 @keyframes intro-spin { to { transform:rotate(360deg); } }
 .game-intro button { position:absolute; right:max(20px,env(safe-area-inset-right)); bottom:max(24px,env(safe-area-inset-bottom)); z-index:1; padding:14px 18px; border:1px solid #ffc066; border-radius:8px; background:#101923e8; color:white; font:700 15px system-ui; cursor:pointer; }
+@media (orientation:landscape) {
+ .game-intro video { width:100vw; height:100svh; }
+ .game-intro-logo { width:min(48vw,420px); max-height:34svh; }
+ .game-intro-loader { top:calc(50% + min(18svh,105px)); }
+}
+@media (orientation:portrait) {
+ .game-intro video { width:100vw; height:100svh; }
+}
 html .lobby-v2168 .mode-start-actions .fight-button { font-size:clamp(15px,1.15vw,20px)!important; line-height:1.15!important; min-height:62px!important; }
 html .lobby-v2168 .mode-start-actions .fight-button .mode-sub { font-size:clamp(11px,.8vw,14px)!important; line-height:1.2!important; }
 @media(max-width:720px) { html .lobby-v2168 .mode-start-actions .fight-button { font-size:clamp(14px,3.8vw,18px)!important; min-height:65px!important; } html .lobby-v2168 .mode-start-actions .fight-button .mode-sub { font-size:11px!important; } }
