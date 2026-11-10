@@ -10298,8 +10298,8 @@ html .select-screen.lobby-v2168 .character-card[data-lobby-text-style="true"] > 
 }
 html[data-display-mode] .online-remote-scene .arena.online-arena { min-height:0!important; height:auto!important; flex:none!important; }
 html[data-display-mode] .online-arena .fighter.motion-rig { width:var(--remote-width)!important; height:var(--remote-height)!important; max-width:none!important; max-height:none!important; bottom:var(--remote-bottom)!important; }
-.game-intro { position:fixed; inset:0; z-index:30000; display:grid; place-items:center; background:#000; }
-.game-intro video { width:100%; height:100%; object-fit:contain; }
+.game-intro { position:fixed; inset:0; z-index:30000; display:grid; place-items:center; width:100dvw; height:100dvh; min-width:100vw; min-height:100vh; overflow:hidden; background:#000; }
+.game-intro video { display:block; width:100dvw; height:100dvh; max-width:none; max-height:none; object-fit:contain; background:#000; }
 .game-intro button { position:absolute; right:max(20px,env(safe-area-inset-right)); bottom:max(24px,env(safe-area-inset-bottom)); z-index:1; padding:14px 18px; border:1px solid #ffc066; border-radius:8px; background:#101923e8; color:white; font:700 15px system-ui; cursor:pointer; }
 html .lobby-v2168 .mode-start-actions .fight-button { font-size:clamp(15px,1.15vw,20px)!important; line-height:1.15!important; min-height:62px!important; }
 html .lobby-v2168 .mode-start-actions .fight-button .mode-sub { font-size:clamp(11px,.8vw,14px)!important; line-height:1.2!important; }
