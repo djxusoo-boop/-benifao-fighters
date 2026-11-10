@@ -56,7 +56,8 @@ type OrbModeProps = {
   soundOn: boolean;
   difficulty: Difficulty;
   campaign?: boolean;
-  onComplete: (score?: number) => void;
+  onComplete: (score?: number, completed?: boolean) => void;
+  onDefeat?: (score: number) => void;
   onExit: () => void;
 };
 
@@ -93,7 +94,7 @@ const OBJECT_HUES = [42, 12, 324, 185, 198, 42] as const;
 
 const clamp = (value: number, minimum: number, maximum: number) => Math.max(minimum, Math.min(maximum, value));
 
-export default function OrbMode({ fighter, fighterName, soundOn, difficulty, campaign = false, onComplete, onExit }: OrbModeProps) {
+export default function OrbMode({ fighter, fighterName, soundOn, difficulty, campaign = false, onComplete, onExit, onDefeat }: OrbModeProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const heroRef = useRef<HTMLDivElement>(null);
   const heroArtRef = useRef<HTMLDivElement>(null);
@@ -102,6 +103,8 @@ export default function OrbMode({ fighter, fighterName, soundOn, difficulty, cam
   const stickUpRef = useRef(false);
   const onExitRef = useRef(onExit);
   const onCompleteRef = useRef(onComplete);
+  const onDefeatRef = useRef(onDefeat);
+  useEffect(() => { onDefeatRef.current = onDefeat; }, [onDefeat]);
   const soundOnRef = useRef(soundOn);
   const audioRef = useRef<AudioContext | null>(null);
   const [round, setRound] = useState(0);
@@ -336,10 +339,13 @@ export default function OrbMode({ fighter, fighterName, soundOn, difficulty, cam
         else onCompleteRef.current(score);
       } else {
         playTone(72, 0.28, "sawtooth");
+        if (campaign) onDefeatRef.current?.(score);
+        else onCompleteRef.current(score, false);
       }
     };
 
     const handleKeyDown = (event: KeyboardEvent) => {
+      if (document.querySelector(".leaderboard-layer") || event.target instanceof HTMLElement && event.target.closest("input, textarea, select, [contenteditable=true]")) return;
       const key = event.key.toLowerCase();
       if (["arrowleft", "arrowright", "a", "d", "h", "j", "k", "l", " "].includes(key)) event.preventDefault();
       if (key === "arrowleft" || key === "a") inputRef.current.left = true;

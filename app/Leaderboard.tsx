@@ -1,13 +1,14 @@
 "use client";
 
+import { rankScores } from "./leaderboard-policy.mjs";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 
-export type LeaderboardMode = "fight" | "orbs" | "adventure" | "coop" | "tournament";
-type Entry = { id: number; playerName: string; score: number; fighter: string; createdAt: string };
+export type LeaderboardMode = "fight" | "orbs" | "adventure" | "coop" | "tournament" | "arcade" | "slug";
+type Entry = { position?: number; id: number; playerName: string; score: number; fighter: string; createdAt: string };
 type StoredEntry = Entry & { mode: LeaderboardMode };
 
 const LABELS: Record<LeaderboardMode, string> = {
-  fight: "LUCHA", orbs: "ROMPEOBJETOS", adventure: "AVENTURA", coop: "COOPERATIVO", tournament: "TORNEO",
+  fight: "LUCHA", orbs: "ROMPEOBJETOS", adventure: "AVENTURA", coop: "COOPERATIVO", tournament: "TORNEO", arcade: "ARCADE", slug: "PRISON SLUG",
 };
 
 const GAMEPAD_KEYS = [..."ABCDEFGHIJKLMNOPQRSTUVWXYZ", "ESPACIO", "BORRAR", "GUARDAR"] as const;
@@ -15,12 +16,13 @@ const KEYBOARD_COLUMNS = 8;
 const LOCAL_RANKING_KEY = "hardcore-fighters-local-ranking-v1";
 
 const sortScores = <T extends Entry>(scores: T[]) =>
-  [...scores].sort((a, b) => b.score - a.score || a.createdAt.localeCompare(b.createdAt)).slice(0, 20);
+  rankScores(scores) as (T & { position: number })[];
 
 const readLocalScores = (mode: LeaderboardMode): Entry[] => {
   if (typeof window === "undefined") return [];
   try {
-    const parsed = JSON.parse(window.localStorage.getItem(LOCAL_RANKING_KEY) ?? "[]") as StoredEntry[];
+    const raw = JSON.parse(window.localStorage.getItem(LOCAL_RANKING_KEY) ?? "[]");
+    const parsed: StoredEntry[] = Array.isArray(raw) ? raw : [];
     return sortScores(parsed.filter((entry) => entry.mode === mode));
   } catch { return []; }
 };
@@ -28,7 +30,8 @@ const readLocalScores = (mode: LeaderboardMode): Entry[] => {
 const saveLocalScore = (mode: LeaderboardMode, score: number, fighter: string | undefined, playerName: string) => {
   if (typeof window === "undefined") return readLocalScores(mode);
   try {
-    const parsed = JSON.parse(window.localStorage.getItem(LOCAL_RANKING_KEY) ?? "[]") as StoredEntry[];
+    const raw = JSON.parse(window.localStorage.getItem(LOCAL_RANKING_KEY) ?? "[]");
+    const parsed: StoredEntry[] = Array.isArray(raw) ? raw : [];
     const nextEntry: StoredEntry = {
       id: Date.now(),
       mode,
@@ -62,21 +65,26 @@ export default function Leaderboard({ initialMode = "fight", score, fighter, onC
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [keyIndex, setKeyIndex] = useState(0);
+  const loadSequence = useRef(0);
+  const submissionRef = useRef<string | null>(null);
   const formRef = useRef<HTMLFormElement>(null);
 
   const load = async (nextMode: LeaderboardMode) => {
+    const sequence = ++loadSequence.current;
     setLoading(true); setError(""); setNotice("");
     try {
       const response = await fetch(`/api/leaderboard?mode=${nextMode}`, { cache: "no-store" });
       const data = await response.json() as { scores?: Entry[]; error?: string; offline?: boolean };
+      if (sequence !== loadSequence.current) return;
       if (!response.ok) throw new Error(data.error);
       setEntries(data.offline ? readLocalScores(nextMode) : (data.scores ?? []));
       if (data.offline) setNotice("Ranking online no disponible. Mostrando puntuaciones de este dispositivo.");
     } catch {
+      if (sequence !== loadSequence.current) return;
       setEntries(readLocalScores(nextMode));
       setNotice("Ranking online no disponible. Mostrando puntuaciones de este dispositivo.");
     }
-    finally { setLoading(false); }
+    finally { if (sequence === loadSequence.current) setLoading(false); }
   };
 
   useEffect(() => {
@@ -109,22 +117,30 @@ export default function Leaderboard({ initialMode = "fight", score, fighter, onC
   const submit = async (event: FormEvent) => {
     event.preventDefault();
     if (score == null || saving) return;
+    if (name.trim().length < 2 || name.trim().length > 30) { setError("Escribe un nombre de 2 a 30 caracteres"); return; }
+    submissionRef.current ??= crypto.randomUUID();
     setSaving(true); setError(""); setNotice("");
     try {
       const response = await fetch("/api/leaderboard", {
         method: "POST", headers: { "content-type": "application/json" },
-        body: JSON.stringify({ playerName: name, mode: initialMode, score, fighter }),
+        body: JSON.stringify({ playerName: name, mode: initialMode, score, fighter, submissionId: submissionRef.current }),
       });
       const data = await response.json() as { error?: string };
+      if (!response.ok && response.status < 500) { setError(data.error || "Revisa el nombre y la puntuación"); return; }
       if (!response.ok) throw new Error(data.error);
       try { window.localStorage.setItem("benifaio-player-name", name.trim()); } catch { /* optional */ }
       setSaved(true); setMode(initialMode); await load(initialMode);
     } catch {
       const cleanName = name.trim().replace(/\s+/g, " ");
+      try {
+        const pending = JSON.parse(localStorage.getItem("hf-ranking-outbox") || "[]");
+        const item = { playerName: cleanName, mode: initialMode, score, fighter, submissionId: submissionRef.current };
+        localStorage.setItem("hf-ranking-outbox", JSON.stringify([...pending.filter((row: { submissionId: string }) => row.submissionId !== item.submissionId), item]));
+      } catch { /* Local saving is best effort. */ }
       setEntries(saveLocalScore(initialMode, score, fighter, cleanName));
       try { window.localStorage.setItem("benifaio-player-name", cleanName); } catch { /* optional */ }
       setSaved(true); setMode(initialMode);
-      setNotice("Guardado en este dispositivo. El ranking online no respondió.");
+      setNotice("Guardado en este dispositivo. Se volverá a enviar al recuperar la conexión.");
     }
     finally { setSaving(false); }
   };
@@ -132,11 +148,11 @@ export default function Leaderboard({ initialMode = "fight", score, fighter, onC
   return <div className="leaderboard-layer" role="dialog" aria-modal="true" aria-label="Ranking mundial">
     <div className="leaderboard-panel">
       <button className="leaderboard-close" type="button" onClick={onClose} aria-label="Cerrar ranking">×</button>
-      <span>CLASIFICACIÓN ONLINE</span><h2>RANKING<br />MUNDIAL</h2>
+      <span>TOP 100 · MÁXIMO 3 RESULTADOS POR NOMBRE EN EL TOP 20</span><h2>RANKING<br />MUNDIAL</h2>
       {score != null && !saved && <form ref={formRef} className="leaderboard-entry" onSubmit={submit}>
         <strong>{String(score).padStart(6, "0")} PUNTOS · {LABELS[initialMode]}</strong>
         <label>ESCRIBE TU NOMBRE COMPLETO
-          <input value={name} onChange={(event) => setName(event.target.value)} minLength={2} maxLength={30} autoComplete="name" placeholder="Nombre del jugador" />
+          <input required value={name} onChange={(event) => setName(event.target.value)} minLength={2} maxLength={30} autoComplete="name" placeholder="Nombre del jugador" />
         </label>
         <div className="leaderboard-gamepad-keyboard" aria-label="Teclado para mando">
           <small>MANDO: CRUCETA MUEVE · A/✕ ESCRIBE · B/○ BORRA</small>
@@ -150,7 +166,7 @@ export default function Leaderboard({ initialMode = "fight", score, fighter, onC
       {error && <p className="leaderboard-error">{error}</p>}
       {notice && <p className="leaderboard-notice">{notice}</p>}
       <ol className="leaderboard-list">
-        {loading ? <li className="empty">CARGANDO CLASIFICACIÓN…</li> : entries.length ? entries.map((entry, index) => <li key={entry.id}><b>{index + 1}</b><span>{entry.playerName}<small>{entry.fighter === "vanessa" ? "VANESSA" : entry.fighter === "josevictor" ? "JOSEVICTOR" : entry.fighter === "cristian" ? "CRISTIAN" : entry.fighter === "cesaret" ? "CESARET" : entry.fighter === "borja" ? "BORJA" : entry.fighter === "bacora" ? "BACORA" : entry.fighter === "bonviure" ? "BONVIURE" : entry.fighter === "elchica" ? "EL CHICA" : entry.fighter === "ogalla" ? "OGALLA" : entry.fighter === "xuso" ? "XUSO" : entry.fighter === "bomba" ? "EL BOMBA" : entry.fighter === "tonimassama" ? "TONI MASSAMA" : entry.fighter === "nova" ? "YOYE" : entry.fighter === "estefy" ? "ESTEFY" : "MALETILLA"}</small></span><strong>{String(entry.score).padStart(6, "0")}</strong></li>) : <li className="empty">SÉ EL PRIMERO EN ESTE MODO</li>}
+        {loading ? <li className="empty">CARGANDO CLASIFICACIÓN…</li> : entries.length ? entries.map((entry, index) => <li key={entry.id}><b>{entry.position ?? index + 1}</b><span>{entry.playerName}<small>{entry.fighter === "vanessa" ? "VANESSA" : entry.fighter === "josevictor" ? "JOSEVICTOR" : entry.fighter === "cristian" ? "CRISTIAN" : entry.fighter === "cesaret" ? "CESARET" : entry.fighter === "borja" ? "BORJA" : entry.fighter === "bacora" ? "BACORA" : entry.fighter === "bonviure" ? "BONVIURE" : entry.fighter === "elchica" ? "EL CHICA" : entry.fighter === "ogalla" ? "OGALLA" : entry.fighter === "xuso" ? "XUSO" : entry.fighter === "bomba" ? "EL BOMBA" : entry.fighter === "tonimassama" ? "TONI MASSAMA" : entry.fighter === "nova" ? "YOYE" : entry.fighter === "estefy" ? "ESTEFY" : "MALETILLA"}</small></span><strong>{String(entry.score).padStart(6, "0")}</strong></li>) : <li className="empty">SÉ EL PRIMERO EN ESTE MODO</li>}
       </ol>
     </div>
   </div>;

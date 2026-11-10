@@ -67,7 +67,7 @@ type Props = {
   soundOn: boolean;
   difficulty: "easy" | "normal";
   onExit: () => void;
-  onComplete: (score?: number) => void;
+  onComplete: (score?: number, completed?: boolean) => void;
 };
 
 const PLAYER_NAMES: Record<FighterId, string> = { maletilla: "MALETILLA", vanessa: "VANESSA", josevictor: "JOSEVICTOR", cristian: "CRISTIAN", cesaret: "CESARET", borja: "BORJA", bacora: "BACORA", bonviure: "BONVIURE", elchica: "EL CHICA", ogalla: "OGALLA", xuso: "XUSO", bomba: "EL BOMBA", rafeta: "RAFETA", tonimassama: "TONI MASSAMA", nova: "YOYE", estefy: "ESTEFY" };
@@ -507,6 +507,7 @@ export default function CoopMode({ playerOne, playerTwo, aiPlayerTwo = false, so
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
+      if (document.querySelector(".leaderboard-layer") || event.target instanceof HTMLElement && event.target.closest("input, textarea, select, [contenteditable=true]")) return;
       const key = event.key.toLowerCase();
       if (["a", "d", "w", "c", "h", "j", "k", "l", "f", "arrowleft", "arrowright", "arrowup", "arrowdown", "1", "2", "3", "4", "escape"].includes(key)) event.preventDefault();
       keysRef.current.add(key);
@@ -788,7 +789,7 @@ export default function CoopMode({ playerOne, playerTwo, aiPlayerTwo = false, so
         completionRef.current = true;
         const finalScore = scoreRef.current + wave * 500;
         setScore(finalScore);
-        later(() => onComplete(finalScore), 900);
+        later(() => onComplete(finalScore, false), 900);
       }
       haptic([100, 70, 140]); beep(52, 0.45, "sawtooth");
     }, 0);

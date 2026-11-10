@@ -50,7 +50,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="es">
-      <body>{children}</body>
+      <body>{children}<script src="/presence.js?v=2.35.0" defer /></body>
     </html>
   );
 }

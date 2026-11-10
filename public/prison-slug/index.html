@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#0b1017" />
     <title>HARDCORE FIGHTERS · PRISON SLUG</title>
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='10' fill='%23071018'/%3E%3Cpath d='M12 12h24c10 0 17 7 17 17S46 46 36 46H25v8H12V12zm13 12v10h10c3 0 5-2 5-5s-2-5-5-5H25z' fill='%237dff38'/%3E%3C/svg%3E" />
-    <link rel="stylesheet" href="styles.css?v=2.34.9" />
+    <link rel="stylesheet" href="styles.css?v=2.35.0" />
   </head>
   <body>
     <main class="app-shell">
@@ -15,6 +15,7 @@
           <p class="eyebrow">PRISON SLUG · MISIÓN 01</p>
           <h1>PRISON <em>SLUG</em></h1>
         </div>
+        <span data-online-count>ONLINE · CONECTANDO</span>
         <button id="muteButton" class="icon-button" type="button" aria-pressed="false" title="Activar o desactivar sonido">SONIDO: OFF</button>
       </header>
 
@@ -87,6 +88,7 @@
           <h2 id="resultTitle">MISIÓN COMPLETA</h2>
           <p id="resultText"></p>
           <strong id="resultScore">000000</strong>
+          <form id="slugRankingForm" hidden><label>Nombre para el ranking <input id="slugRankingName" minlength="2" maxlength="30" required autocomplete="nickname" /></label><button type="submit" class="primary-button">GUARDAR PUNTUACIÓN</button><p id="slugRankingStatus" role="status"></p></form>
           <div>
             <button id="againButton" class="primary-button" type="button">JUGAR OTRA VEZ</button>
             <button id="backButton" class="secondary-button" type="button">VOLVER AL MENÚ PRINCIPAL</button>
@@ -94,6 +96,8 @@
         </div>
       </section>
     </main>
-    <script src="game.js?v=2.34.9"></script>
+    <script src="/presence.js?v=2.35.0" defer></script>
+    <script src="ranking.js?v=2.35.0" defer></script>
+    <script src="game.js?v=2.35.0"></script>
   </body>
 </html>

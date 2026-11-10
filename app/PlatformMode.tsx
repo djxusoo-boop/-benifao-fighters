@@ -18,7 +18,8 @@ type PlatformModeProps = {
   soundOn: boolean;
   difficulty: Difficulty;
   campaign?: boolean;
-  onComplete: (score?: number) => void;
+  onComplete: (score?: number, completed?: boolean) => void;
+  onDefeat?: (score: number) => void;
   onExit: () => void;
 };
 
@@ -601,7 +602,7 @@ const overlaps = (a: Rect, b: Rect) =>
 
 const clamp = (value: number, minimum: number, maximum: number) => Math.max(minimum, Math.min(maximum, value));
 
-export default function PlatformMode({ fighter, fighterName, soundOn, difficulty, campaign = false, onComplete, onExit }: PlatformModeProps) {
+export default function PlatformMode({ fighter, fighterName, soundOn, difficulty, campaign = false, onComplete, onExit, onDefeat }: PlatformModeProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const inputRef = useRef({ left: false, right: false, jump: false });
   const jumpRef = useRef<() => void>(() => undefined);
@@ -610,6 +611,8 @@ export default function PlatformMode({ fighter, fighterName, soundOn, difficulty
   const specialRef = useRef<() => void>(() => undefined);
   const onExitRef = useRef(onExit);
   const onCompleteRef = useRef(onComplete);
+  const onDefeatRef = useRef(onDefeat);
+  useEffect(() => { onDefeatRef.current = onDefeat; }, [onDefeat]);
   const soundOnRef = useRef(soundOn);
   const audioRef = useRef<AudioContext | null>(null);
   const [round, setRound] = useState(0);
@@ -973,6 +976,8 @@ export default function PlatformMode({ fighter, fighterName, soundOn, difficulty
       if (lives <= 0) {
         currentStatus = "lost";
         setStatus("lost");
+        if (campaign) onDefeatRef.current?.(score);
+        else onCompleteRef.current(score, false);
         updateHud(now);
         return;
       }
@@ -1007,6 +1012,8 @@ export default function PlatformMode({ fighter, fighterName, soundOn, difficulty
         if (lives <= 0) {
           currentStatus = "lost";
           setStatus("lost");
+        if (campaign) onDefeatRef.current?.(score);
+        else onCompleteRef.current(score, false);
         }
       }
       updateHud(now);
@@ -1170,7 +1177,7 @@ export default function PlatformMode({ fighter, fighterName, soundOn, difficulty
         unlockedLevelRef.current = nextUnlocked;
         levelStarsRef.current = nextStars;
         setLevelResult(result);
-        if (levelIndex === LEVELS.length - 1) onCompleteRef.current(score);
+        onCompleteRef.current(score, levelIndex === LEVELS.length - 1);
         currentStatus = "level-complete";
         setStatus("level-complete");
         updateHud(now);
@@ -1194,6 +1201,7 @@ export default function PlatformMode({ fighter, fighterName, soundOn, difficulty
     };
 
     const handleKeyDown = (event: KeyboardEvent) => {
+      if (document.querySelector(".leaderboard-layer") || event.target instanceof HTMLElement && event.target.closest("input, textarea, select, [contenteditable=true]")) return;
       const key = event.key.toLowerCase();
       if (["arrowleft", "arrowright", "arrowup", "a", "d", "w", "h", "j", "k", "l", "f", " "].includes(key)) event.preventDefault();
       if (key === "arrowleft" || key === "a") input.left = true;

@@ -492,6 +492,8 @@ function completeMission(won) {
     ? `La Furgoneta Resonante queda operativa. ${state.hero.name} abrió la salida con ${state.score} puntos.`
     : "La banda de drones expulsó al equipo de la ruta. Vuelve a intentarlo o regresa al menú principal.";
   ui.resultScore.textContent = formatScore(state.score);
+  window.dispatchEvent(new CustomEvent("slug-result", { detail: { score: state.score, fighter: state.hero.id } }));
+  if (window.parent !== window) window.parent.postMessage({ type: "hardcore-fighters-score", score: state.score }, window.location.origin);
   blip(won ? 740 : 100, .22);
 }
 

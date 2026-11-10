@@ -4,12 +4,15 @@ import { index, integer, sqliteTable, text, uniqueIndex } from "drizzle-orm/sqli
 export const leaderboardScores = sqliteTable("leaderboard_scores", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   playerName: text("player_name").notNull(),
+  nameKey: text("name_key"),
+  submissionId: text("submission_id"),
   mode: text("mode").notNull(),
   score: integer("score").notNull(),
   fighter: text("fighter").notNull().default("maletilla"),
   createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 }, (table) => [
   index("leaderboard_mode_score_idx").on(table.mode, table.score),
+  uniqueIndex("leaderboard_submission_idx").on(table.submissionId),
 ]);
 
 // Deliberately aggregate-only activity. There is no IP, player name, account,
@@ -34,3 +37,9 @@ export const siteSettings = sqliteTable("site_settings", {
   value: text("value").notNull(),
   updatedAt: integer("updated_at").notNull(),
 });
+
+// Short-lived anonymous presence. No IP, names or browsing history.
+export const liveSessions = sqliteTable("live_sessions", {
+  token: text("token").primaryKey(),
+  expiresAt: integer("expires_at").notNull(),
+}, (table) => [index("live_sessions_expiry_idx").on(table.expiresAt)]);

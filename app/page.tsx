@@ -161,7 +161,7 @@ const STAGES = [
 
 const GAME_TITLE = "HARDCORE FIGHTERS";
 const GAME_EDITION = "WEB · ARCADE EDITION";
-const GAME_VERSION = "V2.34.9";
+const GAME_VERSION = "V2.35.0";
 
 const ROUND_SECONDS = 99;
 const SUPER_MAX = 100;
@@ -2166,6 +2166,7 @@ function Home() {
   }, []);
 
   const startCampaign = useCallback(() => {
+    rankingCapturedRef.current = false;
     if (!fightReady) return;
     recordActivity("mode_start", { mode: "tournament", fighter: selected });
     setPendingRanking(null);
@@ -2638,11 +2639,11 @@ function Home() {
   }, [game.phase, game.winner, recordActivity]);
 
   useEffect(() => {
-    if (campaignStep !== 0 || arcadeRun || game.phase !== "over" || game.winner !== "player" || rankingCapturedRef.current) return;
+    if (trainingMode || campaignStep !== 0 || arcadeRun || game.phase !== "over" || !game.winner || rankingCapturedRef.current) return;
     rankingCapturedRef.current = true;
-    const score = Math.round(game.playerHealth * 100 + game.timer * 25 + roundWins.player * 1000 + progress.bestCombo * 150);
+    const score = Math.round((game.winner === "player" ? game.playerHealth * 100 + game.timer * 25 : 0) + roundWins.player * 1000 + matchStats.hits * 100 + matchStats.maxCombo * 150);
     setPendingRanking({ mode: "fight", score });
-  }, [arcadeRun, campaignStep, game.phase, game.playerHealth, game.timer, game.winner, progress.bestCombo, roundWins.player]);
+  }, [trainingMode, arcadeRun, campaignStep, game.phase, game.playerHealth, game.timer, game.winner, progress.bestCombo, roundWins.player, matchStats.hits, matchStats.maxCombo]);
 
   useEffect(() => {
     if (campaignStep !== 1 || game.phase !== "over" || game.winner !== "player") return;
@@ -2675,9 +2676,10 @@ function Home() {
       setArcadeRun((run) => {
         if (!run || run.status !== "fighting") return run;
         const score = run.score + fightScore;
+        if (!won || last) setPendingRanking({ mode: "arcade", score });
         if (won && last) {
           setDifficulty(run.savedDifficulty);
-          setPendingRanking({ mode: "fight", score });
+          setPendingRanking({ mode: "arcade", score });
           setProgress((current) => {
             const next = { ...current, crowns: (current.crowns ?? 0) + 1 };
             window.localStorage.setItem("benifaio-progress", JSON.stringify(next));
@@ -2720,6 +2722,7 @@ function Home() {
   }, [awardProgress, clearTransientTimers]);
 
   const retryCampaignBoss = useCallback(() => {
+    rankingCapturedRef.current = false;
     clearTransientTimers();
     setBossHealth(CAMPAIGN_BOSS_MAX_HEALTH);
     bossRewardedRef.current = false;
@@ -2735,6 +2738,14 @@ function Home() {
     setFinalFlash(0);
     setGame({ ...freshGame(), phase: "campaign-final" });
   }, [clearTransientTimers]);
+
+  useEffect(() => {
+    const lostOpening = campaignStep === 1 && game.phase === "over" && game.winner && game.winner !== "player";
+    const lostFinal = campaignStep === 4 && game.phase === "campaign-final" && game.playerHealth <= 0;
+    if ((!lostOpening && !lostFinal) || rankingCapturedRef.current) return;
+    rankingCapturedRef.current = true;
+    setPendingRanking({ mode: "tournament", score: campaignScore });
+  }, [campaignStep, campaignScore, game.phase, game.winner, game.playerHealth]);
 
   const hitCampaignBoss = useCallback((ultimate = false) => {
     if (campaignStep !== 4 || gameRef.current.phase !== "campaign-final" || bossHealth <= 0 || gameRef.current.playerHealth <= 0) return;
@@ -3063,6 +3074,7 @@ function Home() {
           <span className="raspberry-edition-badge">{GAME_EDITION}</span>
         </a>
         <div className="topbar-actions">
+          <span className="build-chip" data-online-count="" aria-label="Jugadores conectados">ONLINE · CONECTANDO</span>
           <span className="streak"><b>{streak}</b> victorias</span>
           <span className="profile-level">NIVEL {1 + progress.fights + progress.adventures * 2 + progress.orbs}</span>
           <span className="build-chip" aria-label={`Versión ${GAME_VERSION}`}>{GAME_VERSION}</span>
@@ -3084,7 +3096,7 @@ function Home() {
       </header>
 
       {game.phase === "select" && analyticsNoticeOpen && <aside className="activity-consent" role="dialog" aria-label="Estadísticas anónimas del juego">
-        <div><b>ESTADÍSTICAS DEL JUEGO</b><p>Siempre contamos un acceso anónimo para saber cuánta gente entra. No guardamos IP, nombre, cuenta, móvil ni identificador. Si aceptas, también sumamos en total las partidas, victorias, modos y luchadores usados.</p></div>
+        <div><b>ESTADÍSTICAS DEL JUEGO</b><p>Siempre contamos un acceso anónimo para saber cuánta gente entra. No guardamos IP, nombre, cuenta ni móvil. El contador online usa un código anónimo temporal que caduca tras aproximadamente un minuto sin actividad. Si aceptas, también sumamos en total las partidas, victorias, modos y luchadores usados.</p></div>
         <div className="activity-consent-actions"><button type="button" className="secondary-choice" onClick={() => chooseAnalytics("limited")}>Solo contar entrada</button><button type="button" className="primary-choice" onClick={() => chooseAnalytics("accepted")}>Aceptar estadísticas</button></div>
       </aside>}
 
@@ -3490,18 +3502,18 @@ function Home() {
         )}
 
         {game.phase === "orbs" && (
-          <OrbMode fighter={selected} fighterName={playerData.name} soundOn={soundOn} difficulty={modeDifficulty} campaign={campaignStep === 2} onComplete={campaignStep === 2 ? finishCampaignOrbs : (modeScore) => { const score = modeScore ?? 0; awardProgress("orbs", score); setPendingRanking({ mode: "orbs", score }); }} onExit={resetToSelect} />
+          <OrbMode fighter={selected} fighterName={playerData.name} soundOn={soundOn} difficulty={modeDifficulty} campaign={campaignStep === 2} onDefeat={(score) => setPendingRanking({ mode: "tournament", score: campaignScore + score })} onComplete={campaignStep === 2 ? finishCampaignOrbs : (modeScore, completed = true) => { const score = modeScore ?? 0; if (completed) awardProgress("orbs", score); setPendingRanking({ mode: "orbs", score }); }} onExit={resetToSelect} />
         )}
 
         {game.phase === "platform" && (
-          <PlatformMode fighter={selected} fighterName={playerData.name} soundOn={soundOn} difficulty={modeDifficulty} campaign={campaignStep === 3} onComplete={campaignStep === 3 ? finishCampaignAdventure : (modeScore) => { const score = modeScore ?? 0; awardProgress("adventures", score); setPendingRanking({ mode: "adventure", score }); }} onExit={resetToSelect} />
+          <PlatformMode fighter={selected} fighterName={playerData.name} soundOn={soundOn} difficulty={modeDifficulty} campaign={campaignStep === 3} onDefeat={(score) => setPendingRanking({ mode: "tournament", score: campaignScore + score })} onComplete={campaignStep === 3 ? finishCampaignAdventure : (modeScore, completed = true) => { const score = modeScore ?? 0; if (completed) awardProgress("adventures", score); setPendingRanking({ mode: "adventure", score }); }} onExit={resetToSelect} />
         )}
 
         {game.phase === "coop" && (
-          <CoopMode playerOne={coopPlayerOne} playerTwo={coopPlayerTwo} aiPlayerTwo={coopHumanPlayers === 1} soundOn={soundOn} difficulty={modeDifficulty} onComplete={(modeScore) => { const score = modeScore ?? 0; awardProgress("adventures", score); setPendingRanking({ mode: "coop", score }); }} onExit={resetToSelect} />
+          <CoopMode playerOne={coopPlayerOne} playerTwo={coopPlayerTwo} aiPlayerTwo={coopHumanPlayers === 1} soundOn={soundOn} difficulty={modeDifficulty} onComplete={(modeScore, completed = true) => { const score = modeScore ?? 0; if (completed) awardProgress("adventures", score); setPendingRanking({ mode: "coop", score }); }} onExit={resetToSelect} />
         )}
 
-        {game.phase === "prison-slug" && <PrisonSlugMode fighter={selected} onExit={resetToSelect} />}
+        {game.phase === "prison-slug" && <PrisonSlugMode fighter={selected} onComplete={(score) => setPendingRanking({ mode: "slug", score })} onExit={resetToSelect} />}
 
         {game.phase === "campaign-final" && (
           <div className={`campaign-final boss-phase-${bossPhase} ending-${selected} ${bossHealth <= 0 ? "won" : ""} ${bossWarning ? "boss-warning" : ""} flash-${finalFlash % 2}`} aria-label="Jefe final del Torneo de La Ribera">
@@ -3630,7 +3642,7 @@ function Home() {
               </div>
             ) : (
               <div className="result-actions">
-                <button className="fight-button" type="button" onClick={startRound}>REVANCHA</button>
+                <button className="fight-button" type="button" onClick={() => startRound()}>REVANCHA</button>
                 <button className="secondary-button" type="button" onClick={resetToSelect}>CAMBIAR LUCHADOR</button>
               </div>
             )}
@@ -3639,6 +3651,7 @@ function Home() {
 
         {(rankingOpen || pendingRanking) && (
           <Leaderboard
+            key={pendingRanking ? `${pendingRanking.mode}-${pendingRanking.score}` : "browse"}
             initialMode={pendingRanking?.mode ?? "fight"}
             score={pendingRanking?.score}
             fighter={selected}
