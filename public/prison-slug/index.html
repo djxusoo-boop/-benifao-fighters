@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#0b1017" />
     <title>HARDCORE FIGHTERS · PRISON SLUG</title>
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='10' fill='%23071018'/%3E%3Cpath d='M12 12h24c10 0 17 7 17 17S46 46 36 46H25v8H12V12zm13 12v10h10c3 0 5-2 5-5s-2-5-5-5H25z' fill='%237dff38'/%3E%3C/svg%3E" />
-    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="styles.css?v=2.34.9" />
   </head>
   <body>
     <main class="app-shell">
@@ -27,7 +27,7 @@
         <div id="characterCards" class="character-cards" aria-label="Selección de personaje"></div>
         <div class="select-actions">
           <button id="startButton" class="primary-button" type="button">INICIAR MISIÓN <span>▶</span></button>
-          <p>Teclado: <kbd>A</kbd><kbd>D</kbd> mover · <kbd>W</kbd> saltar · mantén <kbd>J</kbd> para fuego · <kbd>K</kbd> especial</p>
+          <p><kbd>A</kbd><kbd>D</kbd> mover · <kbd>W</kbd><kbd>S</kbd> apuntar o agacharse · <kbd>ESPACIO</kbd> saltar · <kbd>J</kbd> fuego</p>
         </div>
       </section>
 
@@ -43,6 +43,7 @@
           <div class="stage-hud">
             <span id="objectiveReadout">RUMBO A LA FURGONETA</span>
             <b id="scoreReadout">000000</b>
+            <small class="aim-chip">PUNTERÍA <span id="aimReadout">→</span></small>
           </div>
           <div class="hud-block energy-hud">
             <span>ESPECIAL</span>
@@ -54,7 +55,8 @@
         <div class="canvas-frame">
           <canvas id="gameCanvas" width="1280" height="720" aria-label="Aventura lateral de acción"></canvas>
           <div id="eventBanner" class="event-banner" aria-live="assertive"></div>
-          <div id="vanPrompt" class="van-prompt hidden">PULSA <kbd>F</kbd> PARA SUBIR Y CONDUCIR</div>
+          <div id="vanPrompt" class="van-prompt hidden"><kbd>F</kbd> O <strong>VAN</strong> · SUBIR A LA FURGONETA</div>
+          <button id="pauseButton" class="pause-toggle" type="button" aria-label="Pausar partida">Ⅱ</button>
           <div id="pausePanel" class="pause-panel hidden">
             <p class="eyebrow">PAUSA</p>
             <h2>MISIÓN EN ESPERA</h2>
@@ -64,19 +66,19 @@
         </div>
 
         <div class="mobile-controls" aria-label="Controles táctiles">
-          <div id="joystick" class="joystick" role="application" aria-label="Joystick virtual de movimiento">
+          <div id="joystick" class="joystick" role="application" aria-label="Joystick virtual para moverse, saltar y agacharse">
             <span class="joystick-ring" aria-hidden="true"></span>
             <span id="joystickKnob" class="joystick-knob" aria-hidden="true"></span>
           </div>
           <div class="action-pad">
-            <button data-key="jump" type="button" class="jump" aria-label="Saltar">▲</button>
-            <button data-key="crouch" type="button" class="crouch" aria-label="Agacharse">▼</button>
-            <button data-key="fire" type="button" class="fire" aria-label="Fuego">F</button>
+            <button data-key="jump" type="button" class="jump" aria-label="Saltar">↑</button>
+            <button data-key="fire" type="button" class="fire" aria-label="Fuego. Mantén pulsado y arrastra para apuntar">→</button>
             <button data-key="special" type="button" class="special" aria-label="Especial">★</button>
             <button data-key="activate" type="button" class="activate" aria-label="Subir a la furgoneta">VAN</button>
           </div>
         </div>
-        <p class="desktop-controls"><kbd>A</kbd><kbd>D</kbd> MOVER · <kbd>W</kbd> SALTAR · <kbd>S</kbd> AGACHARSE · <kbd>J</kbd> FUEGO · <kbd>K</kbd> ESPECIAL · <kbd>F</kbd> FURGONETA · <kbd>P</kbd> PAUSA</p>
+        <p class="touch-guide">MANTÉN FUEGO Y DESLIZA PARA APUNTAR</p>
+        <p class="desktop-controls"><kbd>A</kbd><kbd>D</kbd> MOVER · <kbd>W</kbd><kbd>S</kbd> APUNTAR / AGACHARSE · <kbd>ESPACIO</kbd> SALTAR · <kbd>J</kbd> FUEGO · <kbd>K</kbd> ESPECIAL · <kbd>F</kbd> FURGONETA · <kbd>P</kbd> PAUSA</p>
       </section>
 
       <section id="resultScreen" class="screen result-screen hidden" aria-live="polite">
@@ -92,6 +94,6 @@
         </div>
       </section>
     </main>
-    <script src="game.js"></script>
+    <script src="game.js?v=2.34.9"></script>
   </body>
 </html>

@@ -7,6 +7,10 @@ const ENEMY_SPRITE_SCALE = 1.2;
 const WORLD_END = 6100;
 const VAN_X = 4980;
 const EXIT_X = 5880;
+const VAN_HOLD_X = 5440;
+const VAN_BEAM_RANGE = 740;
+const ACTION_BUFFER = .13;
+const SECTOR_NAMES = ["BARRIO PRISON", "PASO ELEVADO", "PATIO INDUSTRIAL", "DEPÓSITO SONORO", "SALIDA NORTE"];
 
 // The route is deliberately hand-authored: the player can read the road,
 // climb over wreckage, and use the high ground instead of running across one
@@ -68,14 +72,25 @@ const BOSS_SPRITE_FRAMES = {
   drumboss: { label: "CAPITÁN DEL RITMO", color: "#f6c34a", image: "drum" },
 };
 const DESTRUCTIBLES = [
-  { kind: "crate", x: 470, w: 62, h: 58, hp: 26 },
+  { kind: "crate", x: 470, w: 62, h: 58, hp: 22, weapon: "machinegun" },
   { kind: "barrel", x: 1065, w: 42, h: 65, hp: 20 },
-  { kind: "crate", x: 1815, w: 58, h: 54, hp: 24 },
+  { kind: "crate", x: 1815, w: 58, h: 54, hp: 24, weapon: "bomb" },
   { kind: "barrel", x: 2150, w: 42, h: 65, hp: 20 },
   { kind: "antenna", x: 2700, w: 48, h: 122, hp: 36 },
-  { kind: "crate", x: 3180, w: 66, h: 60, hp: 27 },
+  { kind: "crate", x: 3180, w: 66, h: 60, hp: 27, weapon: "rocket" },
   { kind: "barrel", x: 4110, w: 42, h: 65, hp: 20 },
-  { kind: "crate", x: 4530, w: 62, h: 58, hp: 26 },
+  { kind: "crate", x: 4530, w: 62, h: 58, hp: 26, weapon: "laser" },
+];
+
+// Fixed ambushes give each stretch a different rhythm and let elevated
+// turrets be placed against a specific platform in the level.
+const ROUTE_ENCOUNTERS = [
+  { at: 120, foes: [[560, "soldier"], [715, "drone"], [880, "grenadier"]] },
+  { at: 930, foes: [[1360, "turret", 428], [1490, "soldier"], [1630, "bottle"]] },
+  { at: 1750, foes: [[2100, "grenadier"], [2290, "brute"], [2500, "speaker"]] },
+  { at: 2600, foes: [[3100, "turret", 414], [3260, "soldier"], [3470, "grenadier"]] },
+  { at: 3440, foes: [[3850, "tanklet"], [4030, "bottle"], [4180, "soldier"]] },
+  { at: 4140, foes: [[4490, "turret", 438], [4570, "speaker"], [4810, "brute"]] },
 ];
 
 const canvas = document.querySelector("#gameCanvas");
@@ -96,6 +111,8 @@ const ui = {
   lives: document.querySelector("#livesReadout"),
   weapon: document.querySelector("#weaponReadout"),
   rush: document.querySelector("#rushReadout"),
+  aim: document.querySelector("#aimReadout"),
+  touchFire: document.querySelector('[data-key="fire"]'),
   energy: document.querySelector("#energyMeter"),
   ability: document.querySelector("#abilityReadout"),
   score: document.querySelector("#scoreReadout"),
@@ -306,12 +323,12 @@ let selectedId = characters.some((hero) => hero.id === requestedFighter) ? reque
 let state = null;
 let soundOn = false;
 let audioContext = null;
-// `fire` records a tap; `fireHeld` keeps firing at every weapon's cadence.
-// Keeping them separate means a very quick touch tap cannot be swallowed by
-// the pointer-up event in the same frame.
-const input = { left: false, right: false, jump: false, crouch: false, fire: false, fireHeld: false, special: false, activate: false };
-const pressed = new Set();
+const held = new Map();
+const queued = { fire: 0, jump: 0, special: 0, activate: 0 };
+let stick = { x: 0, y: 0 };
+let touchAim = null;
 let lastFrame = 0;
+let frameRequest = 0;
 
 function loadImage(src) {
   if (imageCache.has(src)) return imageCache.get(src);
@@ -324,6 +341,34 @@ function loadImage(src) {
 function clamp(value, min, max) { return Math.max(min, Math.min(max, value)); }
 function distance(a, b) { return Math.abs(a - b); }
 function rectsOverlap(a, b) { return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y; }
+function direction(x, y, facing = 1) {
+  const length = Math.hypot(x, y);
+  return length ? { x: x / length, y: y / length } : { x: facing, y: 0 };
+}
+function aimDirection(player, boarded = false) {
+  if (touchAim) return touchAim;
+  const x = moveAxis();
+  const y = Number(isHeld("down")) - Number(isHeld("up"));
+  // Grounded down is a crouch. The air and the van allow all eight angles.
+  return direction(x, y > 0 && player.landed && !boarded ? 0 : y, player.facing);
+}
+function moveAxis() { return Number(isHeld("right")) - Number(isHeld("left")); }
+
+function segmentHit(x, y, dx, dy, rect, padding = 0) {
+  let enter = 0, exit = 1;
+  for (const [start, delta, min, size] of [[x, dx, rect.x, rect.w], [y, dy, rect.y, rect.h]]) {
+    const low = min - padding, high = min + size + padding;
+    if (!delta) {
+      if (start < low || start > high) return Infinity;
+      continue;
+    }
+    const near = (low - start) / delta, far = (high - start) / delta;
+    enter = Math.max(enter, Math.min(near, far));
+    exit = Math.min(exit, Math.max(near, far));
+    if (enter > exit) return Infinity;
+  }
+  return enter;
+}
 function formatScore(value) { return String(Math.max(0, Math.floor(value))).padStart(6, "0"); }
 function heroFromId(id) { return characters.find((hero) => hero.id === id) ?? characters[0]; }
 function terrainAt(worldX) {
@@ -332,13 +377,14 @@ function terrainAt(worldX) {
   return piece.y1 + (piece.y2 - piece.y1) * ratio;
 }
 function vehicleTop(vehicle) { return terrainAt(vehicle.x + vehicle.w * .5) - vehicle.h; }
-function supportAt(worldX, bottom, velocityY) {
+function supportAt(worldX, previousFeet, feet) {
   let support = terrainAt(worldX);
-  if (velocityY >= 0) {
-    for (const vehicle of VEHICLES) {
-      const top = vehicleTop(vehicle);
-      if (worldX + 24 > vehicle.x && worldX - 24 < vehicle.x + vehicle.w && bottom <= top + 92 && bottom >= top - 14) support = Math.min(support, top);
-    }
+  for (const vehicle of VEHICLES) {
+    const top = vehicleTop(vehicle);
+    if (worldX + 24 > vehicle.x && worldX - 24 < vehicle.x + vehicle.w && previousFeet <= top + 2 && feet >= top) support = Math.min(support, top);
+  }
+  for (const platform of state.platforms) {
+    if (worldX + 24 > platform.x && worldX - 24 < platform.x + platform.w && previousFeet <= platform.y + 2 && feet >= platform.y) support = Math.min(support, platform.y);
   }
   return support;
 }
@@ -376,7 +422,6 @@ function initialState(hero) {
     messageUntil: 0,
     player: { x: 120, y: terrainAt(120) - 138, w: 72, h: 138, vx: 0, vy: 0, facing: 1, hp: 100, lives: 3, energy: hero.id === "xuso" ? 50 : 32, weapon: "pistol", ammo: Infinity, invincible: 0, fireCooldown: 0, specialCooldown: 0, landed: true, run: 0, weaponFlash: 0, poseKind: "idle", poseUntil: 0, crouching: false },
     bullets: [],
-    enemyShots: [],
     enemies: [],
     deathSprites: [],
     particles: [],
@@ -391,10 +436,9 @@ function initialState(hero) {
     ],
     checkpoints: [1300, 2900, 4450],
     checkpoint: 0,
-    van: { active: false, charged: false, destroyed: false, charge: 0, waveClock: 0, pulseCooldown: 1.6, beamCooldown: 0, bursts: 0, hp: 100, damageFlash: 0, prompt: false, boarded: false, x: VAN_X, vx: 0, driverId: hero.id, roofRiderId: null },
+    van: { active: false, charged: false, destroyed: false, charge: 0, waveClock: .65, pulseCooldown: 1.6, beamCooldown: 0, beamFlash: 0, aim: direction(1, 0), bursts: 0, hp: 100, damageFlash: 0, hurtCooldown: 0, prompt: false, boarded: false, x: VAN_X, vx: 0, driverId: hero.id, roofRiderId: null },
     finaleSpawned: false,
     finalBossType: null,
-    spawnClock: 0,
     waves: 0,
     sector: 1,
     rush: { chain: 0, timer: 0, multiplier: 1, best: 0 },
@@ -402,6 +446,7 @@ function initialState(hero) {
 }
 
 function beginMission() {
+  releaseInputs();
   const hero = heroFromId(selectedId);
   state = initialState(hero);
   screens.select.classList.add("hidden");
@@ -413,7 +458,8 @@ function beginMission() {
   ui.pause.classList.add("hidden");
   banner("MISIÓN 01 · SECTOR 01 · RECUPERA LA FURGONETA", "#f6f1de", 2200);
   lastFrame = performance.now();
-  requestAnimationFrame(loop);
+  cancelAnimationFrame(frameRequest);
+  frameRequest = requestAnimationFrame(loop);
   blip(180, .11);
 }
 
@@ -461,7 +507,7 @@ function banner(message, color = "#f6f1de", duration = 1200) {
   }, duration + 30);
 }
 
-function spawnEnemy(x, type = "drone") {
+function spawnEnemy(x, type = "drone", floor = null) {
   const specs = {
     sprayboss: { hp: 180, w: 142, h: 220, shot: 1.2, speed: 0 },
     juiceboss: { hp: 155, w: 132, h: 205, shot: 1.25, speed: 24 },
@@ -479,19 +525,15 @@ function spawnEnemy(x, type = "drone") {
     drone: { hp: 22, w: 62, h: 101, shot: 1.4, speed: 58 },
   };
   const spec = specs[type] ?? specs.drone;
-  state.enemies.push({ x, y: terrainAt(x) - spec.h, w: spec.w, h: spec.h, type, hp: spec.hp, maxHp: spec.hp, vx: 0, shot: spec.shot + Math.random() * .45, hit: 0, dir: -1, grounded: true, speed: spec.speed, phase: Math.random() * Math.PI * 2 });
+  state.enemies.push({ x, y: (floor ?? terrainAt(x)) - spec.h, floor, w: spec.w, h: spec.h, type, hp: spec.hp, maxHp: spec.hp, shot: spec.shot + Math.random() * .45, hit: 0, dir: -1, speed: spec.speed, phase: Math.random() * Math.PI * 2 });
 }
 
-function spawnOpeningWave() {
-  const progress = state.player.x;
-  const count = progress > 4000 ? 4 : 3;
-  for (let index = 0; index < count; index += 1) {
-    const heavy = index === count - 1 && progress > 2300;
-    const roll = (state.waves + index) % 7;
-    const type = heavy ? (progress > 4200 ? "tanklet" : "brute") : roll === 1 ? "grenadier" : roll === 3 ? "bottle" : roll === 5 ? "soldier" : "drone";
-    spawnEnemy(progress + 700 + index * 125, type);
+function updateRouteEncounters() {
+  const encounter = ROUTE_ENCOUNTERS[state.waves];
+  if (encounter && state.player.x >= encounter.at) {
+    for (const foe of encounter.foes) spawnEnemy(...foe);
+    state.waves += 1;
   }
-  state.waves += 1;
 }
 
 function equipWeapon(id, ammo = WEAPONS[id]?.ammo) {
@@ -514,58 +556,96 @@ function consumeAmmo() {
   return true;
 }
 
-function fire() {
+function playerMuzzle(player, aim) {
+  const pivotX = player.x + player.w / 2;
+  const pivotY = player.y + (player.crouching ? 96 : 43);
+  return { x: pivotX + aim.x * 52, y: pivotY + aim.y * 52, pivotX, pivotY };
+}
+
+function fire(aim) {
   const player = state.player;
-  if (player.fireCooldown > 0 || state.status !== "playing") return;
-  if (state.van.boarded) { fireVanBeam(); return; }
-  const weapon = WEAPONS[player.weapon] ?? WEAPONS.pistol;
-  if (player.weapon !== "pistol" && player.ammo <= 0) { equipWeapon("pistol"); return; }
+  if (state.van.boarded) return fireVanBeam();
+  if (player.fireCooldown > 0) return false;
+  const id = player.weapon;
+  const weapon = WEAPONS[id];
   player.fireCooldown = weapon.fireRate;
   player.weaponFlash = .1;
-  player.poseKind = "fire";
-  player.poseUntil = state.elapsed + .34;
-  const startX = player.x + (player.facing > 0 ? player.w : -10);
-  const startY = player.y + 46;
-  if (player.weapon === "machinegun") {
-    state.bullets.push({ x: startX, y: startY + (Math.random() - .5) * 14, vx: player.facing * 790, vy: 0, w: 22, h: 7, life: 1.05, friendly: true, damage: weapon.damage, color: weapon.color });
-  } else if (player.weapon === "bomb") {
-    state.bullets.push({ x: startX, y: startY, vx: player.facing * 330, vy: -450, gravity: 940, w: 18, h: 18, life: 2.1, friendly: true, damage: weapon.damage, bomb: true, color: weapon.color });
-  } else if (player.weapon === "rocket") {
-    state.bullets.push({ x: startX, y: startY, vx: player.facing * 560, vy: 0, w: 28, h: 12, life: 1.8, friendly: true, damage: weapon.damage, rocket: true, color: weapon.color });
-  } else if (player.weapon === "laser") {
-    state.bullets.push({ x: startX + player.facing * 95, y: startY, vx: player.facing, vy: 0, w: 190, h: 10, life: .12, friendly: true, damage: weapon.damage, laser: true, color: weapon.color });
-  } else {
-    state.bullets.push({ x: startX, y: startY, vx: player.facing * 650, vy: 0, w: 20, h: 8, life: 1.15, friendly: true, damage: weapon.damage, color: weapon.color });
+  if (player.poseUntil <= state.elapsed || player.poseKind === "fire") {
+    player.poseKind = "fire";
+    player.poseUntil = state.elapsed + .14;
   }
+  const { x, y } = playerMuzzle(player, aim);
+  const shot = { x, y, color: weapon.color, damage: weapon.damage };
+  if (id === "laser") {
+    fireRay(shot, aim, 535, 6, weapon.damage);
+    state.bullets.push({ ...shot, aim, range: 535, life: .075 });
+  } else {
+    const speed = id === "bomb" ? 480 : id === "rocket" ? 710 : id === "machinegun" ? 910 : 800;
+    state.bullets.push({ ...shot, w: 14, h: 8, life: 1.4, friendly: true, directed: true,
+      vx: aim.x * speed, vy: aim.y * speed - (id === "bomb" ? 215 : 0),
+      gravity: id === "bomb" ? 850 : 0, bomb: id === "bomb", rocket: id === "rocket" });
+  }
+  spark(x, y, weapon.color, id === "machinegun" ? 2 : 4);
   consumeAmmo();
-  blip(player.weapon === "laser" ? 920 : player.weapon === "rocket" ? 180 : 520, player.weapon === "machinegun" ? .018 : .035);
+  blip(id === "laser" ? 920 : id === "rocket" ? 180 : 520, id === "machinegun" ? .018 : .035);
+  return true;
+}
+
+function vanMuzzle() {
+  const { vanW, y } = vanLayout(state.van.x);
+  const { aim } = state.van;
+  const pivotX = state.van.x + vanW * .53, pivotY = y + 306;
+  return { x: pivotX + aim.x * 54, y: pivotY + aim.y * 54, pivotX, pivotY };
 }
 
 function fireVanBeam() {
   const van = state.van;
-  if (!van.boarded || van.destroyed || van.beamCooldown > 0) return;
-  const { vanW, y } = vanLayout(van.x);
-  van.beamCooldown = .58;
-  state.player.weaponFlash = .18;
-  state.player.poseKind = "fire";
-  state.player.poseUntil = state.elapsed + .28;
-  state.bullets.push({ x: van.x + vanW * .83, y: y + 178, vx: 1040, vy: 0, w: 360, h: 34, life: .24, friendly: true, damage: 54, laser: true, vanBeam: true, color: "#7dff38" });
-  spark(van.x + vanW * .8, y + 178, "#7dff38", 16);
-  banner("¡RAYO DE LOS ALTAVOCES!", "#7dff38", 650);
-  blip(1040, .16);
+  if (van.beamCooldown > 0) return false;
+  van.beamCooldown = .23;
+  van.beamFlash = .09;
+  const muzzle = vanMuzzle();
+  fireRay({ ...muzzle, color: "#7dff38" }, van.aim, VAN_BEAM_RANGE, 42, 19);
+  spark(muzzle.x, muzzle.y, "#7dff38", 4);
+  blip(440, .055);
+  return true;
+}
+
+function fireRay(origin, aim, range, width, damage) {
+  for (const target of [...state.props, ...state.enemies]) {
+    if (target.hp <= 0) continue;
+    const hit = segmentHit(origin.x, origin.y, aim.x * range, aim.y * range, target, width);
+    if (hit === Infinity) continue;
+    target.hp -= damage;
+    target.hit = .16;
+    spark(origin.x + aim.x * range * hit, origin.y + aim.y * range * hit, origin.color, 5);
+  }
 }
 
 function detonate(x, y, damage, radius, color) {
   spark(x, y, color, 22);
   smoke(x, y, 8, color);
   state.cameraShake = Math.max(state.cameraShake, Math.min(20, radius / 8));
-  state.particles.push({ x, y, vx: 0, vy: 0, life: .22, maxLife: .22, color, size: radius * .35, blast: radius });
+  state.particles.push({ x, y, vx: 0, vy: 0, life: .34, maxLife: .34, color, blast: radius });
   state.enemies.forEach((enemy) => {
-    if (distance(enemy.x + enemy.w / 2, x) <= radius) { enemy.hp -= damage; enemy.hit = .24; }
+    const dx = x - clamp(x, enemy.x, enemy.x + enemy.w);
+    const dy = y - clamp(y, enemy.y, enemy.y + enemy.h);
+    if (Math.hypot(dx, dy) <= radius) { enemy.hp -= damage; enemy.hit = .24; }
   });
   state.props.forEach((prop) => {
-    if (prop.hp > 0 && distance(prop.x + prop.w / 2, x) <= radius) prop.hp -= Math.round(damage * .75);
+    if (prop.hp > 0 && Math.hypot(prop.x + prop.w / 2 - x, prop.y + prop.h / 2 - y) <= radius) prop.hp -= Math.round(damage * .75);
   });
+}
+
+function updateDestroyedProps() {
+  for (const prop of state.props) {
+    if (prop.hp > 0 || prop.destroyed) continue;
+    prop.destroyed = true;
+    const x = prop.x + prop.w / 2, y = prop.y + prop.h / 2;
+    if (prop.kind === "barrel") detonate(x, y, 36, 135, "#ff9a31");
+    else { spark(x, y, "#ffce8c", 15); dust(x, y, 6); }
+    if (prop.weapon) state.pickups.push({ x, y: terrainAt(x) - 40, type: "weapon", weapon: prop.weapon, life: 32, bob: 0 });
+    state.score += 80;
+  }
 }
 
 function rushMultiplier() {
@@ -592,7 +672,7 @@ function updateSector() {
   const nextSector = x < 1450 ? 1 : x < 2850 ? 2 : x < 4300 ? 3 : x < 5300 ? 4 : 5;
   if (nextSector > state.sector) {
     state.sector = nextSector;
-    banner(`SECTOR ${String(nextSector).padStart(2, "0")} · RUTA ASEGURADA`, "#4defff", 1250);
+    banner(`SECTOR ${String(nextSector).padStart(2, "0")} · ${SECTOR_NAMES[nextSector - 1]}`, "#4defff", 1250);
     state.score += 250;
   }
 }
@@ -645,12 +725,13 @@ function activateVan() {
     ? requestedFighter2
     : (state.hero.id === "xuso" ? "bomba" : "xuso");
   state.van.charge = 0;
-  state.van.waveClock = 0;
+  state.van.waveClock = .75;
   state.van.pulseCooldown = 1.6;
   state.van.bursts = 0;
+  state.enemies = [];
+  state.bullets = [];
   ui.objective.textContent = "PROTEGE LA FURGONETA";
-  banner("¡SUBE A LA FURGONETA! · P1 CONDUCE · P2 AL TECHO", "#7dff38", 2200);
-  for (let index = 0; index < 4; index += 1) spawnEnemy(VAN_X - 480 + index * 185, index === 3 ? "speaker" : index === 1 ? "bottle" : index === 2 ? "grenadier" : "soldier");
+  banner("¡EMBOSCADA! · MANTÉN FUEGO Y DIRIGE EL RAYO", "#7dff38", 2000);
   blip(58, .28);
 }
 
@@ -710,29 +791,31 @@ function vanLayout(worldX) {
 function updateVanRide(dt) {
   const van = state.van;
   const player = state.player;
-  const steering = Number(input.right) - Number(input.left);
+  const steering = moveAxis();
   van.vx += steering * 620 * dt;
   if (!steering) van.vx += 38 * dt;
   van.vx *= Math.pow(.35, dt);
   van.vx = clamp(van.vx, -70, 340);
-  van.x = clamp(van.x + van.vx * dt, VAN_X, EXIT_X + 640);
+  van.x = clamp(van.x + van.vx * dt, VAN_X, van.charged ? EXIT_X : VAN_HOLD_X);
   const layout = vanLayout(van.x);
   player.x = van.x + layout.vanW * .5 - player.w * .5;
   player.y = layout.driverGround - player.h;
   player.vx = van.vx;
   player.vy = 0;
   player.landed = true;
-  player.crouching = Boolean(input.crouch);
+  player.crouching = false;
   player.facing = 1;
+  if (touchAim || steering || isHeld("up") || isHeld("down")) van.aim = aimDirection(player, true);
   player.run += dt * (8 + Math.abs(van.vx) * .025);
   state.camera += ((clamp(van.x + layout.vanW * .5 - W * .35, 0, WORLD_END - W)) - state.camera) * Math.min(1, dt * 4.4);
 }
 
 function damageVan(damage) {
   const van = state.van;
-  if (!van.boarded || van.destroyed || van.hp <= 0) return;
+  if (!van.boarded || van.destroyed || van.hp <= 0 || van.hurtCooldown > 0) return;
   van.hp = clamp(van.hp - damage, 0, 100);
   van.damageFlash = .18;
+  van.hurtCooldown = .85;
   state.cameraShake = Math.max(state.cameraShake, damage > 14 ? 12 : 6);
   const layout = vanLayout(van.x);
   spark(van.x + layout.vanW * .54, layout.y + 170, damage > 14 ? "#ff7048" : "#ffb449", damage > 14 ? 12 : 6);
@@ -759,9 +842,45 @@ function sonicPulse() {
   const van = state.van;
   const { vanW, y } = vanLayout(van.x);
   const x = van.x + vanW * .58;
-  state.bullets.push({ x, y: y + 186, vx: 0, vy: 0, w: 84, h: 84, life: .42, friendly: true, damage: 20, ring: true, pulse: true, color: "#4defff" });
-  spark(x, y + 186, "#4defff", 10);
+  state.bullets.push({ x, y: y + 290, vx: 0, vy: 0, w: 145, h: 145, life: .48, friendly: true, damage: 13, ring: true, pulse: true, hits: new Set(), color: "#4defff" });
+  spark(x, y + 290, "#4defff", 10);
   blip(180, .08);
+}
+
+function updateOnFoot(dt) {
+  const player = state.player;
+  const wasLanded = player.landed;
+  const previousFeet = player.y + player.h;
+  const moving = moveAxis();
+  player.crouching = isHeld("down") && wasLanded;
+  if (player.crouching || !moving) player.vx *= Math.pow(.0005, dt);
+  else player.vx = clamp(player.vx + moving * 2200 * dt, -305, 305);
+  if (moving) player.facing = Math.sign(moving);
+  if (Math.abs(player.vx) > 30) player.run += dt * 12;
+  if (queued.jump > 0 && wasLanded && !player.crouching) {
+    queued.jump = 0;
+    player.vy = -645;
+    blip(230, .045);
+  }
+  player.vy += 1450 * dt;
+  player.x = clamp(player.x + player.vx * dt, 0, WORLD_END);
+  player.y += player.vy * dt;
+  const feet = player.y + player.h;
+  const support = supportAt(player.x + player.w / 2, previousFeet, feet);
+  player.landed = player.vy >= 0 && feet >= support;
+  if (player.landed) {
+    player.y = support - player.h;
+    player.vy = 0;
+    if (!wasLanded) dust(player.x + player.w / 2, support, 7);
+  }
+  player.crouching = isHeld("down") && player.landed;
+  const checkpoint = Math.max(0, ...state.checkpoints.filter((mark) => player.x >= mark));
+  if (checkpoint > state.checkpoint) {
+    state.checkpoint = checkpoint;
+    banner("PUNTO DE CONTROL", "#4defff", 900);
+  }
+  state.camera += (clamp(player.x - W * .34, 0, WORLD_END - W) - state.camera) * Math.min(1, dt * 3.7);
+  if (!state.van.destroyed) updateRouteEncounters();
 }
 
 function update(dt) {
@@ -770,54 +889,27 @@ function update(dt) {
   state.cameraShake = Math.max(0, state.cameraShake - dt * 26);
   state.hitFlash = Math.max(0, state.hitFlash - dt);
   state.van.damageFlash = Math.max(0, state.van.damageFlash - dt);
+  state.van.hurtCooldown = Math.max(0, state.van.hurtCooldown - dt);
   state.van.beamCooldown = Math.max(0, state.van.beamCooldown - dt);
+  state.van.beamFlash = Math.max(0, state.van.beamFlash - dt);
   state.rush.timer = Math.max(0, state.rush.timer - dt);
   if (state.rush.timer === 0 && state.rush.chain) { state.rush.chain = 0; state.rush.multiplier = 1; }
   state.props.forEach((prop) => { prop.hit = Math.max(0, prop.hit - dt); });
   const player = state.player;
-  if (input.fire || input.fireHeld) { fire(); input.fire = false; }
-  if (input.special) { special(); input.special = false; }
-  if (input.activate) { activateVan(); input.activate = false; }
+  if (queued.activate > 0) { activateVan(); queued.activate = 0; }
   player.fireCooldown = Math.max(0, player.fireCooldown - dt);
   player.specialCooldown = Math.max(0, player.specialCooldown - dt);
   player.invincible = Math.max(0, player.invincible - dt);
   player.weaponFlash = Math.max(0, player.weaponFlash - dt);
   if (state.van.boarded) updateVanRide(dt);
-  else {
-  const wasLanded = player.landed;
-  const moving = Number(input.right) - Number(input.left);
-  player.vx += moving * 1900 * dt;
-  if (!moving) player.vx *= Math.pow(.0005, dt);
-  player.crouching = Boolean(input.crouch && player.landed);
-  if (player.crouching) player.vx *= Math.pow(.06, dt);
-  player.vx = clamp(player.vx, -290, 290);
-  if (moving) { player.facing = moving > 0 ? 1 : -1; player.run += dt * 12; }
-  if (input.jump && player.landed && !player.crouching) { player.vy = -590; player.landed = false; input.jump = false; blip(230, .045); }
-  player.vy += 1450 * dt;
-  player.x = clamp(player.x + player.vx * dt, 0, WORLD_END);
-  player.y += player.vy * dt;
-  player.landed = false;
-  const support = supportAt(player.x + player.w / 2, player.y + player.h, player.vy);
-  if (player.vy >= 0 && player.y + player.h >= support && player.y + player.h <= support + 120) {
-    player.y = support - player.h; player.vy = 0; player.landed = true;
-    if (!wasLanded) dust(player.x + player.w / 2, support, 7);
-  }
-  state.platforms.forEach((platform) => {
-    const feet = player.y + player.h;
-    if (player.vy >= 0 && player.x + player.w > platform.x && player.x < platform.x + platform.w && feet >= platform.y && feet <= platform.y + 26) {
-      player.y = platform.y - player.h; player.vy = 0; player.landed = true;
-    }
-  });
-  if (state.checkpoints.some((mark) => player.x >= mark && mark > state.checkpoint)) {
-    state.checkpoint = Math.max(...state.checkpoints.filter((mark) => player.x >= mark));
-    banner("PUNTO DE CONTROL", "#4defff", 900);
-  }
+  else updateOnFoot(dt);
+  const aim = state.van.boarded ? state.van.aim : aimDirection(player);
+  if (!state.van.boarded && (queued.fire > 0 || isHeld("fire")) && aim.x) player.facing = Math.sign(aim.x);
+  if ((queued.fire > 0 || isHeld("fire")) && fire(aim)) queued.fire = 0;
+  if (queued.special > 0) { special(); queued.special = 0; }
+  for (const action of Object.keys(queued)) queued[action] = Math.max(0, queued[action] - dt);
   updateSector();
-  state.camera += ((clamp(player.x - W * .34, 0, WORLD_END - W)) - state.camera) * Math.min(1, dt * 3.7);
-  }
 
-  state.spawnClock -= dt;
-  if (!state.van.active && state.spawnClock <= 0 && player.x < VAN_X - 600 && state.enemies.length < 7) { spawnOpeningWave(); state.spawnClock = 4.8 + Math.random() * 2.4; }
   // Show the interaction prompt only inside the same radius used by the
   // activation itself, so a visible F prompt never appears too early.
   state.van.prompt = !state.van.active && !state.van.charged && !state.van.destroyed && distance(player.x, VAN_X + 310) <= 360;
@@ -831,24 +923,24 @@ function update(dt) {
       state.van.pulseCooldown = 2.15;
       sonicPulse();
     }
-    if (state.van.waveClock <= 0 && state.van.bursts < 3) {
+    if (state.van.waveClock <= 0 && state.van.bursts < 3 && state.enemies.length <= 2) {
       state.van.bursts += 1;
       state.van.waveClock = 4.6;
-      for (let index = 0; index < 3 + state.van.bursts; index += 1) {
-        const specialType = index === 2 ? "speaker" : index === 4 ? "tanklet" : index % 3 === 1 ? "bottle" : index % 2 ? "grenadier" : "soldier";
-        spawnEnemy(movingVanX - 500 + index * 145, specialType);
-      }
+      spawnEnemy(movingVanX - 170, "soldier");
+      spawnEnemy(Math.min(WORLD_END - 120, movingVanX + 690), "speaker");
+      if (state.van.bursts >= 2) spawnEnemy(movingVanX - 270, "grenadier");
+      if (state.van.bursts === 3) spawnEnemy(movingVanX + 440, "tanklet");
       banner(`OLEADA ${state.van.bursts}/3`, "#ffb449", 750);
     }
-    if (state.van.bursts >= 3 && !state.finaleSpawned) {
+    if (state.van.bursts >= 3 && !state.finaleSpawned && state.enemies.length === 0) {
       state.finaleSpawned = true;
       state.finalBossType = FINAL_BOSSES[Math.floor(Math.random() * FINAL_BOSSES.length)];
-      spawnEnemy(movingVanX + 500, state.finalBossType);
+      spawnEnemy(Math.min(WORLD_END - 200, movingVanX + 630), state.finalBossType);
       const bossLabel = BOSS_SPRITE_FRAMES[state.finalBossType]?.label ?? (state.finalBossType === "juiceboss" ? "CAMPEÓN DEL ZUMO" : "MAESTRO DEL ESPRAY");
       banner(`¡${bossLabel}!`, BOSS_SPRITE_FRAMES[state.finalBossType]?.color ?? "#ff8a35", 1500);
       blip(72, .25);
     }
-    if (state.van.bursts >= 3 && state.enemies.length === 0 && state.van.charge > 11) {
+    if (state.finaleSpawned && state.enemies.length === 0 && state.van.charge > 11) {
       state.van.charged = true;
       ui.objective.textContent = "ESCAPA POR LA RUTA NORTE";
       banner("¡RUTA DE ESCAPE ABIERTA!", "#7dff38", 1600);
@@ -859,6 +951,7 @@ function update(dt) {
   if ((state.van.charged || state.van.destroyed) && (state.van.boarded ? state.van.x >= EXIT_X : player.x >= EXIT_X)) { completeMission(true); return; }
 
   updateBullets(dt);
+  updateDestroyedProps();
   updateEnemies(dt);
   updateDeathSprites(dt);
   updateParticles(dt);
@@ -870,33 +963,27 @@ function update(dt) {
 function updateBullets(dt) {
   const player = state.player;
   state.bullets = state.bullets.filter((bullet) => {
-    bullet.life -= dt; bullet.x += bullet.vx * dt; bullet.y += bullet.vy * dt;
+    bullet.life -= dt;
+    if (bullet.range) return bullet.life > 0;
+    const fromX = bullet.x, fromY = bullet.y;
+    bullet.x += bullet.vx * dt;
+    bullet.y += bullet.vy * dt;
     if (bullet.gravity) { bullet.vy += bullet.gravity * dt; }
     if (bullet.ring) { bullet.w += 180 * dt; bullet.h += 180 * dt; bullet.life -= dt * .3; }
-    if (bullet.friendly) {
-      if (bullet.bomb && bullet.y >= terrainAt(bullet.x) - 8) { detonate(bullet.x, terrainAt(bullet.x) - 8, bullet.damage, 150, bullet.color); return false; }
-      for (const prop of state.props) {
-        const hitbox = { x: bullet.x - bullet.w / 2, y: bullet.y - bullet.h / 2, w: bullet.w, h: bullet.h };
-        if (prop.hp > 0 && rectsOverlap(hitbox, prop)) {
-          prop.hp -= bullet.rocket || bullet.bomb ? bullet.damage : bullet.damage * .7;
-          prop.hit = .18;
-          spark(bullet.x, bullet.y, bullet.color, 6);
-          if (prop.hp <= 0) { detonate(prop.x + prop.w / 2, prop.y + prop.h / 2, 12, 94, prop.kind === "barrel" ? "#ff9a31" : "#caa56a"); state.score += 80; }
-          if (!bullet.ring && !bullet.pulse && !bullet.laser) bullet.life = 0;
-          return bullet.life > 0;
-        }
-      }
-      for (const enemy of state.enemies) {
-        const hitbox = { x: bullet.x - bullet.w / 2, y: bullet.y - bullet.h / 2, w: bullet.w, h: bullet.h };
-        if (enemy.hp > 0 && rectsOverlap(hitbox, enemy)) {
-          if (bullet.rocket || bullet.bomb) detonate(bullet.x, bullet.y, bullet.damage, bullet.rocket ? 128 : 150, bullet.color);
-          else { enemy.hp -= bullet.damage; enemy.hit = .16; spark(bullet.x, bullet.y, bullet.color, 6); }
-          if (!bullet.ring && !bullet.pulse && !bullet.laser) bullet.life = 0;
-          break;
-        }
+    if (bullet.directed) {
+      if (!updateDirectedShot(bullet, fromX, fromY)) return false;
+    } else if (bullet.friendly) {
+      const hitbox = { x: bullet.x - bullet.w / 2, y: bullet.y - bullet.h / 2, w: bullet.w, h: bullet.h };
+      for (const target of [...state.props, ...state.enemies]) {
+        if (target.hp <= 0 || bullet.hits?.has(target) || !rectsOverlap(hitbox, target)) continue;
+        target.hp -= bullet.damage;
+        target.hit = .16;
+        spark(bullet.x, bullet.y, bullet.color, 6);
+        if (!bullet.laser && !bullet.ring) return false;
+        (bullet.hits ??= new Set()).add(target);
       }
     } else {
-      const bulletBox = { x: bullet.x, y: bullet.y, w: bullet.w, h: bullet.h };
+      const bulletBox = { x: bullet.x - bullet.w / 2, y: bullet.y - bullet.h / 2, w: bullet.w, h: bullet.h };
       if (state.van.boarded) {
         const layout = vanLayout(state.van.x);
         const vanBox = { x: state.van.x + 48, y: layout.y + 36, w: layout.vanW - 90, h: layout.vanH - 70 };
@@ -906,14 +993,46 @@ function updateBullets(dt) {
           return false;
         }
       }
-      if (rectsOverlap(bulletBox, player)) {
+      const hurtbox = player.crouching ? { ...player, y: player.y + 53, h: player.h - 53 } : player;
+      if (rectsOverlap(bulletBox, hurtbox)) {
         hurtPlayer(bullet.explosive ? 24 : bullet.tankShell ? 20 : 13);
         if (bullet.explosive) detonate(bullet.x, bullet.y, 0, 74, bullet.color);
         return false;
       }
+      if (bullet.gravity && bullet.y >= terrainAt(bullet.x)) {
+        if (bullet.explosive) detonate(bullet.x, terrainAt(bullet.x), 0, 74, bullet.color);
+        return false;
+      }
     }
-    return bullet.life > 0 && bullet.x > state.camera - 200 && bullet.x < state.camera + W + 250;
+    return bullet.life > 0 && bullet.x > state.camera - 200 && bullet.x < state.camera + W + 250 && bullet.y > -380 && bullet.y < H + 80;
   });
+}
+
+function updateDirectedShot(bullet, fromX, fromY) {
+  const dx = bullet.x - fromX, dy = bullet.y - fromY;
+  let target = null, firstHit = Infinity;
+  for (const candidate of [...state.props, ...state.enemies]) {
+    if (candidate.hp <= 0) continue;
+    const hit = segmentHit(fromX, fromY, dx, dy, candidate, 5);
+    if (hit < firstHit) { target = candidate; firstHit = hit; }
+  }
+  const explosive = bullet.rocket || bullet.bomb;
+  if (target) {
+    const x = fromX + dx * firstHit, y = fromY + dy * firstHit;
+    if (explosive) {
+      detonate(x, y, bullet.damage, bullet.rocket ? 128 : 150, bullet.color);
+    } else {
+      target.hp -= bullet.damage;
+      target.hit = .16;
+      spark(x, y, bullet.color, 6);
+    }
+    return false;
+  }
+  const ground = terrainAt(bullet.x);
+  if (bullet.y < ground) return true;
+  if (explosive) detonate(bullet.x, ground, bullet.damage, bullet.rocket ? 128 : 150, bullet.color);
+  else spark(bullet.x, ground, "#c9a86d", 4);
+  return false;
 }
 
 function weaponDropFor(enemy) {
@@ -932,6 +1051,7 @@ function weaponDropFor(enemy) {
 function updateEnemies(dt) {
   const player = state.player;
   state.enemies.forEach((enemy) => {
+    if (enemy.hp <= 0) return;
     enemy.hit = Math.max(0, enemy.hit - dt);
     enemy.dir = player.x < enemy.x ? -1 : 1;
     const gap = distance(player.x, enemy.x);
@@ -940,8 +1060,8 @@ function updateEnemies(dt) {
     const bodySeparation = (player.w + enemy.w) * .5 + 30;
     if (!stationary && gap < 620 && gap > bodySeparation) enemy.x += enemy.dir * enemy.speed * dt;
     if (enemy.type === "grenadier" && gap < 250) enemy.x -= enemy.dir * 40 * dt;
-    enemy.y = terrainAt(enemy.x) - enemy.h;
-    enemy.shot -= dt;
+    enemy.y = (enemy.floor ?? terrainAt(enemy.x)) - enemy.h;
+    enemy.shot = gap < 530 ? enemy.shot - dt : Math.max(enemy.shot, .24);
     const isBoss = ["sprayboss", "juiceboss", "rockboss", "birdboss", "wolfboss", "drumboss"].includes(enemy.type);
     if (isBoss && !enemy.enraged && enemy.hp <= enemy.maxHp * .5) {
       enemy.enraged = true;
@@ -978,8 +1098,10 @@ function updateEnemies(dt) {
       } else if (enemy.type === "tanklet") {
         state.bullets.push({ x: enemy.x + (enemy.dir < 0 ? -15 : enemy.w + 15), y: enemy.y + 24, vx: enemy.dir * 285, vy: -85, w: 30, h: 22, life: 3.5, friendly: false, tankShell: true, explosive: true, gravity: 320, color: "#ff7c3a" });
       } else if (enemy.type === "turret") {
+        const x = enemy.x + (enemy.dir < 0 ? -8 : enemy.w + 8), y = enemy.y + 21;
+        const aim = direction(player.x + player.w / 2 - x, player.y + 72 - y);
         for (let shot = -1; shot <= 1; shot += 1) {
-          state.bullets.push({ x: enemy.x + (enemy.dir < 0 ? -8 : enemy.w + 8), y: enemy.y + 21 + shot * 9, vx: enemy.dir * 330, vy: shot * 24, w: 17, h: 8, life: 2.4, friendly: false, color: "#ff4b7c" });
+          state.bullets.push({ x, y: y + shot * 9, vx: aim.x * 330, vy: aim.y * 330 + shot * 24, w: 17, h: 8, life: 2.4, friendly: false, color: "#ff4b7c" });
         }
       } else {
         state.bullets.push({ x: enemy.x + (enemy.dir < 0 ? -8 : enemy.w), y: enemy.y + 28, vx: enemy.dir * (enemy.type === "speaker" ? 320 : 230), vy: 0, w: enemy.type === "speaker" ? 18 : 12, h: enemy.type === "speaker" ? 18 : 12, life: 3, friendly: false, color: "#ff4b7c" });
@@ -988,7 +1110,7 @@ function updateEnemies(dt) {
     const contactRange = ["sprayboss", "juiceboss", "rockboss", "birdboss", "wolfboss", "drumboss"].includes(enemy.type) ? 118 : enemy.type === "tanklet" ? 132 : bodySeparation + 8;
     if (gap < contactRange && Math.abs(player.y - enemy.y) < 82) {
       const contactDamage = ["sprayboss", "juiceboss", "rockboss", "birdboss", "wolfboss", "drumboss"].includes(enemy.type) ? 20 : enemy.type === "brute" || enemy.type === "tanklet" ? 16 : 9;
-      if (state.van.boarded) damageVan(Math.ceil(contactDamage * .7));
+      if (state.van.boarded) damageVan(Math.ceil(contactDamage * .45));
       else hurtPlayer(contactDamage);
     }
   });
@@ -1018,7 +1140,7 @@ function updateParticles(dt) {
   state.particles = state.particles.filter((particle) => {
     particle.life -= dt; particle.x += particle.vx * dt; particle.y += particle.vy * dt;
     if (particle.kind === "smoke") { particle.vx *= .98; particle.vy *= .98; particle.size += 12 * dt; }
-    else { particle.vy += 300 * dt; }
+    else if (!particle.blast) particle.vy += 300 * dt;
     return particle.life > 0;
   });
 }
@@ -1027,7 +1149,7 @@ function updatePickups(dt) {
   const player = state.player;
   state.pickups = state.pickups.filter((pickup) => {
     pickup.life -= dt; pickup.bob += dt * 4;
-    if (distance(pickup.x, player.x) < 56 && Math.abs(pickup.y - player.y) < 100) {
+    if (distance(pickup.x, player.x + player.w / 2) < 60 && pickup.y > player.y - 15 && pickup.y < player.y + player.h + 20) {
       if (pickup.type === "weapon") equipWeapon(pickup.weapon);
       else if (pickup.type === "energy") { player.energy = clamp(player.energy + 25, 0, 100); banner("ENERGÍA +25", "#4defff", 500); }
       else state.score += 300;
@@ -1043,15 +1165,27 @@ function updateHud() {
   ui.energy.style.width = `${clamp(player.energy, 0, 100)}%`;
   ui.lives.textContent = String(player.lives).padStart(2, "0");
   const weapon = WEAPONS[player.weapon] ?? WEAPONS.pistol;
-  ui.weapon.textContent = `${weapon.label} · ${player.weapon === "pistol" ? "∞" : Math.max(0, player.ammo)}`;
-  ui.weapon.style.color = weapon.color;
+  const weaponText = state.van.boarded ? "CAÑÓN SÓNICO · ∞" : `${weapon.label} · ${player.weapon === "pistol" ? "∞" : Math.max(0, player.ammo)}`;
+  if (ui.weapon.textContent !== weaponText) ui.weapon.textContent = weaponText;
+  ui.weapon.style.color = state.van.boarded ? "#7dff38" : weapon.color;
+  const aim = state.van.boarded ? state.van.aim : aimDirection(player);
+  const glyph = ["→", "↘", "↓", "↙", "←", "↖", "↑", "↗"][(Math.round(Math.atan2(aim.y, aim.x) / (Math.PI / 4)) + 8) % 8];
+  if (ui.aim.textContent !== glyph) ui.aim.textContent = glyph;
+  if (ui.touchFire.textContent !== glyph) ui.touchFire.textContent = glyph;
+  ui.touchFire.classList.toggle("firing", isHeld("fire"));
   const rushActive = state.rush.chain > 1 && state.rush.timer > 0;
   ui.rush.textContent = rushActive ? `RUSH ×${state.rush.multiplier} · ${state.rush.chain} BAJAS` : "RUSH · LISTO";
   ui.rush.classList.toggle("hot", rushActive && state.rush.multiplier > 1);
   ui.score.textContent = formatScore(state.score);
-  if (state.van.boarded && !state.van.charged) ui.objective.textContent = `CONDUCE ${Math.min(100, Math.floor(state.van.charge / 11 * 100)).toString().padStart(2, "0")}% · VAN ${Math.ceil(state.van.hp)}%`;
-  else if (state.van.active && !state.van.charged) ui.objective.textContent = `CARGA SONORA ${Math.min(100, Math.floor(state.van.charge / 11 * 100)).toString().padStart(2, "0")}%`;
-  else if (state.van.destroyed) ui.objective.textContent = "FURGONETA CAÍDA · SIGUE A PIE";
+  const van = state.van;
+  let objective = "RUMBO A LA FURGONETA";
+  if (van.destroyed) objective = "FURGONETA CAÍDA · SIGUE A PIE";
+  else if (van.charged) objective = "ESCAPA POR LA RUTA NORTE";
+  else if (van.boarded) {
+    const phase = state.finaleSpawned ? "JEFE FINAL" : `OLEADA ${Math.max(1, van.bursts)}/3`;
+    objective = `${phase} · VAN ${Math.ceil(van.hp)}%`;
+  }
+  if (ui.objective.textContent !== objective) ui.objective.textContent = objective;
 }
 
 function worldX(x) { return Math.round(x - state.camera); }
@@ -1065,6 +1199,7 @@ function draw() {
   drawSky();
   drawWorld();
   drawActors();
+  if (state.van.boarded) drawVanTurret();
   drawForeground();
   ctx.restore();
   if (state.hitFlash > 0) { ctx.fillStyle = `rgba(255,48,76,${state.hitFlash * 1.8})`; ctx.fillRect(0, 0, W, H); }
@@ -1280,10 +1415,10 @@ function drawVan(x) {
     const glow = ctx.createRadialGradient(x + vanW / 2, y + 170, 30, x + vanW / 2, y + 170, 440);
     glow.addColorStop(0, "rgba(125,255,56,.38)"); glow.addColorStop(1, "rgba(125,255,56,0)"); ctx.fillStyle = glow; ctx.fillRect(x - 120, y - 110, vanW + 240, vanH + 210);
   }
-  if (image.complete) {
+  if (image.complete && image.naturalWidth) {
     // Keep the supplied rear photo orientation: the speaker wall leads the
     // route while the cab trails behind it.
-    ctx.drawImage(image, 0, y, vanW, vanH);
+    ctx.drawImage(image, x, y, vanW, vanH);
   }
   else { ctx.fillStyle = "#17252b"; ctx.fillRect(x, y + 120, vanW, 230); }
   if (state.van.damageFlash > 0 || state.van.destroyed) {
@@ -1329,7 +1464,16 @@ function drawActors() {
   if (!state.van.boarded) drawHero();
   state.particles.forEach((particle) => {
     ctx.globalAlpha = clamp(particle.life / particle.maxLife, 0, 1); ctx.fillStyle = particle.color;
-    if (particle.blast) { ctx.globalAlpha *= .35; ctx.beginPath(); ctx.arc(worldX(particle.x), particle.y, particle.blast * (1 - particle.life / particle.maxLife), 0, Math.PI * 2); ctx.fill(); }
+    if (particle.blast) {
+      const x = worldX(particle.x), fade = ctx.globalAlpha;
+      const radius = particle.blast * (1 - fade ** 2);
+      ctx.globalAlpha = fade * .7;
+      ctx.strokeStyle = particle.color; ctx.lineWidth = 2 + fade * 7;
+      ctx.beginPath(); ctx.arc(x, particle.y, radius, 0, Math.PI * 2); ctx.stroke();
+      ctx.globalAlpha = fade * fade * .8;
+      ctx.fillStyle = "#fff3c0";
+      ctx.beginPath(); ctx.arc(x, particle.y, particle.blast * (.11 + (1 - fade) * .32), 0, Math.PI * 2); ctx.fill();
+    }
     else if (particle.kind === "smoke") { ctx.globalAlpha *= .48; ctx.beginPath(); ctx.arc(worldX(particle.x), particle.y, particle.size, 0, Math.PI * 2); ctx.fill(); }
     else { ctx.fillRect(worldX(particle.x), particle.y, particle.size, particle.size); }
     ctx.globalAlpha = 1;
@@ -1338,13 +1482,14 @@ function drawActors() {
 
 function heroPoseFor(player) {
   const now = state.elapsed;
-  if (player.poseUntil > now) return player.poseKind;
+  if (player.poseUntil > now && player.poseKind !== "fire") return player.poseKind;
   if (player.crouching && player.landed) return "crouch";
   if (!player.landed) return player.vy < 110 ? "rise" : "kick";
   if (Math.abs(player.vx) > 35) {
     const cycle = ["walkD", "walkB", "walkE", "walkA", "walkC", "walkA"];
     return cycle[Math.floor(state.elapsed * 10.5) % cycle.length];
   }
+  if (player.poseUntil > now) return "fire";
   return "idle";
 }
 
@@ -1408,15 +1553,56 @@ function drawHero() {
   const pose = heroPoseFor(player);
   const x = worldX(player.x);
   const bob = player.landed && !player.crouching ? Math.sin(player.run) * 2 : 0;
-  const poseHeight = (pose === "crouch" ? 145 : 170) * PLAYER_SPRITE_SCALE;
   const alpha = player.invincible > 0 && Math.floor(player.invincible * 20) % 2 === 0 ? .45 : 1;
   drawCharacterSprite(state.hero.id, x + player.w / 2, player.y + player.h + bob, player.facing, pose, 1, alpha);
-  ctx.save();
-  ctx.translate(x + player.w / 2, player.y + player.h + bob);
-  if (player.facing < 0) ctx.scale(-1, 1);
-  if (player.weaponFlash > 0) {
-    ctx.fillStyle = state.hero.color; ctx.fillRect(34, -poseHeight * .48, 42, 9); ctx.globalAlpha = .35; ctx.beginPath(); ctx.arc(78, -poseHeight * .48, 28, 0, Math.PI * 2); ctx.fill();
+  if (player.weaponFlash > 0 || isHeld("up") || touchAim) {
+    const aim = aimDirection(player);
+    drawWeapon(playerMuzzle(player, aim), aim, WEAPONS[player.weapon].color, player.weaponFlash > 0);
   }
+}
+
+function drawWeapon(muzzle, aim, color, firing, mounted = false) {
+  ctx.save();
+  ctx.translate(worldX(muzzle.pivotX), muzzle.pivotY);
+  ctx.rotate(Math.atan2(aim.y, aim.x));
+  if (mounted) {
+    ctx.fillStyle = "#192322"; ctx.beginPath(); ctx.arc(0, 0, 18, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = color; ctx.lineWidth = 3; ctx.stroke();
+  }
+  const start = mounted ? 0 : 19;
+  ctx.fillStyle = "#091320"; ctx.fillRect(start, -7, 54 - start, 14);
+  ctx.fillStyle = "#a5b6b4"; ctx.fillRect(start + 2, -5, 49 - start, 4);
+  ctx.fillStyle = color; ctx.fillRect(47, -6, 7, 12);
+  if (firing) {
+    ctx.fillStyle = color;
+    ctx.beginPath(); ctx.moveTo(51, -10); ctx.lineTo(77, -1); ctx.lineTo(51, 10); ctx.fill();
+    ctx.fillStyle = "#fff8df"; ctx.fillRect(53, -2, 11, 4);
+  }
+  ctx.restore();
+}
+
+function drawVanTurret() {
+  const van = state.van;
+  const muzzle = vanMuzzle();
+  const firing = isHeld("fire") || van.beamFlash > 0;
+  if (firing) drawBeam(muzzle, van.aim, VAN_BEAM_RANGE, "#7dff38", 42, van.beamFlash > 0 ? .94 : .62);
+  drawWeapon(muzzle, van.aim, "#7dff38", firing, true);
+}
+
+function drawBeam(origin, aim, range, color, width, alpha) {
+  ctx.save();
+  ctx.translate(worldX(origin.x), origin.y);
+  ctx.rotate(Math.atan2(aim.y, aim.x));
+  const gradient = ctx.createLinearGradient(0, 0, range, 0);
+  gradient.addColorStop(0, color);
+  gradient.addColorStop(.78, color);
+  gradient.addColorStop(1, "transparent");
+  ctx.globalAlpha = alpha * .24;
+  ctx.fillStyle = gradient; ctx.fillRect(0, -width, range, width * 2);
+  ctx.globalAlpha = alpha * .8;
+  ctx.fillRect(0, -width * .23, range, width * .46);
+  ctx.globalAlpha = alpha;
+  ctx.fillStyle = "#f6ffe4"; ctx.fillRect(0, -2, range * .9, 4);
   ctx.restore();
 }
 
@@ -1424,8 +1610,9 @@ function drawEnemy(enemy) {
   const x = worldX(enemy.x);
   if (x + enemy.w < -90 || x > W + 90) return;
   const bossSprite = BOSS_SPRITE_FRAMES[enemy.type];
+  const usesSprite = bossSprite || ["bottle", "juiceboss", "sprayboss", "brute"].includes(enemy.type);
   ctx.save(); ctx.translate(x + enemy.w / 2, enemy.y + enemy.h / 2 + Math.sin(enemy.phase * 5) * 2);
-  if (enemy.dir > 0) ctx.scale(-1, 1);
+  if (usesSprite ? enemy.dir > 0 : enemy.dir < 0) ctx.scale(-1, 1);
   const flash = enemy.hit > 0;
   if (bossSprite) {
     const sheet = art.bossSheets[bossSprite.image];
@@ -1518,6 +1705,10 @@ function drawEnemy(enemy) {
     if (enemy.type === "grenadier") { ctx.fillStyle = "#26382b"; ctx.fillRect(-torsoW * .62, torsoTop + 8, 11, torsoH * .62); ctx.fillStyle = "#a7ff50"; ctx.beginPath(); ctx.arc(-torsoW * .72, torsoTop + 28, 7, 0, Math.PI * 2); ctx.fill(); }
     if (enemy.type === "speaker") { ctx.strokeStyle = "#7dff38"; ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(0, enemy.h * .02, enemy.w * .24, 0, Math.PI * 2); ctx.stroke(); ctx.fillStyle = "#d7a7ff"; ctx.beginPath(); ctx.arc(0, enemy.h * .02, enemy.w * .12, 0, Math.PI * 2); ctx.fill(); }
   }
+  if (enemy.shot < .22) {
+    ctx.fillStyle = "#ffba58";
+    ctx.beginPath(); ctx.arc(enemy.w * .57, -enemy.h * .22, 4 + (.22 - enemy.shot) * 21, 0, Math.PI * 2); ctx.fill();
+  }
   ctx.restore();
   ctx.fillStyle = "rgba(0,0,0,.7)"; ctx.fillRect(x, enemy.y - 12, enemy.w, 5); ctx.fillStyle = enemy.type === "brute" ? "#ff7844" : "#ffce55"; ctx.fillRect(x, enemy.y - 12, enemy.w * clamp(enemy.hp / enemy.maxHp, 0, 1), 5);
 }
@@ -1542,9 +1733,20 @@ function drawDeathBoss(enemy) {
 
 function drawBullet(bullet) {
   const x = worldX(bullet.x);
+  if (bullet.range) {
+    drawBeam(bullet, bullet.aim, bullet.range, bullet.color, 10, clamp(bullet.life * 18, 0, 1));
+    return;
+  }
   ctx.save();
   ctx.globalAlpha = clamp(bullet.life * 2, 0, 1);
-  if (bullet.dog) {
+  if (bullet.directed && !bullet.bomb) {
+    ctx.translate(x, bullet.y);
+    ctx.rotate(Math.atan2(bullet.vy, bullet.vx));
+    ctx.fillStyle = bullet.color; ctx.fillRect(bullet.rocket ? -24 : -16, -4, bullet.rocket ? 37 : 26, 8);
+    ctx.fillStyle = "#fff6d4"; ctx.fillRect(-5, -2, 13, 4);
+    if (bullet.rocket) { ctx.fillStyle = "#ffb449"; ctx.fillRect(-31, -2, 12, 4); }
+  }
+  else if (bullet.dog) {
     ctx.translate(x, bullet.y);
     if (bullet.vx < 0) ctx.scale(-1, 1);
     if (art.spooky.complete) ctx.drawImage(art.spooky, -bullet.w / 2, -bullet.h / 2, bullet.w, bullet.h);
@@ -1566,13 +1768,6 @@ function drawBullet(bullet) {
   else if (bullet.drumBeat) {
     ctx.fillStyle = bullet.color; ctx.beginPath(); ctx.arc(x, bullet.y, bullet.w * .5, 0, Math.PI * 2); ctx.fill();
     ctx.fillStyle = "#fff5c4"; ctx.beginPath(); ctx.arc(x - 3, bullet.y - 4, 4, 0, Math.PI * 2); ctx.fill();
-  }
-  else if (bullet.vanBeam) {
-    const beam = ctx.createLinearGradient(x - bullet.w / 2, 0, x + bullet.w / 2, 0);
-    beam.addColorStop(0, "rgba(125,255,56,.08)"); beam.addColorStop(.18, "rgba(125,255,56,.82)"); beam.addColorStop(.72, "rgba(77,239,255,.72)"); beam.addColorStop(1, "rgba(246,241,222,.12)");
-    ctx.fillStyle = beam; ctx.fillRect(x - bullet.w / 2, bullet.y - 18, bullet.w, 36);
-    ctx.fillStyle = "rgba(246,241,222,.9)"; ctx.fillRect(x - bullet.w / 2, bullet.y - 4, bullet.w, 8);
-    ctx.strokeStyle = "rgba(125,255,56,.78)"; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(x - bullet.w / 2, bullet.y - 24); ctx.lineTo(x + bullet.w / 2, bullet.y - 7); ctx.moveTo(x - bullet.w / 2, bullet.y + 24); ctx.lineTo(x + bullet.w / 2, bullet.y + 7); ctx.stroke();
   }
   else if (bullet.laser) {
     if (bullet.prism) {
@@ -1620,14 +1815,20 @@ function loop(now) {
   const dt = Math.min(.033, Math.max(.001, (now - lastFrame) / 1000));
   lastFrame = now;
   update(dt); draw();
-  if (state && state.status === "playing") requestAnimationFrame(loop);
+  if (state && state.status === "playing") frameRequest = requestAnimationFrame(loop);
 }
 
 function setPaused(value) {
-  if (!state || state.status !== "playing") return;
+  if (state?.status !== (value ? "playing" : "paused")) return;
+  releaseInputs();
   state.status = value ? "paused" : "playing";
   ui.pause.classList.toggle("hidden", !value);
-  if (!value) { lastFrame = performance.now(); requestAnimationFrame(loop); }
+  document.querySelector("#pauseButton").hidden = value;
+  if (value) cancelAnimationFrame(frameRequest);
+  else {
+    lastFrame = performance.now();
+    frameRequest = requestAnimationFrame(loop);
+  }
 }
 
 function blip(frequency, duration) {
@@ -1640,69 +1841,108 @@ function blip(frequency, duration) {
   } catch { /* audio is optional */ }
 }
 
-function setInput(key, value) {
-  if (!(key in input)) return;
-  if (key === "fire") {
-    if (value) { input.fire = true; input.fireHeld = true; }
-    else input.fireHeld = false;
-    return;
-  }
-  input[key] = value;
+function isHeld(action) {
+  if (action === "left" && stick.x < -.24) return true;
+  if (action === "right" && stick.x > .24) return true;
+  if (action === "up" && stick.y < -.46) return true;
+  if (action === "down" && stick.y > .46) return true;
+  for (const active of held.values()) if (active === action) return true;
+  return false;
 }
+
+function startInput(source, action) {
+  if (held.has(source)) return;
+  held.set(source, action);
+  if (action in queued) queued[action] = ACTION_BUFFER;
+}
+
 function releaseInputs() {
-  input.left = false; input.right = false; input.crouch = false; input.jump = false; input.fire = false; input.fireHeld = false; input.special = false; input.activate = false;
-  pressed.clear();
+  held.clear();
+  for (const action of Object.keys(queued)) queued[action] = 0;
+  resetJoystick();
+  fireTouch = null;
+  touchAim = null;
 }
 
 const joystick = document.querySelector("#joystick");
 const joystickKnob = document.querySelector("#joystickKnob");
 let joystickPointerId = null;
+let fireTouch = null;
 function resetJoystick() {
   joystickPointerId = null;
-  setInput("left", false); setInput("right", false);
+  stick = { x: 0, y: 0 };
   if (joystickKnob) joystickKnob.style.transform = "translate(-50%, -50%)";
 }
+
+function tryCapture(element, event) {
+  try { element.setPointerCapture(event.pointerId); } catch { /* Window listeners cover failed capture. */ }
+}
+
 function moveJoystick(event) {
   if (!joystick || joystickPointerId !== event.pointerId) return;
   const rect = joystick.getBoundingClientRect();
   const radius = Math.max(1, Math.min(rect.width, rect.height) * .5);
-  const maxTravel = radius * .58;
   const dx = event.clientX - (rect.left + rect.width * .5);
   const dy = event.clientY - (rect.top + rect.height * .5);
-  const length = Math.hypot(dx, dy) || 1;
-  const scale = Math.min(1, maxTravel / length);
-  const knobX = dx * scale;
-  const knobY = dy * scale;
+  const scale = Math.max(radius, Math.hypot(dx, dy));
+  const x = dx / scale, y = dy / scale;
+  if (y < -.55 && stick.y >= -.55 && !isHeld("fire") && !state.van.boarded) queued.jump = ACTION_BUFFER;
+  stick = { x, y };
+  const knobX = x * radius * .58, knobY = y * radius * .58;
   if (joystickKnob) joystickKnob.style.transform = `translate(calc(-50% + ${knobX}px), calc(-50% + ${knobY}px))`;
-  setInput("left", dx < -radius * .18);
-  setInput("right", dx > radius * .18);
 }
-if (joystick) {
-  joystick.addEventListener("pointerdown", (event) => { event.preventDefault(); joystickPointerId = event.pointerId; joystick.setPointerCapture?.(event.pointerId); moveJoystick(event); });
-  joystick.addEventListener("pointermove", moveJoystick);
-  joystick.addEventListener("pointerup", resetJoystick);
-  joystick.addEventListener("pointercancel", resetJoystick);
-  joystick.addEventListener("lostpointercapture", resetJoystick);
+
+function finishPointer(event) {
+  if (event.pointerId === joystickPointerId) resetJoystick();
+  if (event.pointerId === fireTouch?.id) {
+    fireTouch = null;
+    touchAim = null;
+  }
+  held.delete(event.pointerId);
 }
-const keyMap = { a: "left", arrowleft: "left", d: "right", arrowright: "right", s: "crouch", c: "crouch", arrowdown: "crouch", w: "jump", arrowup: "jump", " ": "jump", j: "fire", x: "fire", k: "special", z: "special", f: "activate" };
-const heldActions = new Set(["left", "right", "crouch", "fire"]);
+joystick?.addEventListener("pointerdown", (event) => {
+  if (state?.status !== "playing" || joystickPointerId !== null || event.button !== 0) return;
+  event.preventDefault();
+  joystickPointerId = event.pointerId;
+  tryCapture(joystick, event);
+  moveJoystick(event);
+});
+joystick?.addEventListener("lostpointercapture", finishPointer);
+const keyMap = { a: "left", arrowleft: "left", d: "right", arrowright: "right",
+  s: "down", c: "down", arrowdown: "down", w: "up", arrowup: "up",
+  " ": "jump", j: "fire", x: "fire", k: "special", z: "special", f: "activate" };
 window.addEventListener("keydown", (event) => {
   const key = event.key.toLowerCase();
-  if (key === "p" && state) { setPaused(state.status === "playing"); return; }
+  if (key === "p" && state && !event.repeat) { setPaused(state.status === "playing"); return; }
   if (key === "escape" && state?.status === "playing") { setPaused(true); return; }
   const action = keyMap[key];
-  if (!action) return;
+  if (!action || state?.status !== "playing") return;
   event.preventDefault();
-  if (!pressed.has(key)) { setInput(action, true); pressed.add(key); }
+  if (!event.repeat) startInput(key, action);
 });
-window.addEventListener("keyup", (event) => { const key = event.key.toLowerCase(); const action = keyMap[key]; if (action) { if (heldActions.has(action)) setInput(action, false); pressed.delete(key); } });
+window.addEventListener("keyup", (event) => held.delete(event.key.toLowerCase()));
 document.querySelectorAll("[data-key]").forEach((button) => {
   const key = button.dataset.key;
-  const down = (event) => { event.preventDefault(); setInput(key, true); button.setPointerCapture?.(event.pointerId); };
-  const up = (event) => { event.preventDefault(); if (heldActions.has(key)) setInput(key, false); };
-  button.addEventListener("pointerdown", down); button.addEventListener("pointerup", up); button.addEventListener("pointercancel", up); button.addEventListener("pointerleave", up);
+  button.addEventListener("pointerdown", (event) => {
+    if (state?.status !== "playing" || event.button !== 0 || (key === "fire" && fireTouch)) return;
+    event.preventDefault();
+    if (key === "fire") fireTouch = { id: event.pointerId, x: event.clientX, y: event.clientY };
+    startInput(event.pointerId, key);
+    tryCapture(button, event);
+  });
+  button.addEventListener("lostpointercapture", finishPointer);
+  button.addEventListener("click", (event) => {
+    if (event.detail === 0 && state?.status === "playing") queued[key] = ACTION_BUFFER;
+  });
 });
-window.addEventListener("pointerup", () => { input.left = false; input.right = false; input.crouch = false; });
+window.addEventListener("pointermove", (event) => {
+  if (event.pointerId === joystickPointerId) moveJoystick(event);
+  if (event.pointerId !== fireTouch?.id) return;
+  const dx = event.clientX - fireTouch.x, dy = event.clientY - fireTouch.y;
+  touchAim = Math.hypot(dx, dy) >= 14 ? direction(dx, dy) : null;
+});
+window.addEventListener("pointerup", finishPointer);
+window.addEventListener("pointercancel", finishPointer);
 window.addEventListener("blur", releaseInputs);
 document.addEventListener("visibilitychange", () => { if (document.hidden) releaseInputs(); });
 // Mobile Safari can start text selection after a long press. Prison Slug has
@@ -1713,7 +1953,11 @@ document.addEventListener("selectstart", (event) => {
 document.addEventListener("dragstart", (event) => {
   if (state?.status === "playing") event.preventDefault();
 });
+document.addEventListener("contextmenu", (event) => {
+  if (state?.status === "playing") event.preventDefault();
+});
 ui.start.addEventListener("click", beginMission);
+document.querySelector("#pauseButton").addEventListener("click", () => setPaused(true));
 ui.resume.addEventListener("click", () => setPaused(false));
 ui.quit.addEventListener("click", exitToLobby);
 ui.again.addEventListener("click", beginMission);

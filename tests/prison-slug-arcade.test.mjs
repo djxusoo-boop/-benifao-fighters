@@ -1,21 +1,103 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
+import vm from "node:vm";
 
 const gameUrl = new URL("../public/prison-slug/game.js", import.meta.url);
 const htmlUrl = new URL("../public/prison-slug/index.html", import.meta.url);
 const cssUrl = new URL("../public/prison-slug/styles.css", import.meta.url);
 
-test("Prison Slug supports held fire without losing a quick tap", async () => {
+async function mission() {
   const game = await readFile(gameUrl, "utf8");
+  const elements = new Map();
+  const element = () => ({
+    handlers: new Map(), style: {}, classList: { add() {}, remove() {}, toggle() {} },
+    addEventListener(name, handler) { this.handlers.set(name, handler); },
+    getContext: () => ({}), append() {}, setAttribute() {},
+    getBoundingClientRect: () => ({ left: 0, top: 0, width: 100, height: 100 }),
+  });
+  const select = (id) => {
+    if (!elements.has(id)) elements.set(id, element());
+    return elements.get(id);
+  };
+  const win = { ...element(), location: { search: "" }, setTimeout() {} };
+  const fire = select('[data-key="fire"]');
+  fire.dataset = { key: "fire" };
+  const context = vm.createContext({
+    Image: class {}, URLSearchParams, window: win, performance: { now: () => 0 },
+    document: { ...element(), createElement: element, querySelector: select, querySelectorAll: () => [fire] },
+    requestAnimationFrame: () => 1, cancelAnimationFrame() {},
+  });
+  const run = (code) => vm.runInContext(code, context);
+  run(game);
+  run("beginMission(); state.props = []; state.waves = ROUTE_ENCOUNTERS.length;");
+  const event = (target, name, data) => target.handlers.get(name)({ preventDefault() {}, button: 0, ...data });
+  return {
+    run, key: (name, key) => event(win, name, { key }),
+    touch: (target, name, pointerId, clientX = 0, clientY = 0) => event(target === "window" ? win : select(target), name, { pointerId, clientX, clientY }),
+  };
+}
 
-  assert.match(game, /fireHeld: false/, "the input state needs a held-fire channel");
-  assert.match(game, /if \(input\.fire \|\| input\.fireHeld\) \{ fire\(\); input\.fire = false; \}/,
-    "the main loop should fire from either a tap or a held button");
-  assert.match(game, /if \(key === "fire"\) \{\s*if \(value\) \{ input\.fire = true; input\.fireHeld = true; \}\s*else input\.fireHeld = false;/,
-    "releasing fire must keep the tap and only end the hold");
-  assert.match(game, /const heldActions = new Set\(\["left", "right", "crouch", "fire"\]\)/,
-    "keyboard and touch release paths must clear held fire");
+test("held fire repeats, release stops it, and a quick tap is retained", async () => {
+  const { run, key } = await mission();
+  key("keydown", "j");
+  run("for (let i = 0; i < 45; i++) update(1/60)");
+  assert.ok(run("state.bullets.length >= 3"));
+  key("keyup", "j");
+  run("state.bullets = []; for (let i = 0; i < 25; i++) update(1/60)");
+  assert.equal(run("state.bullets.length"), 0);
+  key("keydown", "j");
+  key("keyup", "j");
+  run("update(1/60)");
+  assert.equal(run("state.bullets.length"), 1);
+});
+
+test("keyboard aims up, turns immediately while crouched, and fires during a jump", async () => {
+  const { run, key } = await mission();
+  key("keydown", "w");
+  key("keydown", "j");
+  run("update(1/60)");
+  assert.equal(run("state.bullets[0].vx"), 0);
+  assert.ok(run("state.bullets[0].vy < 0 && state.player.landed"));
+  key("keyup", "w");
+  key("keydown", "s");
+  key("keydown", "a");
+  run("state.player.fireCooldown = 0; update(1/60)");
+  assert.ok(run("state.bullets.at(-1).vx < 0 && state.bullets.at(-1).vy === 0 && state.player.crouching"));
+  assert.equal(run("state.bullets.at(-1).y - state.player.y"), 96);
+  key("keyup", "s");
+  key("keydown", " ");
+  run("state.player.fireCooldown = 0; update(1/60)");
+  assert.ok(run("!state.player.landed && state.player.vy < 0 && state.bullets.at(-1).vx < 0"));
+  key("keydown", "s");
+  run("state.player.fireCooldown = 0; update(1/60)");
+  assert.ok(run("state.bullets.at(-1).vx < 0 && state.bullets.at(-1).vy > 0"));
+});
+
+test("touch aim remains independent of movement and rotates van damage during one hold", async () => {
+  const { run, touch } = await mission();
+  const fire = '[data-key="fire"]';
+  touch("#joystick", "pointerdown", 1, 86, 50);
+  touch(fire, "pointerdown", 2, 300, 220);
+  touch("window", "pointermove", 2, 270, 185);
+  run("update(1/60)");
+  assert.ok(run("state.player.vx > 0 && state.bullets[0].vx < 0 && state.bullets[0].vy < 0"));
+  touch("window", "pointerup", 1);
+  assert.ok(run('!isHeld("right") && isHeld("fire")'));
+  run(`
+    state.player.x = VAN_X + 300;
+    activateVan();
+    spawnEnemy(VAN_X + 750, "soldier");
+    spawnEnemy(VAN_X - 180, "soldier");
+  `);
+  touch("window", "pointermove", 2, 340, 220);
+  run("update(1/60)");
+  assert.ok(run("state.enemies[0].hp < 28 && state.enemies[1].hp === 28"));
+  touch("window", "pointermove", 2, 260, 220);
+  run("state.van.beamCooldown = 0; update(1/60)");
+  assert.ok(run("state.enemies[1].hp < 28 && state.van.aim.x < 0"));
+  touch("window", "pointercancel", 2);
+  assert.ok(run('!isHeld("fire") && touchAim === null'));
 });
 
 test("Prison Slug has original arcade mission pacing feedback", async () => {

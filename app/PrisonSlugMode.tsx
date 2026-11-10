@@ -22,7 +22,7 @@ export default function PrisonSlugMode({ fighter, onExit }: PrisonSlugModeProps)
   return (
     <section className="prison-slug-mode" aria-label="Modo Prison Slug">
       <button className="prison-slug-exit" type="button" onClick={onExit}>← VOLVER A HARDCORE FIGHTERS</button>
-      <iframe title="Prison Slug" src={src} allow="autoplay; fullscreen" />
+      <iframe title="Prison Slug" src={src} allow="autoplay; fullscreen" onLoad={(event) => event.currentTarget.contentWindow?.focus()} />
     </section>
   );
 }
