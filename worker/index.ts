@@ -1,6 +1,7 @@
 /** Cloudflare Worker entry point for the vinext-starter template. */
 import { handleImageOptimization, DEFAULT_DEVICE_SIZES, DEFAULT_IMAGE_SIZES } from "vinext/server/image-optimization";
 import handler from "vinext/server/app-router-entry";
+import pinnedFighters from "../build/pinned-fighters.json";
 
 interface Env {
   ASSETS: Fetcher;
@@ -28,6 +29,17 @@ interface ExecutionContext {
 const worker = {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     const url = new URL(request.url);
+
+    // Unchanged originals omitted from the upload are fetched from an immutable
+    // revision of the public repository. Changed or new files remain local.
+    const prefix = "/assets/new-fighters/";
+    if ((request.method === "GET" || request.method === "HEAD") && url.pathname.startsWith(prefix)) {
+      const name = decodeURIComponent(url.pathname.slice(prefix.length));
+      if (Object.prototype.hasOwnProperty.call(pinnedFighters, name)) {
+        const upstream = new URL(`https://cdn.jsdelivr.net/gh/djxusoo-boop/-benifao-fighters@6ef762ead7659aa55d64edd5b7e981bb444cc10b/public${url.pathname}`);
+        return fetch(upstream, { method: request.method });
+      }
+    }
 
     if (url.pathname === "/_vinext/image") {
       const allowedWidths = [...DEFAULT_DEVICE_SIZES, ...DEFAULT_IMAGE_SIZES];
