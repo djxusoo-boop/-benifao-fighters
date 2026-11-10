@@ -5,7 +5,7 @@ import Image from "next/image";
 import type { CSSProperties, MouseEvent as ReactMouseEvent, PointerEvent as ReactPointerEvent } from "react";
 import GameIntro from "./GameIntro";
 import OnlineCount from "./OnlineCount";
-import OnlineRoom, { type OnlineInput } from "./OnlineRoom";
+import OnlineRoom, { type OnlineInput, type OnlineMode } from "./OnlineRoom";
 import type { RoomRole } from "./online-peer";
 import OrbMode from "./OrbMode";
 import PlatformMode from "./PlatformMode";
@@ -614,6 +614,7 @@ function Home() {
   const [onlineRole, setOnlineRole] = useState<RoomRole | null>(null);
   const onlineRoleRef = useRef<RoomRole | null>(null);
   const [onlineStartPending, setOnlineStartPending] = useState(false);
+  const [onlineLaunchMode, setOnlineLaunchMode] = useState<OnlineMode | null>(null);
 
   const [selected, setSelected] = useState<FighterId>("maletilla");
   const [localOpponent, setLocalOpponent] = useState<FighterId>("vanessa");
@@ -2274,6 +2275,14 @@ function Home() {
 
   const receiveOnlineInput = useCallback((action: OnlineInput, down: boolean) => {
     if (onlineRoleRef.current !== "host") return;
+    const phase = gameRef.current.phase;
+    if (phase !== "fight") {
+      const key = phase === "coop"
+        ? ({ left: "ArrowLeft", right: "ArrowRight", jump: "ArrowUp", crouch: "ArrowDown", punch: "1", kick: "2", special1: "3", special2: "4" } as Record<string, string>)[action]
+        : ({ left: "ArrowLeft", right: "ArrowRight", jump: "ArrowUp", crouch: "ArrowDown", punch: "j", kick: "h", special1: "k", special2: "l" } as Record<string, string>)[action];
+      if (key) window.dispatchEvent(new KeyboardEvent(down ? "keydown" : "keyup", { key, bubbles: true }));
+      return;
+    }
     if (action === "left" || action === "right") {
       const key = action === "left" ? "touch-cpu-left" : "touch-cpu-right";
       if (down) { keysRef.current.add(key); directionalPress("cpu", action === "left" ? -1 : 1); }
@@ -2455,6 +2464,19 @@ function Home() {
     setCampaignStep(0);
     setGame({ ...freshGame(), phase: "prison-slug" });
   }, [clearTransientTimers, fightersReady, recordActivity, selected]);
+
+  useEffect(() => {
+    if (!onlineLaunchMode || onlineLaunchMode === "fight" || !fightersReady) return;
+    const mode = onlineLaunchMode;
+    const frame = requestAnimationFrame(() => {
+      setOnlineLaunchMode(null);
+      if (mode === "coop") startCoopMode();
+      else if (mode === "orbs") startOrbMode();
+      else if (mode === "platform") startPlatformMode();
+      else startPrisonSlugMode();
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [fightersReady, onlineLaunchMode, startCoopMode, startOrbMode, startPlatformMode, startPrisonSlugMode]);
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -3284,7 +3306,12 @@ function Home() {
       <OnlineRoom open={onlineOpen} onClose={() => { setOnlineOpen(false); if (onlineRoleRef.current) resetToSelect(); }}
         fighters={FIGHTER_ORDER.map(id => ({ id, name: FIGHTERS[id].name }))} selected={selected}
         onRole={role => { onlineRoleRef.current = role; setOnlineRole(role); }}
-        onStart={(host, guest) => { if (!FIGHTER_ORDER.includes(host as FighterId) || !FIGHTER_ORDER.includes(guest as FighterId)) return; setSelected(host as FighterId); setLocalOpponent(guest as FighterId); setBattleMode("local"); setCampaignStep(0); setArcadeRun(null); setOnlineStartPending(true); }}
+        onStart={(mode, host, guest) => {
+          if (!FIGHTER_ORDER.includes(host as FighterId) || !FIGHTER_ORDER.includes(guest as FighterId)) return;
+          setSelected(host as FighterId); setLocalOpponent(guest as FighterId); setBattleMode("local"); setCampaignStep(0); setArcadeRun(null);
+          if (mode === "fight") setOnlineStartPending(true);
+          else setOnlineLaunchMode(mode);
+        }}
         onInput={receiveOnlineInput} onDisconnect={disconnectOnline}
         getSnapshot={() => {
           const arena = arenaRef.current;

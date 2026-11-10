@@ -33,7 +33,10 @@ export class OnlinePeer {
   }
   private async api(action: string, data: Record<string, unknown> = {}) {
     const response = await fetch('/api/rooms', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action, token: this.token, code: this.code, ...data }), signal: AbortSignal.any([this.abort.signal, AbortSignal.timeout(10000)]) });
-    const result = await response.json();
+    const text = await response.text();
+    let result: Record<string, unknown>;
+    try { result = JSON.parse(text) as Record<string, unknown>; }
+    catch { throw new Error(response.ok ? 'Respuesta inválida del servicio de salas.' : 'El servicio de salas no está disponible ahora.'); }
     if (!response.ok) throw new Error(result.error || 'No se pudo conectar con la sala.');
     return result;
   }

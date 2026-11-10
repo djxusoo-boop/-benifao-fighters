@@ -4,11 +4,12 @@ import OnlineCount from './OnlineCount';
 import { OnlinePeer, type RoomPacket, type RoomRole } from './online-peer';
 import { joystickIntent } from './touch-joystick.mjs';
 export type OnlineInput = 'left' | 'right' | 'jump' | 'crouch' | 'block' | 'punch' | 'kick' | 'special1' | 'special2';
+export type OnlineMode = 'fight' | 'coop' | 'orbs' | 'platform' | 'slug';
 const actions: OnlineInput[] = ['left', 'right', 'jump', 'crouch', 'block', 'punch', 'kick', 'special1', 'special2'];
 const keyMap: Record<string, OnlineInput> = { a:'left', arrowleft:'left', d:'right', arrowright:'right', w:'jump', arrowup:'jump', ' ':'jump', c:'crouch', arrowdown:'crouch', s:'block', j:'punch', h:'kick', k:'special1', l:'special2' };
 type Props = {
   open: boolean; onClose: () => void; fighters: { id:string; name:string }[]; selected: string;
-  onRole: (role: RoomRole | null) => void; onStart: (hostFighter: string, guestFighter: string) => void;
+  onRole: (role: RoomRole | null) => void; onStart: (mode: OnlineMode, hostFighter: string, guestFighter: string) => void;
   onInput: (action: OnlineInput, down: boolean) => void; onDisconnect: () => void;
   getSnapshot: () => unknown; renderSnapshot: (snapshot: unknown) => ReactNode;
 };
@@ -26,6 +27,7 @@ export default function OnlineRoom(props: Props) {
   const [started, setStarted] = useState(false);
   const [fighter, setFighter] = useState(props.selected);
   const [guestFighter, setGuestFighter] = useState('');
+  const [mode, setMode] = useState<OnlineMode>('fight');
   const [snapshot, setSnapshot] = useState<unknown>(null);
   const held = useRef(new Set<OnlineInput>());
   const lastSeen = useRef(0);
@@ -51,6 +53,10 @@ export default function OnlineRoom(props: Props) {
       lastSeen.current = Date.now();
       if (packet.type === 'ping') { peer.send({ type:'pong' }); return; }
       if (newRole === 'host' && packet.type === 'fighter' && props.fighters.some(f => f.id === packet.fighter)) setGuestFighter(packet.fighter as string);
+      if (newRole === 'guest' && packet.type === 'start' && ['fight','coop','orbs','platform','slug'].includes(packet.mode as string)) {
+        setStarted(true);
+        latest.current.onStart(packet.mode as OnlineMode, packet.hostFighter as string, fighter);
+      }
       if (newRole === 'host' && packet.type === 'input' && actions.includes(packet.action as OnlineInput) && typeof packet.down === 'boolean') latest.current.onInput(packet.action as OnlineInput, packet.down);
       if (newRole === 'guest' && packet.type === 'state' && typeof packet.seq === 'number' && packet.seq > lastSequence.current) { lastSequence.current = packet.seq; setSnapshot(packet.view); setStarted(true); }
     }, (message, ready) => {
@@ -106,15 +112,16 @@ export default function OnlineRoom(props: Props) {
   };
   const releaseStick = () => { for (const action of ['left', 'right', 'jump', 'crouch'] as OnlineInput[]) input(action, false); };
   if (!props.open && !role) return null;
+  if (started) return null;
   const control = (action: OnlineInput, label: string) => <button key={action} type="button" disabled={!connected} onPointerDown={event => { event.preventDefault(); try { event.currentTarget.setPointerCapture(event.pointerId); } catch { /* Pointer input still works without capture on older WebViews. */ } input(action, true); }} onPointerUp={() => input(action, false)} onPointerCancel={() => input(action, false)} onLostPointerCapture={() => input(action, false)}>{label}</button>;
   return <section className={`online-room ${started ? 'online-playing' : ''}`} aria-label="Sala online">
     <header><strong>{code ? `SALA ${code}` : 'JUGAR ONLINE'}</strong><OnlineCount /><button type="button" onClick={leave}>SALIR DE LA SALA</button></header>
     <p role="status">{status}</p>
     {!started && <div className="online-room-card">
-      <h2>Un código. Dos jugadores.</h2><p>Modo lucha · El creador juega como P1 y su amigo como P2.</p>
+      <h2>Un código. Dos jugadores.</h2><p>Elige un modo y comparte el control con tu amigo.</p>
       {!role && <><label>Tu personaje<select value={fighter} onChange={event => setFighter(event.target.value)}>{props.fighters.map(f => <option key={f.id} value={f.id}>{f.name}</option>)}</select></label><button type="button" disabled={busy} onClick={() => void connect('host')}>CREAR SALA</button><label>Código de tu amigo<input inputMode="numeric" autoComplete="off" maxLength={4} value={entry} onChange={event => setEntry(event.target.value.replace(/\D/g, '').slice(0,4))} placeholder="0000" /></label><button type="button" disabled={busy || entry.length !== 4} onClick={() => void connect('guest')}>UNIRME</button></>}
       {role && <strong className="online-room-code">{code || '…'}</strong>}
-      {role === 'host' && connected && guestFighter && <><p>Tu amigo ha elegido {props.fighters.find(f => f.id === guestFighter)?.name}.</p><button type="button" onClick={() => { setStarted(true); props.onStart(fighter, guestFighter); }}>EMPEZAR COMBATE</button></>}
+      {role === 'host' && connected && guestFighter && <><label>Modo de juego<select value={mode} onChange={event => setMode(event.target.value as OnlineMode)}><option value="fight">Lucha arcade</option><option value="coop">Aventura cooperativa</option><option value="orbs">Rompeobjetos</option><option value="platform">Aventura Central</option><option value="slug">Prison Slug</option></select></label><p>Tu amigo ha elegido {props.fighters.find(f => f.id === guestFighter)?.name}.</p><button type="button" onClick={() => { setStarted(true); peerRef.current?.send({ type:'start', mode, hostFighter: fighter }); props.onStart(mode, fighter, guestFighter); }}>EMPEZAR {mode === 'fight' ? 'COMBATE' : 'PARTIDA'}</button></>}
       {role === 'guest' && connected && <p>Listo. Espera a que tu amigo inicie el combate.</p>}
       <small>Conexión directa en pruebas. Algunas redes móviles necesitan que ambos jugadores estén en la misma Wi-Fi.</small>
     </div>}
