@@ -88,6 +88,24 @@ html:is(.arcade-iphone, [data-display-mode=mobile]) .lobby-v2168[data-mobile-ste
   display: none !important;
 }
 html:is(.arcade-iphone, [data-display-mode=mobile]) .lobby-v2168[data-mobile-step=modes] .lobby-games { grid-column: 1 / -1; }
+
+/* Color follows the mode itself, including when the editor changes the order. */
+#game.phase-select .lobby-v2168 .mode-start-actions .fight-button[data-edit-key="fight"] {
+  background:linear-gradient(120deg,#9f2639,#c53a41)!important; border-color:#f17a79!important; color:#fff!important;
+}
+#game.phase-select .lobby-v2168 .mode-start-actions .fight-button[data-edit-key="coop"] {
+  background:linear-gradient(120deg,#553582,#8053ac)!important; border-color:#bc9ae5!important; color:#fff!important;
+}
+#game.phase-select .lobby-v2168 .mode-start-actions .fight-button[data-edit-key="orbs"] {
+  background:linear-gradient(120deg,#095667,#0d7880)!important; border-color:#70cfd0!important; color:#fff!important;
+}
+#game.phase-select .lobby-v2168 .mode-start-actions .fight-button[data-edit-key="central"] {
+  background:linear-gradient(120deg,#17487c,#276aae)!important; border-color:#80b7ee!important; color:#fff!important;
+}
+#game.phase-select .lobby-v2168 .mode-start-actions .fight-button[data-edit-key="slug"] {
+  background:linear-gradient(120deg,#305e27,#4a8037)!important; border-color:#aad77a!important; color:#fff!important;
+}
+#game.phase-select .lobby-v2168 .mode-start-actions .fight-button:is([data-edit-key="fight"],[data-edit-key="coop"],[data-edit-key="orbs"],[data-edit-key="central"],[data-edit-key="slug"]) :is(span,small) { color:#fff!important; }
 html:is(.arcade-iphone, [data-display-mode=mobile]) #game.phase-select .lobby-jump-modes {
   display: flex;
   position: fixed;
