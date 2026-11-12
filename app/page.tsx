@@ -3537,7 +3537,6 @@ function Home() {
                 </aside>
               );
             })()}
-            <LobbyJump atModes={lobbyModesOpen} onChange={(showModes) => { setLobbyModesOpen(showModes); if (!showModes) setLobbyLocked([false, false]); window.scrollTo({ top: 0 }); }} />
             <div className="lobby-games" data-modes-reordered={orderedModes.some((id, index) => id !== MODE_ORDER[index]) || undefined} {...placementAttrs("section", "games")}>
               <h2 {...editAttrs("field", "modesHeading", "Título de los modos", lobbyDesign.modesHeading)} role={lobbyEditorOpen ? "button" : undefined} tabIndex={lobbyEditorOpen ? 0 : undefined}>{lobbyDesign.modesHeading} <small {...editAttrs("field", "modesSubtitle", "Frase de los modos", lobbyDesign.modesSubtitle)} role={lobbyEditorOpen ? "button" : undefined} tabIndex={lobbyEditorOpen ? 0 : undefined}>{lobbyDesign.modesSubtitle}</small></h2>
               <div className="mode-start-actions">
@@ -3577,6 +3576,8 @@ function Home() {
             </div>
           </div>
         )}
+        {/* Outside the menu panel: its backdrop blur would pin a fixed button to the panel's end instead of the screen. */}
+        {game.phase === "select" && <LobbyJump atModes={lobbyModesOpen} onChange={(showModes) => { setLobbyModesOpen(showModes); if (!showModes) setLobbyLocked([false, false]); window.scrollTo({ top: 0 }); }} />}
 
         {game.phase === "select" && lobbyEditorOpen && advancedEditorOpen && <LobbyEditor
           value={lobbyDesign}

@@ -166,6 +166,42 @@ html:is(.arcade-iphone, [data-display-mode=mobile]) #game.phase-select .lobby-ju
 @media (prefers-reduced-motion: reduce) {
   html #game.phase-select .lobby-jump-modes { animation: none; }
 }
+
+/* V2.35.16 · "ELEGIR MODO" is the one action a player must find at a glance:
+   a bright multicolour pill with a moving gradient, a glow and a shine. */
+html:is(.arcade-iphone, [data-display-mode=mobile]) #game.phase-select .lobby-jump-modes.is-forward {
+  overflow: hidden;
+  border: 3px solid #fff3c4;
+  background: linear-gradient(115deg, #ff7a00, #ff2e63 22%, #b03cff 44%, #2f6bff 64%, #00c2d8 80%, #ffb800 92%, #ff7a00) 0 50% / 300% 100%;
+  color: #fff;
+  text-shadow: 0 2px 0 #3a0026a6, 0 0 10px #0006;
+  letter-spacing: .06em;
+  animation: lobby-cta-colors 4s linear infinite, lobby-cta-glow 1.8s ease-in-out infinite;
+}
+html:is(.arcade-iphone, [data-display-mode=mobile]) #game.phase-select .lobby-jump-modes.is-forward::after {
+  content: "";
+  position: absolute;
+  inset: -3px auto -3px 0;
+  width: 38%;
+  background: linear-gradient(100deg, #fff0, #ffffff8c, #fff0);
+  transform: translateX(-140%) skewX(-18deg);
+  animation: lobby-cta-shine 2.8s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes lobby-cta-colors { to { background-position: -150% 50%; } }
+@keyframes lobby-cta-glow {
+  0%, 100% { box-shadow: 0 0 0 0 #ff2e6399, 0 0 16px #b03cff80, 0 6px 20px #000a; }
+  50% { box-shadow: 0 0 0 9px #ff2e6300, 0 0 28px #00c2d8b3, 0 6px 25px #000a; }
+}
+@keyframes lobby-cta-shine {
+  0%, 55% { transform: translateX(-140%) skewX(-18deg); }
+  100% { transform: translateX(320%) skewX(-18deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  html:is(.arcade-iphone, [data-display-mode=mobile]) #game.phase-select .lobby-jump-modes.is-forward,
+  html:is(.arcade-iphone, [data-display-mode=mobile]) #game.phase-select .lobby-jump-modes.is-forward::after { animation: none; }
+  html:is(.arcade-iphone, [data-display-mode=mobile]) #game.phase-select .lobby-jump-modes.is-forward { box-shadow: 0 0 0 3px #ff2e6366, 0 0 20px #b03cff80, 0 6px 20px #000a; }
+}
 html:is(.arcade-iphone, [data-display-mode=mobile]) .leaderboard-tabs button {
   min-height: 44px;
   font-size: 13px;
