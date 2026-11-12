@@ -26,6 +26,7 @@ import { joystickIntent } from "./touch-joystick.mjs";
 import GameErrorBoundary from "./GameErrorBoundary";
 import LobbyJump from "./LobbyJump";
 import { FIGHTER_PROFILES, defenseMultiplier, pickWinQuote, powerMultiplier, speedMultiplier } from "./fighter-profiles";
+import { balanceFactor as fighterBalanceFactor, normalAttackDuration } from "./fighter-balance.mjs";
 import { ArcadeAudio, type HitKind, type MusicTheme } from "./arcade-audio";
 import { SUPER_MOVES } from "./super-moves";
 import { SUPER_ANIM, companionFrame, superFrame, superFramesFor } from "./super-anim";
@@ -169,7 +170,7 @@ const STAGES = [
 
 const GAME_TITLE = "HARDCORE FIGHTERS";
 const GAME_EDITION = "WEB · ARCADE EDITION";
-const GAME_VERSION = "V2.35.17";
+const GAME_VERSION = "V2.35.18";
 
 const ROUND_SECONDS = 99;
 const SUPER_MAX = 100;
@@ -622,15 +623,28 @@ function Home() {
   const balanceRef = useRef<Record<string, { speed: number; power: number; defense: number }>>({});
   useEffect(() => {
     const controller = new AbortController();
-    fetch("/api/fighter-balance", { cache: "no-store", signal: controller.signal })
-      .then(response => response.ok ? response.json() : null)
-      .then(data => { if (data?.balance && typeof data.balance === "object") balanceRef.current = data.balance; })
-      .catch(() => {});
-    return () => controller.abort();
+    let latestRequest = 0;
+    const refresh = () => {
+      const request = ++latestRequest;
+      fetch("/api/fighter-balance", { cache: "no-store", signal: controller.signal })
+        .then(response => response.ok ? response.json() : null)
+        .then(data => { if (request === latestRequest && data?.balance && typeof data.balance === "object") balanceRef.current = data.balance; })
+        .catch(() => {});
+    };
+    const onVisible = () => { if (document.visibilityState === "visible") refresh(); };
+    refresh();
+    window.addEventListener("focus", refresh);
+    document.addEventListener("visibilitychange", onVisible);
+    const timer = window.setInterval(onVisible, 15000);
+    return () => {
+      controller.abort();
+      window.removeEventListener("focus", refresh);
+      document.removeEventListener("visibilitychange", onVisible);
+      window.clearInterval(timer);
+    };
   }, []);
   const balanceFactor = (fighter: string, stat: "speed" | "power" | "defense") => {
-    const value = balanceRef.current[fighter]?.[stat];
-    return typeof value === "number" && Number.isFinite(value) ? Math.max(.5, Math.min(1.5, value / 100)) : 1;
+    return fighterBalanceFactor(balanceRef.current, fighter, stat);
   };
   const [onlineOpen, setOnlineOpen] = useState(false);
   useEffect(() => {
@@ -1585,7 +1599,8 @@ function Home() {
       const extendedNewKick = normalMove === "kick" && ["borja", "bacora", "bonviure", "elchica", "ogalla"].includes(fighter);
       const baseActionDuration = isSuper ? 1400 : level > 0 ? (level === 2 ? 980 : 820) : normalMove === "kick" ? (extendedNewKick ? 760 : 620) : 480;
       const passiveSpeed = (passive === "rhythmRush" && level === 0) ? .8 : (passive === "quickTrigger" && level > 0 && !isSuper) ? .75 : 1;
-      const actionDuration = Math.round((!isSuper && fighter === "xuso" && level > 0 ? (level === 2 ? 1400 : 1200) : baseActionDuration) * passiveSpeed);
+      const originalDuration = Math.round((!isSuper && fighter === "xuso" && level > 0 ? (level === 2 ? 1400 : 1200) : baseActionDuration) * passiveSpeed);
+      const actionDuration = level === 0 ? normalAttackDuration(originalDuration, balanceFactor(fighter, "speed")) : originalDuration;
       cooldownRef.current[side] = now + actionDuration;
       // Normals connect sooner than before so the controls feel snappy.
       const impactDelay = Math.round(actionDuration * (isSuper ? .62 : fighter === "xuso" && level > 0 ? (level === 2 ? .51 : .44) : fighter === "tonimassama" && level > 0 ? (level === 2 ? .56 : .68) : level > 0 ? .38 : extendedNewKick ? .4 : normalMove === "punch" ? .34 : .42));
@@ -2293,7 +2308,10 @@ function Home() {
           const rivalX = side === "player" ? live.cpuX : live.playerX;
           const rivalAction = side === "player" ? live.cpuAction : live.playerAction;
           if (live.phase !== "fight" || Math.abs(rivalX - stop) > 9 || rivalAction === "block" || Date.now() < immuneUntilRef.current[target] || Date.now() < evadeUntilRef.current[target]) return;
-          applyExtraHit(side, target, 4, "normal");
+          const attacker = side === "player" ? selected : opponent;
+          const defender = side === "player" ? opponent : selected;
+          const dogDamage = Math.max(1, Math.round(4 * balanceFactor(attacker, "power") / balanceFactor(defender, "defense")));
+          applyExtraHit(side, target, dogDamage, "normal");
         }, 528);
         showPassive(side, "🐕 ¡SPOOKY MUERDE!");
       });

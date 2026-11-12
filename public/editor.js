@@ -125,7 +125,7 @@
     try {
       const response = await fetch("/api/fighter-balance", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ pin: editorSessionPin, balance: fighterBalance }) });
       if (!response.ok) throw new Error("No se ha podido guardar");
-      $("balance-status").textContent = "Ajustes guardados para todos. Recargad el juego antes de jugar.";
+      $("balance-status").textContent = "Ajustes guardados para todos. Al volver al juego se actualizan automáticamente; si no hay conexión, vuelve a intentarlo.";
     } catch { $("balance-status").textContent = "No se han guardado los cambios. Comprueba la conexión e inténtalo otra vez."; }
     finally { $("balance-save").disabled = false; }
   });
