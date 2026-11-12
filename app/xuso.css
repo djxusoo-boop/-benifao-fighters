@@ -8,7 +8,7 @@
 
 /* Idle breathes through its 4 frames; walk, run, getup and victory are animated too. */
 #game .fighter.motion-rig.xuso .fighter-pose .fighter-art.xuso,
-#game .fighter.motion-rig.xuso.idle .fighter-pose .fighter-art.xuso { background-image:url('/assets/new-fighters/xuso-v3/xuso-reposo-01.webp')!important; animation:xuso-v3-idle 1300ms steps(1,end) infinite!important; }
+#game .fighter.motion-rig.xuso.idle .fighter-pose .fighter-art.xuso { background-image:url('/assets/new-fighters/xuso-v3/xuso-punio-01.webp')!important; animation:none!important; }
 #game .fighter.motion-rig.xuso.walk .fighter-pose .fighter-art.xuso,
 #game .fighter.motion-rig.xuso.walk.stride-alt .fighter-pose .fighter-art.xuso { background-image:url('/assets/new-fighters/xuso-v3/xuso-caminar-01.webp')!important; animation:xuso-v3-walk 620ms steps(1,end) infinite!important; }
 #game .fighter.motion-rig.xuso.dash .fighter-pose .fighter-art.xuso { background-image:url('/assets/new-fighters/xuso-v3/xuso-correr-01.webp')!important; animation:xuso-v3-run 420ms steps(1,end) infinite!important; }
@@ -90,33 +90,45 @@
 .arena .dog-special .move-callout { position:absolute; top:22%; left:50%; translate:-50% 0; }
 .arena .dog-special .dog-runner {
   position:absolute; bottom:5.5%; left:var(--dog-from);
-  width:clamp(96px,17vh,170px); aspect-ratio:307/283; translate:-50% 0;
-  animation:dog-run-to 820ms cubic-bezier(.3,.1,.4,1) forwards;
+  width:var(--dogw); aspect-ratio:307/283; transform:translateX(-50%);
+  animation:dog-run-to 1200ms ease-in-out forwards;
 }
-.arena .dog-special.dog-howl .dog-runner { animation-duration:980ms; animation-name:dog-run-to-pee; }
-.arena .dog-special.toward-left .dog-runner { scale:-1 1; }
+.arena .dog-special.dog-howl .dog-runner { animation-duration:1400ms; animation-name:dog-run-to-pee; }
+.arena .dog-special.toward-left .dog-runner { transform:translateX(-50%) scaleX(-1); }
 .arena .dog-special .dog-body { position:absolute; inset:0; display:block; }
-.arena .dog-special .dog-sprite { position:absolute; inset:0; display:block; background:no-repeat center bottom / contain; filter:drop-shadow(0 6px 6px rgba(0,0,0,.6)); }
-.arena .dog-special.dog-dog .dog-sprite { animation:dog-bite-frames 820ms steps(1,end) forwards; }
-.arena .dog-special.dog-howl .dog-sprite { animation:dog-pee-frames 980ms steps(1,end) forwards; }
+.arena .dog-special .dog-sprite { position:absolute; inset:0; display:block; background:url('/assets/new-fighters/xuso-v3/perro-correr-01.webp') no-repeat center bottom / contain; filter:drop-shadow(0 6px 6px rgba(0,0,0,.6)); }
+.arena .dog-special.dog-dog .dog-sprite { animation:dog-bite-frames 1200ms steps(1,end) forwards; }
+.arena .dog-special.dog-howl .dog-sprite { animation:dog-pee-frames 1400ms steps(1,end) forwards; }
 /* For the pee he turns his back to the rival. */
-.arena .dog-special.dog-howl .dog-body { animation:dog-turn-away 980ms steps(1,end) forwards; }
+.arena .dog-special.dog-howl .dog-body { animation:dog-turn-away 1400ms steps(1,end) forwards; }
+.arena .dog-special.dog-dog .dog-body { animation:dog-turn-home 1200ms steps(1,end) forwards; }
 /* The stream starts at the lifted hind leg (hip ~38% of the dog's height,
    14% of its width behind the centre) and lands on the rival's feet. */
-.arena .dog-special { --dogw:clamp(96px,17vh,170px); }
+.arena .dog-special { --dogw:clamp(42px,9vw,115px); --doghip:clamp(6px,1.26vw,16px); --dog-stream-height:clamp(19px,4.05vw,52px); }
 .arena .dog-special .dog-runner { width:var(--dogw)!important; }
 .arena .dog-special .dog-pee {
-  position:absolute; bottom:5.5%; height:calc(var(--dogw) * .45); opacity:0;
-  left:calc(var(--dog-to) + var(--dogw) * .14);
-  width:calc(var(--pee-len) - var(--dogw) * .14);
+  position:absolute; bottom:5.5%; height:var(--dog-stream-height); opacity:0;
+  left:calc(var(--dog-to) + var(--doghip));
+  width:max(0px,calc(var(--pee-len) - var(--doghip)));
   background:no-repeat 0 0 / 100% 100%;
   filter:drop-shadow(0 0 3px rgba(255,220,80,.55));
-  animation:dog-pee-stream 980ms steps(1,end) forwards;
+  animation:dog-pee-stream 1400ms steps(1,end) forwards;
 }
-.arena .dog-special.toward-left .dog-pee { left:auto; right:calc(100% - var(--dog-to) + var(--dogw) * .14); scale:-1 1; }
-@keyframes dog-run-to { 0% { left:var(--dog-from); } 36%,100% { left:var(--dog-to); } }
-@keyframes dog-run-to-pee { 0% { left:var(--dog-from); } 34%,100% { left:var(--dog-to); } }
-@keyframes dog-turn-away { 0%,37.9% { scale:1 1; } 38%,100% { scale:-1 1; } }
+.arena .dog-special.toward-left .dog-pee { left:auto; right:calc(100% - var(--dog-to) + var(--doghip)); transform:scaleX(-1); }
+@keyframes dog-run-to { 0% { left:var(--dog-from); opacity:0; } 8% { opacity:1; } 36%,76% { left:var(--dog-to); opacity:1; } 100% { left:var(--dog-from); opacity:0; } }
+@keyframes dog-run-to-pee { 0% { left:var(--dog-from); opacity:0; } 8% { opacity:1; } 34%,84% { left:var(--dog-to); opacity:1; } 100% { left:var(--dog-from); opacity:0; } }
+@keyframes dog-turn-away { 0%,37.9% { transform:scaleX(1); } 38%,100% { transform:scaleX(-1); } }
+@keyframes dog-turn-home { 0%,75.9% { transform:scaleX(1); } 76%,100% { transform:scaleX(-1); } }
+
+/* Keep the gameplay cue visible when iOS requests reduced motion. */
+@media (prefers-reduced-motion: reduce) {
+  .arena .dog-special .dog-runner { animation:none!important; left:var(--dog-to); opacity:1; }
+  .arena .dog-special .dog-body, .arena .dog-special .dog-sprite { animation:none!important; }
+  .arena .dog-special.dog-dog .dog-sprite { background-image:url('/assets/new-fighters/xuso-v3/perro-mordisco-05.webp'); }
+  .arena .dog-special.dog-howl .dog-sprite { background-image:url('/assets/new-fighters/xuso-v3/perro-pata-arriba.webp'); }
+  .arena .dog-special.dog-howl .dog-body { transform:scaleX(-1); }
+  .arena .dog-special.dog-howl .dog-pee { animation:none!important; opacity:1; background-image:url('/assets/new-fighters/xuso-v3/meada-2.webp'); }
+}
 @keyframes dog-bite-frames {
   0%,8.9% { background-image:url('/assets/new-fighters/xuso-v3/perro-correr-01.webp'); }
   9%,17.9% { background-image:url('/assets/new-fighters/xuso-v3/perro-correr-02.webp'); }
@@ -126,8 +138,10 @@
   44%,51.9% { background-image:url('/assets/new-fighters/xuso-v3/perro-mordisco-04.webp'); }
   52%,63.9% { background-image:url('/assets/new-fighters/xuso-v3/perro-mordisco-05.webp'); }
   64%,73.9% { background-image:url('/assets/new-fighters/xuso-v3/perro-mordisco-06.webp'); }
-  74%,85.9% { background-image:url('/assets/new-fighters/xuso-v3/perro-mordisco-07.webp'); }
-  86%,100% { background-image:url('/assets/new-fighters/xuso-v3/perro-mordisco-08.webp'); }
+  74%,75.9% { background-image:url('/assets/new-fighters/xuso-v3/perro-mordisco-07.webp'); }
+  76%,83.9% { background-image:url('/assets/new-fighters/xuso-v3/perro-correr-01.webp'); }
+  84%,91.9% { background-image:url('/assets/new-fighters/xuso-v3/perro-correr-02.webp'); }
+  92%,100% { background-image:url('/assets/new-fighters/xuso-v3/perro-correr-03.webp'); }
 }
 @keyframes dog-pee-frames {
   0%,8.9% { background-image:url('/assets/new-fighters/xuso-v3/perro-correr-01.webp'); }
@@ -135,19 +149,24 @@
   18%,26.9% { background-image:url('/assets/new-fighters/xuso-v3/perro-correr-03.webp'); }
   27%,37.9% { background-image:url('/assets/new-fighters/xuso-v3/perro-correr-04.webp'); }
   38%,43.9% { background-image:url('/assets/new-fighters/xuso-v3/perro-alerta.webp'); }
-  44%,92.9% { background-image:url('/assets/new-fighters/xuso-v3/perro-pata-arriba.webp'); }
-  93%,100% { background-image:url('/assets/new-fighters/xuso-v3/perro-alerta.webp'); }
+  44%,83.9% { background-image:url('/assets/new-fighters/xuso-v3/perro-pata-arriba.webp'); }
+  84%,91.9% { background-image:url('/assets/new-fighters/xuso-v3/perro-correr-01.webp'); }
+  92%,100% { background-image:url('/assets/new-fighters/xuso-v3/perro-correr-02.webp'); }
 }
 @keyframes dog-pee-stream {
   0%,45.9% { opacity:0; background-image:url('/assets/new-fighters/xuso-v3/meada-1.webp'); }
   46%,59.9% { opacity:1; background-image:url('/assets/new-fighters/xuso-v3/meada-1.webp'); }
   60%,73.9% { opacity:1; background-image:url('/assets/new-fighters/xuso-v3/meada-2.webp'); }
-  74%,89.9% { opacity:1; background-image:url('/assets/new-fighters/xuso-v3/meada-3.webp'); }
-  90%,100% { opacity:0; background-image:url('/assets/new-fighters/xuso-v3/meada-3.webp'); }
+  74%,82.9% { opacity:1; background-image:url('/assets/new-fighters/xuso-v3/meada-3.webp'); }
+  83%,100% { opacity:0; background-image:url('/assets/new-fighters/xuso-v3/meada-3.webp'); }
 }
 
 /* SUPER: the companion is a giant Spooky with his jaws wide open */
 .arena .super-companion > i[style*="/supers/xuso/"] { filter:drop-shadow(0 0 22px rgba(255,60,60,.65)) drop-shadow(0 10px 14px rgba(0,0,0,.7)); }
+@media (max-width: 900px), (max-height: 500px) {
+  .arena .dog-special .move-callout { font-size:clamp(12px,3vw,19px); max-width:80%; text-align:center; }
+  .arena .super-companion > i[style*="/supers/xuso/"] { height:65%!important; }
+}
 
 /* Lobby card, dossier and victory dance use the new design */
 .portrait.xuso, .result-dancer-art.xuso { background-image:url('/assets/new-fighters/xuso-v3/diseno.webp')!important; mix-blend-mode:normal!important; }
@@ -176,3 +195,13 @@
 #game .orb-hero.xuso.orb-defeated .fighter-art.xuso { background-image:url('/assets/new-fighters/xuso-v3/xuso-derrotado.webp')!important; }
 #game .orb-hero.xuso.orb-victory-dance .fighter-art.xuso { background-image:url('/assets/new-fighters/xuso-v3/xuso-victoria-03.webp')!important; }
 #game .orb-hero.xuso .fighter-art.xuso.face-left { transform:scaleX(-1); }
+
+/* Preserve Xuso’s combat stance and advance the walk drawings with the game clock. */
+#game .fighter.motion-rig.xuso.walk.walk-frame-0 .fighter-pose .fighter-art.xuso { background-image:url('/assets/new-fighters/xuso-v3/xuso-caminar-01.webp')!important; animation:none!important; }
+#game .fighter.motion-rig.xuso.dash.walk-frame-0 .fighter-pose .fighter-art.xuso { background-image:url('/assets/new-fighters/xuso-v3/xuso-correr-01.webp')!important; animation:none!important; }
+#game .fighter.motion-rig.xuso.walk.walk-frame-1 .fighter-pose .fighter-art.xuso { background-image:url('/assets/new-fighters/xuso-v3/xuso-caminar-02.webp')!important; animation:none!important; }
+#game .fighter.motion-rig.xuso.dash.walk-frame-1 .fighter-pose .fighter-art.xuso { background-image:url('/assets/new-fighters/xuso-v3/xuso-correr-02.webp')!important; animation:none!important; }
+#game .fighter.motion-rig.xuso.walk.walk-frame-2 .fighter-pose .fighter-art.xuso { background-image:url('/assets/new-fighters/xuso-v3/xuso-caminar-03.webp')!important; animation:none!important; }
+#game .fighter.motion-rig.xuso.dash.walk-frame-2 .fighter-pose .fighter-art.xuso { background-image:url('/assets/new-fighters/xuso-v3/xuso-correr-03.webp')!important; animation:none!important; }
+#game .fighter.motion-rig.xuso.walk.walk-frame-3 .fighter-pose .fighter-art.xuso { background-image:url('/assets/new-fighters/xuso-v3/xuso-caminar-04.webp')!important; animation:none!important; }
+#game .fighter.motion-rig.xuso.dash.walk-frame-3 .fighter-pose .fighter-art.xuso { background-image:url('/assets/new-fighters/xuso-v3/xuso-correr-04.webp')!important; animation:none!important; }

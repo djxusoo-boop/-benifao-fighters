@@ -5,7 +5,7 @@ import type { PointerEvent as ReactPointerEvent } from "react";
 import ArcadeCrowd, { type CrowdCue } from "./ArcadeCrowd";
 import TouchStick from "./TouchStick";
 
-type FighterId = "maletilla" | "vanessa" | "josevictor" | "cristian" | "cesaret" | "borja" | "bacora" | "bonviure" | "elchica" | "ogalla" | "xuso" | "bomba" | "rafeta" | "tonimassama" | "nova" | "estefy";
+type FighterId = "maletilla" | "vanessa" | "josevictor" | "cristian" | "cesaret" | "borja" | "bacora" | "bonviure" | "elchica" | "ogalla" | "xuso" | "bomba" | "rafeta" | "tonimassama" | "nova" | "estefy" | "mad-dog" | "angerfist" | "dalmau";
 type AdventureStatus = "map" | "playing" | "level-complete" | "won" | "lost";
 type HeroPose = "idle" | "walkA" | "walkB" | "walkC" | "walkD" | "walkE" | "crouch" | "rise" | "fire" | "heavyFire" | "kick" | "hit";
 type EnemyKind = "walker" | "runner" | "heavy" | "hopper" | "shooter" | "flyer" | "charger" | "miniboss" | "boss";
@@ -472,6 +472,9 @@ const atlasHeroPoses = (asset: string): Record<HeroPose, string> => ({
 });
 
 const HERO_POSE_ASSETS: Record<FighterId, Record<HeroPose, string>> = {
+  "mad-dog": {idle: "/assets/new-fighters/mad-dog-cap-v1/combat-01.png", walkA: "/assets/new-fighters/mad-dog-cap-v1/move-04.png", walkB: "/assets/new-fighters/mad-dog-cap-v1/move-05.png", walkC: "/assets/new-fighters/mad-dog-cap-v1/move-06.png", walkD: "/assets/new-fighters/mad-dog-cap-v1/move-07.png", walkE: "/assets/new-fighters/mad-dog-cap-v1/move-04.png", crouch: "/assets/new-fighters/mad-dog-cap-v1/move-10.png", rise: "/assets/new-fighters/mad-dog-cap-v1/move-13.png", fire: "/assets/new-fighters/mad-dog-cap-v1/combat-02.png", heavyFire: "/assets/new-fighters/mad-dog-cap-v1/combat-05.png", kick: "/assets/new-fighters/mad-dog-cap-v1/combat-08.png", hit: "/assets/new-fighters/mad-dog-cap-v1/combat-15.png" },
+  "angerfist": {idle: "/assets/new-fighters/angerfist-draft/combat-01.png", walkA: "/assets/new-fighters/angerfist-draft/move-04.png", walkB: "/assets/new-fighters/angerfist-draft/move-05.png", walkC: "/assets/new-fighters/angerfist-draft/move-06.png", walkD: "/assets/new-fighters/angerfist-draft/move-07.png", walkE: "/assets/new-fighters/angerfist-draft/move-04.png", crouch: "/assets/new-fighters/angerfist-draft/move-10.png", rise: "/assets/new-fighters/angerfist-draft/move-13.png", fire: "/assets/new-fighters/angerfist-draft/combat-04.png", heavyFire: "/assets/new-fighters/angerfist-draft/combat-07.png", kick: "/assets/new-fighters/angerfist-draft/combat-10.png", hit: "/assets/new-fighters/angerfist-draft/combat-12.png" },
+  "dalmau": {idle: "/assets/new-fighters/dalmau-draft/combat-01.png", walkA: "/assets/new-fighters/dalmau-draft/move-05.png", walkB: "/assets/new-fighters/dalmau-draft/move-06.png", walkC: "/assets/new-fighters/dalmau-draft/move-07.png", walkD: "/assets/new-fighters/dalmau-draft/move-08.png", walkE: "/assets/new-fighters/dalmau-draft/move-05.png", crouch: "/assets/new-fighters/dalmau-draft/move-16.png", rise: "/assets/new-fighters/dalmau-draft/move-12.png", fire: "/assets/new-fighters/dalmau-draft/combat-04.png", heavyFire: "/assets/new-fighters/dalmau-draft/combat-07.png", kick: "/assets/new-fighters/dalmau-draft/combat-10.png", hit: "/assets/new-fighters/dalmau-draft/combat-12.png" },
   xuso: {
     idle: "/assets/new-fighters/xuso-v3/xuso-reposo-01.webp", walkA: "/assets/new-fighters/xuso-v3/xuso-caminar-01.webp", walkB: "/assets/new-fighters/xuso-v3/xuso-caminar-02.webp",
     walkC: "/assets/new-fighters/xuso-v3/xuso-caminar-03.webp", walkD: "/assets/new-fighters/xuso-v3/xuso-caminar-04.webp", walkE: "/assets/new-fighters/xuso-v3/xuso-caminar-02.webp",

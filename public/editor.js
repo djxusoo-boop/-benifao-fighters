@@ -11,6 +11,7 @@
     portraitUrls: {}, modeNames: {}, modeSubtitles: {}, labels: {}, styleOverrides: {}, placements: {}, textStyles: {}, fighterOrder: [], modeOrder: [],
   };
   const fighters = [
+    ["mad-dog", "MAD DOG", ""], ["angerfist", "ANGERFIST", ""], ["dalmau", "DALMAU", ""],
     ["maletilla", "MALETILLA", "EL AMO DEL RUIDO"], ["vanessa", "VANESSA", "HARDCORE GIRL"],
     ["josevictor", "JOSEVICTOR", "EL REY DEL BILLETE"], ["cristian", "CRISTIAN", "EL DIOS DE LAS MEZCLAS"],
     ["borja", "BORJA", "EL DOMADOR DEL SAPO"], ["bacora", "BACORA", "EL GUARDIÁN DE LA W"],
@@ -103,6 +104,31 @@
   let selection = null;
   let pointer = null;
   let editorSessionPin = "";
+  let fighterBalance = {};
+  const balanceFields = ["speed", "power", "defense"];
+  fighters.forEach(([id, name]) => { const option = document.createElement("option"); option.value = id; option.textContent = name; $("balance-fighter").append(option); });
+  function showBalance() {
+    const values = fighterBalance[$("balance-fighter").value] || {};
+    balanceFields.forEach((field) => { const value = values[field] ?? 100; $(`balance-${field}`).value = value; $(`balance-${field}-output`).textContent = `${value} %`; });
+  }
+  $("balance-fighter").addEventListener("change", showBalance);
+  balanceFields.forEach((field) => $(`balance-${field}`).addEventListener("input", () => {
+    const id = $("balance-fighter").value;
+    fighterBalance[id] = fighterBalance[id] || { speed: 100, power: 100, defense: 100 };
+    fighterBalance[id][field] = Number($(`balance-${field}`).value);
+    $(`balance-${field}-output`).textContent = `${fighterBalance[id][field]} %`;
+    $("balance-status").textContent = "Cambios pendientes de guardar.";
+  }));
+  $("balance-reset").addEventListener("click", () => { delete fighterBalance[$("balance-fighter").value]; showBalance(); $("balance-status").textContent = "Valores originales recuperados. Guarda para aplicarlos."; });
+  $("balance-save").addEventListener("click", async () => {
+    $("balance-save").disabled = true;
+    try {
+      const response = await fetch("/api/fighter-balance", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ pin: editorSessionPin, balance: fighterBalance }) });
+      if (!response.ok) throw new Error("No se ha podido guardar");
+      $("balance-status").textContent = "Ajustes guardados para todos. Recargad el juego antes de jugar.";
+    } catch { $("balance-status").textContent = "No se han guardado los cambios. Comprueba la conexión e inténtalo otra vez."; }
+    finally { $("balance-save").disabled = false; }
+  });
   let history = [];
   let historyIndex = -1;
   function syncHistory() {
@@ -346,6 +372,11 @@
       $("pin-error").hidden = false; $("pin").value = ""; $("pin").focus(); return;
     }
     editorSessionPin = enteredPin;
+    try {
+      const response = await fetch("/api/fighter-balance", { cache: "no-store" });
+      if (!response.ok) throw new Error("Sin conexión");
+      const data = await response.json(); fighterBalance = data.balance || {}; showBalance();
+    } catch { $("balance-save").disabled = true; $("balance-status").textContent = "No se han podido cargar los ajustes; vuelve a abrir el editor con conexión."; }
     $("pin-error").hidden = true; $("pin").value = "";
     const hasSaved = Boolean(localStorage.getItem(storageKey));
     const saved = readSaved();

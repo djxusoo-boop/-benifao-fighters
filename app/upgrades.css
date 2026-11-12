@@ -1105,6 +1105,14 @@ html:fullscreen .game-shell, html:-webkit-full-screen .game-shell { min-height: 
 /* ===== V2.30.2 Toni Massama's flying peineta: the round TM ring logo ===== */
 .arena .special-fx.fx-fingerPeinetas .fx-unit { width:clamp(46px,5vw,70px)!important; height:clamp(46px,5vw,70px)!important; }
 .arena .special-fx.fx-fingerPeinetas .fx-unit img { width:100%!important; height:100%!important; object-fit:contain; border-radius:50%; filter:drop-shadow(0 0 10px rgba(255,205,70,.85)) drop-shadow(3px 5px 4px rgba(0,0,0,.7))!important; animation:tm-logo-spin 900ms linear infinite; }
+.arena .special-fx.fx-fingerPeinetas .fx-unit { animation-name:tonimassama-peineta-flight!important; }
+@keyframes tonimassama-peineta-flight {
+  0% { opacity:0; transform:translate(0, 0) scale(.5) rotate(0deg); }
+  12% { opacity:1; }
+  45% { opacity:1; transform:translate(var(--fx-half), -48px) scale(.85) rotate(180deg); }
+  80% { opacity:1; transform:translate(var(--fx-travel), 0) scale(1) rotate(360deg); }
+  100% { opacity:0; transform:translate(var(--fx-travel), 0) scale(.8) rotate(450deg); }
+}
 @keyframes tm-logo-spin { from { rotate:-14deg; } 50% { rotate:14deg; } to { rotate:-14deg; } }
 
 /* ===== V2.30.3 Cooperativa: jump and dodge live on the stick; only the attacks stay on the right ===== */
@@ -1112,3 +1120,40 @@ html:fullscreen .game-shell, html:-webkit-full-screen .game-shell { min-height: 
 #game .coop-mode .coop-touch .coop-touch-actions button { width:clamp(78px,10vw,96px)!important; height:clamp(78px,10vw,96px)!important; font-size:28px!important; border-width:3px!important; }
 #game .coop-mode .coop-touch .coop-touch-actions button i { font-size:9px!important; letter-spacing:.06em; margin-top:2px; }
 #game .coop-mode .coop-touch .coop-touch-actions button:last-child { translate:0 -22px; }
+
+/* El ordenador usa la misma secuencia del selector vertical del teléfono. */
+.lobby-v220 .lobby-online-panel {
+  width: min(100%, 640px);
+  justify-self: center;
+  gap: 12px;
+  padding: 14px 18px;
+  border: 1px solid #60c8b2;
+  background: linear-gradient(135deg, #102c36, #091720);
+  box-shadow: 0 0 20px rgba(71, 220, 177, .15);
+}
+.lobby-v220 .online-count-prominent {
+  color: #caffdf;
+  font-size: clamp(18px, 2vw, 25px);
+  text-align: center;
+}
+.lobby-v220 .lobby-online-panel button { min-height: 44px; font-size: 14px; }
+@media (max-width: 720px) {
+  .lobby-v220 .lobby-online-panel { justify-content: center; }
+  .lobby-v220 .online-count-prominent { font-size: 18px; }
+}
+@media (min-width: 1024px) and (orientation: landscape) {
+  .select-screen.lobby-v2168.lobby-v220:not(.lobby-editing) {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: "head" "roster" "showcase" "games" "footer";
+    max-width: 960px;
+    margin-inline: auto;
+  }
+  .lobby-v220 .lobby-heading { grid-template-columns: 1fr; justify-items: center; }
+  .lobby-v220 .lobby-heading-copy, .lobby-v220 .lobby-prison-mark { grid-column: 1; justify-self: center; justify-items: center; }
+  .select-screen.lobby-v2168.lobby-v220:not([data-custom-columns="true"]) .character-cards { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
+  .select-screen.lobby-v2168.lobby-v220:not([data-custom-height="true"]) .character-card { height: 206px !important; }
+  .lobby-v220 .mode-start-actions { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+  .lobby-v220 .showcase-top, .lobby-v220 .showcase-bottom { grid-template-columns: 1fr; }
+  .lobby-v220 .showcase-portrait { min-height: 220px; }
+  .lobby-v220 .showcase-identity { text-align: left; padding: 12px; }
+}

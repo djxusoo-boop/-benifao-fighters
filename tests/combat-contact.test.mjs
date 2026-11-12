@@ -38,6 +38,13 @@ test("ranged and extended new-fighter specials reach the visible opponent", () =
   assert.equal(fighterAttackRange(null, "kick"), 24);
   assert.equal(fighterAttackRange("shield", "punch", true), 77);
 });
+test("Toni's visible projectiles can reach across the full arena", () => {
+  for (const move of ["goldPistol", "fingerPeinetas"]) {
+    const range = fighterAttackRange(move, "punch");
+    assert.equal(combatContact({ ...base, distance: 90, range, normalPunch: false }), "hit");
+    assert.equal(combatContact({ ...base, distance: 90, range, normalPunch: false, evading: true }), "evaded");
+  }
+});
 test("evasion needs an attack in reach; crouching avoids punches but not kicks", () => {
   assert.equal(combatContact({ ...base, evading: true }), "evaded");
   assert.equal(combatContact({ ...base, evading: true, distance: 40 }), "miss");

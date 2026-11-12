@@ -1,12 +1,33 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { layoutViewport, protectPinchClicks } from "../app/viewport-guard.mjs";
+import { layoutViewport, preventLobbyPinch, protectPinchClicks } from "../app/viewport-guard.mjs";
 
 test("pinch zoom does not change device mode or shrink the game layout", () => {
   assert.deepEqual(layoutViewport(1024, 768, 768, 1, true, "auto"), { mobile: false, height: 768 });
   assert.deepEqual(layoutViewport(1024, 768, 384, 2, true, "auto"), { mobile: false, height: 768 });
   assert.deepEqual(layoutViewport(844, 390, 195, 2, true, "auto"), { mobile: true, height: 390 });
   assert.deepEqual(layoutViewport(1024, 768, 650, 1, true, "auto"), { mobile: false, height: 650 });
+});
+
+test("only lobby gesture zoom is cancelled and listeners are removed", () => {
+  const handlers = new Map();
+  let inLobby = true;
+  const target = {
+    querySelector: () => inLobby ? {} : null,
+    addEventListener: (name, handler) => handlers.set(name, handler),
+    removeEventListener: (name) => handlers.delete(name),
+  };
+  const dispose = preventLobbyPinch(target);
+  let prevented = 0;
+  const event = { cancelable: true, preventDefault: () => prevented++ };
+  handlers.get("gesturestart")(event);
+  handlers.get("gesturechange")(event);
+  assert.equal(prevented, 2);
+  inLobby = false;
+  handlers.get("gesturestart")(event);
+  assert.equal(prevented, 2);
+  dispose();
+  assert.equal(handlers.size, 0);
 });
 
 test("a pinch suppresses the ensuing click, while two game controls remain independent", () => {

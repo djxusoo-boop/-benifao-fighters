@@ -1,0 +1,143 @@
+/* Poses preparadas para los tres luchadores; no activa el selector. */
+#game .fighter.motion-rig.mad-dog { aspect-ratio: 400 / 360; }
+#game .fighter.motion-rig.mad-dog .fighter-pose .fighter-art { background:url("/assets/new-fighters/mad-dog-cap-v1/combat-01.png") center bottom / contain no-repeat!important; animation:none!important; }
+#game .fighter.motion-rig.mad-dog.crouch .fighter-pose .fighter-art { background-image:url("/assets/new-fighters/mad-dog-cap-v1/move-10.png")!important; animation:none!important; }
+#game .fighter.motion-rig.mad-dog.jump .fighter-pose .fighter-art { background-image:url("/assets/new-fighters/mad-dog-cap-v1/move-13.png")!important; animation:none!important; }
+#game .fighter.motion-rig.mad-dog.block .fighter-pose .fighter-art { background-image:url("/assets/new-fighters/mad-dog-cap-v1/combat-13.png")!important; animation:none!important; }
+#game .fighter.motion-rig.mad-dog.hit .fighter-pose .fighter-art { background-image:url("/assets/new-fighters/mad-dog-cap-v1/combat-15.png")!important; animation:none!important; }
+#game .fighter.motion-rig.mad-dog.getup .fighter-pose .fighter-art { background-image:url("/assets/new-fighters/mad-dog-cap-v1/combat-18.png")!important; animation:none!important; }
+#game .fighter.motion-rig.mad-dog.knockdown .fighter-pose .fighter-art { background-image:url("/assets/new-fighters/mad-dog-cap-v1/combat-17.png")!important; animation:none!important; }
+#game .fighter.motion-rig.mad-dog.defeated .fighter-pose .fighter-art { background-image:url("/assets/new-fighters/mad-dog-cap-v1/combat-17.png")!important; animation:none!important; }
+#game .fighter.motion-rig.mad-dog.launched .fighter-pose .fighter-art { background-image:url("/assets/new-fighters/mad-dog-cap-v1/combat-17.png")!important; animation:none!important; }
+#game .fighter.motion-rig.mad-dog.winner-dance .fighter-pose .fighter-art { background-image:url("/assets/new-fighters/mad-dog-cap-v1/combat-20.png")!important; animation:none!important; }
+#game .fighter.motion-rig.mad-dog.punch.pose-phase-0 .fighter-pose .fighter-art { background-image:url("/assets/new-fighters/mad-dog-cap-v1/combat-01.png")!important; animation:none!important; }
+#game .fighter.motion-rig.mad-dog.punch.pose-phase-1 .fighter-pose .fighter-art { background-image:url("/assets/new-fighters/mad-dog-cap-v1/combat-01.png")!important; animation:none!important; }
+#game .fighter.motion-rig.mad-dog.punch.pose-phase-2 .fighter-pose .fighter-art { background-image:url("/assets/new-fighters/mad-dog-cap-v1/combat-02.png")!important; animation:none!important; }
+#game .fighter.motion-rig.mad-dog.punch.pose-phase-3 .fighter-pose .fighter-art { background-image:url("/assets/new-fighters/mad-dog-cap-v1/combat-02.png")!important; animation:none!important; }
+#game .fighter.motion-rig.mad-dog.punch.pose-phase-4 .fighter-pose .fighter-art { background-image:url("/assets/new-fighters/mad-dog-cap-v1/combat-03.png")!important; animation:none!important; }
+#game .fighter.motion-rig.mad-dog.kick.pose-phase-0 .fighter-pose .fighter-art { background-image:url("/assets/new-fighters/mad-dog-cap-v1/combat-07.png")!important; animation:none!important; }
+#game .fighter.motion-rig.mad-dog.kick.pose-phase-1 .fighter-pose .fighter-art { background-image:url("/assets/new-fighters/mad-dog-cap-v1/combat-07.png")!important; animation:none!important; }
+#game .fighter.motion-rig.mad-dog.kick.pose-phase-2 .fighter-pose .fighter-art { background-image:url("/assets/new-fighters/mad-dog-cap-v1/combat-08.png")!important; animation:none!important; }
+#game .fighter.motion-rig.mad-dog.kick.pose-phase-3 .fighter-pose .fighter-art { background-image:url("/assets/new-fighters/mad-dog-cap-v1/combat-08.png")!important; animation:none!important; }
+#game .fighter.motion-rig.mad-dog.kick.pose-phase-4 .fighter-pose .fighter-art { background-image:url("/assets/new-fighters/mad-dog-cap-v1/combat-09.png")!important; animation:none!important; }
+#game .fighter.motion-rig.mad-dog.walk .fighter-pose .fighter-art, #game .fighter.motion-rig.mad-dog.dash .fighter-pose .fighter-art { animation:mad-dog-draft-walk 620ms steps(1,end) infinite!important; }
+@keyframes mad-dog-draft-walk {
+  0%, 24.9% { background-image:url("/assets/new-fighters/mad-dog-cap-v1/move-04.png"); }
+  25%, 49.9% { background-image:url("/assets/new-fighters/mad-dog-cap-v1/move-05.png"); }
+  50%, 74.9% { background-image:url("/assets/new-fighters/mad-dog-cap-v1/move-06.png"); }
+  75%, 99.9% { background-image:url("/assets/new-fighters/mad-dog-cap-v1/move-07.png"); }
+}
+.portrait.mad-dog { background-image:url("/assets/new-fighters/mad-dog-cap-v1/combat-01.png")!important; background-size:contain; background-position:center bottom; background-repeat:no-repeat; }
+#game .fighter.motion-rig.angerfist { aspect-ratio: 400 / 360; }
+#game .fighter.motion-rig.angerfist .fighter-pose .fighter-art { background:url("/assets/new-fighters/angerfist-draft/combat-01.png") center bottom / contain no-repeat!important; animation:none!important; }
+#game .fighter.motion-rig.angerfist.crouch .fighter-pose .fighter-art { background-image:url("/assets/new-fighters/angerfist-draft/move-10.png")!important; animation:none!important; }
+#game .fighter.motion-rig.angerfist.jump .fighter-pose .fighter-art { background-image:url("/assets/new-fighters/angerfist-draft/move-13.png")!important; animation:none!important; }
+#game .fighter.motion-rig.angerfist.block .fighter-pose .fighter-art { background-image:url("/assets/new-fighters/angerfist-draft/combat-02.png")!important; animation:none!important; }
+#game .fighter.motion-rig.angerfist.hit .fighter-pose .fighter-art { background-image:url("/assets/new-fighters/angerfist-draft/combat-12.png")!important; animation:none!important; }
+#game .fighter.motion-rig.angerfist.getup .fighter-pose .fighter-art { background-image:url("/assets/new-fighters/angerfist-draft/combat-15.png")!important; animation:none!important; }
+#game .fighter.motion-rig.angerfist.knockdown .fighter-pose .fighter-art { background-image:url("/assets/new-fighters/angerfist-draft/combat-14.png")!important; animation:none!important; }
+#game .fighter.motion-rig.angerfist.defeated .fighter-pose .fighter-art { background-image:url("/assets/new-fighters/angerfist-draft/combat-14.png")!important; animation:none!important; }
+#game .fighter.motion-rig.angerfist.launched .fighter-pose .fighter-art { background-image:url("/assets/new-fighters/angerfist-draft/combat-14.png")!important; animation:none!important; }
+#game .fighter.motion-rig.angerfist.winner-dance .fighter-pose .fighter-art { background-image:url("/assets/new-fighters/angerfist-draft/combat-16.png")!important; animation:none!important; }
+#game .fighter.motion-rig.angerfist.punch.pose-phase-0 .fighter-pose .fighter-art { background-image:url("/assets/new-fighters/angerfist-draft/combat-03.png")!important; animation:none!important; }
+#game .fighter.motion-rig.angerfist.punch.pose-phase-1 .fighter-pose .fighter-art { background-image:url("/assets/new-fighters/angerfist-draft/combat-03.png")!important; animation:none!important; }
+#game .fighter.motion-rig.angerfist.punch.pose-phase-2 .fighter-pose .fighter-art { background-image:url("/assets/new-fighters/angerfist-draft/combat-04.png")!important; animation:none!important; }
+#game .fighter.motion-rig.angerfist.punch.pose-phase-3 .fighter-pose .fighter-art { background-image:url("/assets/new-fighters/angerfist-draft/combat-04.png")!important; animation:none!important; }
+#game .fighter.motion-rig.angerfist.punch.pose-phase-4 .fighter-pose .fighter-art { background-image:url("/assets/new-fighters/angerfist-draft/combat-05.png")!important; animation:none!important; }
+#game .fighter.motion-rig.angerfist.kick.pose-phase-0 .fighter-pose .fighter-art { background-image:url("/assets/new-fighters/angerfist-draft/combat-09.png")!important; animation:none!important; }
+#game .fighter.motion-rig.angerfist.kick.pose-phase-1 .fighter-pose .fighter-art { background-image:url("/assets/new-fighters/angerfist-draft/combat-09.png")!important; animation:none!important; }
+#game .fighter.motion-rig.angerfist.kick.pose-phase-2 .fighter-pose .fighter-art { background-image:url("/assets/new-fighters/angerfist-draft/combat-10.png")!important; animation:none!important; }
+#game .fighter.motion-rig.angerfist.kick.pose-phase-3 .fighter-pose .fighter-art { background-image:url("/assets/new-fighters/angerfist-draft/combat-10.png")!important; animation:none!important; }
+#game .fighter.motion-rig.angerfist.kick.pose-phase-4 .fighter-pose .fighter-art { background-image:url("/assets/new-fighters/angerfist-draft/combat-11.png")!important; animation:none!important; }
+#game .fighter.motion-rig.angerfist.walk .fighter-pose .fighter-art, #game .fighter.motion-rig.angerfist.dash .fighter-pose .fighter-art { animation:angerfist-draft-walk 620ms steps(1,end) infinite!important; }
+@keyframes angerfist-draft-walk {
+  0%, 24.9% { background-image:url("/assets/new-fighters/angerfist-draft/move-04.png"); }
+  25%, 49.9% { background-image:url("/assets/new-fighters/angerfist-draft/move-05.png"); }
+  50%, 74.9% { background-image:url("/assets/new-fighters/angerfist-draft/move-06.png"); }
+  75%, 99.9% { background-image:url("/assets/new-fighters/angerfist-draft/move-07.png"); }
+}
+.portrait.angerfist { background-image:url("/assets/new-fighters/angerfist-draft/combat-01.png")!important; background-size:contain; background-position:center bottom; background-repeat:no-repeat; }
+#game .fighter.motion-rig.dalmau { aspect-ratio: 400 / 360; }
+#game .fighter.motion-rig.dalmau .fighter-pose .fighter-art { background:url("/assets/new-fighters/dalmau-draft/combat-01.png") center bottom / contain no-repeat!important; animation:none!important; }
+#game .fighter.motion-rig.dalmau.crouch .fighter-pose .fighter-art { background-image:url("/assets/new-fighters/dalmau-draft/move-16.png")!important; animation:none!important; }
+#game .fighter.motion-rig.dalmau.jump .fighter-pose .fighter-art { background-image:url("/assets/new-fighters/dalmau-draft/move-12.png")!important; animation:none!important; }
+#game .fighter.motion-rig.dalmau.block .fighter-pose .fighter-art { background-image:url("/assets/new-fighters/dalmau-draft/combat-01.png")!important; animation:none!important; }
+#game .fighter.motion-rig.dalmau.hit .fighter-pose .fighter-art { background-image:url("/assets/new-fighters/dalmau-draft/combat-12.png")!important; animation:none!important; }
+#game .fighter.motion-rig.dalmau.getup .fighter-pose .fighter-art { background-image:url("/assets/new-fighters/dalmau-draft/combat-15.png")!important; animation:none!important; }
+#game .fighter.motion-rig.dalmau.knockdown .fighter-pose .fighter-art { background-image:url("/assets/new-fighters/dalmau-draft/combat-14.png")!important; animation:none!important; }
+#game .fighter.motion-rig.dalmau.defeated .fighter-pose .fighter-art { background-image:url("/assets/new-fighters/dalmau-draft/combat-14.png")!important; animation:none!important; }
+#game .fighter.motion-rig.dalmau.launched .fighter-pose .fighter-art { background-image:url("/assets/new-fighters/dalmau-draft/combat-14.png")!important; animation:none!important; }
+#game .fighter.motion-rig.dalmau.winner-dance .fighter-pose .fighter-art { background-image:url("/assets/new-fighters/dalmau-draft/combat-01.png")!important; animation:none!important; }
+#game .fighter.motion-rig.dalmau.punch.pose-phase-0 .fighter-pose .fighter-art { background-image:url("/assets/new-fighters/dalmau-draft/combat-03.png")!important; animation:none!important; }
+#game .fighter.motion-rig.dalmau.punch.pose-phase-1 .fighter-pose .fighter-art { background-image:url("/assets/new-fighters/dalmau-draft/combat-03.png")!important; animation:none!important; }
+#game .fighter.motion-rig.dalmau.punch.pose-phase-2 .fighter-pose .fighter-art { background-image:url("/assets/new-fighters/dalmau-draft/combat-04.png")!important; animation:none!important; }
+#game .fighter.motion-rig.dalmau.punch.pose-phase-3 .fighter-pose .fighter-art { background-image:url("/assets/new-fighters/dalmau-draft/combat-04.png")!important; animation:none!important; }
+#game .fighter.motion-rig.dalmau.punch.pose-phase-4 .fighter-pose .fighter-art { background-image:url("/assets/new-fighters/dalmau-draft/combat-05.png")!important; animation:none!important; }
+#game .fighter.motion-rig.dalmau.kick.pose-phase-0 .fighter-pose .fighter-art { background-image:url("/assets/new-fighters/dalmau-draft/combat-09.png")!important; animation:none!important; }
+#game .fighter.motion-rig.dalmau.kick.pose-phase-1 .fighter-pose .fighter-art { background-image:url("/assets/new-fighters/dalmau-draft/combat-09.png")!important; animation:none!important; }
+#game .fighter.motion-rig.dalmau.kick.pose-phase-2 .fighter-pose .fighter-art { background-image:url("/assets/new-fighters/dalmau-draft/combat-10.png")!important; animation:none!important; }
+#game .fighter.motion-rig.dalmau.kick.pose-phase-3 .fighter-pose .fighter-art { background-image:url("/assets/new-fighters/dalmau-draft/combat-10.png")!important; animation:none!important; }
+#game .fighter.motion-rig.dalmau.kick.pose-phase-4 .fighter-pose .fighter-art { background-image:url("/assets/new-fighters/dalmau-draft/combat-11.png")!important; animation:none!important; }
+#game .fighter.motion-rig.dalmau.walk .fighter-pose .fighter-art, #game .fighter.motion-rig.dalmau.dash .fighter-pose .fighter-art { animation:dalmau-draft-walk 620ms steps(1,end) infinite!important; }
+@keyframes dalmau-draft-walk {
+  0%, 24.9% { background-image:url("/assets/new-fighters/dalmau-draft/move-05.png"); }
+  25%, 49.9% { background-image:url("/assets/new-fighters/dalmau-draft/move-06.png"); }
+  50%, 74.9% { background-image:url("/assets/new-fighters/dalmau-draft/move-07.png"); }
+  75%, 99.9% { background-image:url("/assets/new-fighters/dalmau-draft/move-08.png"); }
+}
+.portrait.dalmau { background-image:url("/assets/new-fighters/dalmau-draft/combat-01.png")!important; background-size:contain; background-position:center bottom; background-repeat:no-repeat; }
+
+#game .coop-player.mad-dog .coop-player-art, #game .orb-hero.mad-dog .fighter-art.mad-dog { background:url("/assets/new-fighters/mad-dog-cap-v1/combat-01.png") center bottom / contain no-repeat!important; animation:none!important; }
+#game .coop-player.mad-dog.walk .coop-player-art, #game .orb-hero.mad-dog.orb-moving .fighter-art.mad-dog { background-image:url("/assets/new-fighters/mad-dog-cap-v1/move-04.png")!important; }
+#game .coop-player.mad-dog:is(.fire,.special) .coop-player-art, #game .orb-hero.mad-dog.orb-firing .fighter-art.mad-dog { background-image:url("/assets/new-fighters/mad-dog-cap-v1/combat-02.png")!important; }
+#game .coop-player.mad-dog.hit .coop-player-art { background-image:url("/assets/new-fighters/mad-dog-cap-v1/combat-15.png")!important; }
+#game .coop-player.mad-dog:is(.down,.crouch) .coop-player-art { background-image:url("/assets/new-fighters/mad-dog-cap-v1/move-10.png")!important; }
+#game .coop-player.mad-dog.face-left .coop-player-art { transform:scaleX(-1); }
+
+#game .coop-player.angerfist .coop-player-art, #game .orb-hero.angerfist .fighter-art.angerfist { background:url("/assets/new-fighters/angerfist-draft/combat-01.png") center bottom / contain no-repeat!important; animation:none!important; }
+#game .coop-player.angerfist.walk .coop-player-art, #game .orb-hero.angerfist.orb-moving .fighter-art.angerfist { background-image:url("/assets/new-fighters/angerfist-draft/move-04.png")!important; }
+#game .coop-player.angerfist:is(.fire,.special) .coop-player-art, #game .orb-hero.angerfist.orb-firing .fighter-art.angerfist { background-image:url("/assets/new-fighters/angerfist-draft/combat-04.png")!important; }
+#game .coop-player.angerfist.hit .coop-player-art { background-image:url("/assets/new-fighters/angerfist-draft/combat-12.png")!important; }
+#game .coop-player.angerfist:is(.down,.crouch) .coop-player-art { background-image:url("/assets/new-fighters/angerfist-draft/move-10.png")!important; }
+#game .coop-player.angerfist.face-left .coop-player-art { transform:scaleX(-1); }
+
+#game .coop-player.dalmau .coop-player-art, #game .orb-hero.dalmau .fighter-art.dalmau { background:url("/assets/new-fighters/dalmau-draft/combat-01.png") center bottom / contain no-repeat!important; animation:none!important; }
+#game .coop-player.dalmau.walk .coop-player-art, #game .orb-hero.dalmau.orb-moving .fighter-art.dalmau { background-image:url("/assets/new-fighters/dalmau-draft/move-05.png")!important; }
+#game .coop-player.dalmau:is(.fire,.special) .coop-player-art, #game .orb-hero.dalmau.orb-firing .fighter-art.dalmau { background-image:url("/assets/new-fighters/dalmau-draft/combat-04.png")!important; }
+#game .coop-player.dalmau.hit .coop-player-art { background-image:url("/assets/new-fighters/dalmau-draft/combat-12.png")!important; }
+#game .coop-player.dalmau:is(.down,.crouch) .coop-player-art { background-image:url("/assets/new-fighters/dalmau-draft/move-16.png")!important; }
+#game .coop-player.dalmau.face-left .coop-player-art { transform:scaleX(-1); }
+/* The cuts have a wide transparent canvas: enlarge the artwork, not the hitbox. */
+#game .fighter.motion-rig:is(.mad-dog,.angerfist,.dalmau) .fighter-pose .fighter-art {
+  left: -33% !important;
+  width: 166% !important;
+  background-size: contain !important;
+}
+#game .fighter.motion-rig:is(.mad-dog,.angerfist,.dalmau) .fighter-art::before,
+#game .fighter.motion-rig:is(.mad-dog,.angerfist,.dalmau) .fighter-art::after { display:none!important; content:none!important; }
+/* The third combo step and the strong punch use the separate heavy-punch drawings. */
+#game .fighter.motion-rig.mad-dog.punch.combo-step-3:is(.pose-phase-0,.pose-phase-1) .fighter-pose .fighter-art { background-image:url('/assets/new-fighters/mad-dog-cap-v1/combat-04.png')!important; }
+#game .fighter.motion-rig.mad-dog.punch.combo-step-3:is(.pose-phase-2,.pose-phase-3) .fighter-pose .fighter-art { background-image:url('/assets/new-fighters/mad-dog-cap-v1/combat-05.png')!important; }
+#game .fighter.motion-rig.angerfist.punch.combo-step-3:is(.pose-phase-0,.pose-phase-1) .fighter-pose .fighter-art { background-image:url('/assets/new-fighters/angerfist-draft/combat-06.png')!important; }
+#game .fighter.motion-rig.angerfist.punch.combo-step-3:is(.pose-phase-2,.pose-phase-3) .fighter-pose .fighter-art { background-image:url('/assets/new-fighters/angerfist-draft/combat-07.png')!important; }
+#game .fighter.motion-rig.dalmau.punch.combo-step-3:is(.pose-phase-0,.pose-phase-1) .fighter-pose .fighter-art { background-image:url('/assets/new-fighters/dalmau-draft/combat-06.png')!important; }
+#game .fighter.motion-rig.dalmau.punch.combo-step-3:is(.pose-phase-2,.pose-phase-3) .fighter-pose .fighter-art { background-image:url('/assets/new-fighters/dalmau-draft/combat-07.png')!important; }
+/* The down and get-up drawings already show their posture; do not rotate them again. */
+#game .fighter.motion-rig:is(.mad-dog,.angerfist,.dalmau):is(.knockdown,.defeated,.launched,.getup) .fighter-motion { rotate:none!important; translate:none!important; }
+
+/* Drive full-body walk frames from the game clock, including on iOS. */
+#game .fighter.motion-rig.mad-dog:is(.walk,.dash) .fighter-pose .fighter-art { background-image:url('/assets/new-fighters/mad-dog-cap-v1/move-04.png')!important; }
+#game .fighter.motion-rig.angerfist:is(.walk,.dash) .fighter-pose .fighter-art { background-image:url('/assets/new-fighters/angerfist-draft/move-04.png')!important; }
+#game .fighter.motion-rig.dalmau:is(.walk,.dash) .fighter-pose .fighter-art { background-image:url('/assets/new-fighters/dalmau-draft/move-05.png')!important; }
+#game .fighter.motion-rig.mad-dog:is(.walk,.dash).walk-frame-0 .fighter-pose .fighter-art { background-image:url("/assets/new-fighters/mad-dog-cap-v1/move-04.png")!important; animation:none!important; }
+#game .fighter.motion-rig.mad-dog:is(.walk,.dash).walk-frame-1 .fighter-pose .fighter-art { background-image:url("/assets/new-fighters/mad-dog-cap-v1/move-05.png")!important; animation:none!important; }
+#game .fighter.motion-rig.mad-dog:is(.walk,.dash).walk-frame-2 .fighter-pose .fighter-art { background-image:url("/assets/new-fighters/mad-dog-cap-v1/move-06.png")!important; animation:none!important; }
+#game .fighter.motion-rig.mad-dog:is(.walk,.dash).walk-frame-3 .fighter-pose .fighter-art { background-image:url("/assets/new-fighters/mad-dog-cap-v1/move-07.png")!important; animation:none!important; }
+#game .fighter.motion-rig.angerfist:is(.walk,.dash).walk-frame-0 .fighter-pose .fighter-art { background-image:url("/assets/new-fighters/angerfist-draft/move-04.png")!important; animation:none!important; }
+#game .fighter.motion-rig.angerfist:is(.walk,.dash).walk-frame-1 .fighter-pose .fighter-art { background-image:url("/assets/new-fighters/angerfist-draft/move-05.png")!important; animation:none!important; }
+#game .fighter.motion-rig.angerfist:is(.walk,.dash).walk-frame-2 .fighter-pose .fighter-art { background-image:url("/assets/new-fighters/angerfist-draft/move-06.png")!important; animation:none!important; }
+#game .fighter.motion-rig.angerfist:is(.walk,.dash).walk-frame-3 .fighter-pose .fighter-art { background-image:url("/assets/new-fighters/angerfist-draft/move-07.png")!important; animation:none!important; }
+#game .fighter.motion-rig.dalmau:is(.walk,.dash).walk-frame-0 .fighter-pose .fighter-art { background-image:url("/assets/new-fighters/dalmau-draft/move-05.png")!important; animation:none!important; }
+#game .fighter.motion-rig.dalmau:is(.walk,.dash).walk-frame-1 .fighter-pose .fighter-art { background-image:url("/assets/new-fighters/dalmau-draft/move-06.png")!important; animation:none!important; }
+#game .fighter.motion-rig.dalmau:is(.walk,.dash).walk-frame-2 .fighter-pose .fighter-art { background-image:url("/assets/new-fighters/dalmau-draft/move-07.png")!important; animation:none!important; }
+#game .fighter.motion-rig.dalmau:is(.walk,.dash).walk-frame-3 .fighter-pose .fighter-art { background-image:url("/assets/new-fighters/dalmau-draft/move-08.png")!important; animation:none!important; }

@@ -2,20 +2,15 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 
-test("Paco El Bomba has planted three-stage sheets for punch, kick and hoe attacks", async () => {
-  const css = `${await readFile(new URL("../app/globals.css", import.meta.url), "utf8")}\n${await readFile(new URL("../app/pose-map.css", import.meta.url), "utf8")}`;
-  for (const move of ["punch", "kick", "hoe"]) {
-    const name = `bomba-${move}-strip-v21857.png`;
-    const png = await readFile(new URL(`../public/assets/new-fighters/${name}`, import.meta.url));
-    assert.equal(png.subarray(1, 4).toString(), "PNG", `${name} must be a PNG`);
-    assert.ok(png.readUInt32BE(16) > 1500 && png.readUInt32BE(20) > 650, `${name} needs three detailed frames`);
-    assert.equal(png[25], 6, `${name} must keep its transparent cutout`);
-    assert.ok(css.includes(name), `${name} must be used by the fight`);
+test("Paco El Bomba has separate attack and recovery images", async () => {
+  const css = await readFile(new URL("../app/pose-map.css", import.meta.url), "utf8");
+  for (const name of ["bomba-rig-v21847-recover.webp", "bomba-rig-v21847-punch.webp", "bomba-rig-v21847-kick.webp", "bomba-hoe-attack-v2.webp"]) {
+    const image = await readFile(new URL(`../public/assets/new-fighters/${name}`, import.meta.url));
+    assert.equal(image.subarray(0, 4).toString(), "RIFF", `${name} must be a readable WebP`);
+    assert.ok(css.includes(name), `${name} must be referenced by the fight`);
   }
-  assert.match(css, /bomba:is\(\.punch,\.kick,\.special\)\.pose-phase-2[\s\S]*?background-position:50% bottom!important/,
-    "the impact phase must use the middle frame");
-  assert.match(css, /bomba:is\(\.punch,\.kick,\.special\):is\(\.pose-phase-3,\.pose-phase-4\)[\s\S]*?background-position:100% bottom!important/,
-    "the final phase must use the grounded recovery frame");
+  assert.match(css, /bomba:is\(\.punch,\.kick,\.special\) \.fighter-pose \.fighter-art\.bomba \{ background-size:contain!important/,
+    "complete poses must not be stretched as sprite sheets");
 });
 
 test("new attack poses referenced by the fight exist as transparent PNGs", async () => {
@@ -122,6 +117,22 @@ test("new fighter walk cycles use walk art and preserve facing", async () => {
   assert.match(css, /@keyframes new-kick-root-right-v21835/);
   assert.match(css, /@keyframes new-kick-root-left-v21835/);
   assert.match(css, /\.arena \.fighter\.motion-rig\.kick:is\(\.borja,\.bacora,\.bonviure,\.elchica,\.ogalla\)\.face-left \.fighter-art \{ transform:scaleX\(-1\)!important; \}/);
+});
+
+test("four-frame transparent walk cycles are wired for Xuso and four more fighters", async () => {
+  const css = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
+  const page = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
+  for (const fighter of ["xuso", "bomba", "bacora", "bonviure", "elchica"]) {
+    const sprite = await readFile(new URL(`../public/assets/new-fighters/${fighter}-walk-cycle-v2357.webp`, import.meta.url));
+    assert.equal(sprite.toString("ascii", 0, 4), "RIFF", `${fighter} walk strip must be a valid WebP`);
+    assert.equal(sprite.toString("ascii", 8, 12), "WEBP", `${fighter} walk strip must be a valid WebP`);
+    assert.ok(sprite.length > 100_000, `${fighter} walk strip must contain the character frames`);
+    assert.ok(css.includes(`${fighter}-walk-cycle-v2357.webp`), `${fighter} walk strip must be wired into the game`);
+  }
+  assert.match(css, /\.walk-frame-1:is\(\.walk,\.dash\)[\s\S]*?background-position:33\.333% bottom!important/);
+  assert.match(css, /\.walk-frame-2:is\(\.walk,\.dash\)[\s\S]*?background-position:66\.667% bottom!important/);
+  assert.match(page, /Math\.floor\(now \/ \(playerGear === "stride" \? 105 : 145\)\) % 4/);
+  assert.match(page, /\.online-arena \.fighter\.motion-rig/);
 });
 
 test("new fighter scale stays close to the original roster, with Bonviure only slightly taller", async () => {

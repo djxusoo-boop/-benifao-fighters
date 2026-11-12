@@ -43,8 +43,6 @@
 #game .fighter.motion-rig.estefy.special.leafStorm.pose-phase-2 .fighter-pose .fighter-art.estefy,
 #game .fighter.motion-rig.estefy.special.leafStorm.pose-phase-3 .fighter-pose .fighter-art.estefy { background-image:url('/assets/new-fighters/estefy/machete-corte.webp')!important; animation:none!important; }
 #game .fighter.motion-rig.estefy.special.machete.pose-phase-3 .fighter-pose .fighter-art.estefy { background-image:url('/assets/new-fighters/estefy/machete-continuacion.webp')!important; animation:none!important; }
-#game .fighter.motion-rig.estefy.low-attack.punch .fighter-pose .fighter-art.estefy,
-#game .fighter.motion-rig.estefy.low-attack.kick .fighter-pose .fighter-art.estefy { background-image:url('/assets/new-fighters/estefy/agacharse.webp')!important; animation:none!important; }
 /* No lying-down drawing: she falls onto her back from the feet, like the others. */
 #game .fighter.motion-rig.estefy:is(.knockdown,.defeated) .fighter-motion { rotate: calc(var(--fwd) * -82deg); translate: calc(var(--fwd) * -18%) 6%; transition: rotate 260ms cubic-bezier(.5,0,.9,.6), translate 260ms ease-in; }
 #game .fighter.motion-rig.estefy.launched .fighter-motion { rotate: calc(var(--fwd) * -32deg); translate: calc(var(--fwd) * -8%) -4%; }
@@ -87,3 +85,13 @@
 .special-fx.fx-machete .fx-unit { width:clamp(110px,14vw,190px)!important; height:clamp(110px,14vw,190px)!important; }
 .special-fx.fx-machete.toward-left .fx-unit img, .special-fx.fx-leafStorm.toward-left .fx-unit img { transform:scaleX(-1); }
 .special-fx.fx-leafStorm .fx-unit { width:clamp(70px,9vw,120px)!important; height:clamp(70px,9vw,120px)!important; }
+
+/* Four authored steps, advanced by the same clock as the other fighters. */
+#game .fighter.motion-rig.estefy.walk.walk-frame-0 .fighter-pose .fighter-art.estefy { background-image:url('/assets/new-fighters/estefy/caminar-01.webp')!important; animation:none!important; }
+#game .fighter.motion-rig.estefy.dash.walk-frame-0 .fighter-pose .fighter-art.estefy { background-image:url('/assets/new-fighters/estefy/correr-01.webp')!important; animation:none!important; }
+#game .fighter.motion-rig.estefy.walk.walk-frame-1 .fighter-pose .fighter-art.estefy { background-image:url('/assets/new-fighters/estefy/caminar-02.webp')!important; animation:none!important; }
+#game .fighter.motion-rig.estefy.dash.walk-frame-1 .fighter-pose .fighter-art.estefy { background-image:url('/assets/new-fighters/estefy/correr-02.webp')!important; animation:none!important; }
+#game .fighter.motion-rig.estefy.walk.walk-frame-2 .fighter-pose .fighter-art.estefy { background-image:url('/assets/new-fighters/estefy/caminar-03.webp')!important; animation:none!important; }
+#game .fighter.motion-rig.estefy.dash.walk-frame-2 .fighter-pose .fighter-art.estefy { background-image:url('/assets/new-fighters/estefy/correr-03.webp')!important; animation:none!important; }
+#game .fighter.motion-rig.estefy.walk.walk-frame-3 .fighter-pose .fighter-art.estefy { background-image:url('/assets/new-fighters/estefy/caminar-04.webp')!important; animation:none!important; }
+#game .fighter.motion-rig.estefy.dash.walk-frame-3 .fighter-pose .fighter-art.estefy { background-image:url('/assets/new-fighters/estefy/correr-04.webp')!important; animation:none!important; }

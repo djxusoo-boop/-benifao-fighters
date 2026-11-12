@@ -6,6 +6,19 @@ export function layoutViewport(width, height, visualHeight, scale, coarse, prefe
   return { mobile, height: stableHeight };
 }
 
+// Keep the lobby stable on iOS while preserving ordinary one-finger scrolling.
+export function preventLobbyPinch(target) {
+  const prevent = (event) => {
+    if (target.querySelector("#game.phase-select") && event.cancelable) event.preventDefault();
+  };
+  target.addEventListener("gesturestart", prevent, { passive: false });
+  target.addEventListener("gesturechange", prevent, { passive: false });
+  return () => {
+    target.removeEventListener("gesturestart", prevent);
+    target.removeEventListener("gesturechange", prevent);
+  };
+}
+
 // Cancel the synthetic click following a two-finger zoom outside game controls.
 // Do not prevent touch/pointer events: the browser must still be able to zoom.
 export function protectPinchClicks(target, now = () => Date.now()) {

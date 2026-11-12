@@ -19,6 +19,8 @@ export function attackFacesTarget(direction, attackerX, targetX) {
 /** Match projectile and extended-weapon contact distance to their on-screen travel. */
 export function fighterAttackRange(specialMove, normalMove, airborne = false) {
   const normalRange = normalMove === "kick" ? 24 : 19;
+  // These projectiles cross the whole arena, including the opening positions.
+  if (specialMove === "goldPistol" || specialMove === "fingerPeinetas") return 100;
   const longRangeMoves = new Set([
     "fish", "fishstorm", "toad", "venom", "shield", "staff", "anchor", "chain",
     "jager", "amber", "artichokes",

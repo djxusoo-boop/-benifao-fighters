@@ -54,3 +54,122 @@ html[data-display-mode=mobile] #game.phase-select .lobby-jump-modes {
   box-shadow: 0 0 0 7px #ff7a1a, 0 0 28px #ff7a1a !important;
   transform: scale(1.03) !important; z-index: 2; position: relative;
 }
+/* Limit compositor preallocation on iPhone, including during viewport gestures. */
+html.arcade-iphone *,
+html.arcade-iphone *::before,
+html.arcade-iphone *::after {
+  will-change: auto !important;
+}
+
+/* Larger menu choices on phones; keep one-finger scrolling available. */
+html:is(.arcade-iphone, [data-display-mode=mobile]) .select-screen.lobby-v2168 {
+  touch-action: pan-x pan-y;
+}
+html:is(.arcade-iphone, [data-display-mode=mobile]) #game.phase-select .lobby-v2168 .mode-start-actions {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+}
+html:is(.arcade-iphone, [data-display-mode=mobile]) #game.phase-select .lobby-v2168 .mode-start-actions .fight-button {
+  min-height: 44px !important;
+  height: auto !important;
+  padding: 6px 8px !important;
+  justify-content: center;
+  text-align: center;
+  font-size: 22px !important;
+  line-height: 1.05 !important;
+  overflow-wrap: anywhere;
+}
+html:is(.arcade-iphone, [data-display-mode=mobile]) #game.phase-select .lobby-v2168 .mode-start-actions .fight-button::before,
+html:is(.arcade-iphone, [data-display-mode=mobile]) #game.phase-select .lobby-v2168 .mode-start-actions .fight-button span,
+html:is(.arcade-iphone, [data-display-mode=mobile]) #game.phase-select .lobby-v2168 .mode-start-actions .fight-button .mode-sub {
+  display: none !important;
+}
+html:is(.arcade-iphone, [data-display-mode=mobile]) .lobby-v2168[data-mobile-step=fighters]:not(.lobby-editing) .lobby-games,
+html:is(.arcade-iphone, [data-display-mode=mobile]) .lobby-v2168[data-mobile-step=modes]:not(.lobby-editing) :is(.lobby-roster, .fighter-showcase) {
+  display: none !important;
+}
+html:is(.arcade-iphone, [data-display-mode=mobile]) .lobby-v2168[data-mobile-step=modes] .lobby-games { grid-column: 1 / -1; }
+html:is(.arcade-iphone, [data-display-mode=mobile]) #game.phase-select .lobby-jump-modes {
+  display: flex;
+  position: fixed;
+  right: max(12px, env(safe-area-inset-right));
+  bottom: max(12px, env(safe-area-inset-bottom));
+  z-index: 500;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(52px / var(--phone-visual-scale, 1));
+  padding: 0 calc(20px / var(--phone-visual-scale, 1));
+  border: 3px solid #ffda7b;
+  border-radius: 999px;
+  background: #ff8a1e;
+  color: #160900;
+  font: 900 calc(18px / var(--phone-visual-scale, 1))/1 system-ui, sans-serif;
+  animation: lobby-next-pulse 1.8s ease-in-out infinite;
+}
+@media (orientation: landscape) and (pointer: coarse) {
+  html:is(.arcade-iphone, [data-display-mode=mobile]) .game-shell:has(.lobby-v2168) .topbar {
+    min-height: 0 !important;
+    padding: calc(3px / var(--phone-visual-scale, 1)) 0 !important;
+  }
+  html:is(.arcade-iphone, [data-display-mode=mobile]) .game-shell:has(.lobby-v2168) .topbar .brand,
+  html:is(.arcade-iphone, [data-display-mode=mobile]) .game-shell:has(.lobby-v2168) .topbar :is(.streak, .profile-level, .build-chip) { display: none !important; }
+  html:is(.arcade-iphone, [data-display-mode=mobile]) .game-shell:has(.lobby-v2168[data-mobile-step=fighters]:not(.lobby-editing)) .topbar-actions > :is(.gamepad-button, .display-mode-control, .projector-button, .fullscreen-button, .install-button, .lobby-editor-toggle, .menu-advanced),
+  html:is(.arcade-iphone, [data-display-mode=mobile]) .game-shell:has(.lobby-v2168[data-mobile-step=modes]:not(.lobby-editing)) .topbar-actions > :is(.menu-online, .menu-media) { display: none !important; }
+  html:is(.arcade-iphone, [data-display-mode=mobile]) .game-shell:has(.lobby-v2168) .topbar-actions {
+    width: 100%;
+    max-width: 100%;
+    overflow: visible !important;
+    flex-wrap: wrap !important;
+    gap: calc(4px / var(--phone-visual-scale, 1)) !important;
+  }
+  html:is(.arcade-iphone, [data-display-mode=mobile]) .game-shell:has(.lobby-v2168) .topbar-actions :is(.sound-button, .display-mode-control, .display-mode-control select) {
+    min-height: calc(34px / var(--phone-visual-scale, 1)) !important;
+    font-size: calc(13px / var(--phone-visual-scale, 1)) !important;
+    padding: calc(4px / var(--phone-visual-scale, 1)) calc(7px / var(--phone-visual-scale, 1)) !important;
+  }
+  html:is(.arcade-iphone, [data-display-mode=mobile]) #game.phase-select .select-screen.lobby-v2168:not(.lobby-editing) {
+    display: block !important;
+    padding: calc(6px / var(--phone-visual-scale, 1)) !important;
+  }
+  html:is(.arcade-iphone, [data-display-mode=mobile]) #game.phase-select .lobby-v2168:not(.lobby-editing) .lobby-heading,
+  html:is(.arcade-iphone, [data-display-mode=mobile]) #game.phase-select .lobby-v2168:not(.lobby-editing) .fighter-showcase,
+  html:is(.arcade-iphone, [data-display-mode=mobile]) #game.phase-select .lobby-v2168:not(.lobby-editing) .lobby-help { display: none !important; }
+  html:is(.arcade-iphone, [data-display-mode=mobile]) #game.phase-select .lobby-v2168 .character-cards {
+    grid-template-columns: repeat(7, minmax(0, 1fr)) !important;
+    gap: calc(4px / var(--phone-visual-scale, 1)) !important;
+  }
+  html:is(.arcade-iphone, [data-display-mode=mobile]) #game.phase-select .lobby-v2168 .character-card {
+    height: 27dvh !important;
+    min-height: 0 !important;
+  }
+  html:is(.arcade-iphone, [data-display-mode=mobile]) #game.phase-select .lobby-v2168 .character-card b {
+    font-size: calc(12px / var(--phone-visual-scale, 1)) !important;
+    bottom: calc(4px / var(--phone-visual-scale, 1)) !important;
+  }
+  html:is(.arcade-iphone, [data-display-mode=mobile]) #game.phase-select .lobby-v2168 .mode-start-actions {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: calc(4px / var(--phone-visual-scale, 1)) !important;
+  }
+  html:is(.arcade-iphone, [data-display-mode=mobile]) #game.phase-select .lobby-v2168 .mode-start-actions .fight-button {
+    min-height: calc(44px / var(--phone-visual-scale, 1)) !important;
+    font-size: calc(19px / var(--phone-visual-scale, 1)) !important;
+    padding: calc(4px / var(--phone-visual-scale, 1)) !important;
+  }
+  html:is(.arcade-iphone, [data-display-mode=mobile]) #game.phase-select .lobby-v2168 .lobby-games h2 {
+    font-size: calc(20px / var(--phone-visual-scale, 1)) !important;
+    margin: 0 0 calc(6px / var(--phone-visual-scale, 1)) !important;
+  }
+}
+@keyframes lobby-next-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 #ffad4580, 0 6px 20px #0009; }
+  50% { box-shadow: 0 0 0 8px #ffad4500, 0 6px 25px #ff8a2470; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html #game.phase-select .lobby-jump-modes { animation: none; }
+}
+html:is(.arcade-iphone, [data-display-mode=mobile]) .leaderboard-tabs button {
+  min-height: 44px;
+  font-size: 13px;
+}
+html:is(.arcade-iphone, [data-display-mode=mobile]) .leaderboard-list li small {
+  font-size: 11px;
+}

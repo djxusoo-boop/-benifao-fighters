@@ -5,10 +5,12 @@ import "./pose-map.css";
 import "./mode-pose-map.css";
 import "./estefy.css";
 import "./xuso.css";
+import "./new-fighters-draft.css";
 import "./coop-fix.css";
 import "./coop-ki.css";
 import "./orb-fix.css";
 import "./phone-fit.css";
+import "./coop-shoot-poses.css";
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -17,7 +19,7 @@ export const viewport: Viewport = {
   themeColor: "#080707",
 };
 
-const imageUrl = "https://benifaio-fighters-v2-3-1.kaleb-padberg93.chatgpt.site/og.png";
+const imageUrl = "https://benifaio-fighters-v2-3-1.kaleb-padberg93.chatgpt.site/og-hardcore-fighters.png";
 
 export const metadata: Metadata = {
   title: "Hardcore Fighters — Web Arcade Edition",
@@ -37,7 +39,7 @@ export const metadata: Metadata = {
     title: "Hardcore Fighters",
     description: "¿Quién domina Central? Maletilla, Vanessa y Josevictor entran en combate.",
     type: "website",
-    images: [{ url: imageUrl, width: 1680, height: 945, alt: "Los luchadores de Hardcore Fighters en Central" }],
+    images: [{ url: imageUrl, width: 1672, height: 941, alt: "Hardcore Fighters: Maletilla contra Vanessa en Benifaió" }],
   },
   twitter: {
     card: "summary_large_image",

@@ -4,9 +4,9 @@
 
 export type ProfileFighterId =
   | "maletilla" | "vanessa" | "josevictor" | "cristian" | "cesaret" | "borja" | "bacora"
-  | "bonviure" | "elchica" | "ogalla" | "xuso" | "bomba" | "rafeta" | "tonimassama" | "nova" | "estefy";
+  | "bonviure" | "elchica" | "ogalla" | "xuso" | "bomba" | "rafeta" | "tonimassama" | "nova" | "estefy" | "mad-dog" | "angerfist" | "dalmau";
 
-export type PassiveId = "noise" | "rhythmRush" | "investment" | "onBeat" | "angler" | "venom" | "shieldCounter" | "heavyArmor" | "liquidCourage" | "royalFury" | "dogBite" | "berserkArmor" | "banner" | "quickTrigger" | "prismCharge" | "jungleCut";
+export type PassiveId = "none" | "noise" | "rhythmRush" | "investment" | "onBeat" | "angler" | "venom" | "shieldCounter" | "heavyArmor" | "liquidCourage" | "royalFury" | "dogBite" | "berserkArmor" | "banner" | "quickTrigger" | "prismCharge" | "jungleCut";
 
 export type FighterProfile = {
   power: number;
@@ -24,6 +24,9 @@ export type FighterProfile = {
 };
 
 export const FIGHTER_PROFILES: Record<ProfileFighterId, FighterProfile> = {
+  "mad-dog": { power: 3, speed: 3, defense: 3, technique: 3, motto: "Listo para luchar.", passive: { id: "none", name: "COMBATE", description: "Golpes y defensa básicos" }, archetype: "LUCHADOR", bio: "Luchador de Hardcore Fighters.", winQuotes: ["¡Victoria!"], endingTitle: ["¡VICTORIA", "HARDCORE!"], endingText: "MAD DOG gana el combate." },
+  "angerfist": { power: 3, speed: 3, defense: 3, technique: 3, motto: "Listo para luchar.", passive: { id: "none", name: "COMBATE", description: "Golpes y defensa básicos" }, archetype: "LUCHADOR", bio: "Luchador de Hardcore Fighters.", winQuotes: ["¡Victoria!"], endingTitle: ["¡VICTORIA", "HARDCORE!"], endingText: "ANGERFIST gana el combate." },
+  "dalmau": { power: 3, speed: 3, defense: 3, technique: 3, motto: "Listo para luchar.", passive: { id: "none", name: "COMBATE", description: "Golpes y defensa básicos" }, archetype: "LUCHADOR", bio: "Luchador de Hardcore Fighters.", winQuotes: ["¡Victoria!"], endingTitle: ["¡VICTORIA", "HARDCORE!"], endingText: "DALMAU gana el combate." },
   maletilla: {
     power: 4, speed: 3, defense: 3, technique: 4, motto: "Spray, actitud y combate.", passive: { id: "noise", name: "RUIDO DE PARKING", description: "Cada combo de 3 golpes o más pega +2 de daño extra" }, archetype: "TODOTERRENO",
     bio: "Nadie hace más ruido en el parking. Golpea fuerte y aguanta lo justo.",

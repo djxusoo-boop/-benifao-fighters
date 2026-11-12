@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { enterFullscreen, exitFullscreen, isFullscreen, setOptOut } from "./fullscreen";
-import { layoutViewport, protectPinchClicks } from "./viewport-guard.mjs";
+import { layoutViewport, preventLobbyPinch, protectPinchClicks } from "./viewport-guard.mjs";
 
 type InstallPromptEvent = Event & {
   prompt: () => Promise<void>;
@@ -11,7 +11,7 @@ type InstallPromptEvent = Event & {
 
 type WakeLockHandle = { release: () => Promise<void>; released?: boolean };
 
-const BUILD_VERSION = "V2.35.3";
+const BUILD_VERSION = "V2.35.4";
 const BUILD_STORAGE_KEY = "hardcore-fighters-current-build";
 const BUILD_RELOAD_KEY = "hardcore-fighters-build-reload";
 
@@ -56,8 +56,11 @@ export default function ArcadeDeviceManager() {
   }, []);
 
   useEffect(() => {
+    // Avoid excessive preallocated compositing layers on iPhone WebKit.
+    document.documentElement.classList.toggle("arcade-iphone", /iPhone|iPod/i.test(navigator.userAgent));
     const update = () => {
       const viewport = window.visualViewport;
+      document.documentElement.style.setProperty("--phone-visual-scale", `${Math.min(1, Math.max(0.5, viewport?.scale ?? 1))}`);
       const { mobile, height } = layoutViewport(window.innerWidth, window.innerHeight, viewport?.height, viewport?.scale ?? 1, matchMedia("(pointer: coarse)").matches, displayMode);
       document.documentElement.dataset.displayMode = mobile ? "mobile" : "tablet";
       document.documentElement.classList.toggle("arcade-zoomed", (viewport?.scale ?? 1) > 1.01);
@@ -70,6 +73,7 @@ export default function ArcadeDeviceManager() {
   }, [displayMode]);
 
   useEffect(() => protectPinchClicks(document), []);
+  useEffect(() => preventLobbyPinch(document), []);
 
   const requestWakeLock = useCallback(async () => {
     const wakeLock = (navigator as Navigator & { wakeLock?: { request: (kind: "screen") => Promise<WakeLockHandle> } }).wakeLock;

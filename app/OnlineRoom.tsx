@@ -36,6 +36,7 @@ export default function OnlineRoom(props: Props) {
   const [guestFighter, setGuestFighter] = useState('');
   const [mode, setMode] = useState<OnlineMode>('fight');
   const [copyLabel, setCopyLabel] = useState('COPIAR CÓDIGO');
+  const [shareLabel, setShareLabel] = useState('COMPARTIR INVITACIÓN');
   const [snapshot, setSnapshot] = useState<unknown>(null);
   const held = useRef(new Set<OnlineInput>());
   const lastSeen = useRef(0);
@@ -83,7 +84,11 @@ export default function OnlineRoom(props: Props) {
       const peer = makePeer(newRole);
       if (newRole === 'host') { const value = await peer.create(); if (peerRef.current === peer) setCode(value); }
       else { setCode(entry); await peer.join(entry); }
-    } catch (error) { setStatus(error instanceof Error ? error.message : 'No se pudo abrir la sala.'); }
+    } catch (error) {
+      peerRef.current?.close(); peerRef.current = null;
+      setRole(null); latest.current.onRole(null); setCode('');
+      setStatus(error instanceof Error ? error.message : 'No se pudo abrir la sala.');
+    }
     finally { setBusy(false); }
   };
   useEffect(() => {
@@ -128,9 +133,24 @@ export default function OnlineRoom(props: Props) {
       window.setTimeout(() => setCopyLabel('COPIAR CÓDIGO'), 1600);
     }).catch(() => setCopyLabel('CÓPIALO A MANO'));
   }, [code]);
+  useEffect(() => {
+    const match = window.location.hash.match(/^#sala=(\d{4})$/);
+    if (!match) return;
+    const timer = window.setTimeout(() => { setEntry(match[1]); setStatus('Invitación recibida. Elige tu luchador y pulsa UNIRME A LA SALA.'); }, 0);
+    return () => window.clearTimeout(timer);
+  }, []);
+  const shareRoom = async () => {
+    if (!code) return;
+    const url = `${window.location.origin}${window.location.pathname}#sala=${code}`;
+    try {
+      if (navigator.share) await navigator.share({ title: 'Hardcore Fighters', text: `Únete a mi sala ${code}`, url });
+      else if (navigator.clipboard) { await navigator.clipboard.writeText(url); setShareLabel('ENLACE COPIADO'); }
+      else setShareLabel('COMPARTE EL CÓDIGO');
+    } catch { setShareLabel('COMPARTE EL CÓDIGO'); }
+  };
   if (!props.open && !role) return null;
   if (started && role === 'host') return null;
-  const control = (action: OnlineInput, label: string) => <button key={action} type="button" disabled={!connected} onPointerDown={event => { event.preventDefault(); try { event.currentTarget.setPointerCapture(event.pointerId); } catch { /* Pointer input still works without capture on older WebViews. */ } input(action, true); }} onPointerUp={() => input(action, false)} onPointerCancel={() => input(action, false)} onLostPointerCapture={() => input(action, false)}>{label}</button>;
+  const control = (action: OnlineInput, key: string, label: string, className: string) => <button key={action} className={className} type="button" disabled={!connected} aria-label={label} onPointerDown={event => { event.preventDefault(); try { event.currentTarget.setPointerCapture(event.pointerId); } catch { /* Pointer input still works without capture on older WebViews. */ } input(action, true); }} onPointerUp={() => input(action, false)} onPointerCancel={() => input(action, false)} onLostPointerCapture={() => input(action, false)}><span>{key}</span><small>{label}</small></button>;
   return <section className={`online-room ${started ? 'online-playing' : ''}`} aria-label="Sala online">
     <header className="online-room-header"><div><span className="online-eyebrow">HARDCORE FIGHTERS · ONLINE</span><strong>{code ? `SALA ${code}` : 'JUGAR ONLINE'}</strong></div><div className="online-header-actions"><OnlineCount /><button type="button" onClick={leave}>SALIR</button></div></header>
     <p className={`online-status ${connected ? 'is-connected' : ''}`} role="status"><i />{status}</p>
@@ -138,11 +158,18 @@ export default function OnlineRoom(props: Props) {
       <div className="online-room-intro"><span className="online-room-kicker">SALA PRIVADA · CÓDIGO DE 4 CIFRAS</span><h1>Juega con tu gente.</h1><p>Comparte un código, elige un modo y entra a la partida en segundos.</p></div>
       {!role && <div className="online-entry-grid"><div className="online-entry-card"><span className="online-card-icon">＋</span><h2>Crear sala</h2><p>Serás el anfitrión y elegirás el modo.</p><label>Tu luchador<select value={fighter} onChange={event => setFighter(event.target.value)}>{props.fighters.map(f => <option key={f.id} value={f.id}>{f.name}</option>)}</select></label><button className="online-primary" type="button" disabled={busy} onClick={() => void connect('host')}>{busy ? 'CREANDO…' : 'CREAR SALA'}</button></div><div className="online-entry-card"><span className="online-card-icon">↗</span><h2>Unirse</h2><p>Introduce el código que te han pasado.</p><label>Tu luchador<select value={fighter} onChange={event => setFighter(event.target.value)}>{props.fighters.map(f => <option key={f.id} value={f.id}>{f.name}</option>)}</select></label><input className="online-code-input" inputMode="numeric" autoComplete="off" maxLength={4} value={entry} onChange={event => setEntry(event.target.value.replace(/\D/g, '').slice(0,4))} placeholder="0000" aria-label="Código de la sala" /><button className="online-primary" type="button" disabled={busy || entry.length !== 4} onClick={() => void connect('guest')}>{busy ? 'CONECTANDO…' : 'UNIRME A LA SALA'}</button></div></div>}
       {role && <div className="online-lobby"><div className="online-code-panel"><span>CÓDIGO PARA TU AMIGO</span><strong className="online-room-code">{code || '…'}</strong><button type="button" onClick={copyCode}>{copyLabel}</button></div><div className="online-seats"><div className="online-seat ready"><small>P1 · ANFITRIÓN</small><b>{props.fighters.find(f => f.id === fighter)?.name ?? fighter}</b><span>LISTO</span></div><div className={`online-seat ${guestFighter ? 'ready' : ''}`}><small>P2 · INVITADO</small><b>{guestFighter ? props.fighters.find(f => f.id === guestFighter)?.name : 'Esperando jugador…'}</b><span>{guestFighter ? 'CONECTADO' : 'COMPARTE EL CÓDIGO'}</span></div></div>{role === 'host' && <div className="online-mode-picker"><div><span className="online-section-kicker">ELIGE EL MODO</span><h2>¿Qué vais a jugar?</h2></div><div className="online-mode-grid">{(Object.keys(modeInfo) as OnlineMode[]).map(value => <button key={value} type="button" className={mode === value ? 'selected' : ''} disabled={!guestFighter} onClick={() => setMode(value)}><b><i>{modeInfo[value].icon}</i>{modeInfo[value].title}</b><small>{modeInfo[value].detail}</small></button>)}</div><p className="online-mode-note">{modeInfo[mode].note}</p></div>}{role === 'host' && <button className="online-launch" type="button" disabled={!connected || !guestFighter} onClick={() => { setStarted(true); peerRef.current?.send({ type:'start', mode, hostFighter: fighter }); props.onStart(mode, fighter, guestFighter); }}>{guestFighter ? `EMPEZAR · ${modeInfo[mode].title.toUpperCase()}` : 'ESPERANDO AL SEGUNDO JUGADOR'}</button>}{role === 'guest' && connected && <div className="online-waiting"><strong>ESTÁS DENTRO</strong><span>El anfitrión elegirá el modo y empezará la partida.</span></div>}</div>}
-      <small className="online-footnote">Conexión directa entre dispositivos. Si no conecta, probad en la misma Wi‑Fi.</small>
+      {role === 'host' && code && <button type="button" onClick={() => void shareRoom()}>{shareLabel}</button>}
+      <small className="online-footnote">Ambos necesitan internet para entrar en la sala. Si no conecta, probad en la misma Wi‑Fi.</small>
     </div>}
-    {role === 'guest' && started && <><div className="online-remote-scene">{props.renderSnapshot(snapshot)}</div><div className="online-controls">
-      <div className="online-stick" role="application" aria-label="Joystick del jugador dos" onPointerDown={event => { event.preventDefault(); try { event.currentTarget.setPointerCapture(event.pointerId); } catch { /* Older WebViews can still deliver pointer moves. */ } stick(event); }} onPointerMove={event => { if (event.buttons) stick(event); }} onPointerUp={releaseStick} onPointerCancel={releaseStick} onLostPointerCapture={releaseStick}>✥</div>
-      <div>{control('block','◆ BLOQUEO')}{control('punch','J PUÑO')}{control('kick','H PATADA')}{control('special1','K ESPECIAL')}{control('special2','L SUPER')}</div>
+    {role === 'guest' && started && <><div className="online-remote-scene">{props.renderSnapshot(snapshot)}</div><div className="online-controls touch-controls" aria-label="Controles táctiles del jugador dos">
+      <div className="touch-joystick-wrap">
+        <div className="touch-joystick" role="group" aria-label="Joystick: mover, saltar y agacharse" onPointerDown={event => { event.preventDefault(); try { event.currentTarget.setPointerCapture(event.pointerId); } catch { /* Older WebViews can still deliver pointer moves. */ } stick(event); }} onPointerMove={event => { if (event.buttons) stick(event); }} onPointerUp={releaseStick} onPointerCancel={releaseStick} onLostPointerCapture={releaseStick}>
+          <span className="touch-joystick-arrows" aria-hidden="true"><i className="up">↑</i><i className="left">←</i><i className="right">→</i><i className="down">↓</i></span><span className="touch-joystick-stick" aria-hidden="true" />
+        </div><small className="touch-joystick-label">MOVER · ↑ SALTO · ↓ AGACHAR</small>
+      </div>
+      <div className="touch-actions touch-actions-redesign">
+        {control('block','◆','BLOQUEO','touch-block')}{control('punch','J','PUÑO','touch-hit')}{control('kick','H','PATADA','touch-kick')}{control('special1','K','ESPECIAL','touch-special-one')}{control('special2','L','SUPER','touch-special-two')}
+      </div>
     </div></>}
   </section>;
 }

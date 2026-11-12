@@ -48,6 +48,9 @@ const A = {
 };
 
 export const SUPER_MOVES: Record<ProfileFighterId, SuperMove> = {
+  "mad-dog": { name: "SIN ESPECIAL", pattern: "wave", bonus: "push", bonusCall: "", description: "Aún sin especial", assets: [] },
+  angerfist: { name: "SIN ESPECIAL", pattern: "wave", bonus: "push", bonusCall: "", description: "Aún sin especial", assets: [] },
+  dalmau: { name: "SIN ESPECIAL", pattern: "wave", bonus: "push", bonusCall: "", description: "Aún sin especial", assets: [] },
   maletilla: { name: "APOCALIPSIS DE CLORETILO", pattern: "rain", bonus: "multi", hits: 3, bonusCall: "¡TRIPLE IMPACTO!", description: "Lluvia de setas y cloretilo: 3 impactos seguidos", assets: [A.mushroom, A.cloretilo] },
   vanessa: { name: "REINA DEL ESTRUENDO", pattern: "beam", bonus: "push", bonusCall: "¡CONTRA LA PARED!", description: "Onda de sonido que lanza al rival hasta la pared", assets: [A.mic, A.ear] },
   josevictor: { name: "BANCA ROTA", pattern: "rain", bonus: "drain", bonusCall: "¡TE COMPRO LA BARRA!", description: "Billetes del cielo: vacía la barra SUPER del rival", assets: [A.money, A.bag] },

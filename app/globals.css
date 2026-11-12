@@ -10163,6 +10163,42 @@ html[data-display-mode=mobile] .select-screen.lobby-v2168 .character-card small 
 #game .fighter.motion-rig.bomba:is(.punch,.kick,.special).pose-phase-2 .fighter-pose .fighter-art.bomba { background-position:50% bottom!important; }
 #game .fighter.motion-rig.bomba:is(.punch,.kick,.special):is(.pose-phase-3,.pose-phase-4) .fighter-pose .fighter-art.bomba { background-position:100% bottom!important; }
 .coop-player.ogalla:is(.fire,.special) .coop-player-art, .orb-hero.orb-firing .fighter-art.ogalla { background-image:url('/assets/new-fighters/ogalla-artichoke-attack-v2.webp')!important; }
+
+/* V2.35.7 · Four distinct contact/passing poses keep the custom fighters
+   planted while moving. The JS frame classes also work in remote online play. */
+.arena .fighter.motion-rig:is(.xuso,.bomba,.bacora,.bonviure,.elchica) { --walk-cycle:url('/assets/new-fighters/xuso-walk-cycle-v2357.webp'); }
+.arena .fighter.motion-rig.bomba { --walk-cycle:url('/assets/new-fighters/bomba-walk-cycle-v2357.webp'); }
+.arena .fighter.motion-rig.bacora { --walk-cycle:url('/assets/new-fighters/bacora-walk-cycle-v2357.webp'); }
+.arena .fighter.motion-rig.bonviure { --walk-cycle:url('/assets/new-fighters/bonviure-walk-cycle-v2357.webp'); }
+.arena .fighter.motion-rig.elchica { --walk-cycle:url('/assets/new-fighters/elchica-walk-cycle-v2357.webp'); }
+.arena .fighter.motion-rig:is(.xuso,.bomba,.bacora,.bonviure,.elchica).walk .fighter-pose .fighter-art,
+.arena .fighter.motion-rig:is(.xuso,.bomba,.bacora,.bonviure,.elchica).dash .fighter-pose .fighter-art {
+  background-image:var(--walk-cycle)!important;
+  background-size:400% 100%!important;
+  background-position:0% bottom!important;
+}
+.arena .fighter.motion-rig:is(.xuso,.bomba,.bacora,.bonviure,.elchica).walk-frame-1:is(.walk,.dash) .fighter-pose .fighter-art { background-position:33.333% bottom!important; }
+.arena .fighter.motion-rig:is(.xuso,.bomba,.bacora,.bonviure,.elchica).walk-frame-2:is(.walk,.dash) .fighter-pose .fighter-art { background-position:66.667% bottom!important; }
+.arena .fighter.motion-rig:is(.xuso,.bomba,.bacora,.bonviure,.elchica).walk-frame-3:is(.walk,.dash) .fighter-pose .fighter-art { background-position:100% bottom!important; }
+.arena .fighter.motion-rig.borja.walk-frame-0:is(.walk,.dash) .fighter-pose .fighter-art.borja { background-image:url('/assets/new-fighters/borja-walk.webp')!important; }
+.arena .fighter.motion-rig.borja.walk-frame-1:is(.walk,.dash) .fighter-pose .fighter-art.borja { background-image:url('/assets/new-fighters/borja-walk2-v1.webp')!important; }
+.arena .fighter.motion-rig.borja.walk-frame-2:is(.walk,.dash) .fighter-pose .fighter-art.borja { background-image:url('/assets/new-fighters/borja-walk.webp')!important; }
+.arena .fighter.motion-rig.borja.walk-frame-3:is(.walk,.dash) .fighter-pose .fighter-art.borja { background-image:url('/assets/new-fighters/borja-walk2-v1.webp')!important; }
+.arena .fighter.motion-rig.tonimassama.walk-frame-0:is(.walk,.dash) .fighter-pose .fighter-art.tonimassama { background-image:url('/assets/new-fighters/tonimassama-frames/walk-a.webp')!important; }
+.arena .fighter.motion-rig.tonimassama.walk-frame-1:is(.walk,.dash) .fighter-pose .fighter-art.tonimassama { background-image:url('/assets/new-fighters/tonimassama-frames/walk-b.webp')!important; }
+.arena .fighter.motion-rig.tonimassama.walk-frame-2:is(.walk,.dash) .fighter-pose .fighter-art.tonimassama { background-image:url('/assets/new-fighters/tonimassama-frames/walk-c.webp')!important; }
+.arena .fighter.motion-rig.tonimassama.walk-frame-3:is(.walk,.dash) .fighter-pose .fighter-art.tonimassama { background-image:url('/assets/new-fighters/tonimassama-frames/walk-b.webp')!important; }
+
+/* Coop and Prison Slug use their own movement components, so animate only
+   sprite position there; the isolated image URL stays stable on iOS Safari. */
+@keyframes custom-walk-strip-v2357 {
+  0%,24.9% { background-position:0% bottom; }
+  25%,49.9% { background-position:33.333% bottom; }
+  50%,74.9% { background-position:66.667% bottom; }
+  75%,100% { background-position:100% bottom; }
+}
+.coop-player.xuso.walk .coop-player-art,.orb-hero.orb-moving .fighter-art.xuso { background-image:url('/assets/new-fighters/xuso-walk-cycle-v2357.webp')!important;background-size:400% 100%!important;animation:custom-walk-strip-v2357 640ms steps(1,end) infinite!important; }
+.coop-player.bomba.walk .coop-player-art,.orb-hero.orb-moving .fighter-art.bomba { background-image:url('/assets/new-fighters/bomba-walk-cycle-v2357.webp')!important;background-size:400% 100%!important;animation:custom-walk-strip-v2357 640ms steps(1,end) infinite!important; }
 @keyframes signature-attack-right {
   0% { opacity:0; transform:translateX(0) scale(.5); }
   22%,85% { opacity:1; }
@@ -10361,6 +10397,113 @@ html .select-screen.lobby-v2168 .character-card[data-lobby-text-style="true"] > 
 }
 html[data-display-mode] .online-remote-scene .arena.online-arena { min-height:0!important; height:auto!important; flex:none!important; }
 html[data-display-mode] .online-arena .fighter.motion-rig { width:var(--remote-width)!important; height:var(--remote-height)!important; max-width:none!important; max-height:none!important; bottom:var(--remote-bottom)!important; }
+
+/* Online guest uses the same edge-to-edge fight stage and touch-control
+   language as a local match, for every online game mode. */
+.online-guest .online-playing {
+  position:fixed;
+  inset:0;
+  width:100%;
+  height:100vh;
+  height:100dvh;
+  padding:max(5px,env(safe-area-inset-top)) max(8px,env(safe-area-inset-right)) 0 max(8px,env(safe-area-inset-left));
+  gap:0;
+  background:#050b12;
+}
+.online-guest .online-playing > .online-room-header {
+  z-index:2;
+  flex:0 0 auto;
+  width:100%;
+  max-width:none;
+  min-height:48px;
+  margin:0;
+  padding:2px 8px;
+  box-sizing:border-box;
+}
+.online-guest .online-playing > .online-status {
+  flex:0 0 auto;
+  width:100%;
+  box-sizing:border-box;
+  margin:2px 0 4px;
+  padding:2px 8px;
+}
+.online-guest .online-remote-scene {
+  position:relative;
+  flex:1 1 auto;
+  width:100%;
+  min-width:0;
+  min-height:0;
+  display:flex;
+  align-items:stretch;
+  justify-content:stretch;
+  overflow:hidden;
+  background:#050b12;
+}
+.online-guest .online-remote-scene .arena,
+html[data-display-mode] .online-guest .online-remote-scene .arena.online-arena {
+  flex:1 1 100%!important;
+  width:100%!important;
+  min-width:0!important;
+  min-height:0!important;
+  height:100%!important;
+  max-width:none!important;
+  max-height:none!important;
+  aspect-ratio:auto!important;
+  align-self:stretch;
+}
+.online-guest .online-controls.touch-controls {
+  position:absolute;
+  z-index:40;
+  inset:auto max(8px,env(safe-area-inset-right)) max(8px,env(safe-area-inset-bottom)) max(8px,env(safe-area-inset-left));
+  display:flex!important;
+  align-items:flex-end;
+  justify-content:space-between;
+  gap:12px;
+  padding:0;
+  pointer-events:none;
+  background:transparent;
+}
+.online-guest .online-controls .touch-joystick-wrap { pointer-events:auto; }
+.online-guest .online-controls .touch-joystick {
+  width:clamp(92px,14vh,132px);
+  height:clamp(92px,14vh,132px);
+  flex-basis:clamp(92px,14vh,132px);
+}
+.online-guest .online-controls .touch-actions.touch-actions-redesign {
+  grid-template-columns:repeat(3,clamp(52px,8vh,72px))!important;
+  grid-template-rows:repeat(2,clamp(52px,8vh,72px));
+  gap:clamp(5px,1vw,10px)!important;
+}
+.online-guest .online-controls .touch-actions-redesign button {
+  width:clamp(52px,8vh,72px)!important;
+  height:clamp(52px,8vh,72px)!important;
+  box-sizing:border-box;
+  padding:0!important;
+  border-radius:50%;
+  opacity:.94;
+  backdrop-filter:blur(7px);
+}
+.online-guest .online-controls .touch-joystick-label { text-shadow:0 2px 5px #000; }
+@media (min-width:760px) and (orientation:landscape) {
+  .online-guest .online-playing > .online-room-header { min-height:52px; }
+  .online-guest .online-controls .touch-joystick {
+    width:clamp(122px,17vh,166px);
+    height:clamp(122px,17vh,166px);
+    flex-basis:clamp(122px,17vh,166px);
+  }
+  .online-guest .online-controls .touch-actions.touch-actions-redesign {
+    grid-template-columns:repeat(3,clamp(66px,9vh,86px))!important;
+    grid-template-rows:repeat(2,clamp(66px,9vh,86px));
+  }
+  .online-guest .online-controls .touch-actions-redesign button {
+    width:clamp(66px,9vh,86px)!important;
+    height:clamp(66px,9vh,86px)!important;
+  }
+}
+@media (orientation:portrait) {
+  .online-guest .online-playing > .online-room-header { min-height:44px; }
+  .online-guest .online-controls.touch-controls { bottom:max(12px,env(safe-area-inset-bottom)); }
+}
 .game-intro { position:fixed; inset:0; z-index:30000; display:grid; place-items:center; width:100vw; width:100dvw; height:100vh; height:100dvh; min-width:100vw; min-height:100vh; overflow:hidden; background:#000; touch-action:none; }
 .game-intro video { display:block; width:100vw; width:100dvw; height:100vh; height:100dvh; max-width:none; max-height:none; object-fit:contain; background:#000; opacity:0; pointer-events:none; transition:opacity .25s ease; }
 .game-intro video.is-playing { opacity:1; }

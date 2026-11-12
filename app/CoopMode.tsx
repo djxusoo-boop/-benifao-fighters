@@ -8,7 +8,7 @@ import FighterWalkLayers from "./FighterWalkLayers";
 import TouchStick, { type StickIntent } from "./TouchStick";
 import { preloadCoopFrames } from "./coop-preload";
 
-type FighterId = "maletilla" | "vanessa" | "josevictor" | "cristian" | "cesaret" | "borja" | "bacora" | "bonviure" | "elchica" | "ogalla" | "xuso" | "bomba" | "rafeta" | "tonimassama" | "nova" | "estefy";
+type FighterId = "maletilla" | "vanessa" | "josevictor" | "cristian" | "cesaret" | "borja" | "bacora" | "bonviure" | "elchica" | "ogalla" | "xuso" | "bomba" | "rafeta" | "tonimassama" | "nova" | "estefy" | "mad-dog" | "angerfist" | "dalmau";
 type PlayerSlot = "p1" | "p2";
 type PlayerAction = "idle" | "walk" | "jump" | "fire" | "special" | "dodge" | "hit" | "down" | "revive";
 type CoopStatus = "intro" | "intermission" | "playing" | "won" | "lost";
@@ -70,8 +70,8 @@ type Props = {
   onComplete: (score?: number, completed?: boolean) => void;
 };
 
-const PLAYER_NAMES: Record<FighterId, string> = { maletilla: "MALETILLA", vanessa: "VANESSA", josevictor: "JOSEVICTOR", cristian: "CRISTIAN", cesaret: "CESARET", borja: "BORJA", bacora: "BACORA", bonviure: "BONVIURE", elchica: "EL CHICA", ogalla: "OGALLA", xuso: "XUSO", bomba: "EL BOMBA", rafeta: "RAFETA", tonimassama: "TONI MASSAMA", nova: "YOYE", estefy: "ESTEFY" };
-const ATTACK_LABELS: Record<FighterId, [string, string]> = {
+const PLAYER_NAMES: Record<FighterId, string> = { "mad-dog": "MAD DOG", angerfist: "ANGERFIST", dalmau: "DALMAU", maletilla: "MALETILLA", vanessa: "VANESSA", josevictor: "JOSEVICTOR", cristian: "CRISTIAN", cesaret: "CESARET", borja: "BORJA", bacora: "BACORA", bonviure: "BONVIURE", elchica: "EL CHICA", ogalla: "OGALLA", xuso: "XUSO", bomba: "EL BOMBA", rafeta: "RAFETA", tonimassama: "TONI MASSAMA", nova: "YOYE", estefy: "ESTEFY" };
+const ATTACK_LABELS: Record<FighterId, [string, string]> = { "mad-dog": ["GOLPE", "GOLPE"], angerfist: ["GOLPE", "GOLPE"], dalmau: ["GOLPE", "GOLPE"],
   maletilla: ["CLORETILO", "SETAS"],
   vanessa: ["MICROS", "OREJAS"],
   josevictor: ["BOLSAS", "BILLETES"],
@@ -147,12 +147,12 @@ const PROJECTILE_ASSETS = {
 };
 
 // Each hero's ki colour (energy balls, trails and impacts).
-const KI_COLORS: Record<FighterId, string> = {
+const KI_COLORS: Record<FighterId, string> = { "mad-dog": "#f0a24c", angerfist: "#f0a24c", dalmau: "#f0a24c",
   maletilla: "#ff8b2b", vanessa: "#ff4f9b", josevictor: "#f2c94c", cristian: "#40f0d0", cesaret: "#4fc9ff", borja: "#9be04a", bacora: "#ffd23a",
   bonviure: "#b6a5ff", elchica: "#ff9a2e", ogalla: "#d7ff5a", xuso: "#7dff38", bomba: "#ff6a2a", rafeta: "#ffd84d", tonimassama: "#ffcc33", nova: "#ff4be9", estefy: "#ffe14a",
 };
 
-const BASIC_SHOT: Record<FighterId, keyof typeof PROJECTILE_ASSETS> = {
+const BASIC_SHOT: Record<FighterId, keyof typeof PROJECTILE_ASSETS> = { "mad-dog": "pistol", angerfist: "pistol", dalmau: "pistol",
   maletilla: "bottle", vanessa: "microphone", josevictor: "bag", cristian: "vinyl", cesaret: "fish", borja: "venom", bacora: "shield", bonviure: "anchor",
   elchica: "jager", ogalla: "scepter", xuso: "dog", bomba: "hoe", rafeta: "flag", tonimassama: "pistol", nova: "prism", estefy: "machete",
 };

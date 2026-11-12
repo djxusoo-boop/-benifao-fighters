@@ -1,5 +1,11 @@
 export type RoomRole = 'host' | 'guest';
 export type RoomPacket = { type: string; [key: string]: unknown };
+function sessionDescription(value: unknown, expected: 'offer' | 'answer'): RTCSessionDescriptionInit {
+  if (!value || typeof value !== 'object') throw new Error('La sala ha enviado una conexión no válida.');
+  const description = value as Record<string, unknown>;
+  if (description.type !== expected || typeof description.sdp !== 'string') throw new Error('La sala ha enviado una conexión no válida.');
+  return { type: expected, sdp: description.sdp };
+}
 export class OnlinePeer {
   readonly token = crypto.randomUUID();
   code = '';
@@ -32,12 +38,22 @@ export class OnlinePeer {
     };
   }
   private async api(action: string, data: Record<string, unknown> = {}) {
-    const response = await fetch('/api/rooms', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action, token: this.token, code: this.code, ...data }), signal: AbortSignal.any([this.abort.signal, AbortSignal.timeout(10000)]) });
+    const controller = new AbortController();
+    const cancel = () => controller.abort();
+    this.abort.signal.addEventListener('abort', cancel, { once: true });
+    const timer = setTimeout(cancel, 10000);
+    let response: Response;
+    try {
+      response = await fetch('/api/rooms', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action, token: this.token, code: this.code, ...data }), signal: controller.signal });
+    } finally {
+      clearTimeout(timer);
+      this.abort.signal.removeEventListener('abort', cancel);
+    }
     const text = await response.text();
     let result: Record<string, unknown>;
     try { result = JSON.parse(text) as Record<string, unknown>; }
     catch { throw new Error(response.ok ? 'Respuesta inválida del servicio de salas.' : 'El servicio de salas no está disponible ahora.'); }
-    if (!response.ok) throw new Error(result.error || 'No se pudo conectar con la sala.');
+    if (!response.ok) throw new Error(typeof result.error === 'string' ? result.error : 'No se pudo conectar con la sala.');
     return result;
   }
   private async description() {
@@ -58,6 +74,7 @@ export class OnlinePeer {
     this.bindChannel(this.pc.createDataChannel('snapshots', { ordered: false, maxRetransmits: 0 }));
     await this.pc.setLocalDescription(await this.pc.createOffer());
     const result = await this.api('create', { offer: await this.description() });
+    if (typeof result.code !== 'string' || !/^\d{4}$/.test(result.code)) throw new Error('El servicio no devolvió un código de sala válido.');
     this.code = result.code;
     this.onStatus('Comparte el código. La sala espera a tu compañero durante 5 minutos.', false);
     this.poll();
@@ -66,7 +83,7 @@ export class OnlinePeer {
   async join(code: string) {
     this.role = 'guest'; this.code = code;
     const room = await this.api('join');
-    await this.pc.setRemoteDescription(room.offer);
+    await this.pc.setRemoteDescription(sessionDescription(room.offer, 'offer'));
     await this.pc.setLocalDescription(await this.pc.createAnswer());
     await this.api('answer', { answer: await this.description() });
     this.waitForConnection();
@@ -81,7 +98,7 @@ export class OnlinePeer {
       if (this.stopped) return;
       try {
         const result = await this.api('poll');
-        if (result.answer) { await this.pc.setRemoteDescription(result.answer); this.waitForConnection(); }
+        if (result.answer) { await this.pc.setRemoteDescription(sessionDescription(result.answer, 'answer')); this.waitForConnection(); }
         else this.poll();
       } catch (error) { if (!this.stopped) this.onStatus(error instanceof Error ? error.message : 'Sala no disponible', false); }
     }, 1000);

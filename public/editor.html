@@ -27,6 +27,16 @@
     </section>
 
     <section id="editor" hidden>
+      <section class="panel balance-panel" aria-labelledby="balance-title">
+        <h2 id="balance-title">Ajustar luchadores</h2>
+        <p>Elige un luchador y cambia sus valores para el modo lucha. El 100 % es su valor original; más resistencia reduce el daño que recibe.</p>
+        <label for="balance-fighter">Luchador <select id="balance-fighter"></select></label>
+        <label>Velocidad <output id="balance-speed-output">100 %</output><input id="balance-speed" type="range" min="50" max="150" step="5" value="100"></label>
+        <label>Fuerza de los golpes <output id="balance-power-output">100 %</output><input id="balance-power" type="range" min="50" max="150" step="5" value="100"></label>
+        <label>Resistencia <output id="balance-defense-output">100 %</output><input id="balance-defense" type="range" min="50" max="150" step="5" value="100"></label>
+        <div class="actions"><button id="balance-reset" type="button" class="secondary">Restablecer luchador</button><button id="balance-save" type="button" class="primary">Guardar para todos</button></div>
+        <p id="balance-status" role="status" aria-live="polite"></p>
+      </section>
       <div class="intro panel">
         <div><span class="badge">TU MENÚ, A TU GUSTO</span><h1>Toca lo que quieras cambiar</h1>
           <p>Elige «Organizar» para arrastrar elementos, cambiar su tamaño y ordenar las tarjetas. Para escribir, elige «Editar textos».</p></div>

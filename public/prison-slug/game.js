@@ -193,6 +193,9 @@ const ui = {
 };
 
 const characters = [
+  { id: "mad-dog", name: "MAD DOG", title: "LUCHADOR", ability: "DISPARO", color: "#f0a24c", image: "/assets/new-fighters/mad-dog-cap-v1/combat-01.png", specialText: "¡AL ATAQUE!", specialColor: "#f0a24c", description: "Luchador de Hardcore Fighters." },
+  { id: "angerfist", name: "ANGERFIST", title: "LUCHADOR", ability: "DISPARO", color: "#f0a24c", image: "/assets/new-fighters/angerfist-draft/combat-01.png", specialText: "¡AL ATAQUE!", specialColor: "#f0a24c", description: "Luchador de Hardcore Fighters." },
+  { id: "dalmau", name: "DALMAU", title: "LUCHADOR", ability: "DISPARO", color: "#f0a24c", image: "/assets/new-fighters/dalmau-draft/combat-01.png", specialText: "¡AL ATAQUE!", specialColor: "#f0a24c", description: "Luchador de Hardcore Fighters." },
   {
     id: "xuso", name: "XUSO", title: "XUSO + SPOOKY", ability: "SPOOKY AL ATAQUE", color: "#7dff38",
     image: "assets/duo-dog.png", specialText: "¡SPOOKY, AL ATAQUE!", specialColor: "#7dff38",
@@ -228,6 +231,9 @@ const characters = [
 
 const atlasHeroPoses = (asset) => ({ idle: asset, walkA: asset, walkB: asset, walkC: asset, walkD: asset, walkE: asset, crouch: asset, rise: asset, fire: asset, heavyFire: asset, kick: asset, hit: asset });
 const HERO_POSE_ASSETS = {
+  "mad-dog": {idle: "/assets/new-fighters/mad-dog-cap-v1/combat-01.png", walkA: "/assets/new-fighters/mad-dog-cap-v1/move-04.png", walkB: "/assets/new-fighters/mad-dog-cap-v1/move-05.png", walkC: "/assets/new-fighters/mad-dog-cap-v1/move-06.png", walkD: "/assets/new-fighters/mad-dog-cap-v1/move-07.png", walkE: "/assets/new-fighters/mad-dog-cap-v1/move-04.png", crouch: "/assets/new-fighters/mad-dog-cap-v1/move-10.png", rise: "/assets/new-fighters/mad-dog-cap-v1/move-13.png", fire: "/assets/new-fighters/mad-dog-cap-v1/combat-02.png", heavyFire: "/assets/new-fighters/mad-dog-cap-v1/combat-05.png", kick: "/assets/new-fighters/mad-dog-cap-v1/combat-08.png", hit: "/assets/new-fighters/mad-dog-cap-v1/combat-15.png" },
+  "angerfist": {idle: "/assets/new-fighters/angerfist-draft/combat-01.png", walkA: "/assets/new-fighters/angerfist-draft/move-04.png", walkB: "/assets/new-fighters/angerfist-draft/move-05.png", walkC: "/assets/new-fighters/angerfist-draft/move-06.png", walkD: "/assets/new-fighters/angerfist-draft/move-07.png", walkE: "/assets/new-fighters/angerfist-draft/move-04.png", crouch: "/assets/new-fighters/angerfist-draft/move-10.png", rise: "/assets/new-fighters/angerfist-draft/move-13.png", fire: "/assets/new-fighters/angerfist-draft/combat-04.png", heavyFire: "/assets/new-fighters/angerfist-draft/combat-07.png", kick: "/assets/new-fighters/angerfist-draft/combat-10.png", hit: "/assets/new-fighters/angerfist-draft/combat-12.png" },
+  "dalmau": {idle: "/assets/new-fighters/dalmau-draft/combat-01.png", walkA: "/assets/new-fighters/dalmau-draft/move-05.png", walkB: "/assets/new-fighters/dalmau-draft/move-06.png", walkC: "/assets/new-fighters/dalmau-draft/move-07.png", walkD: "/assets/new-fighters/dalmau-draft/move-08.png", walkE: "/assets/new-fighters/dalmau-draft/move-05.png", crouch: "/assets/new-fighters/dalmau-draft/move-16.png", rise: "/assets/new-fighters/dalmau-draft/move-12.png", fire: "/assets/new-fighters/dalmau-draft/combat-04.png", heavyFire: "/assets/new-fighters/dalmau-draft/combat-07.png", kick: "/assets/new-fighters/dalmau-draft/combat-10.png", hit: "/assets/new-fighters/dalmau-draft/combat-12.png" },
   xuso: {
     idle: "/assets/new-fighters/xuso-v3/xuso-reposo-01.webp", walkA: "/assets/new-fighters/xuso-v3/xuso-caminar-01.webp", walkB: "/assets/new-fighters/xuso-v3/xuso-caminar-02.webp",
     walkC: "/assets/new-fighters/xuso-v3/xuso-caminar-03.webp", walkD: "/assets/new-fighters/xuso-v3/xuso-caminar-04.webp", walkE: "/assets/new-fighters/xuso-v3/xuso-caminar-02.webp",
@@ -511,6 +517,7 @@ function initialState(hero) {
 function beginMission() {
   releaseInputs();
   const hero = heroFromId(selectedId);
+  shootingImageFor(hero.id);
   state = initialState(hero);
   screens.select.classList.add("hidden");
   screens.result.classList.add("hidden");
@@ -640,7 +647,7 @@ function fire(aim) {
   player.weaponFlash = .1;
   if (player.poseUntil <= state.elapsed || player.poseKind === "fire") {
     player.poseKind = "fire";
-    player.poseUntil = state.elapsed + .14;
+    player.poseUntil = state.elapsed + Math.max(.18, weapon.fireRate);
   }
   const { x, y } = playerMuzzle(player, aim);
   const shot = { x, y, color: weapon.color, damage: weapon.damage };
@@ -1632,9 +1639,18 @@ function drawActors() {
   });
 }
 
+const SHOOTING_POSE_IDS = new Set(["maletilla", "vanessa", "josevictor", "cristian", "borja", "bacora", "bonviure", "elchica", "ogalla", "xuso", "bomba", "nova", "estefy", "mad-dog", "angerfist", "dalmau", "tonimassama"]);
+const shootingImages = {};
+function shootingImageFor(id) {
+  if (!SHOOTING_POSE_IDS.has(id)) return null;
+  if (!shootingImages[id]) shootingImages[id] = loadImage(id === "tonimassama" ? "/assets/new-fighters/tonimassama-pistol-complete-v1.webp" : `/assets/slug-shoot/${id}.webp`);
+  return shootingImages[id];
+}
+
 function heroPoseFor(player) {
   const now = state.elapsed;
   if (player.poseUntil > now && player.poseKind !== "fire") return player.poseKind;
+  if (player.poseUntil > now && player.poseKind === "fire" && SHOOTING_POSE_IDS.has(state.hero.id)) return "fire";
   if (player.crouching && player.landed) return "crouch";
   if (!player.landed) return player.vy < 110 ? "rise" : "kick";
   if (Math.abs(player.vx) > 35) {
@@ -1678,7 +1694,9 @@ function drawHeroFrame(image, x, y, width, height, atlasCell) {
 
 function drawCharacterSprite(heroId, screenX, groundY, facing = 1, pose = "idle", scale = 1, alpha = 1) {
   const hero = heroFromId(heroId);
-  const poseImage = art.heroPoses[heroId]?.[pose] ?? art.heroPoses[heroId]?.idle ?? art.hero[heroId];
+  const shotImage = pose === "fire" ? shootingImageFor(heroId) : null;
+  const shotReady = !!(shotImage?.complete && shotImage.naturalWidth);
+  const poseImage = shotReady ? shotImage : (art.heroPoses[heroId]?.[pose] ?? art.heroPoses[heroId]?.idle ?? art.hero[heroId]);
   const poseWidth = (pose === "crouch" || pose === "fire" || pose === "heavyFire" ? 194 : 154) * PLAYER_SPRITE_SCALE * scale;
   const poseHeight = (pose === "crouch" ? 145 : 170) * PLAYER_SPRITE_SCALE * scale;
   ctx.save();
@@ -1690,8 +1708,8 @@ function drawCharacterSprite(heroId, screenX, groundY, facing = 1, pose = "idle"
   // Transparent cutouts are drawn normally; only Rafeta's legacy sprite still has a dark backdrop.
   ctx.globalCompositeOperation = heroId === "rafeta" ? "screen" : "source-over";
   // These two attack drawings face left, everything else faces right.
-  if ((heroId === "cristian" || heroId === "bacora") && pose === "fire") ctx.scale(-1, 1);
-  const drawn = drawHeroFrame(poseImage, -poseWidth / 2, -poseHeight, poseWidth, poseHeight, heroAtlasCell(heroId, pose));
+  if ((heroId === "cristian" || heroId === "bacora") && pose === "fire" && !shotReady) ctx.scale(-1, 1);
+  const drawn = drawHeroFrame(poseImage, -poseWidth / 2, -poseHeight, poseWidth, poseHeight, shotReady ? undefined : heroAtlasCell(heroId, pose));
   ctx.globalCompositeOperation = "source-over";
   ctx.shadowBlur = 0;
   if (!drawn) { ctx.fillStyle = hero.color; ctx.fillRect(-24 * scale, -145 * scale, 48 * scale, 145 * scale); }
@@ -1709,11 +1727,13 @@ function drawHero() {
   drawCharacterSprite(state.hero.id, x + player.w / 2, player.y + player.h + bob, player.facing, pose, 1, alpha);
   if (player.weaponFlash > 0 || isHeld("up") || touchAim) {
     const aim = aimDirection(player);
-    drawWeapon(playerMuzzle(player, aim), aim, WEAPONS[player.weapon].color, player.weaponFlash > 0);
+    const image = pose === "fire" ? shootingImageFor(state.hero.id) : null;
+    const imageShowsGun = image?.complete && image.naturalWidth && Math.abs(aim.y) < .1;
+    drawWeapon(playerMuzzle(player, aim), aim, WEAPONS[player.weapon].color, player.weaponFlash > 0, false, !imageShowsGun);
   }
 }
 
-function drawWeapon(muzzle, aim, color, firing, mounted = false) {
+function drawWeapon(muzzle, aim, color, firing, mounted = false, drawGun = true) {
   ctx.save();
   ctx.translate(worldX(muzzle.pivotX), muzzle.pivotY);
   ctx.rotate(Math.atan2(aim.y, aim.x));
@@ -1722,9 +1742,11 @@ function drawWeapon(muzzle, aim, color, firing, mounted = false) {
     ctx.strokeStyle = color; ctx.lineWidth = 3; ctx.stroke();
   }
   const start = mounted ? 0 : 19;
-  ctx.fillStyle = "#091320"; ctx.fillRect(start, -7, 54 - start, 14);
-  ctx.fillStyle = "#a5b6b4"; ctx.fillRect(start + 2, -5, 49 - start, 4);
-  ctx.fillStyle = color; ctx.fillRect(47, -6, 7, 12);
+  if (drawGun) {
+    ctx.fillStyle = "#091320"; ctx.fillRect(start, -7, 54 - start, 14);
+    ctx.fillStyle = "#a5b6b4"; ctx.fillRect(start + 2, -5, 49 - start, 4);
+    ctx.fillStyle = color; ctx.fillRect(47, -6, 7, 12);
+  }
   if (firing) {
     ctx.fillStyle = color;
     ctx.beginPath(); ctx.moveTo(51, -10); ctx.lineTo(77, -1); ctx.lineTo(51, 10); ctx.fill();

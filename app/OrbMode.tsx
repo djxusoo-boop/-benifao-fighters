@@ -7,7 +7,7 @@ import FighterWalkLayers from "./FighterWalkLayers";
 import TouchStick from "./TouchStick";
 import { preloadCoopFrames } from "./coop-preload";
 
-type FighterId = "maletilla" | "vanessa" | "josevictor" | "cristian" | "cesaret" | "borja" | "bacora" | "bonviure" | "elchica" | "ogalla" | "xuso" | "bomba" | "rafeta" | "tonimassama" | "nova" | "estefy";
+type FighterId = "maletilla" | "vanessa" | "josevictor" | "cristian" | "cesaret" | "borja" | "bacora" | "bonviure" | "elchica" | "ogalla" | "xuso" | "bomba" | "rafeta" | "tonimassama" | "nova" | "estefy" | "mad-dog" | "angerfist" | "dalmau";
 type OrbStatus = "playing" | "won" | "lost";
 type Difficulty = "easy" | "normal";
 type OrbObjectKind = 0 | 1 | 2 | 3 | 4 | 5;
@@ -63,7 +63,7 @@ type OrbModeProps = {
 
 const MAX_LIVES = 8;
 const MAX_ORB_WAVES = 6;
-const ORB_WEAPONS: Record<FighterId, string> = {
+const ORB_WEAPONS: Record<FighterId, string> = { "mad-dog": "/assets/new-fighters/tonimassama-bullet.svg", angerfist: "/assets/new-fighters/tonimassama-bullet.svg", dalmau: "/assets/new-fighters/tonimassama-bullet.svg",
   maletilla: "/assets/mobile/cloretilo-projectile-v1.webp",
   vanessa: "/assets/microphone-attack-mobile.webp",
   josevictor: "/assets/josevictor/money-tube.webp",

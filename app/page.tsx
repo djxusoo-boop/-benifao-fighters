@@ -19,6 +19,7 @@ import FighterVisibilityGuard from "./FighterVisibilityGuard";
 import AutoFullscreen from "./AutoFullscreen";
 import { markFrameLoaded } from "./frame-registry";
 import { isAppleMobile, retainPreloadImage } from "./mobile-resources.mjs";
+import { spookyContact, spookyPath } from "./spooky-path.mjs";
 import { FIGHTER_FRAMES } from "./fighter-frames";
 import { attackFacesTarget, clampFighterStep, combatApproachGap, combatContact, directionToOpponent, fighterAttackRange, visibleFighterBounds } from "./combat-contact.mjs";
 import { joystickIntent } from "./touch-joystick.mjs";
@@ -32,7 +33,7 @@ import LobbyEditor, { DEFAULT_LOBBY_DESIGN, type LobbyDesign } from "./LobbyEdit
 import GameDiagnostics from "./GameDiagnostics";
 import { arrangedOrder } from "./lobby-order.mjs";
 
-type FighterId = "maletilla" | "vanessa" | "josevictor" | "cristian" | "cesaret" | "borja" | "bacora" | "bonviure" | "elchica" | "ogalla" | "xuso" | "bomba" | "rafeta" | "tonimassama" | "nova" | "estefy";
+type FighterId = "maletilla" | "vanessa" | "josevictor" | "cristian" | "cesaret" | "borja" | "bacora" | "bonviure" | "elchica" | "ogalla" | "xuso" | "bomba" | "rafeta" | "tonimassama" | "nova" | "estefy" | "mad-dog" | "angerfist" | "dalmau";
 type Phase = "select" | "intro" | "fight" | "ko" | "over" | "orbs" | "platform" | "coop" | "prison-slug" | "campaign-final";
 type Action = "idle" | "walk" | "dash" | "dodge" | "crouch" | "punch" | "kick" | "special" | "jump" | "block" | "hit" | "launched" | "knockdown" | "getup";
 type Side = "player" | "cpu";
@@ -97,6 +98,9 @@ type GameState = {
 };
 
 const FIGHTERS: Record<FighterId, { name: string; title: string; specialOne: string; specialTwo: string; color: string }> = {
+  "mad-dog": { name: "MAD DOG", title: "", specialOne: "SIN ESPECIAL", specialTwo: "SIN ESPECIAL", color: "#f0a24c" },
+  "angerfist": { name: "ANGERFIST", title: "", specialOne: "SIN ESPECIAL", specialTwo: "SIN ESPECIAL", color: "#f0a24c" },
+  "dalmau": { name: "DALMAU", title: "", specialOne: "SIN ESPECIAL", specialTwo: "SIN ESPECIAL", color: "#f0a24c" },
   maletilla: {
     name: "MALETILLA",
     title: "EL AMO DEL RUIDO",
@@ -140,10 +144,11 @@ const FIGHTERS: Record<FighterId, { name: string; title: string; specialOne: str
 };
 
 // Rafeta is temporarily unavailable; keep his assets and definition for a later return.
-const FIGHTER_ORDER: FighterId[] = ["maletilla", "vanessa", "josevictor", "cristian", "borja", "bacora", "bonviure", "elchica", "ogalla", "xuso", "bomba", "tonimassama", "nova", "estefy"];
+const FIGHTER_ORDER: FighterId[] = ["maletilla", "vanessa", "josevictor", "cristian", "borja", "bacora", "bonviure", "elchica", "ogalla", "xuso", "bomba", "tonimassama", "nova", "estefy", "mad-dog", "angerfist", "dalmau"];
 const MODE_ORDER = ["arcade", "fight", "coop", "orbs", "central", "slug", "tournament", "training", "ranking", "moves", "profile"] as const;
 type LobbyModeId = typeof MODE_ORDER[number];
 const SHORT_SPECIALS: Record<FighterId, [string, string]> = {
+  "mad-dog": ["PUÑO FUERTE", "PATADA FUERTE"], angerfist: ["PUÑO FUERTE", "PATADA FUERTE"], dalmau: ["PUÑO FUERTE", "PATADA FUERTE"],
   maletilla: ["CLORETILO", "SETAS"], vanessa: ["MICRO", "OREJAS"],
   josevictor: ["BOLSAS", "BILLETES"], cristian: ["VINILOS", "KRK 8"],
   cesaret: ["PESCADO", "PECES"], borja: ["SAPO", "VENENO"],
@@ -165,7 +170,7 @@ const STAGES = [
 
 const GAME_TITLE = "HARDCORE FIGHTERS";
 const GAME_EDITION = "WEB · ARCADE EDITION";
-const GAME_VERSION = "V2.35.2";
+const GAME_VERSION = "V2.35.15";
 
 const ROUND_SECONDS = 99;
 const SUPER_MAX = 100;
@@ -380,15 +385,7 @@ function SuperEffect({ fx, minimal = false }: { fx: NonNullable<SuperFx>; minima
 // turns round, lifts a leg and pees on them (L).
 function DogSpecial({ move, side, origin, target, direction }: { move: "dog" | "howl"; side: Side; origin: number; target: number; direction: AttackDirection }) {
   // Freeze the run when the order is given, so the dog never jumps if a fighter moves.
-  const [{ start, stop, peeLength }] = useState(() => {
-    const toward = direction === "toward-right" ? 1 : -1;
-    const gap = Math.abs(target - origin);
-    const keep = move === "dog" ? 5 : 13;
-    const travel = Math.max(4, gap - keep);
-    const stopAt = Math.max(4, Math.min(96, origin + toward * travel));
-    // The stream reaches from the dog's hip to the rival's feet.
-    return { start: Math.max(4, Math.min(96, origin + toward * 3)), stop: stopAt, peeLength: Math.max(6, Math.abs(target - stopAt)) };
-  });
+  const [{ start, stop, peeLength }] = useState(() => spookyPath(origin, target, direction, move));
   return (
     <div className={`dog-special dog-${move} ${side} ${direction}`} style={{ "--dog-from": `${start}%`, "--dog-to": `${stop}%`, "--pee-len": `${peeLength}%` } as CSSProperties} aria-hidden="true">
       <b className="move-callout">{MOVE_LABELS[move]}</b>
@@ -418,7 +415,7 @@ function SpecialEffect({ move, side, origin, target, arenaWidth, direction, airb
         <span
           className="fx-unit"
           key={`${move}-${index}`}
-          style={{ animationDelay: `${index * 0.085}s`, left: `${effectLeft}%`, top: `${(airborne ? 24 : 38) + (index % 3) * 8}%`, "--fx-travel": travel, "--fx-distance": `${distancePx}px` } as CSSProperties}
+          style={{ animationDelay: `${index * 0.085}s`, left: `${effectLeft}%`, top: `${(airborne ? 24 : 38) + (index % 3) * 8}%`, "--fx-travel": travel, "--fx-half": `${direction === "toward-right" ? "" : "-"}${distancePx / 2}px`, "--fx-distance": `${distancePx}px` } as CSSProperties}
         >
           <Image src={MOVE_ASSETS[move]} alt="" width={120} height={120} unoptimized />
         </span>
@@ -441,6 +438,19 @@ type FightView = {
 };
 function FightScene({ view, playerFighterRef, cpuFighterRef }: { view: FightView; playerFighterRef?: React.RefObject<HTMLDivElement | null>; cpuFighterRef?: React.RefObject<HTMLDivElement | null> }) {
   const { stage, game, trainingMode, playerData, cpuData, superMeter, roundWins, roundNumber, battleMode, stageIndex, fightPickup, selected, opponent, playerVictory, cpuVictory, playerWalkIntent, cpuWalkIntent, movementGear, facing, immuneClock, immuneUntil, stunned, superAnim, lowAttack, passiveBadge, combo, damagePops, passiveDog, superFx, superFlash, fightCall, arenaWidth } = view;
+  useEffect(() => {
+    if (playerFighterRef || cpuFighterRef) return;
+    let frame = 0;
+    const timer = window.setInterval(() => {
+      frame = (frame + 1) % 4;
+      document.querySelectorAll<HTMLDivElement>(".online-arena .fighter.motion-rig").forEach((fighter) => {
+        const walking = fighter.classList.contains("walk") || fighter.classList.contains("dash");
+        for (let index = 0; index < 4; index += 1) fighter.classList.toggle(`walk-frame-${index}`, walking && frame === index);
+        fighter.classList.toggle("stride-alt", walking && frame % 2 === 1);
+      });
+    }, 120);
+    return () => window.clearInterval(timer);
+  }, [playerFighterRef, cpuFighterRef]);
   return <>        <div className="stage-slideshow" aria-hidden="true">
           <div
             className="stage-backdrop active"
@@ -610,7 +620,26 @@ export default function Page() {
 }
 
 function Home() {
+  const balanceRef = useRef<Record<string, { speed: number; power: number; defense: number }>>({});
+  useEffect(() => {
+    const controller = new AbortController();
+    fetch("/api/fighter-balance", { cache: "no-store", signal: controller.signal })
+      .then(response => response.ok ? response.json() : null)
+      .then(data => { if (data?.balance && typeof data.balance === "object") balanceRef.current = data.balance; })
+      .catch(() => {});
+    return () => controller.abort();
+  }, []);
+  const balanceFactor = (fighter: string, stat: "speed" | "power" | "defense") => {
+    const value = balanceRef.current[fighter]?.[stat];
+    return typeof value === "number" && Number.isFinite(value) ? Math.max(.5, Math.min(1.5, value / 100)) : 1;
+  };
   const [onlineOpen, setOnlineOpen] = useState(false);
+  useEffect(() => {
+    if (/^#sala=\d{4}$/.test(window.location.hash)) {
+      const timer = window.setTimeout(() => setOnlineOpen(true), 0);
+      return () => window.clearTimeout(timer);
+    }
+  }, []);
   const [onlineRole, setOnlineRole] = useState<RoomRole | null>(null);
   const onlineRoleRef = useRef<RoomRole | null>(null);
   const [onlineStartPending, setOnlineStartPending] = useState(false);
@@ -622,6 +651,7 @@ function Home() {
   const [coopPlayerTwo, setCoopPlayerTwo] = useState<FighterId>("vanessa");
   const [coopHumanPlayers, setCoopHumanPlayers] = useState<1 | 2>(1);
   const [lobbyLocked, setLobbyLocked] = useState<[boolean, boolean]>([false, false]);
+  const [lobbyModesOpen, setLobbyModesOpen] = useState(false);
   const [touchSlot, setTouchSlot] = useState<0 | 1>(0);
   const [stageIndex, setStageIndex] = useState(0);
   const [game, setGame] = useState<GameState>(freshGame);
@@ -1049,7 +1079,8 @@ function Home() {
     }
     // CSS swaps whole images during an action. Prepare only the active pair so
     // the first punch or jump doesn't show an empty image while it downloads.
-    const sources = [...new Set([...FIGHTER_FRAMES[selected], ...FIGHTER_FRAMES[opponent], ...cssFramesFor(selected), ...cssFramesFor(opponent), ...superFramesFor(selected), ...superFramesFor(opponent)])];
+    const spookyFrames = ["perro-correr-01", "perro-correr-02", "perro-correr-03", "perro-correr-04", "perro-mordisco-03", "perro-mordisco-04", "perro-mordisco-05", "perro-mordisco-06", "perro-mordisco-07", "perro-mordisco-08", "perro-alerta", "perro-pata-arriba", "meada-1", "meada-2", "meada-3"].map(name => `/assets/new-fighters/xuso-v3/${name}.webp`);
+    const sources = [...new Set([...(selected === "xuso" || opponent === "xuso" ? spookyFrames : []), ...FIGHTER_FRAMES[selected], ...FIGHTER_FRAMES[opponent], ...cssFramesFor(selected), ...cssFramesFor(opponent), ...superFramesFor(selected), ...superFramesFor(opponent)])];
     // iOS WebKit can terminate the page when many decoded images are retained.
     // Keep a small working set there and let the browser manage the rest.
     const appleMobile = isAppleMobile(navigator.userAgent, navigator.platform, navigator.maxTouchPoints);
@@ -1124,6 +1155,7 @@ function Home() {
       if (slot !== 0 && slot !== 1) return;
       if (action === "confirm" || action === "back") {
         setLobbyLocked(current => current.map((value, index) => index === slot ? action === "confirm" : value) as [boolean, boolean]);
+        setLobbyModesOpen(action === "confirm");
       } else if (action === "move" && !lobbyLocked[slot]) {
         if (slot === 1) setBattleMode("local");
         const cycle = (current: FighterId) => orderedFighters[(orderedFighters.indexOf(current) + direction + orderedFighters.length) % orderedFighters.length];
@@ -1483,6 +1515,8 @@ function Home() {
     (side: Side, requestedLevel: AttackLevel = 0, normalMove: NormalMove = "punch") => {
       const snapshot = gameRef.current;
       if (snapshot.phase !== "fight" || pausedRef.current) return;
+      const strongNormal = requestedLevel > 0 && ["mad-dog", "angerfist", "dalmau"].includes(side === "player" ? selected : opponent);
+      if (strongNormal) { normalMove = requestedLevel === 1 ? "punch" : "kick"; requestedLevel = 0; }
       // A full meter turns special 2 into the SUPER. The CPU also has to wait
       // between specials so it can't spam them every half second.
       const superReady = requestedLevel === 2 && superMeterRef.current[side] >= SUPER_MAX;
@@ -1514,8 +1548,8 @@ function Home() {
       const targetPassive = FIGHTER_PROFILES[targetFighter].passive.id;
       const specialMove = level > 0 ? specialFor(fighter, level as Exclude<AttackLevel, 0>) : null;
       const isSuper = superReady && !cpuSpecialLocked;
-      const attackVariant = level === 0 ? ((comboCountRef.current[side] % 3) + 1) as Exclude<AttackVariant, 0> : 0;
-      const comboFinisher = level === 0 && attackVariant === 3;
+      const attackVariant = level === 0 ? (strongNormal ? 3 : ((comboCountRef.current[side] % 3) + 1)) as Exclude<AttackVariant, 0> : 0;
+      const comboFinisher = level === 0 && attackVariant === 3 && !strongNormal;
       // Keep close-combat frames on screen long enough for the punch/kick to be
       // unmistakable, including on touch screens that render a little slower.
 
@@ -1530,9 +1564,9 @@ function Home() {
             : ATTACK_DAMAGE.punch;
       const comboBonus = level === 0 ? Math.min(3, Math.floor(comboCountRef.current[side] / 2)) : 0;
       const crownPower = (progress.crowns ?? 0) >= 3 ? 1 : 0;
-      const rawDamage = baseDamage + crownPower + comboBonus + (comboFinisher ? 2 : 0) + (airborne ? (level > 0 ? 2 : 1) : 0);
+      const rawDamage = baseDamage + crownPower + comboBonus + (comboFinisher || strongNormal ? 2 : 0) + (airborne ? (level > 0 ? 2 : 1) : 0);
       const cpuScale = side === "cpu" && battleMode === "cpu" ? CPU_DAMAGE_SCALE[difficulty] : 1;
-      const fighterScale = powerMultiplier(fighter) * defenseMultiplier(targetFighter);
+      const fighterScale = powerMultiplier(fighter) * defenseMultiplier(targetFighter) * balanceFactor(fighter, "power") / balanceFactor(targetFighter, "defense");
       const superMove = SUPER_MOVES[fighter];
       const superScale = isSuper ? (superMove.bonus === "crush" ? 2.3 : superMove.bonus === "multi" ? 1.45 : 1.75) : 1;
       const ownHealth = side === "player" ? snapshot.playerHealth : snapshot.cpuHealth;
@@ -1552,10 +1586,10 @@ function Home() {
       const extendedNewKick = normalMove === "kick" && ["borja", "bacora", "bonviure", "elchica", "ogalla"].includes(fighter);
       const baseActionDuration = isSuper ? 1400 : level > 0 ? (level === 2 ? 980 : 820) : normalMove === "kick" ? (extendedNewKick ? 760 : 620) : 480;
       const passiveSpeed = (passive === "rhythmRush" && level === 0) ? .8 : (passive === "quickTrigger" && level > 0 && !isSuper) ? .75 : 1;
-      const actionDuration = Math.round(baseActionDuration * passiveSpeed);
+      const actionDuration = Math.round((!isSuper && fighter === "xuso" && level > 0 ? (level === 2 ? 1400 : 1200) : baseActionDuration) * passiveSpeed);
       cooldownRef.current[side] = now + actionDuration;
       // Normals connect sooner than before so the controls feel snappy.
-      const impactDelay = Math.round(actionDuration * (isSuper ? .62 : level > 0 ? .38 : extendedNewKick ? .4 : normalMove === "punch" ? .34 : .42));
+      const impactDelay = Math.round(actionDuration * (isSuper ? .62 : fighter === "xuso" && level > 0 ? (level === 2 ? .51 : .44) : fighter === "tonimassama" && level > 0 ? (level === 2 ? .56 : .68) : level > 0 ? .38 : extendedNewKick ? .4 : normalMove === "punch" ? .34 : .42));
       // Attacking from a crouch: a low jab that reaches crouching rivals, or a sweep that trips them.
       const isLowAttack = level === 0 && !airborne && (ownAction === "crouch" || crouchHeldRef.current[side]);
       const isKnockdownAttack = level === 2 || comboFinisher || (isLowAttack && normalMove === "kick");
@@ -1682,9 +1716,15 @@ function Home() {
             });
           }
           const targetIsInFront = attackFacesTarget(impactDirection, attackerX, targetX);
+          const spookyMove = !isSuper && (specialMove === "dog" || specialMove === "howl") ? specialMove : null;
+          const spookyHit = spookyMove && spookyContact(
+            side === "player" ? snapshot.playerX : snapshot.cpuX,
+            side === "player" ? snapshot.cpuX : snapshot.playerX,
+            targetX, attackDirection, spookyMove,
+          );
           const contact = combatContact({
-            inFront: targetIsInFront,
-            distance: liveDistance,
+            inFront: spookyMove ? Boolean(spookyHit) : targetIsInFront,
+            distance: spookyMove ? 0 : liveDistance,
             range: specialRange,
             evading: Date.now() < evadeUntilRef.current[targetSide],
             crouching: liveTargetAction === "crouch",
@@ -1906,7 +1946,7 @@ function Home() {
     const fighter = side === "player" ? selected : opponent;
     const targetFighter = side === "player" ? opponent : selected;
     const cpuScale = side === "cpu" && battleMode === "cpu" ? CPU_DAMAGE_SCALE[difficulty] : 1;
-    const damage = Math.max(1, Math.round(12 * powerMultiplier(fighter) * defenseMultiplier(targetFighter) * cpuScale));
+    const damage = Math.max(1, Math.round(12 * powerMultiplier(fighter) * defenseMultiplier(targetFighter) * balanceFactor(fighter, "power") / balanceFactor(targetFighter, "defense") * cpuScale));
     later(() => {
       if (gameRef.current.phase !== "fight") return;
       setGame((current) => {
@@ -2228,6 +2268,7 @@ function Home() {
     setSuperAnim({ player: null, cpu: null });
     setStunned({ player: false, cpu: false });
     setPassiveBadge({ player: null, cpu: null });
+    setPassiveDog(null);
   }, []);
 
   useEffect(() => {
@@ -2244,13 +2285,22 @@ function Home() {
         // Spooky runs in on his own and bites; the bite lands with his jaws.
         const id = Date.now() + Math.random();
         setPassiveDog({ side, id });
-        window.setTimeout(() => setPassiveDog((current) => current?.id === id ? null : current), 820);
-        window.setTimeout(() => applyExtraHit(side, target, 4, "normal"), 320);
+        later(() => setPassiveDog((current) => current?.id === id ? null : current), 1200);
+        const origin = side === "player" ? current.playerX : current.cpuX;
+        const rival = side === "player" ? current.cpuX : current.playerX;
+        const stop = spookyPath(origin, rival, directionToOpponent(origin, rival), "dog").stop;
+        later(() => {
+          const live = gameRef.current;
+          const rivalX = side === "player" ? live.cpuX : live.playerX;
+          const rivalAction = side === "player" ? live.cpuAction : live.playerAction;
+          if (live.phase !== "fight" || Math.abs(rivalX - stop) > 9 || rivalAction === "block" || Date.now() < immuneUntilRef.current[target] || Date.now() < evadeUntilRef.current[target]) return;
+          applyExtraHit(side, target, 4, "normal");
+        }, 528);
         showPassive(side, "🐕 ¡SPOOKY MUERDE!");
       });
     }, 6500);
     return () => window.clearInterval(timer);
-  }, [applyExtraHit, game.phase, opponent, selected, showPassive]);
+  }, [applyExtraHit, game.phase, later, opponent, selected, showPassive]);
 
   const startRound = useCallback((modeOverride?: ActivityMode) => {
     // React passes its click event to an onClick callback. Only accept known
@@ -2597,7 +2647,8 @@ function Home() {
           // A back-step is deliberately shorter than a forward stride. This
           // keeps the feet from looking as if they are skating backwards and
           // gives the retreat animation time to read clearly.
-          const groundSpeed = forwardSpeed * (retreating ? 0.82 : 1) * speedMultiplier(side === "player" ? selected : opponent);
+          const movingFighter = side === "player" ? selected : opponent;
+          const groundSpeed = forwardSpeed * (retreating ? 0.82 : 1) * speedMultiplier(movingFighter) * balanceFactor(movingFighter, "speed");
           const maxSpeed = airborne ? 0.51 : groundSpeed;
           const acceleration = airborne ? 0.08 : retreating ? 0.125 : 0.15;
           const difference = input * maxSpeed - previous;
@@ -2620,10 +2671,16 @@ function Home() {
       // Switch the isolated walk images without a React render. CSS image URL
       // animations are dropped by some mobile browsers; the animation frame
       // already driving movement supplies a stable cadence instead.
-      const playerStrideFrame = Math.floor(now / (playerGear === "stride" ? 135 : 170)) % 2;
-      const cpuStrideFrame = Math.floor(now / (cpuGear === "stride" ? 135 : 170)) % 2;
-      playerFighterRef.current?.classList.toggle("stride-alt", snapshot.playerAction === "walk" && playerStrideFrame === 1);
-      cpuFighterRef.current?.classList.toggle("stride-alt", snapshot.cpuAction === "walk" && cpuStrideFrame === 1);
+      const playerStrideFrame = Math.floor(now / (playerGear === "stride" ? 105 : 145)) % 4;
+      const cpuStrideFrame = Math.floor(now / (cpuGear === "stride" ? 105 : 145)) % 4;
+      const setWalkFrame = (fighter: HTMLDivElement | null, action: GameState["playerAction"], frame: number) => {
+        if (!fighter) return;
+        const walking = action === "walk" || action === "dash";
+        for (let index = 0; index < 4; index += 1) fighter.classList.toggle(`walk-frame-${index}`, walking && frame === index);
+        fighter.classList.toggle("stride-alt", walking && frame % 2 === 1);
+      };
+      setWalkFrame(playerFighterRef.current, snapshot.playerAction, playerStrideFrame);
+      setWalkFrame(cpuFighterRef.current, snapshot.cpuAction, cpuStrideFrame);
 
       let next = snapshot;
         if (playerVelocity && playerMoveAllowed) {
@@ -3264,6 +3321,7 @@ function Home() {
     setImmuneUntil({ player: 0, cpu: 0 });
     setImmuneClock(0);
     setLobbyLocked([false, false]);
+    setLobbyModesOpen(false);
     setGame(freshGame());
     setRoundCall("");
     setVsScreen(null);
@@ -3308,12 +3366,7 @@ function Home() {
       <OnlineRoom open={onlineOpen} onClose={() => { setOnlineOpen(false); if (onlineRoleRef.current) resetToSelect(); }}
         fighters={FIGHTER_ORDER.map(id => ({ id, name: FIGHTERS[id].name }))} selected={selected}
         onRole={role => { onlineRoleRef.current = role; setOnlineRole(role); }}
-        onStart={(mode, host, guest) => {
-          if (!FIGHTER_ORDER.includes(host as FighterId) || !FIGHTER_ORDER.includes(guest as FighterId)) return;
-          setSelected(host as FighterId); setLocalOpponent(guest as FighterId); setBattleMode("local"); setCampaignStep(0); setArcadeRun(null);
-          if (mode === "fight") setOnlineStartPending(true);
-          else setOnlineLaunchMode(mode);
-        }}
+        onStart={(mode, host, guest) => { if (!FIGHTER_ORDER.includes(host as FighterId) || !FIGHTER_ORDER.includes(guest as FighterId)) return; setSelected(host as FighterId); setLocalOpponent(guest as FighterId); setBattleMode("local"); setCampaignStep(0); setArcadeRun(null); if (mode === "fight") setOnlineStartPending(true); else setOnlineLaunchMode(mode); }}
         onInput={receiveOnlineInput} onDisconnect={disconnectOnline}
         getSnapshot={() => {
           const arena = arenaRef.current;
@@ -3333,7 +3386,7 @@ function Home() {
             {v.game.phase === "over" && <div className="online-round-call">{v.game.winner === "cpu" ? "¡HAS GANADO!" : v.game.winner === "draw" ? "EMPATE" : "FIN DEL COMBATE"}<small>Tu amigo puede iniciar la revancha.</small></div>}
           </section>;
         }} />
-      <FighterVisibilityGuard />
+      {onlineRole !== "guest" && <FighterVisibilityGuard />}
       <AutoFullscreen />
       <GameDiagnostics open={diagnosticsOpen} onClose={() => setDiagnosticsOpen(false)} />
       <header className="topbar">
@@ -3343,12 +3396,12 @@ function Home() {
           <span className="raspberry-edition-badge">{GAME_EDITION}</span>
         </a>
         <div className="topbar-actions">
-          <button className="sound-button" type="button" onClick={() => setOnlineOpen(true)} disabled={game.phase !== "select" || Boolean(onlineRole)}>JUGAR ONLINE</button>
+          <button className="sound-button menu-online" type="button" onClick={() => setOnlineOpen(true)} disabled={game.phase !== "select" || Boolean(onlineRole)}>JUGAR ONLINE</button>
           <OnlineCount />
           <span className="streak"><b>{streak}</b> victorias</span>
           <span className="profile-level">NIVEL {1 + progress.fights + progress.adventures * 2 + progress.orbs}</span>
           <span className="build-chip" aria-label={`Versión ${GAME_VERSION}`}>{GAME_VERSION}</span>
-          <button className="sound-button" type="button" onClick={() => setMusicOn((value) => !value)} aria-pressed={musicOn}>{musicOn ? "MÚSICA ON" : "MÚSICA OFF"}</button>
+          <button className="sound-button menu-media" type="button" onClick={() => setMusicOn((value) => !value)} aria-pressed={musicOn}>{musicOn ? "MÚSICA ON" : "MÚSICA OFF"}</button>
           <GamepadManager />
           <ArcadeDeviceManager />
           {game.phase === "select" && !lobbyEditorOpen && <a className="sound-button lobby-editor-toggle" href="/editor.html" target="_blank" rel="noopener noreferrer" onClick={(event) => {
@@ -3357,9 +3410,9 @@ function Home() {
             const installed = Boolean((navigator as Navigator & { standalone?: boolean }).standalone) || window.matchMedia("(display-mode: standalone)").matches;
             if (installed) { event.preventDefault(); window.location.assign("/editor.html"); }
           }}>✎ EDITAR MENÚ</a>}
-          {game.phase === "select" && <button className="sound-button" type="button" onClick={() => setDiagnosticsOpen(true)}>🩺 DIAGNÓSTICO</button>}
-          {game.phase === "select" && <button className="sound-button" type="button" onClick={() => setAnalyticsNoticeOpen(true)}>◌ PRIVACIDAD</button>}
-          <button className="sound-button" type="button" onClick={() => setSoundOn((value) => !value)} aria-pressed={soundOn}>
+          {game.phase === "select" && <button className="sound-button menu-advanced" type="button" onClick={() => setDiagnosticsOpen(true)}>🩺 DIAGNÓSTICO</button>}
+          {game.phase === "select" && <button className="sound-button menu-advanced" type="button" onClick={() => setAnalyticsNoticeOpen(true)}>◌ PRIVACIDAD</button>}
+          <button className="sound-button menu-media" type="button" onClick={() => setSoundOn((value) => !value)} aria-pressed={soundOn}>
             {soundOn ? "SONIDO ON" : "SONIDO OFF"}
           </button>
         </div>
@@ -3371,7 +3424,7 @@ function Home() {
       </aside>}
 
       <section ref={arenaRef} id={onlineRole === "guest" ? "game-background" : "game"} className={`arena phase-${game.phase} style-${fighterStyle} impact-level-${game.impactLevel} ${trainingMode ? "training-mode" : ""} ${campaignStep > 0 ? "campaign-active" : ""} ${(progress.crowns ?? 0) >= 2 ? "champion-aura" : ""} ${paused ? "game-paused" : ""} ${superFlash ? `super-active super-${superFlash.side}` : ""} ${game.playerMove || game.cpuMove ? "special-casting" : ""} ${game.phase === "orbs" ? "orb-active" : ""} ${game.phase === "platform" ? "platform-active" : ""} ${game.phase === "coop" ? "coop-active" : ""} ${game.impact ? (game.impact % 2 ? "impact-a" : "impact-b") : ""}`} aria-label={game.phase === "orbs" ? `Rompeobjetos con ${playerData.name}` : game.phase === "platform" ? `Aventura Central con ${playerData.name}` : game.phase === "coop" ? `Aventura cooperativa de ${FIGHTERS[coopPlayerOne].name} y ${FIGHTERS[coopPlayerTwo].name}` : `Combate en ${stage.name}`}>
-        <FightScene view={fightView} playerFighterRef={playerFighterRef} cpuFighterRef={cpuFighterRef} />
+        {onlineRole !== "guest" && <FightScene view={fightView} playerFighterRef={playerFighterRef} cpuFighterRef={cpuFighterRef} />}
 
         {game.phase === "select" && (
           <div className={`modal-layer select-screen lobby-v2168 lobby-v220 ${lobbyEditorOpen ? "lobby-editing" : ""}`} role="application" aria-label="Menú principal"
@@ -3387,6 +3440,7 @@ function Home() {
             data-custom-ink={customLobbyStyle("ink") || undefined}
             onClickCapture={handleLobbyEditClick}
             data-p1-locked={lobbyLocked[0]} data-p2-locked={lobbyLocked[1]}
+            data-mobile-step={lobbyModesOpen ? "modes" : "fighters"}
             data-all-ready={lobbyLocked[0] && (battleMode === "cpu" || lobbyLocked[1])}>
             {lobbyEditorOpen && <div className="direct-editor-toolbar" role="region" aria-label="Editor del menú">
               <div><strong>✎ EDITANDO MENÚ</strong><span>Toca un texto, un personaje o un modo para cambiarlo. Se guarda en este dispositivo.</span></div>
@@ -3438,7 +3492,7 @@ function Home() {
                 <strong>{anyLobbyLocked ? "2 · ELIGE EL MODO DE JUEGO · ✕ JUGAR" : "1 · CONFIRMA TU PERSONAJE CON ✕"}</strong>
                 <span {...editAttrs("labels", "playerHelp", "Ayuda para elegir", lobbyLabel("playerHelp", "Los dos jugadores eligen en las imágenes: P1 naranja · P2 azul."))} role={lobbyEditorOpen ? "button" : undefined} tabIndex={lobbyEditorOpen ? 0 : undefined}>{lobbyLabel("playerHelp", "Los dos jugadores eligen en las imágenes: P1 naranja · P2 azul.")}</span>
                 <span {...editAttrs("labels", "controlHelp", "Ayuda de controles", lobbyLabel("controlHelp", "Cruceta: mover · ✕: elegir y saltar a los modos · ✕ otra vez: jugar · ○: volver"))} role={lobbyEditorOpen ? "button" : undefined} tabIndex={lobbyEditorOpen ? 0 : undefined}>{lobbyLabel("controlHelp", "Cruceta: mover · ✕: elegir y saltar a los modos · ✕ otra vez: jugar · ○: volver")}</span>
-                <button type="button" onClick={() => { setLobbyLocked([true, true]); document.querySelector<HTMLButtonElement>(".mode-start-actions [data-gamepad-default]")?.focus(); }}>IR A LOS JUEGOS →</button>
+                <button type="button" onClick={() => { setLobbyLocked([true, true]); setLobbyModesOpen(true); }}>IR A LOS JUEGOS →</button>
               </div>
             </div>
             {(() => {
@@ -3477,14 +3531,14 @@ function Home() {
                       <small>MOVIMIENTOS DESTACADOS</small>
                       <span><kbd className="key-k">K</kbd>{FIGHTERS[shown].specialOne}</span>
                       <span><kbd className="key-l">L</kbd>{FIGHTERS[shown].specialTwo}</span>
-                      <span><kbd className="key-super">★</kbd>SUPER · {SUPER_MOVES[shown].name}</span>
+                      {!['mad-dog', 'angerfist', 'dalmau'].includes(shown) && <span><kbd className="key-super">★</kbd>SUPER · {SUPER_MOVES[shown].name}</span>}
                       <span><kbd className="key-throw">S+J</kbd>AGARRE</span>
                     </div>
                   </div>
                 </aside>
               );
             })()}
-            <LobbyJump />
+            <LobbyJump atModes={lobbyModesOpen} onChange={(showModes) => { setLobbyModesOpen(showModes); if (!showModes) setLobbyLocked([false, false]); window.scrollTo({ top: 0 }); }} />
             <div className="lobby-games" data-modes-reordered={orderedModes.some((id, index) => id !== MODE_ORDER[index]) || undefined} {...placementAttrs("section", "games")}>
               <h2 {...editAttrs("field", "modesHeading", "Título de los modos", lobbyDesign.modesHeading)} role={lobbyEditorOpen ? "button" : undefined} tabIndex={lobbyEditorOpen ? 0 : undefined}>{lobbyDesign.modesHeading} <small {...editAttrs("field", "modesSubtitle", "Frase de los modos", lobbyDesign.modesSubtitle)} role={lobbyEditorOpen ? "button" : undefined} tabIndex={lobbyEditorOpen ? 0 : undefined}>{lobbyDesign.modesSubtitle}</small></h2>
               <div className="mode-start-actions">
@@ -3563,7 +3617,7 @@ function Home() {
                   <b>PUÑO / PATADA</b><span>Ataques rápidos a corta distancia</span>
                   <b>{playerData.specialOne}</b><span>Sin recarga · ESPECIAL 1</span>
                   <b>{playerData.specialTwo}</b><span>Sin recarga · ESPECIAL 2</span>
-                  <b>SUPER · {SUPER_MOVES[selected].name}</b><span>{SUPER_MOVES[selected].description}. Llena la barra SUPER golpeando y recibiendo golpes; con la barra llena, ESPECIAL 2 lo lanza</span>
+                  {!['mad-dog', 'angerfist', 'dalmau'].includes(selected) && <><b>SUPER · {SUPER_MOVES[selected].name}</b><span>{SUPER_MOVES[selected].description}. Llena la barra SUPER golpeando y recibiendo golpes; con la barra llena, ESPECIAL 2 lo lanza</span></>}
                   <b>BARRIDA / PUÑO BAJO</b><span>Agáchate y pulsa patada para tirar al rival al suelo, o puño para golpear a un rival agachado</span>
                   <b>AGARRE</b><span>Mantén bloqueo y pulsa puño cerca del rival: rompe su guardia y lo tira al suelo</span>
                   <b>HABILIDAD · {FIGHTER_PROFILES[selected].passive.name}</b><span>{FIGHTER_PROFILES[selected].passive.description}</span>
@@ -3680,7 +3734,7 @@ function Home() {
               <li><kbd>J</kbd> PUÑO <kbd>H</kbd> PATADA</li>
               <li><kbd>K</kbd> {playerData.specialOne}</li>
               <li><kbd>L</kbd> {playerData.specialTwo}</li>
-              <li><kbd>L</kbd> CON BARRA LLENA · SUPER {SUPER_ANIM[selected]?.name ?? SUPER_MOVES[selected].name}</li>
+              {!['mad-dog', 'angerfist', 'dalmau'].includes(selected) && <li><kbd>L</kbd> CON BARRA LLENA · SUPER {SUPER_ANIM[selected]?.name ?? SUPER_MOVES[selected].name}</li>}
               <li><kbd>S + J</kbd> AGARRE <kbd>C + H</kbd> BARRIDA <kbd>C + J</kbd> PUÑO BAJO</li>
               <li><kbd>S + A/D</kbd> ESQUIVA <kbd>A/D ×2</kbd> DASH <kbd>W</kbd> SALTO</li>
               <li className="pause-passive"><b>{FIGHTER_PROFILES[selected].passive.name}</b> · {FIGHTER_PROFILES[selected].passive.description}</li>
@@ -3862,7 +3916,7 @@ function Home() {
               <div><kbd>J</kbd><span>PUÑO</span></div>
               <div><kbd>H</kbd><span>PATADA</span></div>
               <div><kbd>K</kbd><span>{SHORT_SPECIALS[selected][0]}</span></div>
-              <div><kbd>L</kbd><span>{SHORT_SPECIALS[selected][1]} · SUPER CON BARRA LLENA</span></div>
+              <div><kbd>L</kbd><span>{SHORT_SPECIALS[selected][1]}{!['mad-dog', 'angerfist', 'dalmau'].includes(selected) && ' · SUPER CON BARRA LLENA'}</span></div>
               <div><kbd>S + A/D</kbd><span>BLOQUEAR · ESQUIVAR</span></div>
               <div><kbd>S + J</kbd><span>AGARRE</span></div>
             </>
