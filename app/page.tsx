@@ -143,8 +143,7 @@ const FIGHTERS: Record<FighterId, { name: string; title: string; specialOne: str
   estefy: { name: "ESTEFY", title: "LA CAPITANA DEL MACHETE", specialOne: "MACHETAZO", specialTwo: "TORMENTA DE HOJAS", color: "#ffd21f" },
 };
 
-// Rafeta is temporarily unavailable; keep his assets and definition for a later return.
-const FIGHTER_ORDER: FighterId[] = ["maletilla", "vanessa", "josevictor", "cristian", "borja", "bacora", "bonviure", "elchica", "ogalla", "xuso", "bomba", "tonimassama", "nova", "estefy", "mad-dog", "angerfist", "dalmau"];
+const FIGHTER_ORDER: FighterId[] = ["maletilla", "vanessa", "josevictor", "cristian", "borja", "bacora", "bonviure", "elchica", "ogalla", "xuso", "bomba", "rafeta", "tonimassama", "nova", "estefy", "mad-dog", "angerfist", "dalmau"];
 const MODE_ORDER = ["arcade", "fight", "coop", "orbs", "central", "slug", "tournament", "training", "ranking", "moves", "profile"] as const;
 type LobbyModeId = typeof MODE_ORDER[number];
 const SHORT_SPECIALS: Record<FighterId, [string, string]> = {
@@ -170,7 +169,7 @@ const STAGES = [
 
 const GAME_TITLE = "HARDCORE FIGHTERS";
 const GAME_EDITION = "WEB · ARCADE EDITION";
-const GAME_VERSION = "V2.35.15";
+const GAME_VERSION = "V2.35.16";
 
 const ROUND_SECONDS = 99;
 const SUPER_MAX = 100;
@@ -516,7 +515,7 @@ function FightScene({ view, playerFighterRef, cpuFighterRef }: { view: FightView
             <div className="fighter-motion">{superAnim.player && (
               <span className="super-body" aria-hidden="true" style={{ height: `${SUPER_ANIM[superAnim.player.fighter].size * 100}%`, bottom: `${SUPER_ANIM[superAnim.player.fighter].bottom * 100}%`, backgroundImage: `url("${superFrame(superAnim.player.fighter, superAnim.player.frame)}")` }} />
             )}<div className="fighter-pose">
-              <div className={`fighter-art ${selected} ${facing.player}`}>{!(["cesaret", "borja", "bacora", "bonviure", "elchica", "ogalla", "xuso", "bomba", "tonimassama"] as FighterId[]).includes(selected) && <FighterWalkLayers />}</div>
+              <div className={`fighter-art ${selected} ${facing.player}`}>{!(["cesaret", "borja", "bacora", "bonviure", "elchica", "ogalla", "xuso", "bomba", "rafeta", "tonimassama"] as FighterId[]).includes(selected) && <FighterWalkLayers />}</div>
               {stunned.player && <b className="stun-word">★ ¡MAREADO! ★</b>}
               {passiveBadge.player && <b key={passiveBadge.player.id} className="passive-word">{passiveBadge.player.text}</b>}
               {immuneClock < immuneUntil.player && <b className="immune-word">INMUNE · {Math.max(1, Math.ceil((immuneUntil.player - immuneClock) / 1000))}s</b>}
@@ -529,7 +528,7 @@ function FightScene({ view, playerFighterRef, cpuFighterRef }: { view: FightView
             <div className="fighter-motion">{superAnim.cpu && (
               <span className="super-body" aria-hidden="true" style={{ height: `${SUPER_ANIM[superAnim.cpu.fighter].size * 100}%`, bottom: `${SUPER_ANIM[superAnim.cpu.fighter].bottom * 100}%`, backgroundImage: `url("${superFrame(superAnim.cpu.fighter, superAnim.cpu.frame)}")` }} />
             )}<div className="fighter-pose">
-              <div className={`fighter-art ${opponent} ${facing.cpu}`}>{!(["cesaret", "borja", "bacora", "bonviure", "elchica", "ogalla", "xuso", "bomba", "tonimassama"] as FighterId[]).includes(opponent) && <FighterWalkLayers />}</div>
+              <div className={`fighter-art ${opponent} ${facing.cpu}`}>{!(["cesaret", "borja", "bacora", "bonviure", "elchica", "ogalla", "xuso", "bomba", "rafeta", "tonimassama"] as FighterId[]).includes(opponent) && <FighterWalkLayers />}</div>
               {stunned.cpu && <b className="stun-word">★ ¡MAREADO! ★</b>}
               {passiveBadge.cpu && <b key={passiveBadge.cpu.id} className="passive-word">{passiveBadge.cpu.text}</b>}
               {immuneClock < immuneUntil.cpu && <b className="immune-word">INMUNE · {Math.max(1, Math.ceil((immuneUntil.cpu - immuneClock) / 1000))}s</b>}
@@ -961,7 +960,7 @@ function Home() {
   const framePair = `${selected}:${opponent}`;
   const fightReady = fightersReady && readyFramePair === framePair;
   // Scale the new fighters' approach spacing to their actual rendered width.
-  const newFighterMatch = ["cesaret", "borja", "bacora", "bonviure", "elchica", "ogalla", "xuso", "bomba", "tonimassama"].includes(selected) || ["cesaret", "borja", "bacora", "bonviure", "elchica", "ogalla", "xuso", "bomba", "tonimassama"].includes(opponent);
+  const newFighterMatch = ["cesaret", "borja", "bacora", "bonviure", "elchica", "ogalla", "xuso", "bomba", "rafeta", "tonimassama"].includes(selected) || ["cesaret", "borja", "bacora", "bonviure", "elchica", "ogalla", "xuso", "bomba", "rafeta", "tonimassama"].includes(opponent);
   const minimumCombatGap = newFighterMatch ? measuredApproachGap : 7.6;
   const fighterMinX = newFighterMatch ? fighterBounds.min : 7;
   const fighterMaxX = newFighterMatch ? fighterBounds.max : 93;

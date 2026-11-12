@@ -487,7 +487,20 @@ const HERO_POSE_ASSETS: Record<FighterId, Record<HeroPose, string>> = {
     crouch: "/assets/new-fighters/bomba-crouch-v21849.webp", rise: "/assets/new-fighters/bomba-crouch-v21849.webp",
     fire: "/assets/new-fighters/bomba-rig-v21847-punch.webp", heavyFire: "/assets/new-fighters/bomba-hoe-attack-v2.webp", kick: "/assets/new-fighters/bomba-rig-v21847-kick.webp", hit: "/assets/new-fighters/bomba-guard-v2.webp",
   },
-  rafeta: atlasHeroPoses("/prison-slug/assets/white-hero.webp"),
+  rafeta: {
+    idle: "/assets/new-fighters/rafeta-frames/idle.webp",
+    walkA: "/assets/new-fighters/rafeta-frames/walk-a.webp",
+    walkB: "/assets/new-fighters/rafeta-frames/walk-b.webp",
+    walkC: "/assets/new-fighters/rafeta-frames/walk-c.webp",
+    walkD: "/assets/new-fighters/rafeta-frames/walk-b.webp",
+    walkE: "/assets/new-fighters/rafeta-frames/walk-a.webp",
+    crouch: "/assets/new-fighters/rafeta-frames/crouch.webp",
+    rise: "/assets/new-fighters/rafeta-frames/jump.webp",
+    fire: "/assets/new-fighters/rafeta-frames/punch.webp",
+    heavyFire: "/assets/new-fighters/rafeta-frames/flag-sweep.webp",
+    kick: "/assets/new-fighters/rafeta-frames/kick.webp",
+    hit: "/assets/new-fighters/rafeta-frames/land.webp",
+  },
   estefy: {
     idle: "/assets/new-fighters/estefy/punio-guardia.webp", walkA: "/assets/new-fighters/estefy/caminar-01.webp", walkB: "/assets/new-fighters/estefy/caminar-02.webp",
     walkC: "/assets/new-fighters/estefy/caminar-03.webp", walkD: "/assets/new-fighters/estefy/caminar-04.webp", walkE: "/assets/new-fighters/estefy/caminar-02.webp",
@@ -1911,13 +1924,15 @@ export default function PlatformMode({ fighter, fighterName, soundOn, difficulty
                       : { column: 0, row: 0 }
         : undefined;
       drawImageContained(poseImage, -poseWidth / 2, -poseHeight, poseWidth, poseHeight, flipPose, alpha * flashAlpha, atlasCell);
-      if (fighter === "rafeta" && images["weapon-masia"]?.complete) {
-        const logoWidth = poseWidth * 0.103;
-        const logoHeight = poseHeight * 0.215;
-        const logoX = -poseWidth / 2 + poseWidth * 0.295;
+      // The Masia mark sits on the trousers of the standing frame only; the
+      // other frames move the legs, so a fixed overlay would float.
+      if (fighter === "rafeta" && poseImage === images["hero-idle"] && poseImage?.naturalWidth && images["weapon-masia"]?.complete) {
+        const ratio = Math.min(poseWidth / poseImage.naturalWidth, poseHeight / poseImage.naturalHeight);
+        const drawWidth = poseImage.naturalWidth * ratio;
+        const drawHeight = poseImage.naturalHeight * ratio;
         context.save();
         if (flipPose) context.scale(-1, 1);
-        context.drawImage(images["weapon-masia"], logoX, -poseHeight + poseHeight * 0.551, logoWidth, logoHeight);
+        context.drawImage(images["weapon-masia"], -drawWidth / 2 + drawWidth * 0.55, -drawHeight + drawHeight * 0.62, drawWidth * 0.08, drawHeight * 0.22);
         context.restore();
       }
       context.restore();

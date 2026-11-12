@@ -227,6 +227,27 @@
 #game .coop-player.tonimassama.down .coop-player-art,
 #game .orb-hero.tonimassama.orb-defeated .fighter-art.tonimassama { background-image:url('/assets/new-fighters/tonimassama-frames/getup.webp')!important; animation:none!important; }
 #game .orb-hero.tonimassama.orb-victory-dance .fighter-art.tonimassama { background-image:url('/assets/new-fighters/tonimassama-frames/kick.webp')!important; animation:none!important; }
+/* rafeta */
+#game .coop-player.rafeta .coop-player-art, #game .orb-hero.rafeta .fighter-art.rafeta { background-size:contain!important;background-position:center bottom!important;background-repeat:no-repeat!important; }
+#game .coop-player.rafeta .coop-player-art::before, #game .coop-player.rafeta .coop-player-art::after, #game .orb-hero.rafeta .fighter-art.rafeta::before, #game .orb-hero.rafeta .fighter-art.rafeta::after { content:none!important; }
+#game .coop-player.rafeta .fighter-walk-layers, #game .orb-hero.rafeta .fighter-walk-layers { display:none!important; }
+#game .coop-player.rafeta .coop-player-art,
+#game .orb-hero.rafeta .fighter-art.rafeta { background-image:url('/assets/new-fighters/rafeta-frames/idle.webp')!important; animation:none!important; }
+#game .coop-player.rafeta.walk .coop-player-art,
+#game .orb-hero.rafeta.orb-moving .fighter-art.rafeta { background-image:url('/assets/new-fighters/rafeta-frames/walk-a.webp')!important; animation:none!important; }
+#game .coop-player.rafeta.walk.stride-alt .coop-player-art,
+#game .orb-hero.rafeta.orb-moving.orb-walk-fast .fighter-art.rafeta { background-image:url('/assets/new-fighters/rafeta-frames/walk-c.webp')!important; animation:none!important; }
+#game .coop-player.rafeta.jump .coop-player-art,
+#game .coop-player.rafeta.airborne .coop-player-art { background-image:url('/assets/new-fighters/rafeta-frames/jump.webp')!important; animation:none!important; }
+#game .coop-player.rafeta.fire .coop-player-art,
+#game .orb-hero.rafeta.orb-firing .fighter-art.rafeta { background-image:url('/assets/new-fighters/rafeta-frames/punch.webp')!important; animation:none!important; }
+#game .coop-player.rafeta.special .coop-player-art { background-image:url('/assets/new-fighters/rafeta-frames/flag-sweep.webp')!important; animation:none!important; }
+#game .coop-player.rafeta.dodge .coop-player-art,
+#game .coop-player.rafeta.revive .coop-player-art { background-image:url('/assets/new-fighters/rafeta-frames/guard.webp')!important; animation:none!important; }
+#game .coop-player.rafeta.hit .coop-player-art { background-image:url('/assets/new-fighters/rafeta-frames/land.webp')!important; animation:none!important; }
+#game .coop-player.rafeta.down .coop-player-art,
+#game .orb-hero.rafeta.orb-defeated .fighter-art.rafeta { background-image:url('/assets/new-fighters/rafeta-frames/crouch.webp')!important; animation:none!important; }
+#game .orb-hero.rafeta.orb-victory-dance .fighter-art.rafeta { background-image:url('/assets/new-fighters/rafeta-frames/kick.webp')!important; animation:none!important; }
 /* nova */
 #game .coop-player.nova .coop-player-art, #game .orb-hero.nova .fighter-art.nova { background-size:contain!important;background-position:center bottom!important;background-repeat:no-repeat!important; }
 #game .coop-player.nova .coop-player-art::before, #game .coop-player.nova .coop-player-art::after, #game .orb-hero.nova .fighter-art.nova::before, #game .orb-hero.nova .fighter-art.nova::after { content:none!important; }

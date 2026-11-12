@@ -246,7 +246,12 @@ const HERO_POSE_ASSETS = {
     crouch: "/assets/new-fighters/bomba-crouch-v21849.webp", rise: "/assets/new-fighters/bomba-crouch-v21849.webp",
     fire: "/assets/new-fighters/bomba-rig-v21847-punch.webp", heavyFire: "/assets/new-fighters/bomba-hoe-attack-v2.webp", kick: "/assets/new-fighters/bomba-rig-v21847-kick.webp", hit: "/assets/new-fighters/bomba-guard-v2.webp",
   },
-  rafeta: atlasHeroPoses("/prison-slug/assets/white-hero.png"),
+  rafeta: {
+    idle: "/assets/new-fighters/rafeta-frames/idle.webp", walkA: "/assets/new-fighters/rafeta-frames/walk-a.webp", walkB: "/assets/new-fighters/rafeta-frames/walk-b.webp",
+    walkC: "/assets/new-fighters/rafeta-frames/walk-c.webp", walkD: "/assets/new-fighters/rafeta-frames/walk-b.webp", walkE: "/assets/new-fighters/rafeta-frames/walk-a.webp",
+    crouch: "/assets/new-fighters/rafeta-frames/crouch.webp", rise: "/assets/new-fighters/rafeta-frames/jump.webp",
+    fire: "/assets/new-fighters/rafeta-frames/punch.webp", heavyFire: "/assets/new-fighters/rafeta-frames/flag-sweep.webp", kick: "/assets/new-fighters/rafeta-frames/kick.webp", hit: "/assets/new-fighters/rafeta-frames/land.webp",
+  },
   estefy: {
     idle: "/assets/new-fighters/estefy/punio-guardia.webp", walkA: "/assets/new-fighters/estefy/caminar-01.webp", walkB: "/assets/new-fighters/estefy/caminar-02.webp", walkC: "/assets/new-fighters/estefy/caminar-03.webp", walkD: "/assets/new-fighters/estefy/caminar-04.webp", walkE: "/assets/new-fighters/estefy/caminar-02.webp",
     crouch: "/assets/new-fighters/estefy/agacharse.webp", rise: "/assets/new-fighters/estefy/salto-aire.webp", fire: "/assets/new-fighters/estefy/machete-corte.webp", heavyFire: "/assets/new-fighters/estefy/machete-continuacion.webp", kick: "/assets/new-fighters/estefy/patada-contacto.webp", hit: "/assets/new-fighters/estefy/recibir-golpe.webp"
@@ -1705,15 +1710,17 @@ function drawCharacterSprite(heroId, screenX, groundY, facing = 1, pose = "idle"
   if (facing < 0) ctx.scale(-1, 1);
   ctx.shadowColor = `${hero.color}aa`;
   ctx.shadowBlur = 10 * scale;
-  // Transparent cutouts are drawn normally; only Rafeta's legacy sprite still has a dark backdrop.
-  ctx.globalCompositeOperation = heroId === "rafeta" ? "screen" : "source-over";
   // These two attack drawings face left, everything else faces right.
   if ((heroId === "cristian" || heroId === "bacora") && pose === "fire" && !shotReady) ctx.scale(-1, 1);
   const drawn = drawHeroFrame(poseImage, -poseWidth / 2, -poseHeight, poseWidth, poseHeight, shotReady ? undefined : heroAtlasCell(heroId, pose));
-  ctx.globalCompositeOperation = "source-over";
   ctx.shadowBlur = 0;
   if (!drawn) { ctx.fillStyle = hero.color; ctx.fillRect(-24 * scale, -145 * scale, 48 * scale, 145 * scale); }
-  if (heroId === "rafeta" && art.masia.complete) { ctx.save(); ctx.scale(-1, 1); ctx.drawImage(art.masia, 10 * scale, -poseHeight * .46, 15 * scale, 34 * scale); ctx.restore(); }
+  // The Masia mark belongs on the trousers of Rafeta's standing frame only.
+  if (heroId === "rafeta" && drawn && poseImage === art.heroPoses.rafeta?.idle && art.masia.complete) {
+    const ratio = Math.min(poseWidth / poseImage.naturalWidth, poseHeight / poseImage.naturalHeight);
+    const drawWidth = poseImage.naturalWidth * ratio, drawHeight = poseImage.naturalHeight * ratio;
+    ctx.drawImage(art.masia, -drawWidth / 2 + drawWidth * .55, -drawHeight + drawHeight * .62, drawWidth * .08, drawHeight * .22);
+  }
   ctx.restore();
   return { poseWidth, poseHeight };
 }

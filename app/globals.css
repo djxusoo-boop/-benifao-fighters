@@ -8307,6 +8307,11 @@ html[data-display-mode=mobile] .select-screen.lobby-v2168 .character-card small 
   width:8%;
   height:22%;
 }
+/* The Masia mark is placed for the standing pose; in every other pose the
+   trousers move, so a fixed overlay would float beside the body. */
+.arena .fighter.motion-rig.rafeta:is(.walk,.dash,.jump,.airborne,.crouch,.dodge,.block,.punch,.kick,.special,.hit,.launched,.knockdown,.defeated,.super-anim) .fighter-art.rafeta::after { display:none!important; }
+/* Low punch and sweep use the dedicated crouching attack frame. */
+.arena .fighter.motion-rig.rafeta.low-attack:is(.punch,.kick) .fighter-pose .fighter-art.rafeta { animation:none!important; background-image:url('/assets/new-fighters/rafeta-frames/crouch-attack.webp')!important; }
 .arena .fighter.motion-rig.walk.rafeta .fighter-art.rafeta { animation:rafeta-walk-frames 680ms steps(1,end) infinite; }
 .arena .fighter.motion-rig.jump.rafeta .fighter-art.rafeta,
 .arena .fighter.motion-rig.airborne:not(.punch):not(.kick):not(.special).rafeta .fighter-art.rafeta { background-image:url('/assets/new-fighters/rafeta-frames/jump.webp'); }
@@ -10188,6 +10193,11 @@ html[data-display-mode=mobile] .select-screen.lobby-v2168 .character-card small 
 .arena .fighter.motion-rig.tonimassama.walk-frame-1:is(.walk,.dash) .fighter-pose .fighter-art.tonimassama { background-image:url('/assets/new-fighters/tonimassama-frames/walk-b.webp')!important; }
 .arena .fighter.motion-rig.tonimassama.walk-frame-2:is(.walk,.dash) .fighter-pose .fighter-art.tonimassama { background-image:url('/assets/new-fighters/tonimassama-frames/walk-c.webp')!important; }
 .arena .fighter.motion-rig.tonimassama.walk-frame-3:is(.walk,.dash) .fighter-pose .fighter-art.tonimassama { background-image:url('/assets/new-fighters/tonimassama-frames/walk-b.webp')!important; }
+/* Rafeta: the generic walk rule clears every sprite, so his own cycle must be explicit. */
+.arena .fighter.motion-rig.rafeta.walk-frame-0:is(.walk,.dash) .fighter-pose .fighter-art.rafeta { background-image:url('/assets/new-fighters/rafeta-frames/walk-a.webp')!important; animation:none!important; }
+.arena .fighter.motion-rig.rafeta.walk-frame-1:is(.walk,.dash) .fighter-pose .fighter-art.rafeta { background-image:url('/assets/new-fighters/rafeta-frames/walk-b.webp')!important; animation:none!important; }
+.arena .fighter.motion-rig.rafeta.walk-frame-2:is(.walk,.dash) .fighter-pose .fighter-art.rafeta { background-image:url('/assets/new-fighters/rafeta-frames/walk-c.webp')!important; animation:none!important; }
+.arena .fighter.motion-rig.rafeta.walk-frame-3:is(.walk,.dash) .fighter-pose .fighter-art.rafeta { background-image:url('/assets/new-fighters/rafeta-frames/walk-b.webp')!important; animation:none!important; }
 
 /* Coop and Prison Slug use their own movement components, so animate only
    sprite position there; the isolated image URL stays stable on iOS Safari. */

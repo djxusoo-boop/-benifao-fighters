@@ -151,3 +151,22 @@ test("new fighter scale stays close to the original roster, with Bonviure only s
   assert.match(shortLandscape[1], /height:clamp\(144px,44vh,264px\)!important/);
   assert.match(shortLandscape[1], /height:clamp\(150px,46vh,276px\)!important/);
 });
+
+test("Rafeta is selectable and every pose he uses exists in every mode", async () => {
+  const read = (path) => readFile(new URL(`../${path}`, import.meta.url), "utf8");
+  const page = await read("app/page.tsx");
+  assert.match(page.match(/const FIGHTER_ORDER: FighterId\[\] = \[[^\]]*\]/)[0], /"rafeta"/, "Rafeta must be in the fighter select");
+  const sources = await Promise.all(["app/globals.css", "app/mode-pose-map.css", "app/fighter-frames.ts", "app/PlatformMode.tsx", "public/prison-slug/game.js"].map(read));
+  const used = new Set(sources.flatMap((source) => [...source.matchAll(/rafeta-frames\/([a-z-]+\.webp)/g)].map((match) => match[1])));
+  for (const pose of ["idle", "walk-a", "walk-b", "walk-c", "guard", "jump", "land", "crouch", "crouch-attack", "punch", "kick", "flag-sweep"]) {
+    assert.ok(used.has(`${pose}.webp`), `${pose}.webp must be used by the game`);
+  }
+  for (const name of used) {
+    const image = await readFile(new URL(`../public/assets/new-fighters/rafeta-frames/${name}`, import.meta.url));
+    assert.equal(image.toString("ascii", 8, 12), "WEBP", `${name} must be a readable WebP`);
+  }
+  const [css, platform, slug] = [sources[0], sources[3], sources[4]];
+  for (const frame of [0, 1, 2, 3]) assert.match(css, new RegExp(`\\.rafeta\\.walk-frame-${frame}:is\\(\\.walk,\\.dash\\)[^{]*\\{ background-image:url\\('/assets/new-fighters/rafeta-frames/walk-`), `walk frame ${frame} must show Rafeta`);
+  assert.doesNotMatch(platform, /rafeta: atlasHeroPoses/, "Aventura Central must animate Rafeta with his frames");
+  assert.doesNotMatch(slug, /rafeta: atlasHeroPoses/, "Prison Slug must animate Rafeta with his frames");
+});

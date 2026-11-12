@@ -17,7 +17,7 @@
     ["borja", "BORJA", "EL DOMADOR DEL SAPO"], ["bacora", "BACORA", "EL GUARDIÁN DE LA W"],
     ["bonviure", "BONVIURE", "EL ANCLA NEGRA"], ["elchica", "EL CHICA", "EL REY DEL JÄGER"],
     ["ogalla", "OGALLA", "EL REY DE LA ALCACHOFA"], ["xuso", "XUSO", "EL DÚO DEL PERRO"],
-    ["bomba", "EL BOMBA", "EL AZADÓN"], ["tonimassama", "TONI MASSAMA", "EL REY DE LA PEINETA"],
+    ["bomba", "EL BOMBA", "EL AZADÓN"], ["rafeta", "RAFETA", "PORTAESTANDARTE"], ["tonimassama", "TONI MASSAMA", "EL REY DE LA PEINETA"],
     ["nova", "YOYE", "PRISMA DE NEÓN"], ["estefy", "ESTEFY", "LA CAPITANA DEL MACHETE"],
   ];
   const modes = [
