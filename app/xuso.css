@@ -32,14 +32,12 @@
 #game .fighter.motion-rig.xuso.punch.pose-phase-0 .fighter-pose .fighter-art.xuso { background-image:url('/assets/new-fighters/xuso-v3/xuso-punio-01.webp')!important; animation:none!important; }
 #game .fighter.motion-rig.xuso.punch.pose-phase-1 .fighter-pose .fighter-art.xuso { background-image:url('/assets/new-fighters/xuso-v3/xuso-punio-02.webp')!important; animation:none!important; }
 #game .fighter.motion-rig.xuso.punch.pose-phase-2 .fighter-pose .fighter-art.xuso,
-#game .fighter.motion-rig.xuso.punch.pose-phase-3 .fighter-pose .fighter-art.xuso,
-#game .fighter.motion-rig.xuso.punch.airborne .fighter-pose .fighter-art.xuso { background-image:url('/assets/new-fighters/xuso-v3/xuso-punio-03.webp')!important; animation:none!important; }
+#game .fighter.motion-rig.xuso.punch.pose-phase-3 .fighter-pose .fighter-art.xuso { background-image:url('/assets/new-fighters/xuso-v3/xuso-punio-03.webp')!important; animation:none!important; }
 #game .fighter.motion-rig.xuso.punch.pose-phase-4 .fighter-pose .fighter-art.xuso { background-image:url('/assets/new-fighters/xuso-v3/xuso-punio-04.webp')!important; animation:none!important; }
 #game .fighter.motion-rig.xuso.kick.pose-phase-0 .fighter-pose .fighter-art.xuso { background-image:url('/assets/new-fighters/xuso-v3/xuso-patada-01.webp')!important; animation:none!important; }
 #game .fighter.motion-rig.xuso.kick.pose-phase-1 .fighter-pose .fighter-art.xuso { background-image:url('/assets/new-fighters/xuso-v3/xuso-patada-02.webp')!important; animation:none!important; }
 #game .fighter.motion-rig.xuso.kick.pose-phase-2 .fighter-pose .fighter-art.xuso,
-#game .fighter.motion-rig.xuso.kick.pose-phase-3 .fighter-pose .fighter-art.xuso,
-#game .fighter.motion-rig.xuso.kick.airborne .fighter-pose .fighter-art.xuso { background-image:url('/assets/new-fighters/xuso-v3/xuso-patada-03.webp')!important; animation:none!important; }
+#game .fighter.motion-rig.xuso.kick.pose-phase-3 .fighter-pose .fighter-art.xuso { background-image:url('/assets/new-fighters/xuso-v3/xuso-patada-03.webp')!important; animation:none!important; }
 #game .fighter.motion-rig.xuso.kick.pose-phase-4 .fighter-pose .fighter-art.xuso { background-image:url('/assets/new-fighters/xuso-v3/xuso-patada-04.webp')!important; animation:none!important; }
 /* Specials: Xuso gives the order and Spooky does the job. */
 #game .fighter.motion-rig.xuso.special.dog.pose-phase-0 .fighter-pose .fighter-art.xuso,
