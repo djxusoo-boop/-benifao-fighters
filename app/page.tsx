@@ -777,6 +777,7 @@ function Home() {
   const dashCooldownRef = useRef<Record<Side, number>>({ player: 0, cpu: 0 });
   const evadeUntilRef = useRef<Record<Side, number>>({ player: 0, cpu: 0 });
   const queuedAttackRef = useRef<Record<Side, QueuedAttack>>({ player: null, cpu: null });
+  const takeoffInputRef = useRef<Record<Side, QueuedAttack>>({ player: null, cpu: null });
   // Every attack owns a token. A delayed hit is ignored when its fighter was
   // interrupted, knocked down or has already started another move.
   const attackTokenRef = useRef<Record<Side, number>>({ player: 0, cpu: 0 });
@@ -1539,6 +1540,10 @@ function Home() {
       const ownAction = side === "player" ? snapshot.playerAction : snapshot.cpuAction;
       const airborne = side === "player" ? snapshot.playerAirborne : snapshot.cpuAirborne;
       const now = Date.now();
+      if (jumpLockRef.current[side] && !airborne && (ownAction === "idle" || ownAction === "walk" || ownAction === "crouch")) {
+        takeoffInputRef.current[side] = { level: inputLevel, normalMove };
+        return;
+      }
       // Guard + punch = throw. It beats a rival who only blocks.
       if (level === 0 && normalMove === "punch" && ownAction === "block" && !airborne) {
         throwRef.current(side);
@@ -1993,11 +1998,23 @@ function Home() {
     performAttackRef.current = performAttack;
   }, [performAttack]);
 
+  useEffect(() => {
+    for (const side of ["player", "cpu"] as const) {
+      const inAir = side === "player" ? game.playerAirborne : game.cpuAirborne;
+      const input = takeoffInputRef.current[side];
+      if (inAir && input) {
+        takeoffInputRef.current[side] = null;
+        performAttackRef.current(side, input.level, input.normalMove);
+      }
+    }
+  }, [game.playerAirborne, game.cpuAirborne]);
+
   const jump = useCallback((side: Side) => {
     const snapshot = gameRef.current;
     if (snapshot.phase !== "fight" || pausedRef.current || jumpLockRef.current[side]) return;
     const ownAction = side === "player" ? snapshot.playerAction : snapshot.cpuAction;
     if (ownAction !== "idle" && ownAction !== "walk" && ownAction !== "crouch") return;
+    takeoffInputRef.current[side] = null;
     jumpLockRef.current[side] = true;
     const keys = keysRef.current;
     const manualDirection = side === "player"
@@ -2031,6 +2048,12 @@ function Home() {
     beep(112, 0.05, "triangle");
 
     later(() => {
+      const live = gameRef.current;
+      const action = side === "player" ? live.playerAction : live.cpuAction;
+      if (live.phase !== "fight" || (action !== "crouch" && action !== "walk" && action !== "idle")) {
+        takeoffInputRef.current[side] = null;
+        return;
+      }
       setGame((current) => side === "player"
         ? { ...current, playerAction: "jump", playerAirborne: true }
         : { ...current, cpuAction: "jump", cpuAirborne: true });
@@ -2208,6 +2231,7 @@ function Home() {
     dashCooldownRef.current = { player: 0, cpu: 0 };
     evadeUntilRef.current = { player: 0, cpu: 0 };
     queuedAttackRef.current = { player: null, cpu: null };
+    takeoffInputRef.current = { player: null, cpu: null };
     attackTokenRef.current = { player: 0, cpu: 0 };
     comboCountRef.current = { player: 0, cpu: 0 };
     setCombo({ player: 0, cpu: 0 });
@@ -3304,6 +3328,7 @@ function Home() {
     dashCooldownRef.current = { player: 0, cpu: 0 };
     evadeUntilRef.current = { player: 0, cpu: 0 };
     queuedAttackRef.current = { player: null, cpu: null };
+    takeoffInputRef.current = { player: null, cpu: null };
     attackTokenRef.current = { player: 0, cpu: 0 };
     comboCountRef.current = { player: 0, cpu: 0 };
     setCombo({ player: 0, cpu: 0 });
