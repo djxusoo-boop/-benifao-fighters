@@ -88,6 +88,8 @@ type GameState = {
   cpuMove: SpecialMove | null;
   playerAttackDirection: AttackDirection;
   cpuAttackDirection: AttackDirection;
+  playerCast?: { origin: number; target: number; airborne: boolean };
+  cpuCast?: { origin: number; target: number; airborne: boolean };
   playerAttackVariant: AttackVariant;
   cpuAttackVariant: AttackVariant;
   playerPosePhase: FighterPosePhase;
@@ -144,6 +146,7 @@ const FIGHTERS: Record<FighterId, { name: string; title: string; specialOne: str
   estefy: { name: "ESTEFY", title: "LA CAPITANA DEL MACHETE", specialOne: "MACHETAZO", specialTwo: "TORMENTA DE HOJAS", color: "#ffd21f" },
 };
 
+const HEAVY_NORMAL_FIGHTERS = new Set<FighterId>(["mad-dog", "angerfist", "dalmau"]);
 const FIGHTER_ORDER: FighterId[] = ["maletilla", "vanessa", "josevictor", "cristian", "borja", "bacora", "bonviure", "elchica", "ogalla", "xuso", "bomba", "rafeta", "tonimassama", "nova", "estefy", "mad-dog", "angerfist", "dalmau"];
 const MODE_ORDER = ["arcade", "fight", "coop", "orbs", "central", "slug", "tournament", "training", "ranking", "moves", "profile"] as const;
 type LobbyModeId = typeof MODE_ORDER[number];
@@ -170,7 +173,7 @@ const STAGES = [
 
 const GAME_TITLE = "HARDCORE FIGHTERS";
 const GAME_EDITION = "WEB · ARCADE EDITION";
-const GAME_VERSION = "V2.35.19";
+const GAME_VERSION = "V2.35.20";
 
 const ROUND_SECONDS = 99;
 const SUPER_MAX = 100;
@@ -288,7 +291,7 @@ const MOVE_ASSETS: Record<SpecialMove, string> = {
   anchor: "/assets/new-fighters/anchor.svg", chain: "/assets/new-fighters/chain.svg",
   jager: "/assets/new-fighters/jager.svg", amber: "/assets/new-fighters/amber.svg",
   scepter: "/assets/new-fighters/scepter.svg", artichokes: "/assets/new-fighters/artichokes.svg",
-  dog: "/assets/new-fighters/xuso-v3/perro-mordisco-05.webp", howl: "/assets/new-fighters/xuso-v3/perro-pata-arriba.webp", hoe: "/assets/new-fighters/hoe.svg", hoeSweep: "/assets/new-fighters/hoe.svg", flag: "/assets/new-fighters/rafeta-flag.svg", flagSweep: "/assets/new-fighters/rafeta-flag.svg", goldPistol: "/assets/new-fighters/tonimassama-bullet.svg", fingerPeinetas: "/assets/new-fighters/tonimassama-peineta-logo.webp", prism: "/assets/new-fighters/tonimassama-bullet.svg", prismBurst: "/assets/new-fighters/tonimassama-bullet.svg",
+  dog: "/assets/new-fighters/xuso-v3/perro-mordisco-05.webp", howl: "/assets/new-fighters/xuso-v3/perro-pata-arriba.webp", hoe: "/assets/new-fighters/hoe.svg", hoeSweep: "/assets/new-fighters/hoe.svg", flag: "/assets/new-fighters/rafeta-flag.svg", flagSweep: "/assets/new-fighters/rafeta-flag.svg", goldPistol: "/assets/new-fighters/tonimassama-bullet.svg", fingerPeinetas: "/assets/new-fighters/tonimassama-peineta-logo.webp", prism: "/assets/supers/nova/c3.webp", prismBurst: "/assets/supers/nova/c3.webp",
 };
 
 const ARCADE_PICKUPS = [
@@ -425,6 +428,8 @@ function SpecialEffect({ move, side, origin, target, arenaWidth, direction, airb
 }
 
 
+type PassiveDog = { side: Side; id: number; origin: number; target: number; direction: AttackDirection };
+
 type FightView = {
   geometry?: Record<Side, { width: number; height: number; bottom: number }>;
   stage: typeof STAGES[number]; game: GameState; trainingMode: boolean;
@@ -434,7 +439,7 @@ type FightView = {
   playerWalkIntent: WalkIntent; cpuWalkIntent: WalkIntent; movementGear: Record<Side, MovementGear>; facing: Record<Side, string>;
   immuneClock: number; immuneUntil: Record<Side, number>; stunned: Record<Side, boolean>; superAnim: Record<Side, SuperAnim | null>;
   lowAttack: Record<Side, boolean>; passiveBadge: Record<Side, { text: string; id: number } | null>; combo: Record<Side, number>;
-  damagePops: DamagePop[]; passiveDog: { side: Side; id: number } | null; superFx: SuperFx; superFlash: SuperFlash; fightCall: FightCall; arenaWidth: number;
+  damagePops: DamagePop[]; passiveDog: PassiveDog | null; superFx: SuperFx; superFlash: SuperFlash; fightCall: FightCall; arenaWidth: number;
 };
 function FightScene({ view, playerFighterRef, cpuFighterRef }: { view: FightView; playerFighterRef?: React.RefObject<HTMLDivElement | null>; cpuFighterRef?: React.RefObject<HTMLDivElement | null> }) {
   const { stage, game, trainingMode, playerData, cpuData, superMeter, roundWins, roundNumber, battleMode, stageIndex, fightPickup, selected, opponent, playerVictory, cpuVictory, playerWalkIntent, cpuWalkIntent, movementGear, facing, immuneClock, immuneUntil, stunned, superAnim, lowAttack, passiveBadge, combo, damagePops, passiveDog, superFx, superFlash, fightCall, arenaWidth } = view;
@@ -469,14 +474,14 @@ function FightScene({ view, playerFighterRef, cpuFighterRef }: { view: FightView
           <div className={`fighter-hud player-hud ${game.playerAction === "hit" || game.playerAction === "launched" ? "damaged" : ""}`}>
             <div className="hud-name"><span>1P · {Math.ceil(game.playerHealth)}%</span>{playerData.name}</div>
             <div className={`health-track ${game.playerHealth <= 25 ? "critical" : ""}`}><i className="health-trail" style={{ width: `${game.playerHealth}%` }} /><span style={{ width: `${game.playerHealth}%` }} /></div>
-            <div className={`super-meter ${superMeter.player >= SUPER_MAX ? "full" : ""}`} aria-label={`Barra de super ${Math.round(superMeter.player)}%`}><span style={{ width: `${superMeter.player}%` }} /><b>{superMeter.player >= SUPER_MAX ? "¡SUPER LISTO! · L" : `SUPER ${Math.round(superMeter.player)}%`}</b></div>
+            {!HEAVY_NORMAL_FIGHTERS.has(selected) && (<div className={`super-meter ${superMeter.player >= SUPER_MAX ? "full" : ""}`} aria-label={`Barra de super ${Math.round(superMeter.player)}%`}><span style={{ width: `${superMeter.player}%` }} /><b>{superMeter.player >= SUPER_MAX ? "¡SUPER LISTO! · L" : `SUPER ${Math.round(superMeter.player)}%`}</b></div>)}
             <div className="round-pips" aria-label={`${roundWins.player} rondas ganadas`}><i className={roundWins.player >= 1 ? "won" : ""} /><i className={roundWins.player >= 2 ? "won" : ""} /></div>
           </div>
           <div className="timer" aria-label={trainingMode ? "Entrenamiento sin límite" : `${game.timer} segundos`}><small>{trainingMode ? "TRAIN" : `R${roundNumber}`}</small><span>{trainingMode ? "∞" : String(game.timer).padStart(2, "0")}</span></div>
           <div className={`fighter-hud cpu-hud ${game.cpuAction === "hit" || game.cpuAction === "launched" ? "damaged" : ""}`}>
             <div className="hud-name">{cpuData.name}<span>{battleMode === "local" ? "2P" : "CPU"} · {Math.ceil(game.cpuHealth)}%</span></div>
             <div className={`health-track ${game.cpuHealth <= 25 ? "critical" : ""}`}><i className="health-trail" style={{ width: `${game.cpuHealth}%` }} /><span style={{ width: `${game.cpuHealth}%` }} /></div>
-            <div className={`super-meter ${superMeter.cpu >= SUPER_MAX ? "full" : ""}`} aria-label={`Barra de super rival ${Math.round(superMeter.cpu)}%`}><span style={{ width: `${superMeter.cpu}%` }} /><b>{superMeter.cpu >= SUPER_MAX ? "¡SUPER LISTO!" : `SUPER ${Math.round(superMeter.cpu)}%`}</b></div>
+            {!HEAVY_NORMAL_FIGHTERS.has(opponent) && (<div className={`super-meter ${superMeter.cpu >= SUPER_MAX ? "full" : ""}`} aria-label={`Barra de super rival ${Math.round(superMeter.cpu)}%`}><span style={{ width: `${superMeter.cpu}%` }} /><b>{superMeter.cpu >= SUPER_MAX ? "¡SUPER LISTO!" : `SUPER ${Math.round(superMeter.cpu)}%`}</b></div>)}
             <div className="round-pips" aria-label={`${roundWins.cpu} rondas ganadas`}><i className={roundWins.cpu >= 1 ? "won" : ""} /><i className={roundWins.cpu >= 2 ? "won" : ""} /></div>
           </div>
         </div>
@@ -540,28 +545,28 @@ function FightScene({ view, playerFighterRef, cpuFighterRef }: { view: FightView
           </div>
         </>}
 
-        {game.playerMove && (
+        {game.playerAction === "special" && game.playerMove && (
           <SpecialEffect
             move={game.playerMove}
             side="player"
-            origin={game.playerX}
-            target={game.cpuX}
+            origin={game.playerCast?.origin ?? game.playerX}
+            target={game.playerCast?.target ?? game.cpuX}
             arenaWidth={arenaWidth}
             direction={game.playerAttackDirection}
-            airborne={game.playerAirborne}
+            airborne={game.playerCast?.airborne ?? game.playerAirborne}
             color={playerData.color}
             heavy={game.playerMove === specialFor(selected, 2)}
           />
         )}
-        {game.cpuMove && (
+        {game.cpuAction === "special" && game.cpuMove && (
           <SpecialEffect
             move={game.cpuMove}
             side="cpu"
-            origin={game.cpuX}
-            target={game.playerX}
+            origin={game.cpuCast?.origin ?? game.cpuX}
+            target={game.cpuCast?.target ?? game.playerX}
             arenaWidth={arenaWidth}
             direction={game.cpuAttackDirection}
-            airborne={game.cpuAirborne}
+            airborne={game.cpuCast?.airborne ?? game.cpuAirborne}
             color={cpuData.color}
             heavy={game.cpuMove === specialFor(opponent, 2)}
           />
@@ -574,8 +579,7 @@ function FightScene({ view, playerFighterRef, cpuFighterRef }: { view: FightView
         ))}
         {passiveDog && game.phase === "fight" && (
           <DogSpecial key={`passive-dog-${passiveDog.id}`} move="dog" side={passiveDog.side}
-            origin={passiveDog.side === "player" ? game.playerX : game.cpuX} target={passiveDog.side === "player" ? game.cpuX : game.playerX}
-            direction={directionToOpponent(passiveDog.side === "player" ? game.playerX : game.cpuX, passiveDog.side === "player" ? game.cpuX : game.playerX)} />
+            origin={passiveDog.origin} target={passiveDog.target} direction={passiveDog.direction} />
         )}
         {superFx && <SuperEffect key={`superfx-${superFx.id}`} fx={superFx} minimal={Boolean(SUPER_ANIM[superFx.fighter])} />}
         {(["player", "cpu"] as Side[]).map((side) => {
@@ -744,7 +748,7 @@ function Home() {
   const [vsScreen, setVsScreen] = useState<{ id: number } | null>(null);
   const [arcadeRun, setArcadeRun] = useState<ArcadeRun | null>(null);
   const arcadeRunRef = useRef<ArcadeRun | null>(null);
-  const [passiveDog, setPassiveDog] = useState<{ side: Side; id: number } | null>(null);
+  const [passiveDog, setPassiveDog] = useState<PassiveDog | null>(null);
   const [passiveBadge, setPassiveBadge] = useState<Record<Side, { text: string; id: number } | null>>({ player: null, cpu: null });
   const [matchStats, setMatchStats] = useState<MatchStats>(freshMatchStats);
   const [roundEndKind, setRoundEndKind] = useState<"ko" | "perfect" | "time">("ko");
@@ -1344,8 +1348,10 @@ function Home() {
   const jingle = useCallback((kind: Parameters<ArcadeAudio["jingle"]>[0]) => { if (soundOn) getAudio().jingle(kind); }, [getAudio, soundOn]);
 
   const addMeter = useCallback((side: Side, amount: number) => {
+    const fighter = side === "player" ? selected : opponent;
+    if (HEAVY_NORMAL_FIGHTERS.has(fighter)) return;
     const previous = superMeterRef.current[side];
-    const fighterPassive = FIGHTER_PROFILES[side === "player" ? selected : opponent].passive.id;
+    const fighterPassive = FIGHTER_PROFILES[fighter].passive.id;
     const next = Math.min(SUPER_MAX, previous + amount * (trainingMode ? 3 : 1) * (fighterPassive === "prismCharge" ? 1.5 : 1));
     if (next === previous) return;
     superMeterRef.current = { ...superMeterRef.current, [side]: next };
@@ -1530,7 +1536,7 @@ function Home() {
       const snapshot = gameRef.current;
       if (snapshot.phase !== "fight" || pausedRef.current) return;
       const inputLevel = requestedLevel;
-      const strongNormal = requestedLevel > 0 && ["mad-dog", "angerfist", "dalmau"].includes(side === "player" ? selected : opponent);
+      const strongNormal = requestedLevel > 0 && HEAVY_NORMAL_FIGHTERS.has(side === "player" ? selected : opponent);
       if (strongNormal) { normalMove = requestedLevel === 1 ? "punch" : "kick"; requestedLevel = 0; }
       // A full meter turns special 2 into the SUPER. The CPU also has to wait
       // between specials so it can't spam them every half second.
@@ -1659,6 +1665,7 @@ function Home() {
         if (side === "player") {
           next.playerAction = attackerAction;
           next.playerMove = specialMove;
+          next.playerCast = specialMove ? { origin: snapshot.playerX, target: snapshot.cpuX, airborne } : undefined;
           next.playerAttackDirection = attackDirection;
           next.playerAttackVariant = attackVariant;
           next.playerPosePhase = 0;
@@ -1671,6 +1678,7 @@ function Home() {
         } else {
           next.cpuAction = attackerAction;
           next.cpuMove = specialMove;
+          next.cpuCast = specialMove ? { origin: snapshot.cpuX, target: snapshot.playerX, airborne } : undefined;
           next.cpuAttackDirection = attackDirection;
           next.cpuAttackVariant = attackVariant;
           next.cpuPosePhase = 0;
@@ -2314,11 +2322,12 @@ function Home() {
         if (Date.now() < immuneUntilRef.current[target] || Date.now() < evadeUntilRef.current[target]) return;
         // Spooky runs in on his own and bites; the bite lands with his jaws.
         const id = Date.now() + Math.random();
-        setPassiveDog({ side, id });
-        later(() => setPassiveDog((current) => current?.id === id ? null : current), 1200);
         const origin = side === "player" ? current.playerX : current.cpuX;
         const rival = side === "player" ? current.cpuX : current.playerX;
-        const stop = spookyPath(origin, rival, directionToOpponent(origin, rival), "dog").stop;
+        const direction = directionToOpponent(origin, rival);
+        setPassiveDog({ side, id, origin, target: rival, direction });
+        later(() => setPassiveDog((current) => current?.id === id ? null : current), 1200);
+        const stop = spookyPath(origin, rival, direction, "dog").stop;
         later(() => {
           const live = gameRef.current;
           const rivalX = side === "player" ? live.cpuX : live.playerX;
@@ -3565,7 +3574,7 @@ function Home() {
                       <small>MOVIMIENTOS DESTACADOS</small>
                       <span><kbd className="key-k">K</kbd>{FIGHTERS[shown].specialOne}</span>
                       <span><kbd className="key-l">L</kbd>{FIGHTERS[shown].specialTwo}</span>
-                      {!['mad-dog', 'angerfist', 'dalmau'].includes(shown) && <span><kbd className="key-super">★</kbd>SUPER · {SUPER_MOVES[shown].name}</span>}
+                      {!HEAVY_NORMAL_FIGHTERS.has(shown) && <span><kbd className="key-super">★</kbd>SUPER · {SUPER_MOVES[shown].name}</span>}
                       <span><kbd className="key-throw">S+J</kbd>AGARRE</span>
                     </div>
                   </div>
@@ -3652,7 +3661,7 @@ function Home() {
                   <b>PUÑO / PATADA</b><span>Ataques rápidos a corta distancia</span>
                   <b>{playerData.specialOne}</b><span>Sin recarga · ESPECIAL 1</span>
                   <b>{playerData.specialTwo}</b><span>Sin recarga · ESPECIAL 2</span>
-                  {!['mad-dog', 'angerfist', 'dalmau'].includes(selected) && <><b>SUPER · {SUPER_MOVES[selected].name}</b><span>{SUPER_MOVES[selected].description}. Llena la barra SUPER golpeando y recibiendo golpes; con la barra llena, ESPECIAL 2 lo lanza</span></>}
+                  {!HEAVY_NORMAL_FIGHTERS.has(selected) && <><b>SUPER · {SUPER_MOVES[selected].name}</b><span>{SUPER_MOVES[selected].description}. Llena la barra SUPER golpeando y recibiendo golpes; con la barra llena, ESPECIAL 2 lo lanza</span></>}
                   <b>BARRIDA / PUÑO BAJO</b><span>Agáchate y pulsa patada para tirar al rival al suelo, o puño para golpear a un rival agachado</span>
                   <b>AGARRE</b><span>Mantén bloqueo y pulsa puño cerca del rival: rompe su guardia y lo tira al suelo</span>
                   <b>HABILIDAD · {FIGHTER_PROFILES[selected].passive.name}</b><span>{FIGHTER_PROFILES[selected].passive.description}</span>
@@ -3769,7 +3778,7 @@ function Home() {
               <li><kbd>J</kbd> PUÑO <kbd>H</kbd> PATADA</li>
               <li><kbd>K</kbd> {playerData.specialOne}</li>
               <li><kbd>L</kbd> {playerData.specialTwo}</li>
-              {!['mad-dog', 'angerfist', 'dalmau'].includes(selected) && <li><kbd>L</kbd> CON BARRA LLENA · SUPER {SUPER_ANIM[selected]?.name ?? SUPER_MOVES[selected].name}</li>}
+              {!HEAVY_NORMAL_FIGHTERS.has(selected) && <li><kbd>L</kbd> CON BARRA LLENA · SUPER {SUPER_ANIM[selected]?.name ?? SUPER_MOVES[selected].name}</li>}
               <li><kbd>S + J</kbd> AGARRE <kbd>C + H</kbd> BARRIDA <kbd>C + J</kbd> PUÑO BAJO</li>
               <li><kbd>S + A/D</kbd> ESQUIVA <kbd>A/D ×2</kbd> DASH <kbd>W</kbd> SALTO</li>
               <li className="pause-passive"><b>{FIGHTER_PROFILES[selected].passive.name}</b> · {FIGHTER_PROFILES[selected].passive.description}</li>
@@ -3951,7 +3960,7 @@ function Home() {
               <div><kbd>J</kbd><span>PUÑO</span></div>
               <div><kbd>H</kbd><span>PATADA</span></div>
               <div><kbd>K</kbd><span>{SHORT_SPECIALS[selected][0]}</span></div>
-              <div><kbd>L</kbd><span>{SHORT_SPECIALS[selected][1]}{!['mad-dog', 'angerfist', 'dalmau'].includes(selected) && ' · SUPER CON BARRA LLENA'}</span></div>
+              <div><kbd>L</kbd><span>{SHORT_SPECIALS[selected][1]}{!HEAVY_NORMAL_FIGHTERS.has(selected) && ' · SUPER CON BARRA LLENA'}</span></div>
               <div><kbd>S + A/D</kbd><span>BLOQUEAR · ESQUIVAR</span></div>
               <div><kbd>S + J</kbd><span>AGARRE</span></div>
             </>

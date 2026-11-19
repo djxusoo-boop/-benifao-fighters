@@ -78,7 +78,7 @@ const ORB_WEAPONS: Record<FighterId, string> = { "mad-dog": "/assets/new-fighter
   bomba: "/assets/new-fighters/hoe.svg",
   rafeta: "/assets/new-fighters/rafeta-flag.svg",
   tonimassama: "/assets/new-fighters/tonimassama-bullet.svg",
-  nova: "/assets/new-fighters/tonimassama-bullet.svg",
+  nova: "/assets/supers/nova/c3.webp",
   estefy: "/assets/new-fighters/estefy/machete-arma.webp",
 };
 const ORB_OBJECTS = [

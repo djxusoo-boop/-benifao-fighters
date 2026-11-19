@@ -136,3 +136,17 @@ export const pickWinQuote = (fighter: ProfileFighterId, seed: number) => {
   const quotes = FIGHTER_PROFILES[fighter].winQuotes;
   return quotes[Math.abs(Math.floor(seed)) % quotes.length];
 };
+
+export const RANGED_ATTACK_LABELS: Record<ProfileFighterId, [string, string]> = { "mad-dog": ["DISPARO", "RÁFAGA"], angerfist: ["DISPARO", "RÁFAGA"], dalmau: ["DISPARO", "RÁFAGA"],
+  maletilla: ["CLORETILO", "SETAS"],
+  vanessa: ["MICROS", "OREJAS"],
+  josevictor: ["BOLSAS", "BILLETES"],
+  cristian: ["VINILOS", "KRK 8"],
+  cesaret: ["PESCADO", "PECES"],
+  borja: ["SAPO", "VENENO"],
+  bacora: ["ESCUDO", "VARA"],
+  bonviure: ["ANCLA", "CADENA"],
+  elchica: ["BOTELLA", "ÁMBAR"],
+  ogalla: ["BASTÓN", "ALCACHOFAS"],
+  xuso: ["MORDISCO", "MEADA"], bomba: ["AZADA", "BARRIDO"], rafeta: ["BANDERA", "GIRO"], tonimassama: ["PISTOLA", "PEINETAS"], nova: ["PRISMA", "LÁSER"], estefy: ["MACHETE", "HOJAS"],
+};

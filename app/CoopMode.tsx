@@ -7,6 +7,7 @@ import ArcadeCrowd from "./ArcadeCrowd";
 import FighterWalkLayers from "./FighterWalkLayers";
 import TouchStick, { type StickIntent } from "./TouchStick";
 import { preloadCoopFrames } from "./coop-preload";
+import { RANGED_ATTACK_LABELS as ATTACK_LABELS } from "./fighter-profiles";
 
 type FighterId = "maletilla" | "vanessa" | "josevictor" | "cristian" | "cesaret" | "borja" | "bacora" | "bonviure" | "elchica" | "ogalla" | "xuso" | "bomba" | "rafeta" | "tonimassama" | "nova" | "estefy" | "mad-dog" | "angerfist" | "dalmau";
 type PlayerSlot = "p1" | "p2";
@@ -24,6 +25,7 @@ type CoopPlayer = {
   revive: number;
   moveDirection: -1 | 0 | 1;
   invulnerable?: boolean;
+  castFacing?: "face-left" | "face-right";
 };
 
 type Enemy = {
@@ -71,19 +73,6 @@ type Props = {
 };
 
 const PLAYER_NAMES: Record<FighterId, string> = { "mad-dog": "MAD DOG", angerfist: "ANGERFIST", dalmau: "DALMAU", maletilla: "MALETILLA", vanessa: "VANESSA", josevictor: "JOSEVICTOR", cristian: "CRISTIAN", cesaret: "CESARET", borja: "BORJA", bacora: "BACORA", bonviure: "BONVIURE", elchica: "EL CHICA", ogalla: "OGALLA", xuso: "XUSO", bomba: "EL BOMBA", rafeta: "RAFETA", tonimassama: "TONI MASSAMA", nova: "YOYE", estefy: "ESTEFY" };
-const ATTACK_LABELS: Record<FighterId, [string, string]> = { "mad-dog": ["GOLPE", "GOLPE"], angerfist: ["GOLPE", "GOLPE"], dalmau: ["GOLPE", "GOLPE"],
-  maletilla: ["CLORETILO", "SETAS"],
-  vanessa: ["MICROS", "OREJAS"],
-  josevictor: ["BOLSAS", "BILLETES"],
-  cristian: ["VINILOS", "KRK 8"],
-  cesaret: ["PESCADO", "PECES"],
-  borja: ["SAPO", "VENENO"],
-  bacora: ["ESCUDO", "VARA"],
-  bonviure: ["ANCLA", "CADENA"],
-  elchica: ["BOTELLA", "ÁMBAR"],
-  ogalla: ["BASTÓN", "ALCACHOFAS"],
-  xuso: ["MORDISCO", "MEADA"], bomba: ["AZADA", "BARRIDO"], rafeta: ["BANDERA", "GIRO"], tonimassama: ["PISTOLA", "PEINETAS"], nova: ["PRISMA", "LÁSER"], estefy: ["MACHETE", "HOJAS"],
-};
 const MAX_COOP_WAVES = 7; // the scripted waves; after them the survival is endless
 const BEST_WAVE_KEY = "hardcore-coop-best-wave";
 type WaveConfig = { health: number; x: number; role?: Exclude<EnemyRole, "boss" | "walker"> | "walker"; boss?: boolean };
@@ -141,7 +130,7 @@ const PROJECTILE_ASSETS = {
   flagSweep: "/assets/new-fighters/rafeta-flag.svg",
   pistol: "/assets/new-fighters/tonimassama-bullet.svg",
   peineta: "/assets/new-fighters/tonimassama-peineta-logo.webp",
-  prism: "/assets/new-fighters/tonimassama-bullet.svg",
+  prism: "/assets/supers/nova/c3.webp",
   machete: "/assets/new-fighters/estefy/machete-arco.webp",
   leaves: "/assets/new-fighters/estefy/machete-hojas.webp",
 };
@@ -349,8 +338,8 @@ export default function CoopMode({ playerOne, playerTwo, aiPlayerTwo = false, so
     };
   }, []);
 
-  const setAction = useCallback((slot: PlayerSlot, action: PlayerAction, duration = 0) => {
-    setPlayers((current) => ({ ...current, [slot]: { ...current[slot], action } }));
+  const setAction = useCallback((slot: PlayerSlot, action: PlayerAction, duration = 0, castFacing?: CoopPlayer["castFacing"]) => {
+    setPlayers((current) => ({ ...current, [slot]: { ...current[slot], action, castFacing } }));
     if (duration) later(() => {
       setPlayers((current) => current[slot].action === action && current[slot].health > 0
         ? { ...current, [slot]: { ...current[slot], action: current[slot].airborne ? "jump" : "idle" } }
@@ -437,7 +426,7 @@ export default function CoopMode({ playerOne, playerTwo, aiPlayerTwo = false, so
     const sorted = [...enemiesRef.current].sort((a, b) => Math.abs(a.x - player.x) - Math.abs(b.x - player.x));
     if (!sorted.length) return;
     cooldownRef.current[slot] = now + (special ? 820 : 420);
-    setAction(slot, special ? "special" : "fire", special ? 820 : 420);
+    setAction(slot, special ? "special" : "fire", special ? 820 : 420, sorted[0].x < player.x ? "face-left" : "face-right");
     const count = special ? 4 : 3;
     const kind: Projectile["kind"] = special
       ? fighter === "nova" ? "prism" : fighter === "estefy" ? "leaves" : fighter === "cesaret" ? "fish" : fighter === "borja" ? "venom" : fighter === "bacora" ? "staff" : fighter === "bonviure" ? "chain" : fighter === "elchica" ? "amber" : fighter === "ogalla" ? "artichokes" : fighter === "xuso" ? "dog" : fighter === "bomba" ? "hoe" : fighter === "rafeta" ? "flagSweep" : fighter === "tonimassama" ? "peineta" : fighter === "maletilla" ? "mushroom" : fighter === "vanessa" ? "ear" : fighter === "josevictor" ? "money" : "speaker"
@@ -461,7 +450,7 @@ export default function CoopMode({ playerOne, playerTwo, aiPlayerTwo = false, so
     if (statusRef.current !== "playing") return;
     const player = playersRef.current[slot];
     if (player.health <= 0 || player.airborne) return;
-    setPlayers((current) => ({ ...current, [slot]: { ...current[slot], airborne: true, action: "jump" } }));
+    setPlayers((current) => ({ ...current, [slot]: { ...current[slot], airborne: true, action: current[slot].action === "fire" || current[slot].action === "special" ? current[slot].action : "jump" } }));
     beep(185, 0.08, "triangle");
     later(() => {
       setPlayers((current) => current[slot].health > 0
@@ -871,11 +860,12 @@ export default function CoopMode({ playerOne, playerTwo, aiPlayerTwo = false, so
       {(["p1", "p2"] as PlayerSlot[]).map((slot) => {
         const player = players[slot];
         const fighter = player.fighter;
-        const facingRight = nearestDirection[slot] === "face-right";
+        const facing = player.action === "fire" || player.action === "special" ? (player.castFacing ?? nearestDirection[slot]) : nearestDirection[slot];
+        const facingRight = facing === "face-right";
         const movingForward = player.moveDirection !== 0 && (facingRight ? player.moveDirection > 0 : player.moveDirection < 0);
         const gait = player.action === "walk" ? (movingForward ? "walk-forward" : "walk-retreat") : "";
         return (
-          <div className={`coop-player ${slot} ${fighter} ${player.action} ${gait} ${player.airborne ? "airborne" : ""} ${nearestDirection[slot]} ${player.health > 0 && player.invulnerable ? "invulnerable" : ""}`} key={slot} style={{ left: `${player.x}%` }}>
+          <div className={`coop-player ${slot} ${fighter} ${player.action} ${gait} ${player.airborne ? "airborne" : ""} ${facing} ${player.health > 0 && player.invulnerable ? "invulnerable" : ""}`} key={slot} style={{ left: `${player.x}%` }}>
             <span className="coop-player-art" role="img" aria-label={PLAYER_NAMES[fighter]}>{!( ["cesaret", "borja", "bacora", "bonviure", "elchica", "ogalla", "xuso", "bomba", "rafeta", "tonimassama"] as FighterId[]).includes(fighter) && <FighterWalkLayers />}</span>
             <span className="coop-player-shadow" />
             {player.health <= 0 && <div className="revive-meter"><small>ACÉRCATE PARA REANIMAR</small><div><span style={{ width: `${player.revive}%` }} /></div></div>}

@@ -258,7 +258,7 @@ const HERO_POSE_ASSETS = {
   },
   nova: {
     idle: "/assets/new-fighters/nova-frame-0.webp", walkA: "/assets/new-fighters/nova-frame-1.webp", walkB: "/assets/new-fighters/nova-frame-0.webp", walkC: "/assets/new-fighters/nova-frame-1.webp", walkD: "/assets/new-fighters/nova-frame-0.webp", walkE: "/assets/new-fighters/nova-frame-1.webp",
-    crouch: "/assets/new-fighters/nova-frame-1.webp", rise: "/assets/new-fighters/nova-frame-3.webp", fire: "/assets/new-fighters/nova-frame-2.webp", heavyFire: "/assets/new-fighters/nova-frame-2.webp", kick: "/assets/new-fighters/nova-frame-3.webp", hit: "/assets/new-fighters/nova-frame-3.webp",
+    crouch: "/assets/new-fighters/yoye-crouch.webp", rise: "/assets/new-fighters/nova-frame-3.webp", fire: "/assets/new-fighters/nova-frame-2.webp", heavyFire: "/assets/new-fighters/nova-frame-2.webp", kick: "/assets/new-fighters/nova-frame-3.webp", hit: "/assets/new-fighters/yoye-hit.webp",
   },
   tonimassama: {
     idle: "/assets/new-fighters/tonimassama-frames/idle.webp",
@@ -383,8 +383,6 @@ const art = {
     wolf: loadImage("assets/boss-punk-wolf-sheet.png"),
     drum: loadImage("assets/boss-drum-captain-sheet.png"),
   },
-  hero: Object.fromEntries(characters.map((hero) => [hero.id, loadImage(hero.image)])),
-  heroPoses: Object.fromEntries(Object.entries(HERO_POSE_ASSETS).map(([id, poses]) => [id, Object.fromEntries(Object.entries(poses).map(([pose, src]) => [pose, loadImage(src)]))])),
   spooky: loadImage("/assets/new-fighters/xuso-v3/perro-correr-02.webp"),
   masia: loadImage("/assets/new-fighters/masia-logo.png"),
   rafetaFlag: loadImage("/assets/new-fighters/rafeta-flag.svg"),
@@ -522,6 +520,8 @@ function initialState(hero) {
 function beginMission() {
   releaseInputs();
   const hero = heroFromId(selectedId);
+  for (const src of Object.values(HERO_POSE_ASSETS[hero.id] ?? {})) loadImage(src);
+  loadImage(hero.image);
   shootingImageFor(hero.id);
   state = initialState(hero);
   screens.select.classList.add("hidden");
@@ -1655,14 +1655,14 @@ function shootingImageFor(id) {
 function heroPoseFor(player) {
   const now = state.elapsed;
   if (player.poseUntil > now && player.poseKind !== "fire") return player.poseKind;
-  if (player.poseUntil > now && player.poseKind === "fire" && SHOOTING_POSE_IDS.has(state.hero.id)) return "fire";
   if (player.crouching && player.landed) return "crouch";
+  if (player.poseUntil > now && player.poseKind === "fire" && Math.abs(aimDirection(player).y) < .1 && SHOOTING_POSE_IDS.has(state.hero.id)) return "fire";
   if (!player.landed) return player.vy < 110 ? "rise" : "kick";
   if (Math.abs(player.vx) > 35) {
     const cycle = ["walkD", "walkB", "walkE", "walkA", "walkC", "walkA"];
     return cycle[Math.floor(state.elapsed * 10.5) % cycle.length];
   }
-  if (player.poseUntil > now) return "fire";
+  if (player.poseUntil > now && Math.abs(aimDirection(player).y) < .1) return "fire";
   return "idle";
 }
 
@@ -1701,7 +1701,9 @@ function drawCharacterSprite(heroId, screenX, groundY, facing = 1, pose = "idle"
   const hero = heroFromId(heroId);
   const shotImage = pose === "fire" ? shootingImageFor(heroId) : null;
   const shotReady = !!(shotImage?.complete && shotImage.naturalWidth);
-  const poseImage = shotReady ? shotImage : (art.heroPoses[heroId]?.[pose] ?? art.heroPoses[heroId]?.idle ?? art.hero[heroId]);
+  const poses = HERO_POSE_ASSETS[heroId];
+  const idleSource = poses?.idle ?? hero.image;
+  const poseImage = shotReady ? shotImage : loadImage(poses?.[pose] ?? idleSource);
   const poseWidth = (pose === "crouch" || pose === "fire" || pose === "heavyFire" ? 194 : 154) * PLAYER_SPRITE_SCALE * scale;
   const poseHeight = (pose === "crouch" ? 145 : 170) * PLAYER_SPRITE_SCALE * scale;
   ctx.save();
@@ -1712,11 +1714,13 @@ function drawCharacterSprite(heroId, screenX, groundY, facing = 1, pose = "idle"
   ctx.shadowBlur = 10 * scale;
   // These two attack drawings face left, everything else faces right.
   if ((heroId === "cristian" || heroId === "bacora") && pose === "fire" && !shotReady) ctx.scale(-1, 1);
-  const drawn = drawHeroFrame(poseImage, -poseWidth / 2, -poseHeight, poseWidth, poseHeight, shotReady ? undefined : heroAtlasCell(heroId, pose));
+  const idleImage = loadImage(idleSource);
+  let drawn = drawHeroFrame(poseImage, -poseWidth / 2, -poseHeight, poseWidth, poseHeight, shotReady ? undefined : heroAtlasCell(heroId, pose));
+  if (!drawn && poseImage !== idleImage) drawn = drawHeroFrame(idleImage, -poseWidth / 2, -poseHeight, poseWidth, poseHeight, heroAtlasCell(heroId, "idle"));
   ctx.shadowBlur = 0;
   if (!drawn) { ctx.fillStyle = hero.color; ctx.fillRect(-24 * scale, -145 * scale, 48 * scale, 145 * scale); }
   // The Masia mark belongs on the trousers of Rafeta's standing frame only.
-  if (heroId === "rafeta" && drawn && poseImage === art.heroPoses.rafeta?.idle && art.masia.complete) {
+  if (heroId === "rafeta" && drawn && poseImage === idleImage && art.masia.complete) {
     const ratio = Math.min(poseWidth / poseImage.naturalWidth, poseHeight / poseImage.naturalHeight);
     const drawWidth = poseImage.naturalWidth * ratio, drawHeight = poseImage.naturalHeight * ratio;
     ctx.drawImage(art.masia, -drawWidth / 2 + drawWidth * .55, -drawHeight + drawHeight * .62, drawWidth * .08, drawHeight * .22);

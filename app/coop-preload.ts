@@ -4,7 +4,8 @@
 
 const urlPattern = /url\(["']?([^"')]+)["']?\)/g;
 const started = new Set<string>();
-const keep: HTMLImageElement[] = [];
+const decoded = new Map<string, HTMLImageElement>();
+const MAX_RETAINED_FRAMES = 48;
 
 const framesFor = (fighter: string, root = "coop-player") => {
   const urls = new Set<string>();
@@ -32,14 +33,18 @@ const framesFor = (fighter: string, root = "coop-player") => {
 export const preloadCoopFrames = (fighters: string[], decode = true, root = "coop-player") => {
   fighters.forEach((fighter) => {
     framesFor(fighter, root).forEach((url) => {
-      if (started.has(url)) return;
+      if (decode ? decoded.has(url) : started.has(url)) return;
       started.add(url);
       const image = new Image();
       image.decoding = "async";
       image.src = url;
       if (decode) {
-        keep.push(image);
-        void image.decode?.().catch(() => undefined);
+        decoded.set(url, image);
+        if (decoded.size > MAX_RETAINED_FRAMES) {
+          const oldest = decoded.keys().next().value;
+          if (oldest) decoded.delete(oldest);
+        }
+        void image.decode?.().catch(() => { if (decoded.get(url) === image) decoded.delete(url); });
       }
     });
   });

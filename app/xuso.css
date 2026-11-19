@@ -176,7 +176,7 @@
 #game .coop-player.xuso { width:auto!important; aspect-ratio:1/1; }
 #game .coop-player.xuso .coop-player-art { background-image:url('/assets/new-fighters/xuso-v3/xuso-reposo-01.webp')!important; background-size:contain!important; background-position:center bottom!important; background-repeat:no-repeat!important; animation:none!important; filter:none!important; mix-blend-mode:normal!important; }
 #game .coop-player.xuso.walk .coop-player-art { background-image:url('/assets/new-fighters/xuso-v3/xuso-caminar-01.webp')!important; animation:xuso-v3-walk 620ms steps(1,end) infinite!important; }
-#game .coop-player.xuso:is(.jump,.airborne) .coop-player-art { background-image:url('/assets/new-fighters/xuso-v3/xuso-salto-aire.webp')!important; animation:none!important; }
+#game .coop-player.xuso:is(.jump,.airborne):where(:not(.fire,.special,.hit,.down)) .coop-player-art { background-image:url('/assets/new-fighters/xuso-v3/xuso-salto-aire.webp')!important; animation:none!important; }
 #game .coop-player.xuso:is(.fire,.special) .coop-player-art { background-image:url('/assets/new-fighters/xuso-v3/xuso-orden-perro-03.webp')!important; animation:none!important; }
 #game .coop-player.xuso:is(.dodge,.revive) .coop-player-art { background-image:url('/assets/new-fighters/xuso-v3/xuso-esquivar.webp')!important; animation:none!important; }
 #game .coop-player.xuso.hit .coop-player-art { background-image:url('/assets/new-fighters/xuso-v3/xuso-recibir-golpe.webp')!important; animation:none!important; }

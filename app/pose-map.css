@@ -80,48 +80,45 @@
 #game .fighter.motion-rig.bomba.punch:is(.pose-phase-2,.pose-phase-3) .fighter-pose .fighter-art.bomba { background-image:url('/assets/new-fighters/bomba-rig-v21847-punch.webp')!important; background-position:center bottom!important; }
 #game .fighter.motion-rig.bomba.kick:is(.pose-phase-2,.pose-phase-3) .fighter-pose .fighter-art.bomba { background-image:url('/assets/new-fighters/bomba-rig-v21847-kick.webp')!important; background-position:center bottom!important; }
 #game .fighter.motion-rig.bomba.special:is(.hoe,.hoeSweep):is(.pose-phase-2,.pose-phase-3) .fighter-pose .fighter-art.bomba { background-image:url('/assets/new-fighters/bomba-hoe-attack-v2.webp')!important; background-position:center bottom!important; }
-/* nova */
-#game .fighter.motion-rig.nova .fighter-pose .fighter-art.nova { background-size:contain!important; background-position:center bottom!important; background-repeat:no-repeat!important; }
-#game .fighter.motion-rig.nova .fighter-art.nova::before, #game .fighter.motion-rig.nova .fighter-art.nova::after { content:none!important; }
-#game .fighter.motion-rig.nova .fighter-walk-layers { display:none!important; }
-#game .fighter.motion-rig.nova.idle .fighter-pose .fighter-art.nova,
-#game .fighter.motion-rig.nova.winner-dance .fighter-pose .fighter-art.nova { background-image:url('/assets/new-fighters/nova-frame-0.webp')!important; animation:none!important; }
-#game .fighter.motion-rig.nova.walk .fighter-pose .fighter-art.nova,
-#game .fighter.motion-rig.nova.dash .fighter-pose .fighter-art.nova { background-image:url('/assets/new-fighters/nova-frame-1.webp')!important; animation:none!important; }
-#game .fighter.motion-rig.nova.walk.stride-alt .fighter-pose .fighter-art.nova { background-image:url('/assets/new-fighters/nova-frame-0.webp')!important; animation:none!important; }
-#game .fighter.motion-rig.nova.block .fighter-pose .fighter-art.nova,
-#game .fighter.motion-rig.nova.dodge .fighter-pose .fighter-art.nova { background-image:url('/assets/new-fighters/nova-frame-0.webp')!important; animation:none!important; }
-#game .fighter.motion-rig.nova.crouch .fighter-pose .fighter-art.nova { background-image:url('/assets/new-fighters/nova-frame-1.webp')!important; animation:none!important; }
-#game .fighter.motion-rig.nova.jump .fighter-pose .fighter-art.nova,
-#game .fighter.motion-rig.nova.airborne:not(.punch):not(.kick):not(.special) .fighter-pose .fighter-art.nova { background-image:url('/assets/new-fighters/nova-frame-3.webp')!important; animation:none!important; }
-#game .fighter.motion-rig.nova.hit .fighter-pose .fighter-art.nova,
-#game .fighter.motion-rig.nova.launched .fighter-pose .fighter-art.nova,
-#game .fighter.motion-rig.nova.knockdown .fighter-pose .fighter-art.nova,
-#game .fighter.motion-rig.nova.defeated .fighter-pose .fighter-art.nova { background-image:url('/assets/new-fighters/nova-frame-1.webp')!important; animation:none!important; }
-#game .fighter.motion-rig.nova.getup .fighter-pose .fighter-art.nova { background-image:url('/assets/new-fighters/nova-frame-1.webp')!important; animation:none!important; }
-#game .fighter.motion-rig.nova.punch.pose-phase-0 .fighter-pose .fighter-art.nova,
-#game .fighter.motion-rig.nova.punch.pose-phase-4 .fighter-pose .fighter-art.nova { background-image:url('/assets/new-fighters/nova-frame-0.webp')!important; animation:none!important; }
-#game .fighter.motion-rig.nova.punch.pose-phase-1 .fighter-pose .fighter-art.nova,
-#game .fighter.motion-rig.nova.punch.pose-phase-2 .fighter-pose .fighter-art.nova,
-#game .fighter.motion-rig.nova.punch.pose-phase-3 .fighter-pose .fighter-art.nova,
-#game .fighter.motion-rig.nova.punch.airborne .fighter-pose .fighter-art.nova { background-image:url('/assets/new-fighters/nova-frame-1.webp')!important; animation:none!important; }
-#game .fighter.motion-rig.nova.kick.pose-phase-0 .fighter-pose .fighter-art.nova,
-#game .fighter.motion-rig.nova.kick.pose-phase-4 .fighter-pose .fighter-art.nova { background-image:url('/assets/new-fighters/nova-frame-0.webp')!important; animation:none!important; }
+/* Yoye: pixel art aligned to the original foot line. */
+#game .fighter.motion-rig.nova .fighter-pose .fighter-art.nova {
+  background-size: auto 100% !important;
+  background-position: center bottom !important;
+  background-repeat: no-repeat !important;
+  animation: none !important;
+}
+#game .fighter.motion-rig.nova .fighter-art.nova::before,
+#game .fighter.motion-rig.nova .fighter-art.nova::after { content: none !important; }
+#game .fighter.motion-rig.nova .fighter-walk-layers { display: none !important; }
+#game .fighter.motion-rig.nova:is(.punch,.kick,.hit,.launched,.knockdown,.defeated) .fighter-pose .fighter-art.nova {
+  left: -35% !important;
+  width: 170% !important;
+}
+#game .fighter.motion-rig.nova:is(.idle,.block,.dodge,.winner-dance) .fighter-pose .fighter-art.nova,
+#game .fighter.motion-rig.nova:is(.punch,.kick,.special):is(.pose-phase-0,.pose-phase-4) .fighter-pose .fighter-art.nova {
+  background-image: url('/assets/new-fighters/yoye-guard.webp') !important;
+}
+#game .fighter.motion-rig.nova:is(.walk,.dash) .fighter-pose .fighter-art.nova { background-image: url('/assets/new-fighters/nova-frame-1.webp') !important; }
+#game .fighter.motion-rig.nova.walk.stride-alt .fighter-pose .fighter-art.nova { background-image: url('/assets/new-fighters/nova-frame-0.webp') !important; }
+#game .fighter.motion-rig.nova:is(.crouch,.getup) .fighter-pose .fighter-art.nova,
 #game .fighter.motion-rig.nova.kick.pose-phase-1 .fighter-pose .fighter-art.nova,
-#game .fighter.motion-rig.nova.kick.pose-phase-2 .fighter-pose .fighter-art.nova,
-#game .fighter.motion-rig.nova.kick.pose-phase-3 .fighter-pose .fighter-art.nova,
-#game .fighter.motion-rig.nova.kick.airborne .fighter-pose .fighter-art.nova { background-image:url('/assets/new-fighters/nova-frame-3.webp')!important; animation:none!important; }
-#game .fighter.motion-rig.nova.special.prism.pose-phase-0 .fighter-pose .fighter-art.nova,
-#game .fighter.motion-rig.nova.special.prism.pose-phase-4 .fighter-pose .fighter-art.nova { background-image:url('/assets/new-fighters/nova-frame-0.webp')!important; animation:none!important; }
-#game .fighter.motion-rig.nova.special.prism.pose-phase-1 .fighter-pose .fighter-art.nova,
-#game .fighter.motion-rig.nova.special.prism.pose-phase-2 .fighter-pose .fighter-art.nova,
-#game .fighter.motion-rig.nova.special.prism.pose-phase-3 .fighter-pose .fighter-art.nova { background-image:url('/assets/new-fighters/nova-frame-2.webp')!important; animation:none!important; }
-#game .fighter.motion-rig.nova.special.prismBurst.pose-phase-0 .fighter-pose .fighter-art.nova,
-#game .fighter.motion-rig.nova.special.prismBurst.pose-phase-4 .fighter-pose .fighter-art.nova { background-image:url('/assets/new-fighters/nova-frame-0.webp')!important; animation:none!important; }
-#game .fighter.motion-rig.nova.special.prismBurst.pose-phase-1 .fighter-pose .fighter-art.nova,
-#game .fighter.motion-rig.nova.special.prismBurst.pose-phase-2 .fighter-pose .fighter-art.nova,
-#game .fighter.motion-rig.nova.special.prismBurst.pose-phase-3 .fighter-pose .fighter-art.nova { background-image:url('/assets/new-fighters/nova-frame-2.webp')!important; animation:none!important; }
-#game .fighter.motion-rig.nova.low-attack.punch .fighter-pose .fighter-art.nova { background-image:url('/assets/new-fighters/nova-frame-1.webp')!important; animation:none!important; }
+#game .fighter.motion-rig.nova.low-attack.punch.pose-phase-1 .fighter-pose .fighter-art.nova {
+  background-image: url('/assets/new-fighters/yoye-crouch.webp') !important;
+}
+#game .fighter.motion-rig.nova.jump .fighter-pose .fighter-art.nova { background-image: url('/assets/new-fighters/nova-frame-3.webp') !important; }
+#game .fighter.motion-rig.nova:is(.hit,.launched) .fighter-pose .fighter-art.nova { background-image: url('/assets/new-fighters/yoye-hit.webp') !important; }
+#game .fighter.motion-rig.nova:is(.knockdown,.defeated) .fighter-pose .fighter-art.nova { background-image: url('/assets/new-fighters/yoye-down.webp') !important; }
+#game .fighter.motion-rig.nova.punch.pose-phase-1 .fighter-pose .fighter-art.nova,
+#game .fighter.motion-rig.nova.special.pose-phase-1 .fighter-pose .fighter-art.nova {
+  background-image: url('/assets/new-fighters/yoye-guard.webp') !important;
+}
+#game .fighter.motion-rig.nova.punch:is(.pose-phase-2,.pose-phase-3) .fighter-pose .fighter-art.nova { background-image: url('/assets/new-fighters/yoye-punch.webp') !important; }
+#game .fighter.motion-rig.nova.kick:is(.pose-phase-2,.pose-phase-3) .fighter-pose .fighter-art.nova { background-image: url('/assets/new-fighters/yoye-kick.webp') !important; }
+#game .fighter.motion-rig.nova.special:is(.pose-phase-2,.pose-phase-3) .fighter-pose .fighter-art.nova { background-image: url('/assets/new-fighters/nova-frame-2.webp') !important; }
+#game .fighter.motion-rig.nova:is(.knockdown,.defeated,.getup) .fighter-motion {
+  rotate: none !important;
+  translate: none !important;
+}
 /* tonimassama */
 #game .fighter.motion-rig.tonimassama .fighter-pose .fighter-art.tonimassama { background-size:contain!important; background-position:center bottom!important; background-repeat:no-repeat!important; }
 #game .fighter.motion-rig.tonimassama .fighter-art.tonimassama::before, #game .fighter.motion-rig.tonimassama .fighter-art.tonimassama::after { content:none!important; }
@@ -336,13 +333,13 @@
 #game .fighter.motion-rig.vanessa:is(.knockdown,.defeated,.getup) .fighter-walk-layers { display:none!important; }
 
 /* Fighters without a lying-down drawing fall onto their back (body rotates from the feet). */
-#game .fighter.motion-rig:is(.xuso,.bomba,.nova,.tonimassama,.ogalla,.bacora,.elchica):is(.knockdown,.defeated) .fighter-motion {
+#game .fighter.motion-rig:is(.xuso,.bomba,.tonimassama,.ogalla,.bacora,.elchica):is(.knockdown,.defeated) .fighter-motion {
   rotate: calc(var(--fwd) * -82deg);
   translate: calc(var(--fwd) * -18%) 6%;
   transition: rotate 260ms cubic-bezier(.5,0,.9,.6), translate 260ms ease-in;
 }
-#game .fighter.motion-rig:is(.xuso,.bomba,.nova,.tonimassama,.ogalla,.bacora,.elchica).launched .fighter-motion { rotate: calc(var(--fwd) * -32deg); translate: calc(var(--fwd) * -8%) -4%; }
-#game .fighter.motion-rig:is(.xuso,.bomba,.nova,.tonimassama,.ogalla,.bacora,.elchica).getup .fighter-motion { rotate: calc(var(--fwd) * -10deg); transition-duration: 380ms; }
+#game .fighter.motion-rig:is(.xuso,.bomba,.tonimassama,.ogalla,.bacora,.elchica).launched .fighter-motion { rotate: calc(var(--fwd) * -32deg); translate: calc(var(--fwd) * -8%) -4%; }
+#game .fighter.motion-rig:is(.xuso,.bomba,.tonimassama,.ogalla,.bacora,.elchica).getup .fighter-motion { rotate: calc(var(--fwd) * -10deg); transition-duration: 380ms; }
 
 /* Low attacks (from crouch): low jab and sweep */
 #game .fighter.low-attack.punch .fighter-motion { scale: 1.04 .8; translate: calc(var(--fwd) * 10px) 0; rotate: calc(var(--fwd) * 3deg); }
