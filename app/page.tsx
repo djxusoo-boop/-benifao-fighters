@@ -173,7 +173,7 @@ const STAGES = [
 
 const GAME_TITLE = "HARDCORE FIGHTERS";
 const GAME_EDITION = "WEB · ARCADE EDITION";
-const GAME_VERSION = "V2.35.20";
+const GAME_VERSION = "V2.35.21";
 
 const ROUND_SECONDS = 99;
 const SUPER_MAX = 100;
@@ -772,6 +772,8 @@ function Home() {
   const [joystickVector, setJoystickVector] = useState<Record<Side, { x: number; y: number }>>({ player: { x: 0, y: 0 }, cpu: { x: 0, y: 0 } });
   const cooldownRef = useRef<Record<Side, number>>({ player: 0, cpu: 0 });
   const jumpLockRef = useRef<Record<Side, boolean>>({ player: false, cpu: false });
+  const jumpTravelRef = useRef<Partial<Record<Side, { velocity: number; remaining: number }>>>({});
+  const guardHeldRef = useRef<Record<Side, boolean>>({ player: false, cpu: false });
   const crouchHeldRef = useRef<Record<Side, boolean>>({ player: false, cpu: false });
   const movementVelocityRef = useRef<Record<Side, number>>({ player: 0, cpu: 0 });
   const movementHeldRef = useRef<Record<Side, number>>({ player: 0, cpu: 0 });
@@ -2068,29 +2070,19 @@ function Home() {
       beep(185, 0.07, "triangle");
     }, 90);
 
-    // Spread horizontal travel across the whole leap. Four large position
-    // updates made the new fighters appear to teleport on phones.
-    const jumpSteps = 15;
-    Array.from({ length: jumpSteps }, (_, index) => index).forEach((index) => {
-      const delay = 150 + index * 43;
-      later(() => {
-        setGame((current) => {
-          const airborne = side === "player" ? current.playerAirborne : current.cpuAirborne;
-          if (!airborne) return current;
-          const ownX = side === "player" ? current.playerX : current.cpuX;
-          const currentRivalX = side === "player" ? current.cpuX : current.playerX;
-          const nextX = clampFighterStep(ownX, currentRivalX, Math.max(fighterMinX, Math.min(fighterMaxX, ownX + direction * jumpTravel / jumpSteps)), minimumCombatGap);
-          return side === "player"
-            ? { ...current, playerX: nextX }
-            : { ...current, cpuX: nextX };
-        });
-        if (index === 0) beep(285, 0.06, "triangle");
-      }, delay);
-    });
+    // Integrate the original travel over the same window, one step per paint.
+    later(() => {
+      const inAir = side === "player" ? gameRef.current.playerAirborne : gameRef.current.cpuAirborne;
+      if (!inAir) return;
+      const duration = 645;
+      jumpTravelRef.current[side] = { velocity: direction * jumpTravel / duration, remaining: duration };
+      beep(285, 0.06, "triangle");
+    }, 150);
 
     later(() => beep(98, 0.045, "square"), 785);
     later(() => {
       jumpLockRef.current[side] = false;
+      delete jumpTravelRef.current[side];
       setGame((current) => {
         const actionKey = side === "player" ? "playerAction" : "cpuAction";
         const airborneKey = side === "player" ? "playerAirborne" : "cpuAirborne";
@@ -2180,6 +2172,7 @@ function Home() {
 
   const setGuard = useCallback((guarding: boolean) => {
     if (gameRef.current.phase !== "fight") return;
+    guardHeldRef.current.player = guarding;
     if (guarding && cooldownRef.current.player > Date.now() + 200 && gameRef.current.playerAction === "idle") return;
     if (guarding) guardStartedRef.current.player = Date.now();
     setGame((current) => {
@@ -2203,6 +2196,7 @@ function Home() {
 
   const setCpuGuard = useCallback((guarding: boolean) => {
     if (gameRef.current.phase !== "fight" || battleMode !== "local") return;
+    guardHeldRef.current.cpu = guarding;
     if (guarding && cooldownRef.current.cpu > Date.now() + 200 && gameRef.current.cpuAction === "idle") return;
     if (guarding) guardStartedRef.current.cpu = Date.now();
     setGame((current) => {
@@ -2238,6 +2232,8 @@ function Home() {
     directionTapRef.current = { player: { direction: 0, at: 0 }, cpu: { direction: 0, at: 0 } };
     dashCooldownRef.current = { player: 0, cpu: 0 };
     evadeUntilRef.current = { player: 0, cpu: 0 };
+    jumpTravelRef.current = {};
+    guardHeldRef.current = { player: false, cpu: false };
     queuedAttackRef.current = { player: null, cpu: null };
     takeoffInputRef.current = { player: null, cpu: null };
     attackTokenRef.current = { player: 0, cpu: 0 };
@@ -2659,13 +2655,22 @@ function Home() {
   useEffect(() => {
     let frame = 0;
     let previousFrame = performance.now();
+    let lastPlayerIntent: WalkIntent = "neutral";
+    let lastCpuIntent: WalkIntent = "neutral";
+    let lastPlayerGear: MovementGear = "still";
+    let lastCpuGear: MovementGear = "still";
     const updateMovement = (now: number) => {
       frame = window.requestAnimationFrame(updateMovement);
       const elapsed = now - previousFrame;
       previousFrame = now;
       const frameScale = Math.min(1.25, elapsed / 20);
       const keys = keysRef.current;
-      if (gameRef.current.phase !== "fight" || pausedRef.current) return;
+      if (gameRef.current.phase !== "fight") {
+        lastPlayerIntent = lastCpuIntent = "neutral";
+        lastPlayerGear = lastCpuGear = "still";
+        return;
+      }
+      if (pausedRef.current || document.hidden) return;
       const movingLeft = keys.has("a") || (battleMode === "cpu" && keys.has("arrowleft")) || keys.has("touch-left");
       const movingRight = keys.has("d") || (battleMode === "cpu" && keys.has("arrowright")) || keys.has("touch-right");
       const cpuLeft = battleMode === "local" && (keys.has("touch-cpu-left") || keys.has("arrowleft"));
@@ -2675,11 +2680,11 @@ function Home() {
       const direction = movingLeft === movingRight ? 0 : movingLeft ? -1 : 1;
       const snapshot = gameRef.current;
       const movingTowardRival = snapshot.cpuX > snapshot.playerX ? direction > 0 : direction < 0;
-      if (direction) setPlayerWalkIntent(movingTowardRival ? "advance" : "retreat");
+
       const cpuManualDirection = cpuLeft === cpuRight ? 0 : cpuLeft ? -1 : 1;
       const cpuDirection = battleMode === "cpu" ? cpuAiMovementDirectionRef.current : cpuManualDirection;
       const cpuMovingTowardRival = snapshot.playerX > snapshot.cpuX ? cpuDirection > 0 : cpuDirection < 0;
-      if (cpuDirection) setCpuWalkIntent(cpuMovingTowardRival ? "advance" : "retreat");
+
 
       const accelerate = (side: Side, input: number, airborne: boolean, retreating: boolean) => {
         const previous = movementVelocityRef.current[side];
@@ -2709,7 +2714,21 @@ function Home() {
       const cpuVelocity = accelerate("cpu", cpuMoveAllowed ? cpuDirection : 0, snapshot.cpuAirborne, Boolean(cpuDirection && !cpuMovingTowardRival));
       const playerGear: MovementGear = Math.abs(playerVelocity) < 0.045 ? "still" : movementHeldRef.current.player > 9 ? "stride" : "start";
       const cpuGear: MovementGear = Math.abs(cpuVelocity) < 0.045 ? "still" : movementHeldRef.current.cpu > 9 ? "stride" : "start";
-      setMovementGear((current) => current.player === playerGear && current.cpu === cpuGear ? current : { player: playerGear, cpu: cpuGear });
+      if (playerGear !== lastPlayerGear || cpuGear !== lastCpuGear) {
+        lastPlayerGear = playerGear;
+        lastCpuGear = cpuGear;
+        setMovementGear({ player: playerGear, cpu: cpuGear });
+      }
+      const playerIntent = direction ? (movingTowardRival ? "advance" : "retreat") : "neutral";
+      const cpuIntent = cpuDirection ? (cpuMovingTowardRival ? "advance" : "retreat") : "neutral";
+      if (playerIntent !== lastPlayerIntent) {
+        lastPlayerIntent = playerIntent;
+        setPlayerWalkIntent(playerIntent);
+      }
+      if (cpuIntent !== lastCpuIntent) {
+        lastCpuIntent = cpuIntent;
+        setCpuWalkIntent(cpuIntent);
+      }
       // Switch the isolated walk images without a React render. CSS image URL
       // animations are dropped by some mobile browsers; the animation frame
       // already driving movement supplies a stable cadence instead.
@@ -2725,31 +2744,52 @@ function Home() {
       setWalkFrame(cpuFighterRef.current, snapshot.cpuAction, cpuStrideFrame);
 
       let next = snapshot;
-        if (playerVelocity && playerMoveAllowed) {
+      const inputTime = Date.now();
+      const canResumeGuard = (side: Side, action: Action, airborne: boolean) =>
+        guardHeldRef.current[side] && !airborne && !jumpLockRef.current[side]
+        && (action === "idle" || action === "walk" || action === "crouch")
+        && cooldownRef.current[side] <= inputTime + 200;
+      if (canResumeGuard("player", snapshot.playerAction, snapshot.playerAirborne)) {
+        guardStartedRef.current.player = inputTime;
+        next = { ...next, playerAction: "block" };
+      }
+      if (battleMode === "local" && canResumeGuard("cpu", snapshot.cpuAction, snapshot.cpuAirborne)) {
+        guardStartedRef.current.cpu = inputTime;
+        next = { ...next, cpuAction: "block" };
+      }
+      const jumpStep = (side: Side, airborne: boolean) => {
+        const travel = jumpTravelRef.current[side];
+        if (!airborne || !travel) return 0;
+        const duration = Math.min(travel.remaining, elapsed, 32);
+        travel.remaining -= duration;
+        if (travel.remaining <= 0) delete jumpTravelRef.current[side];
+        return travel.velocity * duration;
+      };
+      const playerStep = playerVelocity * frameScale + jumpStep("player", snapshot.playerAirborne);
+      const cpuStep = cpuVelocity * frameScale + jumpStep("cpu", snapshot.cpuAirborne);
+        if (playerStep && playerMoveAllowed && next.playerAction !== "block") {
           const limitLeft = fighterMinX;
           const limitRight = fighterMaxX;
-          const proposedX = Math.max(limitLeft, Math.min(limitRight, next.playerX + playerVelocity * frameScale));
+          const proposedX = Math.max(limitLeft, Math.min(limitRight, next.playerX + playerStep));
           const nextX = clampFighterStep(next.playerX, next.cpuX, proposedX, minimumCombatGap);
           if (Math.abs(nextX - next.playerX) > 0.0001) {
             next = { ...next, playerX: nextX, playerAction: next.playerAirborne ? next.playerAction : "walk" };
           } else {
             movementVelocityRef.current.player = 0;
             movementHeldRef.current.player = 0;
-            setPlayerWalkIntent("neutral");
             if (next.playerAction === "walk") next = { ...next, playerAction: "idle" };
           }
         } else if (!direction && next.playerAction === "walk") {
           next = { ...next, playerAction: "idle" };
         }
-        if (cpuVelocity && cpuMoveAllowed) {
-          const proposedX = Math.max(fighterMinX, Math.min(fighterMaxX, next.cpuX + cpuVelocity * frameScale));
+        if (cpuStep && cpuMoveAllowed && next.cpuAction !== "block") {
+          const proposedX = Math.max(fighterMinX, Math.min(fighterMaxX, next.cpuX + cpuStep));
           const cpuX = clampFighterStep(next.cpuX, next.playerX, proposedX, minimumCombatGap);
           if (Math.abs(cpuX - next.cpuX) > 0.0001) {
             next = { ...next, cpuX, cpuAction: next.cpuAirborne ? next.cpuAction : "walk" };
           } else {
             movementVelocityRef.current.cpu = 0;
             movementHeldRef.current.cpu = 0;
-            setCpuWalkIntent("neutral");
             if (next.cpuAction === "walk") next = { ...next, cpuAction: "idle" };
           }
         } else if (!cpuDirection && next.cpuAction === "walk") {
@@ -2769,7 +2809,8 @@ function Home() {
         playerFighterRef.current?.classList.toggle("face-right", !playerFacingLeft);
         cpuFighterRef.current?.classList.toggle("face-left", cpuFacingLeft);
         cpuFighterRef.current?.classList.toggle("face-right", !cpuFacingLeft);
-        if (now - lastMovementRenderRef.current >= 40) {
+        if (next.playerAction !== snapshot.playerAction || next.cpuAction !== snapshot.cpuAction
+          || now - lastMovementRenderRef.current >= 40) {
           lastMovementRenderRef.current = now;
           // Movement paints between React renders, but an attack or hit may
           // have entered the state queue meanwhile. Preserve that newer action
@@ -2792,29 +2833,6 @@ function Home() {
     frame = window.requestAnimationFrame(updateMovement);
     return () => window.cancelAnimationFrame(frame);
   }, [battleMode, fighterMaxX, fighterMinX, minimumCombatGap, opponent, selected]);
-
-  useEffect(() => {
-    const stopWalk = window.setInterval(() => {
-      const keys = keysRef.current;
-      const playerStopped = !keys.has("a") && !keys.has("d") && !keys.has("touch-left") && !keys.has("touch-right")
-        && (battleMode === "local" || (!keys.has("arrowleft") && !keys.has("arrowright")));
-      const cpuStopped = battleMode === "local"
-        && !keys.has("arrowleft") && !keys.has("arrowright") && !keys.has("touch-cpu-left") && !keys.has("touch-cpu-right");
-      if (playerStopped) {
-        if (Math.abs(movementVelocityRef.current.player) < 0.09) {
-          setPlayerWalkIntent("neutral");
-          setGame((current) => current.playerAction === "walk" ? { ...current, playerAction: "idle" } : current);
-        }
-      }
-      if (cpuStopped) {
-        if (Math.abs(movementVelocityRef.current.cpu) < 0.09) {
-          setCpuWalkIntent("neutral");
-          setGame((current) => current.cpuAction === "walk" ? { ...current, cpuAction: "idle" } : current);
-        }
-      }
-    }, 90);
-    return () => window.clearInterval(stopWalk);
-  }, [battleMode]);
 
   useEffect(() => {
     const ai = window.setInterval(() => {
@@ -3199,6 +3217,8 @@ function Home() {
   useEffect(() => {
     const releaseTouchControls = () => {
       keysRef.current.clear();
+      queuedAttackRef.current = { player: null, cpu: null };
+      takeoffInputRef.current = { player: null, cpu: null };
       joystickPointerRef.current = { player: null, cpu: null };
       joystickDirectionRef.current = { player: 0, cpu: 0 };
       joystickJumpLatchedRef.current = { player: false, cpu: false };
@@ -3336,6 +3356,8 @@ function Home() {
     directionTapRef.current = { player: { direction: 0, at: 0 }, cpu: { direction: 0, at: 0 } };
     dashCooldownRef.current = { player: 0, cpu: 0 };
     evadeUntilRef.current = { player: 0, cpu: 0 };
+    jumpTravelRef.current = {};
+    guardHeldRef.current = { player: false, cpu: false };
     queuedAttackRef.current = { player: null, cpu: null };
     takeoffInputRef.current = { player: null, cpu: null };
     attackTokenRef.current = { player: 0, cpu: 0 };

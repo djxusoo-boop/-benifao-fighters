@@ -555,17 +555,15 @@ export default function CoopMode({ playerOne, playerTwo, aiPlayerTwo = false, so
   useEffect(() => {
     let frameId = 0;
     let lastFrame = performance.now();
+    let lastWorldUpdate = lastFrame;
     const movement = (frameTime: number) => {
       if (document.hidden || statusRef.current !== "playing") {
-        lastFrame = frameTime;
+        lastFrame = lastWorldUpdate = frameTime;
         frameId = window.requestAnimationFrame(movement);
         return;
       }
-      if (frameTime - lastFrame < 32) {
-        frameId = window.requestAnimationFrame(movement);
-        return;
-      }
-      lastFrame = frameTime - Math.min((frameTime - lastFrame) % 32, 16);
+      const step = Math.min(1.5, (frameTime - lastFrame) / 32);
+      lastFrame = frameTime;
       const inputTime = Date.now();
       for (const slot of ["p1", "p2"] as PlayerSlot[]) {
         const pending = queuedAttackRef.current[slot];
@@ -598,11 +596,12 @@ export default function CoopMode({ playerOne, playerTwo, aiPlayerTwo = false, so
           const previousVelocity = movementVelocityRef.current[id];
           const targetVelocity = canStride && direction ? direction * 0.92 : 0;
           const traction = canStride && direction ? 0.28 : player.airborne ? 0.92 : 0.68;
-          const velocity = previousVelocity + (targetVelocity - previousVelocity) * traction;
+          const velocity = previousVelocity + (targetVelocity - previousVelocity) * (1 - Math.pow(1 - traction, step));
           movementVelocityRef.current[id] = Math.abs(velocity) < 0.025 ? 0 : velocity;
           if (canStride && Math.abs(movementVelocityRef.current[id]) > 0.025) {
-            const moved = clamp(player.x + movementVelocityRef.current[id], 5, 95);
+            const moved = clamp(player.x + movementVelocityRef.current[id] * step, 5, 95);
             const moveDirection = Math.sign(movementVelocityRef.current[id]) as -1 | 1;
+            if (moved === player.x && moveDirection === player.moveDirection && player.action === "walk") return;
             next = { ...next, [id]: { ...player, x: moved, moveDirection, action: player.airborne ? player.action : player.action === "idle" || player.action === "walk" ? "walk" : player.action } };
           } else if (player.action === "walk") {
             next = { ...next, [id]: { ...player, moveDirection: 0, action: player.airborne ? "jump" : "idle" } };
@@ -615,13 +614,13 @@ export default function CoopMode({ playerOne, playerTwo, aiPlayerTwo = false, so
         const p2 = next.p2;
         if (p1.health <= 0 && p2.health > 0) {
           const close = Math.abs(p1.x - p2.x) < 12;
-          const revive = close ? clamp(p1.revive + 2.2, 0, 100) : Math.max(0, p1.revive - 1.2);
+          const revive = close ? clamp(p1.revive + 2.2 * step, 0, 100) : Math.max(0, p1.revive - 1.2 * step);
           if (revive >= 100) hitCooldownRef.current.p1 = Date.now() + 1400;
           next = { ...next, p1: revive >= 100 ? { ...p1, health: 48, revive: 0, action: "revive" } : { ...p1, revive }, p2: close && p2.action === "idle" ? { ...p2, action: "revive" } : p2 };
           if (!close && next.p2.action === "revive") next = { ...next, p2: { ...next.p2, action: "idle" } };
         } else if (p2.health <= 0 && p1.health > 0) {
           const close = Math.abs(p1.x - p2.x) < 12;
-          const revive = close ? clamp(p2.revive + 2.2, 0, 100) : Math.max(0, p2.revive - 1.2);
+          const revive = close ? clamp(p2.revive + 2.2 * step, 0, 100) : Math.max(0, p2.revive - 1.2 * step);
           if (revive >= 100) hitCooldownRef.current.p2 = Date.now() + 1400;
           next = { ...next, p2: revive >= 100 ? { ...p2, health: 48, revive: 0, action: "revive" } : { ...p2, revive }, p1: close && p1.action === "idle" ? { ...p1, action: "revive" } : p1 };
           if (!close && next.p1.action === "revive") next = { ...next, p1: { ...next.p1, action: "idle" } };
@@ -633,6 +632,13 @@ export default function CoopMode({ playerOne, playerTwo, aiPlayerTwo = false, so
         return next;
       });
 
+      // Enemy decisions and pickups retain their original cadence. Only
+      // player motion needs a new position on every rendered frame.
+      if (frameTime - lastWorldUpdate < 32) {
+        frameId = window.requestAnimationFrame(movement);
+        return;
+      }
+      lastWorldUpdate = frameTime - Math.min((frameTime - lastWorldUpdate) % 32, 16);
       const now = Date.now();
       if (pickupsRef.current.length) {
         const remaining = pickupsRef.current.filter((pickup) => {

@@ -8,3 +8,10 @@ export function isAppleMobile(userAgent, platform, maxTouchPoints) {
 export function retainPreloadImage(images, image, limit) {
   if (images.length < limit) images.push(image);
 }
+
+// Large high-density canvases fill the same scene many more times per frame.
+// Keep normal-sized viewports crisp and bound the backing store in fullscreen.
+export function canvasResolutionScale(width, height, pixelRatio, ratioCap) {
+  const maxBackingPixels = 2_400_000;
+  return Math.min(pixelRatio, ratioCap, Math.max(1, Math.sqrt(maxBackingPixels / (width * height))));
+}

@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import type { PointerEvent as ReactPointerEvent } from "react";
 import ArcadeCrowd, { type CrowdCue } from "./ArcadeCrowd";
 import TouchStick from "./TouchStick";
+import { canvasResolutionScale } from "./mobile-resources.mjs";
 import { RANGED_ATTACK_LABELS } from "./fighter-profiles";
 
 type FighterId = "maletilla" | "vanessa" | "josevictor" | "cristian" | "cesaret" | "borja" | "bacora" | "bonviure" | "elchica" | "ogalla" | "xuso" | "bomba" | "rafeta" | "tonimassama" | "nova" | "estefy" | "mad-dog" | "angerfist" | "dalmau";
@@ -1001,9 +1002,11 @@ export default function PlatformMode({ fighter, fighterName, soundOn, difficulty
       const memory = (navigator as Navigator & { deviceMemory?: number }).deviceMemory ?? 8;
       const isRaspberryPi = /linux arm|aarch64/i.test(navigator.userAgent);
       const ratioCap = isRaspberryPi ? 1.3 : cores <= 4 && memory < 6 ? 1.35 : 1.75;
-      const pixelRatio = Math.min(ratioCap, window.devicePixelRatio || 1);
-      canvas.width = Math.round(cssWidth * pixelRatio);
-      canvas.height = Math.round(cssHeight * pixelRatio);
+      const pixelRatio = canvasResolutionScale(cssWidth, cssHeight, window.devicePixelRatio || 1, ratioCap);
+      const backingWidth = Math.round(cssWidth * pixelRatio);
+      const backingHeight = Math.round(cssHeight * pixelRatio);
+      if (canvas.width !== backingWidth) canvas.width = backingWidth;
+      if (canvas.height !== backingHeight) canvas.height = backingHeight;
       viewportWidth = cssWidth * viewportHeight / cssHeight;
       scale = cssHeight / viewportHeight;
       context.setTransform(pixelRatio * scale, 0, 0, pixelRatio * scale, 0, -viewportTop * pixelRatio * scale);

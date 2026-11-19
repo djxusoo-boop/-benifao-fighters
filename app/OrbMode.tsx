@@ -5,6 +5,7 @@ import type { PointerEvent as ReactPointerEvent } from "react";
 import ArcadeCrowd from "./ArcadeCrowd";
 import FighterWalkLayers from "./FighterWalkLayers";
 import TouchStick from "./TouchStick";
+import { canvasResolutionScale } from "./mobile-resources.mjs";
 import { preloadCoopFrames } from "./coop-preload";
 
 type FighterId = "maletilla" | "vanessa" | "josevictor" | "cristian" | "cesaret" | "borja" | "bacora" | "bonviure" | "elchica" | "ogalla" | "xuso" | "bomba" | "rafeta" | "tonimassama" | "nova" | "estefy" | "mad-dog" | "angerfist" | "dalmau";
@@ -212,9 +213,11 @@ export default function OrbMode({ fighter, fighterName, soundOn, difficulty, cam
       const memory = (navigator as Navigator & { deviceMemory?: number }).deviceMemory ?? 8;
       const isRaspberryPi = /linux arm|aarch64/i.test(navigator.userAgent);
       const ratioCap = isRaspberryPi ? 1.3 : cores <= 4 && memory < 6 ? 1.35 : 1.75;
-      pixelRatio = Math.min(ratioCap, window.devicePixelRatio || 1);
-      canvas.width = Math.round(width * pixelRatio);
-      canvas.height = Math.round(height * pixelRatio);
+      pixelRatio = canvasResolutionScale(width, height, window.devicePixelRatio || 1, ratioCap);
+      const backingWidth = Math.round(width * pixelRatio);
+      const backingHeight = Math.round(height * pixelRatio);
+      if (canvas.width !== backingWidth) canvas.width = backingWidth;
+      if (canvas.height !== backingHeight) canvas.height = backingHeight;
       context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
 
       if (previousWidth > 0 && previousHeight > 0) {
