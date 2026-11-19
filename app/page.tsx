@@ -64,7 +64,10 @@ type FighterPosePhase = 0 | 1 | 2 | 3 | 4;
 type LobbyEditGroup = "field" | "labels" | "fighterNames" | "fighterTitles" | "modeNames" | "modeSubtitles";
 type LobbyEditTarget = { group: LobbyEditGroup; key: string; label: string };
 type FightCall = { text: string; side: Side; id: number } | null;
-type QueuedAttack = { level: AttackLevel; normalMove: NormalMove } | null;
+type AttackInput = { level: AttackLevel; normalMove: NormalMove };
+type QueuedAttack = (AttackInput & { ready: boolean }) | null;
+const ATTACK_BUFFER_MS = 190;
+const LIGHT_SPECIAL_DURATION_MS = 820;
 type ArcadeProgress = { fights: number; adventures: number; orbs: number; bestCombo: number; crowns?: number; medals?: number; bestTournament?: number; bestOrb?: number; bestAdventure?: number; losses?: number; trainingSessions?: number; winsByFighter?: Partial<Record<FighterId, number>> };
 type CampaignStep = 0 | 1 | 2 | 3 | 4;
 type ArcadePickupKind = 0 | 1 | 2;
@@ -134,7 +137,7 @@ const FIGHTERS: Record<FighterId, { name: string; title: string; specialOne: str
   },
   cesaret: { name: "CESARET", title: "EL REY DE LA PESCA", specialOne: "GOLPE DE PESCADO", specialTwo: "LLUVIA DE PECES", color: "#62c8e7" },
   borja: { name: "BORJA", title: "EL DOMADOR DEL SAPO", specialOne: "ATAQUE DEL SAPO", specialTwo: "VENENO DEL SAPO", color: "#a9e450" },
-  bacora: { name: "BACORA", title: "EL GUARDIÁN DE LA W", specialOne: "EMBESTIDA DE ESCUDO", specialTwo: "GOLPE DE VARA", color: "#e6b82e" },
+  bacora: { name: "BACORA", title: "EL GUARDIÁN DE LA W", specialOne: "LANZAMIENTO DE LA W", specialTwo: "GOLPE DE VARA", color: "#e6b82e" },
   bonviure: { name: "BONVIURE", title: "EL ANCLA NEGRA", specialOne: "BARRIDO DE ANCLA", specialTwo: "LATIGAZO DE CADENA", color: "#a68c72" },
   elchica: { name: "EL CHICA", title: "EL REY DEL JÄGER", specialOne: "BOTELLA DEL CHICA", specialTwo: "SALPICADURA ÁMBAR", color: "#ec8d27" },
   ogalla: { name: "OGALLA", title: "EL REY DE LA ALCACHOFA", specialOne: "BASTÓN DE ALCACHOFA", specialTwo: "LLUVIA DE ALCACHOFAS", color: "#c89a46" },
@@ -173,7 +176,7 @@ const STAGES = [
 
 const GAME_TITLE = "HARDCORE FIGHTERS";
 const GAME_EDITION = "WEB · ARCADE EDITION";
-const GAME_VERSION = "V2.35.23";
+const GAME_VERSION = "V2.35.24";
 
 const ROUND_SECONDS = 99;
 const SUPER_MAX = 100;
@@ -267,7 +270,7 @@ const MOVE_LABELS: Record<SpecialMove, string> = {
   fishstorm: "¡LLUVIA DE PECES!",
   toad: "¡ATAQUE DEL SAPO!",
   venom: "¡VENENO DEL SAPO!",
-  shield: "¡EMBESTIDA DE ESCUDO!", staff: "¡GOLPE DE VARA!", anchor: "¡BARRIDO DE ANCLA!", chain: "¡LATIGAZO DE CADENA!",
+  shield: "¡LANZAMIENTO DE LA W!", staff: "¡GOLPE DE VARA!", anchor: "¡BARRIDO DE ANCLA!", chain: "¡LATIGAZO DE CADENA!",
   jager: "¡BOTELLA DEL CHICA!", amber: "¡SALPICADURA ÁMBAR!", scepter: "¡BASTÓN DE ALCACHOFA!", artichokes: "¡LLUVIA DE ALCACHOFAS!",
   dog: "¡MORDISCO DE SPOOKY!", howl: "¡SPOOKY TE MEA!", hoe: "¡AZADAZO!", hoeSweep: "¡BARRIDO DE AZADA!", flag: "¡EMBESTIDA DE BANDERA!", flagSweep: "¡GIRO DEL ESTANDARTE!", goldPistol: "¡DISPARO DORADO!", fingerPeinetas: "¡PEINETAS VOLADORAS!", machete: "¡MACHETAZO!", leafStorm: "¡TORMENTA DE HOJAS!", prism: "¡RÁFAGA PRISMÁTICA!", prismBurst: "¡LÁSER ARCOÍRIS!",
 };
@@ -409,7 +412,9 @@ function SpecialEffect({ move, side, origin, target, arenaWidth, direction, airb
   const travel = `${direction === "toward-right" ? "" : "-"}${distancePx}px`;
   const effectLeft = move === "staff" && direction === "toward-left" ? Math.max(2, launchPoint - distancePercent) : launchPoint;
   return (
-    <div className={`special-fx fx-${move} ${side} ${direction} ${airborne ? "airborne" : ""} ${heavy ? "special-heavy" : "special-light"}`} style={{ "--fx-color": color } as CSSProperties} aria-hidden="true">
+    <div className={`special-fx fx-${move} ${side} ${direction} ${airborne ? "airborne" : ""} ${heavy ? "special-heavy" : "special-light"}`} style={{ "--fx-color": color, ...(move === "shield" ? {
+      "--shield-hand": `${launchPoint}%`, "--shield-target": `${target}%`, "--shield-duration": `${LIGHT_SPECIAL_DURATION_MS}ms`,
+    } : {}) } as CSSProperties} aria-hidden="true">
       <span className="special-cast-ring" style={{ left: `${launchPoint}%`, top: airborne ? "30%" : "44%" }} />
       <span className="special-cast-flare" style={{ left: `${launchPoint}%`, top: airborne ? "30%" : "44%" }} />
       <span className="special-target-ring" style={{ left: `${Math.max(4, Math.min(96, target))}%`, top: airborne ? "34%" : "46%" }} />
@@ -784,7 +789,7 @@ function Home() {
   const dashCooldownRef = useRef<Record<Side, number>>({ player: 0, cpu: 0 });
   const evadeUntilRef = useRef<Record<Side, number>>({ player: 0, cpu: 0 });
   const queuedAttackRef = useRef<Record<Side, QueuedAttack>>({ player: null, cpu: null });
-  const takeoffInputRef = useRef<Record<Side, QueuedAttack>>({ player: null, cpu: null });
+  const takeoffInputRef = useRef<Record<Side, AttackInput | null>>({ player: null, cpu: null });
   // Every attack owns a token. A delayed hit is ignored when its fighter was
   // interrupted, knocked down or has already started another move.
   const attackTokenRef = useRef<Record<Side, number>>({ player: 0, cpu: 0 });
@@ -1559,13 +1564,14 @@ function Home() {
         return;
       }
       if (ownAction !== "idle" && ownAction !== "walk" && ownAction !== "dash" && ownAction !== "crouch" && ownAction !== "jump") {
-        if (ownAction === "punch" || ownAction === "kick" || ownAction === "special") {
-          queuedAttackRef.current[side] = { level: strongNormal ? inputLevel : level, normalMove };
+        if ((ownAction === "punch" || ownAction === "kick" || ownAction === "special") && cooldownRef.current[side] - now <= ATTACK_BUFFER_MS && !guardHeldRef.current[side]) {
+          queuedAttackRef.current[side] = { level: strongNormal ? inputLevel : level, normalMove, ready: false };
         }
         return;
       }
       if (cooldownRef.current[side] > now) return;
 
+      queuedAttackRef.current[side] = null;
       const attackToken = attackTokenRef.current[side] + 1;
       attackTokenRef.current[side] = attackToken;
 
@@ -1612,7 +1618,7 @@ function Home() {
         ? directionToOpponent(snapshot.playerX, snapshot.cpuX)
         : directionToOpponent(snapshot.cpuX, snapshot.playerX);
       const extendedNewKick = normalMove === "kick" && ["borja", "bacora", "bonviure", "elchica", "ogalla"].includes(fighter);
-      const baseActionDuration = isSuper ? 1400 : level > 0 ? (level === 2 ? 980 : 820) : normalMove === "kick" ? (extendedNewKick ? 760 : 620) : 480;
+      const baseActionDuration = isSuper ? 1400 : level > 0 ? (level === 2 ? 980 : LIGHT_SPECIAL_DURATION_MS) : normalMove === "kick" ? (extendedNewKick ? 760 : 620) : 480;
       const passiveSpeed = (passive === "rhythmRush" && level === 0) ? .8 : (passive === "quickTrigger" && level > 0 && !isSuper) ? .75 : 1;
       const originalDuration = Math.round((!isSuper && fighter === "xuso" && level > 0 ? (level === 2 ? 1400 : 1200) : baseActionDuration) * passiveSpeed);
       const actionDuration = level === 0 ? normalAttackDuration(originalDuration, balanceFactor(fighter, "speed")) : originalDuration;
@@ -1928,11 +1934,7 @@ function Home() {
           return { ...current, cpuAction, cpuMove: null, cpuAttackVariant: 0, cpuPosePhase: 0 };
         });
         const queued = queuedAttackRef.current[side];
-        if (queued && gameRef.current.phase === "fight") {
-          queuedAttackRef.current[side] = null;
-          cooldownRef.current[side] = Math.min(cooldownRef.current[side], Date.now() + 28);
-          later(() => performAttackRef.current(side, queued.level, queued.normalMove), 44);
-        }
+        if (queued) queued.ready = true;
       }, actionDuration);
     },
     [addMeter, applyPassiveOnHit, applySuperBonus, battleMode, beep, difficulty, fighterMaxX, fighterMinX, getAudio, haptic, later, minimumCombatGap, opponent, popDamage, progress.crowns, registerCombo, selected, sfx, showFightCall, soundOn, swing, trainingMode],
@@ -1950,6 +1952,7 @@ function Home() {
     const targetAirborne = side === "player" ? snap.cpuAirborne : snap.playerAirborne;
     if (["launched", "knockdown", "getup"].includes(targetAction)) return;
     cooldownRef.current[side] = now + 760;
+    queuedAttackRef.current[side] = null;
     attackTokenRef.current[side] += 1;
     const direction = directionToOpponent(ownX, rivalX);
     setGame((current) => side === "player"
@@ -2019,6 +2022,20 @@ function Home() {
       }
     }
   }, [game.playerAirborne, game.cpuAirborne]);
+
+  // Consume only after the recovery pose has committed. A later guard press
+  // clears the queued strike before either player can start it.
+  useEffect(() => {
+    for (const side of ["player", "cpu"] as const) {
+      const queued = queuedAttackRef.current[side];
+      if (!queued?.ready) continue;
+      queuedAttackRef.current[side] = null;
+      const action = side === "player" ? game.playerAction : game.cpuAction;
+      if (game.phase === "fight" && !guardHeldRef.current[side] && ["idle", "walk", "jump", "crouch"].includes(action)) {
+        performAttackRef.current(side, queued.level, queued.normalMove);
+      }
+    }
+  }, [game.phase, game.playerAction, game.cpuAction]);
 
   const jump = useCallback((side: Side) => {
     const snapshot = gameRef.current;
@@ -2166,6 +2183,7 @@ function Home() {
   const setGuard = useCallback((guarding: boolean) => {
     if (gameRef.current.phase !== "fight") return;
     guardHeldRef.current.player = guarding;
+    if (guarding) queuedAttackRef.current.player = null;
     if (guarding && cooldownRef.current.player > Date.now() + 200 && gameRef.current.playerAction === "idle") return;
     if (guarding) guardStartedRef.current.player = Date.now();
     setGame((current) => {
@@ -2190,6 +2208,7 @@ function Home() {
   const setCpuGuard = useCallback((guarding: boolean) => {
     if (gameRef.current.phase !== "fight" || battleMode !== "local") return;
     guardHeldRef.current.cpu = guarding;
+    if (guarding) queuedAttackRef.current.cpu = null;
     if (guarding && cooldownRef.current.cpu > Date.now() + 200 && gameRef.current.cpuAction === "idle") return;
     if (guarding) guardStartedRef.current.cpu = Date.now();
     setGame((current) => {

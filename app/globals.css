@@ -8498,13 +8498,18 @@ html[data-display-mode=mobile] .select-screen.lobby-v2168 .character-card small 
 .arena .fighter.motion-rig.bonviure { width:clamp(190px,36vh,334px)!important;height:clamp(295px,56.5vh,520px)!important;aspect-ratio:2/3!important; }
 .arena .fighter.motion-rig.bonviure .fighter-art { background-size:cover!important;background-position:center bottom!important; }
 
-.special-fx.fx-shield .fx-unit,
-.special-fx.fx-anchor .fx-unit { width:clamp(72px,8vw,112px);height:clamp(72px,8vw,112px);animation-duration:760ms!important; }
-.special-fx.fx-shield.toward-right .fx-unit { animation-name:shield-throw-right!important; }
-.special-fx.fx-shield.toward-left .fx-unit { animation-name:shield-throw-left!important; }
+.special-fx.fx-anchor .fx-unit,
+.special-fx.fx-shield .fx-unit { width:clamp(72px,8vw,112px);height:clamp(72px,8vw,112px); }
+.special-fx.fx-anchor .fx-unit { animation-duration:760ms!important; }
+.special-fx.fx-shield .fx-unit {
+  top:52%!important;
+  translate:-50% -50%;
+  animation:shield-flight var(--shield-duration) linear both!important;
+}
+.special-fx.fx-shield.airborne .fx-unit { top:38%!important; }
 .special-fx.fx-anchor.toward-right .fx-unit { animation-name:anchor-throw-return-right!important; }
 .special-fx.fx-anchor.toward-left .fx-unit { animation-name:anchor-throw-return-left!important; }
-.special-fx.fx-shield .fx-unit img { animation:shield-spin 760ms linear both; }
+
 .special-fx.fx-anchor .fx-unit::before {
   content:"";position:absolute;top:50%;right:70%;width:var(--fx-distance);height:clamp(4px,.55vw,7px);
   background:repeating-linear-gradient(90deg,#332219 0 7px,#977348 7px 12px,#4b3020 12px 17px);
@@ -8528,9 +8533,15 @@ html[data-display-mode=mobile] .select-screen.lobby-v2168 .character-card small 
 .special-fx:is(.fx-flag,.fx-flagSweep) .move-callout { color:#ffe283; }
 .special-fx.fx-anchor .move-callout,.special-fx.fx-chain .move-callout { color:#e4bd82; }
 .special-fx:is(.fx-shield,.fx-staff,.fx-anchor,.fx-chain) .fx-unit img { filter:drop-shadow(0 0 12px currentColor) drop-shadow(4px 7px 5px #000b); }
-@keyframes shield-throw-right { 0%{opacity:0;transform:translate(0,14px) scale(.3) rotate(-28deg)} 12%{opacity:1} 42%,56%{opacity:1;transform:translateX(var(--fx-travel)) translateY(-24px) scale(1.1) rotate(360deg)} 100%{opacity:0;transform:translateX(var(--fx-travel)) translateY(6px) scale(.7) rotate(520deg)} }
-@keyframes shield-throw-left { 0%{opacity:0;transform:translate(0,14px) scale(.3) rotate(28deg)} 12%{opacity:1} 42%,56%{opacity:1;transform:translateX(var(--fx-travel)) translateY(-24px) scale(1.1) rotate(-360deg)} 100%{opacity:0;transform:translateX(var(--fx-travel)) translateY(6px) scale(.7) rotate(-520deg)} }
-@keyframes shield-spin { to{transform:rotate(360deg)} }
+/* Release on pose 1, reach the opponent at the damage frame (38%),
+   and return to the hand before the shield reappears on the idle sprite. */
+@keyframes shield-flight {
+  0%,13.9% { left:var(--shield-hand); opacity:0; transform:scale(.68); }
+  14% { left:var(--shield-hand); opacity:1; transform:scale(.68); }
+  38%,45% { left:var(--shield-target); opacity:1; transform:rotate(360deg) scale(1); }
+  81% { left:var(--shield-hand); opacity:1; transform:rotate(720deg) scale(.68); }
+  82%,100% { left:var(--shield-hand); opacity:0; transform:rotate(720deg) scale(.68); }
+}
 @keyframes anchor-throw-return-right { 0%{opacity:0;transform:translateX(0) scale(.28) rotate(-45deg)} 12%{opacity:1} 42%,55%{opacity:1;transform:translateX(var(--fx-travel)) translateY(-16px) scale(1.06) rotate(270deg)} 82%{opacity:1;transform:translateX(0) translateY(0) scale(.82) rotate(600deg)} 100%{opacity:0;transform:translateX(0) scale(.55) rotate(700deg)} }
 @keyframes anchor-throw-return-left { 0%{opacity:0;transform:translateX(0) scale(.28) rotate(45deg)} 12%{opacity:1} 42%,55%{opacity:1;transform:translateX(var(--fx-travel)) translateY(-16px) scale(1.06) rotate(-270deg)} 82%{opacity:1;transform:translateX(0) translateY(0) scale(.82) rotate(-600deg)} 100%{opacity:0;transform:translateX(0) scale(.55) rotate(-700deg)} }
 @keyframes anchor-chain-out-return { 0%,6%,100%{transform:scaleX(0)} 18%{transform:scaleX(.18)} 46%,60%{transform:scaleX(1)} 84%{transform:scaleX(0)} }
