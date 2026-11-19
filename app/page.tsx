@@ -21,7 +21,7 @@ import { markFrameLoaded } from "./frame-registry";
 import { isAppleMobile, retainPreloadImage } from "./mobile-resources.mjs";
 import { spookyContact, spookyPath } from "./spooky-path.mjs";
 import { FIGHTER_FRAMES } from "./fighter-frames";
-import { advanceCombatStride, attackFacesTarget, clampFighterStep, combatApproachGap, combatContact, directionToOpponent, fighterAttackRange, visibleFighterBounds } from "./combat-contact.mjs";
+import { advanceCombatStride, advanceWalkPhase, attackFacesTarget, clampFighterStep, combatApproachGap, combatContact, directionToOpponent, fighterAttackRange, visibleFighterBounds } from "./combat-contact.mjs";
 import { joystickIntent, trackHeldPointer } from "./touch-joystick.mjs";
 import GameErrorBoundary from "./GameErrorBoundary";
 import LobbyJump from "./LobbyJump";
@@ -173,7 +173,7 @@ const STAGES = [
 
 const GAME_TITLE = "HARDCORE FIGHTERS";
 const GAME_EDITION = "WEB · ARCADE EDITION";
-const GAME_VERSION = "V2.35.22";
+const GAME_VERSION = "V2.35.23";
 
 const ROUND_SECONDS = 99;
 const SUPER_MAX = 100;
@@ -1918,12 +1918,12 @@ function Home() {
         setGame((current) => {
           if (side === "player") {
             const playerAction = current.playerAction === "punch" || current.playerAction === "kick" || current.playerAction === "special"
-              ? (current.playerAirborne ? "jump" : "idle") as Action
+              ? (current.playerAirborne ? "jump" : crouchHeldRef.current.player ? "crouch" : "idle") as Action
               : current.playerAction;
             return { ...current, playerAction, playerMove: null, playerAttackVariant: 0, playerPosePhase: 0 };
           }
           const cpuAction = current.cpuAction === "punch" || current.cpuAction === "kick" || current.cpuAction === "special"
-            ? (current.cpuAirborne ? "jump" : "idle") as Action
+            ? (current.cpuAirborne ? "jump" : crouchHeldRef.current.cpu ? "crouch" : "idle") as Action
             : current.cpuAction;
           return { ...current, cpuAction, cpuMove: null, cpuAttackVariant: 0, cpuPosePhase: 0 };
         });
@@ -2652,12 +2652,31 @@ function Home() {
     let lastCpuIntent: WalkIntent = "neutral";
     let lastPlayerGear: MovementGear = "still";
     let lastCpuGear: MovementGear = "still";
+    // Advance each walk cycle by ground covered, so accelerating, braking and
+    // backing away keep the same foot rhythm at different rendering rates.
+    const gait = {
+      player: { previousX: 0, phase: 0, walking: false },
+      cpu: { previousX: 0, phase: 0, walking: false },
+    };
+    const paintWalk = (side: Side, element: HTMLDivElement | null, action: Action, x: number, rivalX: number) => {
+      const stride = gait[side];
+      const walking = action === "walk" || action === "dash";
+      if (!walking && !stride.walking) return;
+      const signedTravel = (x - stride.previousX) * (rivalX >= x ? 1 : -1);
+      stride.phase = walking && stride.walking ? advanceWalkPhase(stride.phase, signedTravel) : 0;
+      stride.previousX = x;
+      stride.walking = walking;
+      const index = Math.round(stride.phase) % 4;
+      for (let i = 0; i < 4; i++) element?.classList.toggle(`walk-frame-${i}`, walking && i === index);
+      element?.classList.toggle("stride-alt", walking && index % 2 === 1);
+    };
     const updateMovement = (now: number) => {
       frame = window.requestAnimationFrame(updateMovement);
       const elapsed = now - previousFrame;
       previousFrame = now;
       const keys = keysRef.current;
       if (gameRef.current.phase !== "fight") {
+        gait.player.walking = gait.cpu.walking = false;
         lastPlayerIntent = lastCpuIntent = "neutral";
         lastPlayerGear = lastCpuGear = "still";
         return;
@@ -2714,33 +2733,20 @@ function Home() {
         lastCpuIntent = cpuIntent;
         setCpuWalkIntent(cpuIntent);
       }
-      // Switch the isolated walk images without a React render. CSS image URL
-      // animations are dropped by some mobile browsers; the animation frame
-      // already driving movement supplies a stable cadence instead.
-      const playerStrideFrame = Math.floor(now / (playerGear === "stride" ? 105 : 145)) % 4;
-      const cpuStrideFrame = Math.floor(now / (cpuGear === "stride" ? 105 : 145)) % 4;
-      const setWalkFrame = (fighter: HTMLDivElement | null, action: GameState["playerAction"], frame: number) => {
-        if (!fighter) return;
-        const walking = action === "walk" || action === "dash";
-        for (let index = 0; index < 4; index += 1) fighter.classList.toggle(`walk-frame-${index}`, walking && frame === index);
-        fighter.classList.toggle("stride-alt", walking && frame % 2 === 1);
-      };
-      setWalkFrame(playerFighterRef.current, snapshot.playerAction, playerStrideFrame);
-      setWalkFrame(cpuFighterRef.current, snapshot.cpuAction, cpuStrideFrame);
-
       let next = snapshot;
       const inputTime = Date.now();
-      const canResumeGuard = (side: Side, action: Action, airborne: boolean) =>
-        guardHeldRef.current[side] && !airborne && !jumpLockRef.current[side]
-        && (action === "idle" || action === "walk" || action === "crouch")
-        && cooldownRef.current[side] <= inputTime + 200;
-      if (canResumeGuard("player", snapshot.playerAction, snapshot.playerAirborne)) {
-        guardStartedRef.current.player = inputTime;
-        next = { ...next, playerAction: "block" };
-      }
-      if (battleMode === "local" && canResumeGuard("cpu", snapshot.cpuAction, snapshot.cpuAirborne)) {
-        guardStartedRef.current.cpu = inputTime;
-        next = { ...next, cpuAction: "block" };
+      const heldStance = (side: Side, action: Action, airborne: boolean): Action => {
+        if (airborne || jumpLockRef.current[side] || (action !== "idle" && action !== "walk" && action !== "crouch")) return action;
+        if (guardHeldRef.current[side] && cooldownRef.current[side] <= inputTime + 200) {
+          guardStartedRef.current[side] = inputTime;
+          return "block";
+        }
+        return crouchHeldRef.current[side] ? "crouch" : action;
+      };
+      const playerStance = heldStance("player", snapshot.playerAction, snapshot.playerAirborne);
+      const cpuStance = battleMode === "local" ? heldStance("cpu", snapshot.cpuAction, snapshot.cpuAirborne) : snapshot.cpuAction;
+      if (playerStance !== snapshot.playerAction || cpuStance !== snapshot.cpuAction) {
+        next = { ...next, playerAction: playerStance, cpuAction: cpuStance };
       }
       const jumpStep = (side: Side, airborne: boolean) => {
         const travel = jumpTravelRef.current[side];
@@ -2752,7 +2758,7 @@ function Home() {
       };
       const playerStep = playerStride.distance + jumpStep("player", snapshot.playerAirborne);
       const cpuStep = cpuStride.distance + jumpStep("cpu", snapshot.cpuAirborne);
-        if (playerStep && playerMoveAllowed && next.playerAction !== "block") {
+        if (playerStep && playerMoveAllowed && next.playerAction !== "block" && next.playerAction !== "crouch") {
           const limitLeft = fighterMinX;
           const limitRight = fighterMaxX;
           const proposedX = Math.max(limitLeft, Math.min(limitRight, next.playerX + playerStep));
@@ -2767,7 +2773,7 @@ function Home() {
         } else if (!direction && next.playerAction === "walk") {
           next = { ...next, playerAction: "idle" };
         }
-        if (cpuStep && cpuMoveAllowed && next.cpuAction !== "block") {
+        if (cpuStep && cpuMoveAllowed && next.cpuAction !== "block" && next.cpuAction !== "crouch") {
           const proposedX = Math.max(fighterMinX, Math.min(fighterMaxX, next.cpuX + cpuStep));
           const cpuX = clampFighterStep(next.cpuX, next.playerX, proposedX, minimumCombatGap);
           if (Math.abs(cpuX - next.cpuX) > 0.0001) {
@@ -2780,6 +2786,8 @@ function Home() {
         } else if (!cpuDirection && next.cpuAction === "walk") {
           next = { ...next, cpuAction: "idle" };
         }
+      paintWalk("player", playerFighterRef.current, next.playerAction, next.playerX, next.cpuX);
+      paintWalk("cpu", cpuFighterRef.current, next.cpuAction, next.cpuX, next.playerX);
       if (next !== snapshot) {
         gameRef.current = next;
         if (playerFighterRef.current) playerFighterRef.current.style.left = `${next.playerX}%`;

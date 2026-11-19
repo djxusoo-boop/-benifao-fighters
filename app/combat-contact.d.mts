@@ -22,3 +22,4 @@ export function advanceCombatStride(input: {
   speed: number;
   elapsed: number;
 }): { velocity: number; held: number; distance: number };
+export function advanceWalkPhase(phase: number, signedTravel: number): number;

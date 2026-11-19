@@ -131,7 +131,8 @@ test("four-frame transparent walk cycles are wired for Xuso and four more fighte
   }
   assert.match(css, /\.walk-frame-1:is\(\.walk,\.dash\)[\s\S]*?background-position:33\.333% bottom!important/);
   assert.match(css, /\.walk-frame-2:is\(\.walk,\.dash\)[\s\S]*?background-position:66\.667% bottom!important/);
-  assert.match(page, /Math\.floor\(now \/ \(playerGear === "stride" \? 105 : 145\)\) % 4/);
+  assert.ok(page.includes('paintWalk("player", playerFighterRef.current, next.playerAction, next.playerX, next.cpuX)'));
+  assert.ok(page.includes('paintWalk("cpu", cpuFighterRef.current, next.cpuAction, next.cpuX, next.playerX)'));
   assert.match(page, /\.online-arena \.fighter\.motion-rig/);
 });
 

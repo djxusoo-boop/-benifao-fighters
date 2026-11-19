@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { advanceCombatStride, attackFacesTarget, clampFighterStep, combatApproachGap, combatContact, directionToOpponent, fighterAttackRange, visibleFighterBounds } from "../app/combat-contact.mjs";
+import { advanceCombatStride, advanceWalkPhase, attackFacesTarget, clampFighterStep, combatApproachGap, combatContact, directionToOpponent, fighterAttackRange, visibleFighterBounds } from "../app/combat-contact.mjs";
 
 const base = { inFront: true, distance: 12, range: 19, evading: false, crouching: false, normalPunch: true };
 test("only attacks in reach and facing the opponent connect", () => {
@@ -89,4 +89,12 @@ test("combat locomotion stays consistent across 30 and 60 FPS", () => {
 test("a long stall cannot advance the fighter by more than 50 milliseconds of motion", () => {
   const input = { velocity: 0, held: 0, input: 1, airborne: false, retreating: false, speed: 1 };
   assert.deepEqual(advanceCombatStride({ ...input, elapsed: 1000 }), advanceCombatStride({ ...input, elapsed: 50 }));
+});
+
+test("walking poses follow travel, hold on a stop, and reverse when backing away", () => {
+  assert.equal(advanceWalkPhase(0, 4.8), 1);
+  assert.equal(advanceWalkPhase(0, -4.8), 3);
+  assert.equal(advanceWalkPhase(1.5, 0), 1.5);
+  const halfStep = advanceWalkPhase(3.5, 2.4);
+  assert.equal(advanceWalkPhase(halfStep, 2.4), advanceWalkPhase(3.5, 4.8));
 });

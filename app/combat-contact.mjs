@@ -85,3 +85,8 @@ export function advanceCombatStride({ velocity, held, input, airborne, retreatin
   }
   return { velocity, held, distance };
 }
+
+/** Each pose spans 4.8 percent of the arena. Retreat plays the cycle backwards. */
+export function advanceWalkPhase(phase, signedTravel) {
+  return ((phase + signedTravel / 4.8) % 4 + 4) % 4;
+}
