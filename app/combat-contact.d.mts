@@ -12,3 +12,13 @@ export function fighterAttackRange(specialMove: string | null, normalMove: "punc
 export function clampFighterStep(ownX: number, rivalX: number, proposedX: number, minimumGap: number): number;
 export function combatApproachGap(arenaWidth: number, fighterWidth: number): number;
 export function visibleFighterBounds(arenaWidth: number, fighterWidth: number, min?: number, max?: number, padding?: number, extraTravel?: number): { min: number; max: number };
+
+export function advanceCombatStride(input: {
+  velocity: number;
+  held: number;
+  input: number;
+  airborne: boolean;
+  retreating: boolean;
+  speed: number;
+  elapsed: number;
+}): { velocity: number; held: number; distance: number };

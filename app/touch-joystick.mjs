@@ -21,3 +21,38 @@ export function joystickIntent(dx, dy, radius) {
     crouch: y > 0.46,
   };
 }
+
+/**
+ * Track this contact even if pointer capture is unsupported or rejected.
+ * @param {HTMLElement} element
+ * @param {number} pointerId
+ * @param {{ move?: (x: number, y: number) => void, release: () => void }} handlers
+ */
+export function trackHeldPointer(element, pointerId, { move, release }) {
+  const doc = element.ownerDocument;
+  const view = doc.defaultView;
+  const controller = new AbortController();
+  const options = { signal: controller.signal };
+  const stop = () => controller.abort();
+  const finish = () => {
+    if (controller.signal.aborted) return;
+    stop();
+    release();
+  };
+  /** @param {PointerEvent} event */
+  const endPointer = (event) => { if (event.pointerId === pointerId) finish(); };
+  try {
+    element.setPointerCapture?.(pointerId);
+  } catch {
+    // Window listeners still receive motion and release outside the element.
+  }
+  view?.addEventListener("pointermove", (event) => {
+    if (event.pointerId === pointerId) move?.(event.clientX, event.clientY);
+  }, options);
+  view?.addEventListener("pointerup", endPointer, options);
+  view?.addEventListener("pointercancel", endPointer, options);
+  element.addEventListener("lostpointercapture", endPointer, options);
+  view?.addEventListener("blur", finish, options);
+  doc.addEventListener("visibilitychange", () => { if (doc.hidden) finish(); }, options);
+  return stop;
+}

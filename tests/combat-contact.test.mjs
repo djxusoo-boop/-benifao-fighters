@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { attackFacesTarget, clampFighterStep, combatApproachGap, combatContact, directionToOpponent, fighterAttackRange, visibleFighterBounds } from "../app/combat-contact.mjs";
+import { advanceCombatStride, attackFacesTarget, clampFighterStep, combatApproachGap, combatContact, directionToOpponent, fighterAttackRange, visibleFighterBounds } from "../app/combat-contact.mjs";
 
 const base = { inFront: true, distance: 12, range: 19, evading: false, crouching: false, normalPunch: true };
 test("only attacks in reach and facing the opponent connect", () => {
@@ -67,4 +67,26 @@ test("large fighters can close into normal-punch reach on desktop and mobile", (
   assert.ok(mobileGap >= 14 && mobileGap <= 17.5);
   assert.ok(desktopGap < 19 && mobileGap < 19);
   assert.equal(combatApproachGap(0, 180), 17.5);
+});
+
+test("combat locomotion stays consistent across 30 and 60 FPS", () => {
+  for (const retreating of [false, true]) {
+    const travel = (fps) => {
+      let velocity = 0;
+      let held = 0;
+      let distance = 0;
+      for (let frame = 0; frame < fps; frame += 1) {
+        const result = advanceCombatStride({ velocity, held, input: 1, airborne: false, retreating, speed: 0.9, elapsed: 1000 / fps });
+        ({ velocity, held } = result);
+        distance += result.distance;
+      }
+      return distance;
+    };
+    assert.ok(Math.abs(travel(30) / travel(60) - 1) < 0.015);
+  }
+});
+
+test("a long stall cannot advance the fighter by more than 50 milliseconds of motion", () => {
+  const input = { velocity: 0, held: 0, input: 1, airborne: false, retreating: false, speed: 1 };
+  assert.deepEqual(advanceCombatStride({ ...input, elapsed: 1000 }), advanceCombatStride({ ...input, elapsed: 50 }));
 });

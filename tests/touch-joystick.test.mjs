@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { joystickIntent } from "../app/touch-joystick.mjs";
+import { joystickIntent, trackHeldPointer } from "../app/touch-joystick.mjs";
 
 test("keeps a forgiving neutral centre", () => {
   const intent = joystickIntent(8, -7, 50);
@@ -29,4 +29,20 @@ test("clamps a pointer dragged beyond the joystick rim", () => {
   const intent = joystickIntent(500, 500, 50);
   assert.ok(intent.x <= 1 && intent.y <= 1);
   assert.ok(Math.hypot(intent.x, intent.y) <= 1.000001);
+});
+
+test("a held contact follows motion outside the stick and releases only for its own pointer", () => {
+  const view = new EventTarget();
+  const doc = Object.assign(new EventTarget(), { defaultView: view, hidden: false });
+  const stick = Object.assign(new EventTarget(), { ownerDocument: doc, setPointerCapture() { throw new Error("no capture"); } });
+  let motion = [];
+  let releases = 0;
+  trackHeldPointer(stick, 1, { move: (x, y) => { motion = [x, y]; }, release: () => { releases += 1; } });
+  view.dispatchEvent(Object.assign(new Event("pointermove"), { pointerId: 1, clientX: 43, clientY: 21 }));
+  assert.deepEqual(motion, [43, 21]);
+  view.dispatchEvent(Object.assign(new Event("pointerup"), { pointerId: 2 }));
+  assert.equal(releases, 0);
+  view.dispatchEvent(Object.assign(new Event("pointerup"), { pointerId: 1 }));
+  view.dispatchEvent(new Event("blur"));
+  assert.equal(releases, 1);
 });

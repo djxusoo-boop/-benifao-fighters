@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { CSSProperties, PointerEvent as ReactPointerEvent } from "react";
-import { joystickIntent } from "./touch-joystick.mjs";
+import { joystickIntent, trackHeldPointer } from "./touch-joystick.mjs";
 
 export type StickIntent = { left: boolean; right: boolean; up: boolean; down: boolean };
 
@@ -19,7 +19,7 @@ const NEUTRAL: StickIntent = { left: false, right: false, up: false, down: false
 // bottom-left; the action buttons of each mode go bottom-right.
 export default function TouchStick({ onChange, label, hint, className = "" }: Props) {
   const baseRef = useRef<HTMLDivElement>(null);
-  const pointerRef = useRef<number | null>(null);
+  const trackingRef = useRef<(() => void) | null>(null);
   const intentRef = useRef<StickIntent>(NEUTRAL);
   const onChangeRef = useRef(onChange);
   const [knob, setKnob] = useState({ x: 0, y: 0 });
@@ -39,39 +39,33 @@ export default function TouchStick({ onChange, label, hint, className = "" }: Pr
     const bounds = base.getBoundingClientRect();
     const radius = bounds.width * 0.42;
     const intent = joystickIntent(clientX - (bounds.left + bounds.width / 2), clientY - (bounds.top + bounds.height / 2), radius);
-    setKnob({ x: intent.x, y: intent.y });
+    setKnob(current => current.x === intent.x && current.y === intent.y ? current : { x: intent.x, y: intent.y });
     emit({ left: intent.left, right: intent.right, up: intent.jump, down: intent.crouch });
   };
 
   const release = () => {
-    pointerRef.current = null;
+    trackingRef.current = null;
     setKnob({ x: 0, y: 0 });
     emit(NEUTRAL);
   };
 
-  useEffect(() => () => { if (pointerRef.current !== null) onChangeRef.current(NEUTRAL); }, []);
+  useEffect(() => () => {
+    if (trackingRef.current) {
+      trackingRef.current();
+      onChangeRef.current(NEUTRAL);
+    }
+  }, []);
 
   const begin = (event: ReactPointerEvent<HTMLDivElement>) => {
     event.preventDefault();
-    if (pointerRef.current !== null) return;
-    pointerRef.current = event.pointerId;
-    try { event.currentTarget.setPointerCapture?.(event.pointerId); } catch { /* Capture is a nicety. */ }
+    if (trackingRef.current) return;
+    trackingRef.current = trackHeldPointer(event.currentTarget, event.pointerId, { move: track, release });
     track(event.clientX, event.clientY);
-  };
-  const move = (event: ReactPointerEvent<HTMLDivElement>) => {
-    if (pointerRef.current !== event.pointerId) return;
-    event.preventDefault();
-    track(event.clientX, event.clientY);
-  };
-  const end = (event: ReactPointerEvent<HTMLDivElement>) => {
-    if (pointerRef.current !== event.pointerId) return;
-    event.preventDefault();
-    release();
   };
 
   return (
     <div className={`mode-stick-wrap ${className}`}>
-      <div ref={baseRef} className="mode-stick" role="group" aria-label={label} onPointerDown={begin} onPointerMove={move} onPointerUp={end} onPointerCancel={end} onLostPointerCapture={release}>
+      <div ref={baseRef} className="mode-stick" role="group" aria-label={label} onPointerDown={begin}>
         <span className="mode-stick-arrows" aria-hidden="true"><i className="up">↑</i><i className="left">←</i><i className="right">→</i><i className="down">↓</i></span>
         <span className="mode-stick-knob" style={{ "--kx": knob.x, "--ky": knob.y } as CSSProperties} aria-hidden="true" />
       </div>

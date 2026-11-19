@@ -21,8 +21,8 @@ import { markFrameLoaded } from "./frame-registry";
 import { isAppleMobile, retainPreloadImage } from "./mobile-resources.mjs";
 import { spookyContact, spookyPath } from "./spooky-path.mjs";
 import { FIGHTER_FRAMES } from "./fighter-frames";
-import { attackFacesTarget, clampFighterStep, combatApproachGap, combatContact, directionToOpponent, fighterAttackRange, visibleFighterBounds } from "./combat-contact.mjs";
-import { joystickIntent } from "./touch-joystick.mjs";
+import { advanceCombatStride, attackFacesTarget, clampFighterStep, combatApproachGap, combatContact, directionToOpponent, fighterAttackRange, visibleFighterBounds } from "./combat-contact.mjs";
+import { joystickIntent, trackHeldPointer } from "./touch-joystick.mjs";
 import GameErrorBoundary from "./GameErrorBoundary";
 import LobbyJump from "./LobbyJump";
 import { FIGHTER_PROFILES, defenseMultiplier, pickWinQuote, powerMultiplier, speedMultiplier } from "./fighter-profiles";
@@ -173,7 +173,7 @@ const STAGES = [
 
 const GAME_TITLE = "HARDCORE FIGHTERS";
 const GAME_EDITION = "WEB · ARCADE EDITION";
-const GAME_VERSION = "V2.35.21";
+const GAME_VERSION = "V2.35.22";
 
 const ROUND_SECONDS = 99;
 const SUPER_MAX = 100;
@@ -765,7 +765,8 @@ function Home() {
   const keysRef = useRef(new Set<string>());
   const playerJoystickRef = useRef<HTMLDivElement | null>(null);
   const cpuJoystickRef = useRef<HTMLDivElement | null>(null);
-  const joystickPointerRef = useRef<Record<Side, number | null>>({ player: null, cpu: null });
+  const stickTrackingRef = useRef<Partial<Record<Side, () => void>>>({});
+  const guardTrackingRef = useRef<Partial<Record<Side, () => void>>>({});
   const joystickDirectionRef = useRef<Record<Side, -1 | 0 | 1>>({ player: 0, cpu: 0 });
   const joystickJumpLatchedRef = useRef<Record<Side, boolean>>({ player: false, cpu: false });
   const joystickCrouchRef = useRef<Record<Side, boolean>>({ player: false, cpu: false });
@@ -2655,7 +2656,6 @@ function Home() {
       frame = window.requestAnimationFrame(updateMovement);
       const elapsed = now - previousFrame;
       previousFrame = now;
-      const frameScale = Math.min(1.25, elapsed / 20);
       const keys = keysRef.current;
       if (gameRef.current.phase !== "fight") {
         lastPlayerIntent = lastCpuIntent = "neutral";
@@ -2678,34 +2678,27 @@ function Home() {
       const cpuMovingTowardRival = snapshot.playerX > snapshot.cpuX ? cpuDirection > 0 : cpuDirection < 0;
 
 
-      const accelerate = (side: Side, input: number, airborne: boolean, retreating: boolean) => {
-        const previous = movementVelocityRef.current[side];
-        if (input) {
-          movementHeldRef.current[side] = Math.sign(previous) === input ? movementHeldRef.current[side] + frameScale : frameScale;
-          const forwardSpeed = movementHeldRef.current[side] > 9 ? 0.95 : 0.68;
-          // A back-step is deliberately shorter than a forward stride. This
-          // keeps the feet from looking as if they are skating backwards and
-          // gives the retreat animation time to read clearly.
-          const movingFighter = side === "player" ? selected : opponent;
-          const groundSpeed = forwardSpeed * (retreating ? 0.82 : 1) * speedMultiplier(movingFighter) * balanceFactor(movingFighter, "speed");
-          const maxSpeed = airborne ? 0.51 : groundSpeed;
-          const acceleration = airborne ? 0.08 : retreating ? 0.125 : 0.15;
-          const difference = input * maxSpeed - previous;
-          const next = previous + Math.sign(difference) * Math.min(Math.abs(difference), acceleration * frameScale);
-          movementVelocityRef.current[side] = Math.max(-maxSpeed, Math.min(maxSpeed, next));
-        } else {
-          movementHeldRef.current[side] = 0;
-          movementVelocityRef.current[side] = Math.abs(previous) < 0.045 ? 0 : previous * Math.pow(airborne ? 0.88 : 0.68, frameScale);
-        }
-        return movementVelocityRef.current[side];
+      const advance = (side: Side, input: number, airborne: boolean, retreating: boolean) => {
+        const fighter = side === "player" ? selected : opponent;
+        const stride = advanceCombatStride({
+          velocity: movementVelocityRef.current[side],
+          held: movementHeldRef.current[side],
+          input,
+          airborne,
+          retreating,
+          speed: input ? speedMultiplier(fighter) * balanceFactor(fighter, "speed") : 1,
+          elapsed,
+        });
+        movementVelocityRef.current[side] = stride.velocity;
+        movementHeldRef.current[side] = stride.held;
+        return stride;
       };
-
       const playerMoveAllowed = snapshot.playerAirborne || snapshot.playerAction === "idle" || snapshot.playerAction === "walk";
       const cpuMoveAllowed = snapshot.cpuAirborne || snapshot.cpuAction === "idle" || snapshot.cpuAction === "walk";
-      const playerVelocity = accelerate("player", playerMoveAllowed ? direction : 0, snapshot.playerAirborne, Boolean(direction && !movingTowardRival));
-      const cpuVelocity = accelerate("cpu", cpuMoveAllowed ? cpuDirection : 0, snapshot.cpuAirborne, Boolean(cpuDirection && !cpuMovingTowardRival));
-      const playerGear: MovementGear = Math.abs(playerVelocity) < 0.045 ? "still" : movementHeldRef.current.player > 9 ? "stride" : "start";
-      const cpuGear: MovementGear = Math.abs(cpuVelocity) < 0.045 ? "still" : movementHeldRef.current.cpu > 9 ? "stride" : "start";
+      const playerStride = advance("player", playerMoveAllowed ? direction : 0, snapshot.playerAirborne, Boolean(direction && !movingTowardRival));
+      const cpuStride = advance("cpu", cpuMoveAllowed ? cpuDirection : 0, snapshot.cpuAirborne, Boolean(cpuDirection && !cpuMovingTowardRival));
+      const playerGear: MovementGear = Math.abs(playerStride.velocity) < 0.045 ? "still" : movementHeldRef.current.player > 9 ? "stride" : "start";
+      const cpuGear: MovementGear = Math.abs(cpuStride.velocity) < 0.045 ? "still" : movementHeldRef.current.cpu > 9 ? "stride" : "start";
       if (playerGear !== lastPlayerGear || cpuGear !== lastCpuGear) {
         lastPlayerGear = playerGear;
         lastCpuGear = cpuGear;
@@ -2752,13 +2745,13 @@ function Home() {
       const jumpStep = (side: Side, airborne: boolean) => {
         const travel = jumpTravelRef.current[side];
         if (!airborne || !travel) return 0;
-        const duration = Math.min(travel.remaining, elapsed, 32);
+        const duration = Math.min(travel.remaining, Math.max(elapsed, 0), 50);
         travel.remaining -= duration;
         if (travel.remaining <= 0) delete jumpTravelRef.current[side];
         return travel.velocity * duration;
       };
-      const playerStep = playerVelocity * frameScale + jumpStep("player", snapshot.playerAirborne);
-      const cpuStep = cpuVelocity * frameScale + jumpStep("cpu", snapshot.cpuAirborne);
+      const playerStep = playerStride.distance + jumpStep("player", snapshot.playerAirborne);
+      const cpuStep = cpuStride.distance + jumpStep("cpu", snapshot.cpuAirborne);
         if (playerStep && playerMoveAllowed && next.playerAction !== "block") {
           const limitLeft = fighterMinX;
           const limitRight = fighterMaxX;
@@ -3211,7 +3204,10 @@ function Home() {
       keysRef.current.clear();
       queuedAttackRef.current = { player: null, cpu: null };
       takeoffInputRef.current = { player: null, cpu: null };
-      joystickPointerRef.current = { player: null, cpu: null };
+      Object.values(stickTrackingRef.current).forEach((stop) => stop());
+      Object.values(guardTrackingRef.current).forEach((stop) => stop());
+      stickTrackingRef.current = {};
+      guardTrackingRef.current = {};
       joystickDirectionRef.current = { player: 0, cpu: 0 };
       joystickJumpLatchedRef.current = { player: false, cpu: false };
       joystickCrouchRef.current = { player: false, cpu: false };
@@ -3260,13 +3256,22 @@ function Home() {
     action();
   };
 
-  const endTouch = (event: ReactPointerEvent<HTMLElement>, action: () => void) => {
+  const beginTouchGuard = (side: Side, event: ReactPointerEvent<HTMLButtonElement>) => {
     event.preventDefault();
-    action();
+    if (guardTrackingRef.current[side] || gameRef.current.phase !== "fight" || pausedRef.current) return;
+    const changeGuard = side === "player" ? setGuard : setCpuGuard;
+    guardTrackingRef.current[side] = trackHeldPointer(event.currentTarget, event.pointerId, {
+      release: () => {
+        delete guardTrackingRef.current[side];
+        changeGuard(false);
+      },
+    });
+    changeGuard(true);
   };
 
   const resetJoystick = useCallback((side: Side) => {
-    joystickPointerRef.current[side] = null;
+    stickTrackingRef.current[side]?.();
+    delete stickTrackingRef.current[side];
     joystickDirectionRef.current[side] = 0;
     joystickJumpLatchedRef.current[side] = false;
     keysRef.current.delete(side === "player" ? "touch-left" : "touch-cpu-left");
@@ -3308,32 +3313,33 @@ function Home() {
       if (side === "player") setCrouch(intent.crouch);
       else setCpuCrouch(intent.crouch);
     }
-    setJoystickVector((current) => ({ ...current, [side]: { x: intent.x, y: intent.y } }));
+    setJoystickVector((current) => current[side].x === intent.x && current[side].y === intent.y
+      ? current : { ...current, [side]: { x: intent.x, y: intent.y } });
   }, [directionalPress, jump, setCpuCrouch, setCrouch]);
 
   const beginJoystick = (side: Side, event: ReactPointerEvent<HTMLDivElement>) => {
     event.preventDefault();
-    if (joystickPointerRef.current[side] !== null) return;
-    joystickPointerRef.current[side] = event.pointerId;
-    try {
-      event.currentTarget.setPointerCapture?.(event.pointerId);
-    } catch {
-      // Android WebViews can reject capture; pointer events still work here.
-    }
+    if (stickTrackingRef.current[side] || gameRef.current.phase !== "fight" || pausedRef.current) return;
+    stickTrackingRef.current[side] = trackHeldPointer(event.currentTarget, event.pointerId, {
+      move: (x, y) => updateJoystick(side, x, y),
+      release: () => resetJoystick(side),
+    });
     updateJoystick(side, event.clientX, event.clientY);
   };
 
-  const moveJoystick = (side: Side, event: ReactPointerEvent<HTMLDivElement>) => {
-    if (joystickPointerRef.current[side] !== event.pointerId) return;
-    event.preventDefault();
-    updateJoystick(side, event.clientX, event.clientY);
-  };
-
-  const endJoystick = (side: Side, event: ReactPointerEvent<HTMLDivElement>) => {
-    if (joystickPointerRef.current[side] !== event.pointerId) return;
-    event.preventDefault();
-    resetJoystick(side);
-  };
+  useEffect(() => {
+    if (game.phase !== "fight" || paused) return;
+    return () => {
+      for (const side of ["player", "cpu"] as const) {
+        if (stickTrackingRef.current[side]) resetJoystick(side);
+        if (guardTrackingRef.current[side]) {
+          guardTrackingRef.current[side]?.();
+          delete guardTrackingRef.current[side];
+          (side === "player" ? setGuard : setCpuGuard)(false);
+        }
+      }
+    };
+  }, [game.phase, paused, resetJoystick, setCpuGuard, setGuard]);
 
   const resetToSelect = useCallback(() => {
     clearTransientTimers();
@@ -3886,14 +3892,14 @@ function Home() {
         {(game.phase === "fight" || game.phase === "intro" || game.phase === "ko") && (
           <div className={`touch-controls ${game.phase === "fight" ? "" : "touch-controls-waiting"}`} aria-label={game.phase === "fight" ? "Controles táctiles" : "Controles táctiles · espera al siguiente asalto"} aria-disabled={game.phase !== "fight"}>
             <div className="touch-joystick-wrap">
-              <div ref={playerJoystickRef} className="touch-joystick" role="group" aria-label="Joystick: mover, saltar y agacharse" onPointerDown={(event) => beginJoystick("player", event)} onPointerMove={(event) => moveJoystick("player", event)} onPointerUp={(event) => endJoystick("player", event)} onPointerCancel={(event) => endJoystick("player", event)} onLostPointerCapture={() => resetJoystick("player")}>
+              <div ref={playerJoystickRef} className="touch-joystick" role="group" aria-label="Joystick: mover, saltar y agacharse" onPointerDown={(event) => beginJoystick("player", event)}>
                 <span className="touch-joystick-arrows" aria-hidden="true"><i className="up">↑</i><i className="left">←</i><i className="right">→</i><i className="down">↓</i></span>
                 <span className="touch-joystick-stick" style={{ transform: `translate(${joystickVector.player.x * 31}px, ${joystickVector.player.y * 31}px)` }} aria-hidden="true" />
               </div>
               <small className="touch-joystick-label">MOVER · ↑ SALTO · ↓ AGACHAR</small>
             </div>
             <div className="touch-actions touch-actions-redesign">
-              <button type="button" className="touch-block" onPointerDown={(event) => beginTouch(event, () => setGuard(true))} onPointerUp={(event) => endTouch(event, () => setGuard(false))} onPointerCancel={(event) => endTouch(event, () => setGuard(false))} onLostPointerCapture={() => setGuard(false)} aria-label="Bloquear">◆<small>BLOQUEO</small></button>
+              <button type="button" className="touch-block" onPointerDown={(event) => beginTouchGuard("player", event)} aria-label="Bloquear">◆<small>BLOQUEO</small></button>
               <button type="button" className="touch-hit" onPointerDown={(event) => beginTouch(event, () => performAttack("player", 0, "punch"))} aria-label="Dar un puñetazo"><span>J</span><small>PUÑO</small></button>
               <button type="button" className="touch-kick" onPointerDown={(event) => beginTouch(event, () => performAttack("player", 0, "kick"))} aria-label="Dar una patada"><span>H</span><small>PATADA</small></button>
               <button type="button" className="touch-special-one" onPointerDown={(event) => beginTouch(event, () => performAttack("player", 1))} aria-label={playerData.specialOne}><span>K</span><small>{SHORT_SPECIALS[selected][0]}</small></button>
@@ -3905,14 +3911,14 @@ function Home() {
         {(game.phase === "fight" || game.phase === "intro" || game.phase === "ko") && battleMode === "local" && (
           <div className={`touch-controls touch-controls-p2 ${game.phase === "fight" ? "" : "touch-controls-waiting"}`} aria-label={game.phase === "fight" ? "Controles táctiles del jugador dos" : "Controles táctiles del jugador dos · espera al siguiente asalto"} aria-disabled={game.phase !== "fight"}>
             <div className="touch-joystick-wrap">
-              <div ref={cpuJoystickRef} className="touch-joystick" role="group" aria-label="Joystick del jugador dos" onPointerDown={(event) => beginJoystick("cpu", event)} onPointerMove={(event) => moveJoystick("cpu", event)} onPointerUp={(event) => endJoystick("cpu", event)} onPointerCancel={(event) => endJoystick("cpu", event)} onLostPointerCapture={() => resetJoystick("cpu")}>
+              <div ref={cpuJoystickRef} className="touch-joystick" role="group" aria-label="Joystick del jugador dos" onPointerDown={(event) => beginJoystick("cpu", event)}>
                 <span className="touch-joystick-arrows" aria-hidden="true"><i className="up">↑</i><i className="left">←</i><i className="right">→</i><i className="down">↓</i></span>
                 <span className="touch-joystick-stick" style={{ transform: `translate(${joystickVector.cpu.x * 31}px, ${joystickVector.cpu.y * 31}px)` }} aria-hidden="true" />
               </div>
               <small className="touch-joystick-label">P2 · MOVER / SALTAR / AGACHAR</small>
             </div>
             <div className="touch-actions touch-actions-p2 touch-actions-redesign">
-              <button type="button" className="touch-block" onPointerDown={(event) => beginTouch(event, () => setCpuGuard(true))} onPointerUp={(event) => endTouch(event, () => setCpuGuard(false))} onPointerCancel={(event) => endTouch(event, () => setCpuGuard(false))} onLostPointerCapture={() => setCpuGuard(false)}>◆<small>BLOQUEO</small></button>
+              <button type="button" className="touch-block" onPointerDown={(event) => beginTouchGuard("cpu", event)}>◆<small>BLOQUEO</small></button>
               <button type="button" className="touch-hit" onPointerDown={(event) => beginTouch(event, () => performAttack("cpu", 0, "punch"))}><span>1</span><small>PUÑO</small></button>
               <button type="button" className="touch-kick" onPointerDown={(event) => beginTouch(event, () => performAttack("cpu", 0, "kick"))}><span>2</span><small>PATADA</small></button>
               <button type="button" className="touch-special-one" onPointerDown={(event) => beginTouch(event, () => performAttack("cpu", 1))}><span>3</span><small>{SHORT_SPECIALS[opponent][0]}</small></button>

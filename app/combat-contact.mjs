@@ -59,3 +59,29 @@ export function visibleFighterBounds(arenaWidth, fighterWidth, min = 7, max = 93
   const safeEdge = Math.max(min, Math.min(49, ((fighterWidth / 2 + padding + extraTravel) / arenaWidth) * 100));
   return { min: safeEdge, max: 100 - safeEdge };
 }
+
+/** Move the same distance over real time, splitting slower frames into short steps. */
+export function advanceCombatStride({ velocity, held, input, airborne, retreating, speed, elapsed }) {
+  const speedFactor = speed * (retreating ? 0.82 : 1);
+  const acceleration = airborne ? 0.08 : retreating ? 0.125 : 0.15;
+  const damping = airborne ? 0.88 : 0.68;
+  let distance = 0;
+  // Limit catch-up on long stalls while allowing a full 30 FPS frame.
+  for (let remaining = Math.min(50, Math.max(0, elapsed)) / 20; remaining > 0;) {
+    const step = Math.min(0.5, remaining);
+    remaining -= step;
+    const previous = velocity;
+    if (input) {
+      held = Math.sign(previous) === input ? held + step : step;
+      const maxSpeed = airborne ? 0.51 : (held > 9 ? 0.95 : 0.68) * speedFactor;
+      const difference = input * maxSpeed - velocity;
+      velocity += Math.sign(difference) * Math.min(Math.abs(difference), acceleration * step);
+      velocity = Math.max(-maxSpeed, Math.min(maxSpeed, velocity));
+    } else {
+      held = 0;
+      velocity = Math.abs(previous) < 0.045 ? 0 : previous * Math.pow(damping, step);
+    }
+    distance += (previous + velocity) * 0.5 * step;
+  }
+  return { velocity, held, distance };
+}
