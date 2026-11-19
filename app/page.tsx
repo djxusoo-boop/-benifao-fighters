@@ -2059,48 +2059,40 @@ function Home() {
 
     later(() => {
       const live = gameRef.current;
-      const action = side === "player" ? live.playerAction : live.cpuAction;
+      const actionKey = side === "player" ? "playerAction" : "cpuAction";
+      const airborneKey = side === "player" ? "playerAirborne" : "cpuAirborne";
+      const action = live[actionKey];
       if (live.phase !== "fight" || (action !== "crouch" && action !== "walk" && action !== "idle")) {
         takeoffInputRef.current[side] = null;
+        jumpLockRef.current[side] = false;
         return;
       }
-      setGame((current) => side === "player"
-        ? { ...current, playerAction: "jump", playerAirborne: true }
-        : { ...current, cpuAction: "jump", cpuAirborne: true });
+      setGame((current) => ({ ...current, [actionKey]: "jump", [airborneKey]: true }));
       beep(185, 0.07, "triangle");
-    }, 90);
 
-    // Integrate the original travel over the same window, one step per paint.
-    later(() => {
-      const inAir = side === "player" ? gameRef.current.playerAirborne : gameRef.current.cpuAirborne;
-      if (!inAir) return;
-      const duration = 645;
-      jumpTravelRef.current[side] = { velocity: direction * jumpTravel / duration, remaining: duration };
-      beep(285, 0.06, "triangle");
-    }, 150);
-
-    later(() => beep(98, 0.045, "square"), 785);
-    later(() => {
-      jumpLockRef.current[side] = false;
-      delete jumpTravelRef.current[side];
-      setGame((current) => {
-        const actionKey = side === "player" ? "playerAction" : "cpuAction";
-        const airborneKey = side === "player" ? "playerAirborne" : "cpuAirborne";
-        return {
+      // Only a successful takeoff gets a flight and landing timer.
+      later(() => {
+        if (!gameRef.current[airborneKey]) return;
+        const duration = 645;
+        jumpTravelRef.current[side] = { velocity: direction * jumpTravel / duration, remaining: duration };
+        beep(285, 0.06, "triangle");
+      }, 60);
+      later(() => beep(98, 0.045, "square"), 695);
+      later(() => {
+        jumpLockRef.current[side] = false;
+        delete jumpTravelRef.current[side];
+        setGame((current) => ({
           ...current,
           [airborneKey]: false,
           [actionKey]: current[actionKey] === "jump" ? "crouch" : current[actionKey],
-        };
-      });
-      later(() => {
-        setGame((current) => {
-          const actionKey = side === "player" ? "playerAction" : "cpuAction";
-          return current[actionKey] === "crouch" && !crouchHeldRef.current[side]
+        }));
+        later(() => {
+          setGame((current) => current[actionKey] === "crouch" && !crouchHeldRef.current[side]
             ? { ...current, [actionKey]: "idle" }
-            : current;
-        });
-      }, 115);
-    }, 910);
+            : current);
+        }, 115);
+      }, 820);
+    }, 90);
   }, [battleMode, beep, fighterMaxX, fighterMinX, later, minimumCombatGap]);
 
   const dash = useCallback((side: Side, direction: -1 | 1, evasive = false) => {
