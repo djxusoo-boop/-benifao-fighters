@@ -360,7 +360,7 @@
 }
 
 /* ===== V2.27.1 Ogalla: real single frames for every attack, always fitted to the box ===== */
-#game .fighter.motion-rig:is(.ogalla,.bacora,.bonviure,.elchica,.borja):is(.special,.jump,.airborne,.crouch,.hit,.launched,.knockdown,.defeated,.getup,.dodge,.idle,.walk,.block) .fighter-pose .fighter-art:is(.ogalla,.bacora,.bonviure,.elchica,.borja) { background-size:contain!important; background-position:center bottom!important; background-repeat:no-repeat!important; }
+#game .fighter.motion-rig:is(.ogalla,.bacora,.bonviure,.elchica,.borja):is(.special,.jump,.crouch,.hit,.launched,.knockdown,.defeated,.getup,.dodge,.idle,.walk,.block) .fighter-pose .fighter-art:is(.ogalla,.bacora,.bonviure,.elchica,.borja) { background-size:contain!important; background-position:center bottom!important; background-repeat:no-repeat!important; }
 #game .fighter.motion-rig.ogalla:is(.punch,.kick,.special) .fighter-pose .fighter-art.ogalla { background-size:contain!important; background-position:center bottom!important; background-repeat:no-repeat!important; animation:none!important; }
 #game .fighter.motion-rig.ogalla:is(.punch,.kick) .fighter-art.ogalla::before, #game .fighter.motion-rig.ogalla:is(.punch,.kick) .fighter-art.ogalla::after { content:none!important; }
 #game .fighter.motion-rig.ogalla.punch.pose-phase-0 .fighter-pose .fighter-art.ogalla { background-image:url('/assets/new-fighters/ogalla-punch-1.webp')!important; }
@@ -375,3 +375,15 @@
 #game .fighter.motion-rig.ogalla.special.scepter:is(.pose-phase-2,.pose-phase-3) .fighter-pose .fighter-art.ogalla { background-image:url('/assets/new-fighters/ogalla-staff-special-v2.webp')!important; }
 #game .fighter.motion-rig.ogalla.special.artichokes:is(.pose-phase-2,.pose-phase-3) .fighter-pose .fighter-art.ogalla { background-image:url('/assets/new-fighters/ogalla-artichoke-attack-v2.webp')!important; }
 #game .fighter.motion-rig.ogalla.special.pose-phase-4 .fighter-pose .fighter-art.ogalla { background-image:url('/assets/new-fighters/ogalla-idle-v2.webp')!important; }
+
+/* These three fighters walk with a four-cell sheet. Keep the same crop
+   throughout the stride, including when a guest watches an online fight. */
+#game .fighter.motion-rig:is(.bacora,.bonviure,.elchica):is(.walk,.dash) .fighter-pose .fighter-art:is(.bacora,.bonviure,.elchica) {
+  background-image: var(--walk-sheet) !important;
+  background-size: 400% 100% !important;
+  background-position: var(--stride-position, 0%) bottom !important;
+  animation: none !important;
+}
+.fighter.walk-frame-1 { --stride-position: 33.333333%; }
+.fighter.walk-frame-2 { --stride-position: 66.666667%; }
+.fighter.walk-frame-3 { --stride-position: 100%; }

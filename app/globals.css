@@ -9860,14 +9860,6 @@ html[data-display-mode=mobile] .select-screen.lobby-v2168 .character-card small 
   left:-25%!important;
   width:150%!important;
 }
-.arena .fighter.motion-rig.bacora.punch.pose-phase-2 .fighter-pose .fighter-art.bacora {
-  left:-15%!important;
-  width:130%!important;
-}
-.arena .fighter.motion-rig.bacora.kick.pose-phase-2 .fighter-pose .fighter-art.bacora {
-  left:-45%!important;
-  width:190%!important;
-}
 .arena .fighter.motion-rig.elchica.special.pose-phase-2 .fighter-pose .fighter-art.elchica {
   left:-22.5%!important;
   width:145%!important;
@@ -10171,14 +10163,14 @@ html[data-display-mode=mobile] .select-screen.lobby-v2168 .character-card small 
 
 /* V2.35.7 · Four distinct contact/passing poses keep the custom fighters
    planted while moving. The JS frame classes also work in remote online play. */
-.arena .fighter.motion-rig:is(.xuso,.bomba,.bacora,.bonviure,.elchica) { --walk-cycle:url('/assets/new-fighters/xuso-walk-cycle-v2357.webp'); }
-.arena .fighter.motion-rig.bomba { --walk-cycle:url('/assets/new-fighters/bomba-walk-cycle-v2357.webp'); }
-.arena .fighter.motion-rig.bacora { --walk-cycle:url('/assets/new-fighters/bacora-walk-cycle-v2357.webp'); }
-.arena .fighter.motion-rig.bonviure { --walk-cycle:url('/assets/new-fighters/bonviure-walk-cycle-v2357.webp'); }
-.arena .fighter.motion-rig.elchica { --walk-cycle:url('/assets/new-fighters/elchica-walk-cycle-v2357.webp'); }
+.arena .fighter.motion-rig:is(.xuso,.bomba,.bacora,.bonviure,.elchica) { --walk-sheet:url('/assets/new-fighters/xuso-walk-cycle-v2357.webp'); }
+.arena .fighter.motion-rig.bomba { --walk-sheet:url('/assets/new-fighters/bomba-walk-cycle-v2357.webp'); }
+.arena .fighter.motion-rig.bacora { --walk-sheet:url('/assets/new-fighters/bacora-walk-cycle-v2357.webp'); }
+.arena .fighter.motion-rig.bonviure { --walk-sheet:url('/assets/new-fighters/bonviure-walk-cycle-v2357.webp'); }
+.arena .fighter.motion-rig.elchica { --walk-sheet:url('/assets/new-fighters/elchica-walk-cycle-v2357.webp'); }
 .arena .fighter.motion-rig:is(.xuso,.bomba,.bacora,.bonviure,.elchica).walk .fighter-pose .fighter-art,
 .arena .fighter.motion-rig:is(.xuso,.bomba,.bacora,.bonviure,.elchica).dash .fighter-pose .fighter-art {
-  background-image:var(--walk-cycle)!important;
+  background-image:var(--walk-sheet)!important;
   background-size:400% 100%!important;
   background-position:0% bottom!important;
 }

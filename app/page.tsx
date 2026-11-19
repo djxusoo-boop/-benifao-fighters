@@ -170,7 +170,7 @@ const STAGES = [
 
 const GAME_TITLE = "HARDCORE FIGHTERS";
 const GAME_EDITION = "WEB · ARCADE EDITION";
-const GAME_VERSION = "V2.35.18";
+const GAME_VERSION = "V2.35.19";
 
 const ROUND_SECONDS = 99;
 const SUPER_MAX = 100;
@@ -1528,6 +1528,7 @@ function Home() {
     (side: Side, requestedLevel: AttackLevel = 0, normalMove: NormalMove = "punch") => {
       const snapshot = gameRef.current;
       if (snapshot.phase !== "fight" || pausedRef.current) return;
+      const inputLevel = requestedLevel;
       const strongNormal = requestedLevel > 0 && ["mad-dog", "angerfist", "dalmau"].includes(side === "player" ? selected : opponent);
       if (strongNormal) { normalMove = requestedLevel === 1 ? "punch" : "kick"; requestedLevel = 0; }
       // A full meter turns special 2 into the SUPER. The CPU also has to wait
@@ -1545,7 +1546,7 @@ function Home() {
       }
       if (ownAction !== "idle" && ownAction !== "walk" && ownAction !== "dash" && ownAction !== "crouch" && ownAction !== "jump") {
         if (ownAction === "punch" || ownAction === "kick" || ownAction === "special") {
-          queuedAttackRef.current[side] = { level, normalMove };
+          queuedAttackRef.current[side] = { level: strongNormal ? inputLevel : level, normalMove };
         }
         return;
       }
@@ -1704,7 +1705,7 @@ function Home() {
         });
       };
       later(() => setPosePhase(1), Math.max(65, Math.round(actionDuration * 0.14)));
-      later(() => setPosePhase(2), Math.max(145, Math.round(actionDuration * 0.34)));
+      later(() => setPosePhase(2), level === 0 ? impactDelay : Math.max(145, Math.round(actionDuration * 0.34)));
       later(() => setPosePhase(3), Math.max(245, Math.round(actionDuration * 0.58)));
       later(() => setPosePhase(4), Math.max(330, Math.round(actionDuration * 0.82)));
 
@@ -1720,16 +1721,7 @@ function Home() {
           const targetSide: Side = side === "player" ? "cpu" : "player";
           const attackerX = side === "player" ? impactSnapshot.playerX : impactSnapshot.cpuX;
           const targetX = side === "player" ? impactSnapshot.cpuX : impactSnapshot.playerX;
-          const impactDirection = directionToOpponent(attackerX, targetX);
-          if (impactDirection !== attackDirection) {
-            setGame((current) => {
-              if (current.phase !== "fight") return current;
-              return side === "player"
-                ? { ...current, playerAttackDirection: impactDirection }
-                : { ...current, cpuAttackDirection: impactDirection };
-            });
-          }
-          const targetIsInFront = attackFacesTarget(impactDirection, attackerX, targetX);
+          const targetIsInFront = attackFacesTarget(attackDirection, attackerX, targetX);
           const spookyMove = !isSuper && (specialMove === "dog" || specialMove === "howl") ? specialMove : null;
           const spookyHit = spookyMove && spookyContact(
             side === "player" ? snapshot.playerX : snapshot.cpuX,

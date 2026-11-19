@@ -12,8 +12,8 @@
 #game .fighter.motion-rig.xuso.walk .fighter-pose .fighter-art.xuso,
 #game .fighter.motion-rig.xuso.walk.stride-alt .fighter-pose .fighter-art.xuso { background-image:url('/assets/new-fighters/xuso-v3/xuso-caminar-01.webp')!important; animation:xuso-v3-walk 620ms steps(1,end) infinite!important; }
 #game .fighter.motion-rig.xuso.dash .fighter-pose .fighter-art.xuso { background-image:url('/assets/new-fighters/xuso-v3/xuso-correr-01.webp')!important; animation:xuso-v3-run 420ms steps(1,end) infinite!important; }
-#game .fighter.motion-rig.xuso.winner-dance .fighter-pose .fighter-art.xuso { background-image:url('/assets/new-fighters/xuso-v3/xuso-victoria-01.webp')!important; animation:xuso-v3-victory 1400ms steps(1,end) infinite!important; }
-#game .fighter.motion-rig.xuso.getup .fighter-pose .fighter-art.xuso { background-image:url('/assets/new-fighters/xuso-v3/xuso-levantarse-02.webp')!important; animation:xuso-v3-getup 520ms steps(1,end) both!important; }
+#game .fighter.motion-rig.xuso.winner-dance .fighter-pose .fighter-art.xuso { background-image:var(--xuso-action-frame, url('/assets/new-fighters/xuso-v3/xuso-victoria-01.webp'))!important; animation:xuso-v3-victory 1400ms steps(1,end) infinite!important; }
+#game .fighter.motion-rig.xuso.getup .fighter-pose .fighter-art.xuso { background-image:var(--xuso-action-frame, url('/assets/new-fighters/xuso-v3/xuso-levantarse-02.webp'))!important; animation:xuso-v3-getup 520ms steps(1,end) both!important; }
 #game .fighter.motion-rig.xuso.block .fighter-pose .fighter-art.xuso { background-image:url('/assets/new-fighters/xuso-v3/xuso-bloquear.webp')!important; animation:none!important; }
 #game .fighter.motion-rig.xuso.dodge .fighter-pose .fighter-art.xuso { background-image:url('/assets/new-fighters/xuso-v3/xuso-esquivar.webp')!important; animation:none!important; }
 #game .fighter.motion-rig.xuso.crouch .fighter-pose .fighter-art.xuso,
@@ -74,15 +74,15 @@
   75%,100% { background-image:url('/assets/new-fighters/xuso-v3/xuso-correr-04.webp'); }
 }
 @keyframes xuso-v3-victory {
-  0%,24.9% { background-image:url('/assets/new-fighters/xuso-v3/xuso-victoria-01.webp'); }
-  25%,49.9% { background-image:url('/assets/new-fighters/xuso-v3/xuso-victoria-02.webp'); }
-  50%,74.9% { background-image:url('/assets/new-fighters/xuso-v3/xuso-victoria-03.webp'); }
-  75%,100% { background-image:url('/assets/new-fighters/xuso-v3/xuso-victoria-04.webp'); }
+  0%,24.9% { --xuso-action-frame:url('/assets/new-fighters/xuso-v3/xuso-victoria-01.webp'); }
+  25%,49.9% { --xuso-action-frame:url('/assets/new-fighters/xuso-v3/xuso-victoria-02.webp'); }
+  50%,74.9% { --xuso-action-frame:url('/assets/new-fighters/xuso-v3/xuso-victoria-03.webp'); }
+  75%,100% { --xuso-action-frame:url('/assets/new-fighters/xuso-v3/xuso-victoria-04.webp'); }
 }
 @keyframes xuso-v3-getup {
-  0%,32.9% { background-image:url('/assets/new-fighters/xuso-v3/xuso-levantarse-02.webp'); }
-  33%,65.9% { background-image:url('/assets/new-fighters/xuso-v3/xuso-levantarse-03.webp'); }
-  66%,100% { background-image:url('/assets/new-fighters/xuso-v3/xuso-levantarse-04.webp'); }
+  0%,32.9% { --xuso-action-frame:url('/assets/new-fighters/xuso-v3/xuso-levantarse-02.webp'); }
+  33%,65.9% { --xuso-action-frame:url('/assets/new-fighters/xuso-v3/xuso-levantarse-03.webp'); }
+  66%,100% { --xuso-action-frame:url('/assets/new-fighters/xuso-v3/xuso-levantarse-04.webp'); }
 }
 
 /* ---- Spooky, the real dog: K sprints and bites, L turns round and pees ---- */
