@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { advanceCombatStride, advanceWalkPhase, attackFacesTarget, clampFighterStep, combatApproachGap, combatContact, directionToOpponent, fighterAttackRange, visibleFighterBounds } from "../app/combat-contact.mjs";
+import { advanceCombatStride, advanceWalkPhase, attackFacesTarget, clampFighterStep, combatApproachGap, combatContact, directionToOpponent, fighterAttackRange, weaponEndpoint, visibleFighterBounds } from "../app/combat-contact.mjs";
 
 const base = { inFront: true, distance: 12, range: 19, evading: false, crouching: false, normalPunch: true };
 test("only attacks in reach and facing the opponent connect", () => {
@@ -97,4 +97,14 @@ test("walking poses follow travel, hold on a stop, and reverse when backing away
   assert.equal(advanceWalkPhase(1.5, 0), 1.5);
   const halfStep = advanceWalkPhase(3.5, 2.4);
   assert.equal(advanceWalkPhase(halfStep, 2.4), advanceWalkPhase(3.5, 4.8));
+});
+
+test("weapon art stops at its contact limit on either side of the arena", () => {
+  for (const [move, reach] of [["anchor", 70], ["hoe", 32], ["hoeSweep", 35], ["scepter", 28]]) {
+    assert.equal(weaponEndpoint(move, 10, 89, false), 10 + reach);
+    assert.equal(weaponEndpoint(move, 89, 10, false), 89 - reach);
+    assert.equal(weaponEndpoint(move, 50, 55, false), 55);
+    assert.equal(weaponEndpoint(move, 10, 89, true), 10 + reach + 7);
+  }
+  assert.equal(weaponEndpoint("shield", 10, 89, false), null);
 });

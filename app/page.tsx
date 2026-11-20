@@ -21,7 +21,7 @@ import { markFrameLoaded } from "./frame-registry";
 import { isAppleMobile, retainPreloadImage } from "./mobile-resources.mjs";
 import { spookyContact, spookyPath } from "./spooky-path.mjs";
 import { FIGHTER_FRAMES } from "./fighter-frames";
-import { advanceCombatStride, advanceWalkPhase, attackFacesTarget, clampFighterStep, combatApproachGap, combatContact, directionToOpponent, fighterAttackRange, visibleFighterBounds } from "./combat-contact.mjs";
+import { advanceCombatStride, advanceWalkPhase, attackFacesTarget, clampFighterStep, combatApproachGap, combatContact, directionToOpponent, fighterAttackRange, weaponEndpoint, visibleFighterBounds } from "./combat-contact.mjs";
 import { joystickIntent, trackHeldPointer } from "./touch-joystick.mjs";
 import GameErrorBoundary from "./GameErrorBoundary";
 import LobbyJump from "./LobbyJump";
@@ -176,7 +176,7 @@ const STAGES = [
 
 const GAME_TITLE = "HARDCORE FIGHTERS";
 const GAME_EDITION = "WEB · ARCADE EDITION";
-const GAME_VERSION = "V2.35.24";
+const GAME_VERSION = "V2.35.25";
 
 const ROUND_SECONDS = 99;
 const SUPER_MAX = 100;
@@ -405,6 +405,21 @@ function DogSpecial({ move, side, origin, target, direction }: { move: "dog" | "
 
 function SpecialEffect({ move, side, origin, target, arenaWidth, direction, airborne = false, color = "#ff8b2b", heavy = false }: { move: SpecialMove; side: Side; origin: number; target: number; arenaWidth: number; direction: AttackDirection; airborne?: boolean; color?: string; heavy?: boolean }) {
   if (move === "dog" || move === "howl") return <DogSpecial move={move} side={side} origin={origin} target={target} direction={direction} />;
+  const endpoint = weaponEndpoint(move, origin, target, airborne);
+  if (endpoint !== null) {
+    const sign = direction === "toward-right" ? 1 : -1;
+    const hand = origin + sign * Math.min(3, Math.abs(endpoint - origin));
+    const span = Math.abs(endpoint - hand);
+    return (
+      <div className={`special-fx weapon-effect weapon-${move} ${direction}`} aria-hidden="true"
+        style={{ "--weapon-time": move === "hoeSweep" ? "980ms" : `${LIGHT_SPECIAL_DURATION_MS}ms` } as CSSProperties}>
+        <b className="move-callout">{MOVE_LABELS[move]}</b>
+        <span className="weapon-lane" style={{ left: `${Math.min(hand, endpoint)}%`, width: `${span}%`, top: airborne ? "36%" : move === "hoeSweep" ? "66%" : "55%" }}>
+          {move === "anchor" ? <><i className="weapon-tether" /><img className="weapon-head" src={MOVE_ASSETS.anchor} alt="" /></> : <i className="weapon-arc" />}
+        </span>
+      </div>
+    );
+  }
   const count = ["shield", "staff", "anchor", "chain", "dog", "howl", "hoe", "hoeSweep", "flag", "flagSweep", "goldPistol", "machete"].includes(move) ? 1 : move === "fingerPeinetas" ? 4 : move === "microphone" || move === "bottles" || move === "speakers" ? 3 : 4;
   const launchPoint = Math.max(8, Math.min(92, origin + (direction === "toward-right" ? 2 : -2)));
   const distancePercent = Math.max(8, Math.abs(target - origin));
@@ -1110,6 +1125,8 @@ function Home() {
     // iOS WebKit can terminate the page when many decoded images are retained.
     // Keep a small working set there and let the browser manage the rest.
     const appleMobile = isAppleMobile(navigator.userAgent, navigator.platform, navigator.maxTouchPoints);
+    const android = /Android/i.test(navigator.userAgent);
+    const retainedFrameLimit = appleMobile ? 8 : android ? 12 : Infinity;
     const keep: HTMLImageElement[] = [];
     preloadedFramesRef.current = keep;
     let cancelled = false;
@@ -1129,7 +1146,7 @@ function Home() {
       } };
       active.add(item);
       image.decoding = "async";
-      retainPreloadImage(keep, image, appleMobile ? 8 : Infinity);
+      retainPreloadImage(keep, image, retainedFrameLimit);
       const onLoaded = () => {
         if (!appleMobile && typeof image.decode === "function") void image.decode().catch(() => undefined).finally(item.finish);
         else item.finish();
@@ -1589,6 +1606,9 @@ function Home() {
 
       const distance = Math.abs(snapshot.playerX - snapshot.cpuX);
       const specialRange = fighterAttackRange(specialMove, normalMove, airborne) + (isSuper ? 18 : 0);
+      const castOrigin = side === "player" ? snapshot.playerX : snapshot.cpuX;
+      const castTarget = side === "player" ? snapshot.cpuX : snapshot.playerX;
+      const weaponEnd = isSuper ? null : weaponEndpoint(specialMove, castOrigin, castTarget, airborne);
       const baseDamage = level === 2
         ? ATTACK_DAMAGE.specialTwo
         : level === 1
@@ -1752,8 +1772,8 @@ function Home() {
           );
           const contact = combatContact({
             inFront: spookyMove ? Boolean(spookyHit) : targetIsInFront,
-            distance: spookyMove ? 0 : liveDistance,
-            range: specialRange,
+            distance: spookyMove ? 0 : weaponEnd === null ? liveDistance : Math.abs(targetX - castOrigin),
+            range: weaponEnd === null ? specialRange : Math.abs(weaponEnd - castOrigin),
             evading: Date.now() < evadeUntilRef.current[targetSide],
             crouching: liveTargetAction === "crouch",
             normalPunch: level === 0 && normalMove === "punch" && !isLowAttack,

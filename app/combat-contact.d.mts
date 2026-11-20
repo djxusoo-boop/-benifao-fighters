@@ -23,3 +23,4 @@ export function advanceCombatStride(input: {
   elapsed: number;
 }): { velocity: number; held: number; distance: number };
 export function advanceWalkPhase(phase: number, signedTravel: number): number;
+export function weaponEndpoint(move: string | null, origin: number, target: number, airborne: boolean): number | null;

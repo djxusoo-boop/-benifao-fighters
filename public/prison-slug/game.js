@@ -1308,11 +1308,15 @@ function updatePickups(dt) {
   });
 }
 
+function setHudText(element, text) {
+  if (element.textContent !== text) element.textContent = text;
+}
+
 function updateHud() {
   const player = state.player;
   ui.health.style.width = `${clamp(state.van.boarded ? state.van.hp : player.hp, 0, 100)}%`;
   ui.energy.style.width = `${clamp(player.energy, 0, 100)}%`;
-  ui.lives.textContent = String(player.lives).padStart(2, "0");
+  setHudText(ui.lives, String(player.lives).padStart(2, "0"));
   const weapon = WEAPONS[player.weapon] ?? WEAPONS.pistol;
   const weaponText = state.van.boarded ? "CAÑÓN SÓNICO · ∞" : `${weapon.label} · ${player.weapon === "pistol" ? "∞" : Math.max(0, player.ammo)}`;
   if (ui.weapon.textContent !== weaponText) ui.weapon.textContent = weaponText;
@@ -1323,12 +1327,12 @@ function updateHud() {
   if (ui.touchFire.textContent !== glyph) ui.touchFire.textContent = glyph;
   ui.touchFire.classList.toggle("firing", isHeld("fire"));
   const rushActive = state.rush.chain > 1 && state.rush.timer > 0;
-  ui.rush.textContent = rushActive ? `RUSH ×${state.rush.multiplier} · ${state.rush.chain} BAJAS` : "RUSH · LISTO";
+  setHudText(ui.rush, rushActive ? `RUSH ×${state.rush.multiplier} · ${state.rush.chain} BAJAS` : "RUSH · LISTO");
   ui.rush.classList.toggle("hot", rushActive && state.rush.multiplier > 1);
-  ui.score.textContent = formatScore(state.score);
+  setHudText(ui.score, formatScore(state.score));
   const progress = Math.min(100, Math.floor(player.x / EXIT_X * 100));
-  ui.progress.value = progress;
-  ui.route.textContent = `${SECTOR_NAMES[state.sector - 1]} · ${progress}%`;
+  if (ui.progress.value !== progress) ui.progress.value = progress;
+  setHudText(ui.route, `${SECTOR_NAMES[state.sector - 1]} · ${progress}%`);
   const van = state.van;
   let objective = "RUMBO A LA FURGONETA";
   if (van.destroyed) objective = `SIGUE A PIE · ${state.roadGate}/4 CONTROLES`;

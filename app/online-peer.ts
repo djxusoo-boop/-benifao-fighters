@@ -105,7 +105,7 @@ export class OnlinePeer {
   }
   send(packet: RoomPacket, snapshot = false) {
     const channel = snapshot ? this.snapshots : this.control;
-    if (channel?.readyState !== 'open' || channel.bufferedAmount > 64000) return false;
+    if (channel?.readyState !== 'open' || (snapshot && channel.bufferedAmount > 64000)) return false;
     channel.send(JSON.stringify(packet)); return true;
   }
   close() {

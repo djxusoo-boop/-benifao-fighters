@@ -10541,3 +10541,41 @@ html .lobby-v2168 .mode-start-actions .fight-button .mode-sub { font-size:clamp(
 .online-count-prominent { color:#b8ffd6; font:800 clamp(15px,1.3vw,21px)/1.2 system-ui,sans-serif; letter-spacing:.03em; }
 .lobby-online-panel button { padding:10px 14px; border:1px solid #f9a949; border-radius:7px; background:#ef8b27; color:#17110b; font:800 13px/1.2 system-ui,sans-serif; cursor:pointer; }
 @media(max-width:720px) { .lobby-online-panel { width:100%; justify-content:space-between; } .online-count-prominent { font-size:16px; } .lobby-online-panel button { font-size:12px; } }
+
+/* The lane runs from the hand to the reachable point at the time of the cast. */
+.weapon-lane { position:absolute; height:0; pointer-events:none; }
+.weapon-effect.toward-left .weapon-lane { transform:scaleX(-1); }
+.weapon-tether,.weapon-arc {
+  position:absolute; width:100%; transform-origin:left center;
+  animation:weapon-extension var(--weapon-time) linear both;
+}
+.weapon-tether { height:5px; border:1px solid #3f352c; background:repeating-linear-gradient(100deg,#a79578 0 4px,#463729 4px 7px); }
+.weapon-head {
+  position:absolute; width:clamp(46px,7vw,94px); height:auto; translate:-50% -57%;
+  animation:anchor-contact var(--weapon-time) linear both;
+}
+.weapon-arc {
+  bottom:0; height:clamp(15px,4vh,38px); border-bottom:3px solid #ffdb9b;
+  border-radius:0 0 75% 50%; filter:drop-shadow(0 2px 3px #f8a640);
+  animation-name:weapon-sweep;
+}
+.weapon-scepter .weapon-arc { border-color:#d9f38d; filter:drop-shadow(0 2px 3px #80bc4a); }
+@keyframes anchor-contact {
+  0%,14% { left:0; opacity:0; transform:rotate(-22deg); }
+  16% { left:0; opacity:1; transform:rotate(-22deg); }
+  38%,46% { left:100%; opacity:1; transform:rotate(32deg); }
+  81% { left:0; opacity:1; transform:rotate(-22deg); }
+  82%,100% { left:0; opacity:0; }
+}
+@keyframes weapon-extension {
+  0%,14% { transform:scaleX(0); opacity:0; }
+  16% { transform:scaleX(0); opacity:1; }
+  38%,46% { transform:scaleX(1); opacity:1; }
+  82%,100% { transform:scaleX(0); opacity:0; }
+}
+@keyframes weapon-sweep {
+  0%,20% { transform:scaleX(0) rotate(-12deg); opacity:0; }
+  30% { opacity:.75; }
+  38%,42% { transform:scaleX(1); opacity:1; }
+  56%,100% { transform:scaleX(.92) rotate(4deg); opacity:0; }
+}

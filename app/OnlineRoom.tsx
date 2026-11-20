@@ -2,7 +2,8 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode, type PointerEvent as ReactPointerEvent } from 'react';
 import OnlineCount from './OnlineCount';
 import { OnlinePeer, type RoomPacket, type RoomRole } from './online-peer';
-import { joystickIntent } from './touch-joystick.mjs';
+import TouchStick, { type StickIntent } from './TouchStick';
+import { trackHeldPointer } from './touch-joystick.mjs';
 export type OnlineInput = 'left' | 'right' | 'jump' | 'crouch' | 'block' | 'punch' | 'kick' | 'special1' | 'special2';
 export type OnlineMode = 'fight' | 'coop' | 'orbs' | 'platform' | 'slug';
 const actions: OnlineInput[] = ['left', 'right', 'jump', 'crouch', 'block', 'punch', 'kick', 'special1', 'special2'];
@@ -118,12 +119,29 @@ export default function OnlineRoom(props: Props) {
     window.addEventListener('keydown', down, true); window.addEventListener('keyup', up, true); window.addEventListener('blur', release); document.addEventListener('visibilitychange', visibility);
     return () => { release(); window.removeEventListener('keydown', down, true); window.removeEventListener('keyup', up, true); window.removeEventListener('blur', release); document.removeEventListener('visibilitychange', visibility); };
   }, [connected, role, input, release]);
-  const stick = (event: ReactPointerEvent<HTMLDivElement>) => {
-    const b = event.currentTarget.getBoundingClientRect();
-    const intent = joystickIntent(event.clientX - b.left - b.width / 2, event.clientY - b.top - b.height / 2, b.width / 2 - 8);
-    input('left', intent.left); input('right', intent.right); input('jump', intent.jump); input('crouch', intent.crouch);
+  const stick = (intent: StickIntent) => {
+    input('left', intent.left); input('right', intent.right);
+    input('jump', intent.up); input('crouch', intent.down);
   };
-  const releaseStick = () => { for (const action of ['left', 'right', 'jump', 'crouch'] as OnlineInput[]) input(action, false); };
+  const buttonContacts = useRef(new Map<OnlineInput, () => void>());
+  useEffect(() => {
+    const contacts = buttonContacts.current;
+    return () => {
+      for (const [action, stop] of contacts) { stop(); input(action, false); }
+      contacts.clear();
+    };
+  }, [input, started, connected]);
+  const beginButton = (event: ReactPointerEvent<HTMLButtonElement>, action: OnlineInput) => {
+    event.preventDefault();
+    const contacts = buttonContacts.current;
+    if (contacts.has(action)) return;
+    const stop = trackHeldPointer(event.currentTarget, event.pointerId, { release: () => {
+      contacts.delete(action);
+      input(action, false);
+    } });
+    contacts.set(action, stop);
+    input(action, true);
+  };
   const copyCode = useCallback(() => {
     if (!code) return;
     const task = navigator.clipboard?.writeText(code);
@@ -150,7 +168,7 @@ export default function OnlineRoom(props: Props) {
   };
   if (!props.open && !role) return null;
   if (started && role === 'host') return null;
-  const control = (action: OnlineInput, key: string, label: string, className: string) => <button key={action} className={className} type="button" disabled={!connected} aria-label={label} onPointerDown={event => { event.preventDefault(); try { event.currentTarget.setPointerCapture(event.pointerId); } catch { /* Pointer input still works without capture on older WebViews. */ } input(action, true); }} onPointerUp={() => input(action, false)} onPointerCancel={() => input(action, false)} onLostPointerCapture={() => input(action, false)}><span>{key}</span><small>{label}</small></button>;
+  const control = (action: OnlineInput, key: string, label: string, className: string) => <button key={action} className={className} type="button" disabled={!connected} aria-label={label} onPointerDown={event => beginButton(event, action)}><span>{key}</span><small>{label}</small></button>;
   return <section className={`online-room ${started ? 'online-playing' : ''}`} aria-label="Sala online">
     <header className="online-room-header"><div><span className="online-eyebrow">HARDCORE FIGHTERS · ONLINE</span><strong>{code ? `SALA ${code}` : 'JUGAR ONLINE'}</strong></div><div className="online-header-actions"><OnlineCount /><button type="button" onClick={leave}>SALIR</button></div></header>
     <p className={`online-status ${connected ? 'is-connected' : ''}`} role="status"><i />{status}</p>
@@ -162,11 +180,7 @@ export default function OnlineRoom(props: Props) {
       <small className="online-footnote">Ambos necesitan internet para entrar en la sala. Si no conecta, probad en la misma Wi‑Fi.</small>
     </div>}
     {role === 'guest' && started && <><div className="online-remote-scene">{props.renderSnapshot(snapshot)}</div><div className="online-controls touch-controls" aria-label="Controles táctiles del jugador dos">
-      <div className="touch-joystick-wrap">
-        <div className="touch-joystick" role="group" aria-label="Joystick: mover, saltar y agacharse" onPointerDown={event => { event.preventDefault(); try { event.currentTarget.setPointerCapture(event.pointerId); } catch { /* Older WebViews can still deliver pointer moves. */ } stick(event); }} onPointerMove={event => { if (event.buttons) stick(event); }} onPointerUp={releaseStick} onPointerCancel={releaseStick} onLostPointerCapture={releaseStick}>
-          <span className="touch-joystick-arrows" aria-hidden="true"><i className="up">↑</i><i className="left">←</i><i className="right">→</i><i className="down">↓</i></span><span className="touch-joystick-stick" aria-hidden="true" />
-        </div><small className="touch-joystick-label">MOVER · ↑ SALTO · ↓ AGACHAR</small>
-      </div>
+      {connected && <TouchStick fightStyle onChange={stick} label="Joystick: mover, saltar y agacharse" hint="MOVER · ↑ SALTO · ↓ AGACHAR" />}
       <div className="touch-actions touch-actions-redesign">
         {control('block','◆','BLOQUEO','touch-block')}{control('punch','J','PUÑO','touch-hit')}{control('kick','H','PATADA','touch-kick')}{control('special1','K','ESPECIAL','touch-special-one')}{control('special2','L','SUPER','touch-special-two')}
       </div>

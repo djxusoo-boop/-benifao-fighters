@@ -16,6 +16,8 @@ export function attackFacesTarget(direction, attackerX, targetX) {
   return direction === "toward-right" ? targetX >= attackerX : targetX <= attackerX;
 }
 
+const closeRanges = { scepter: 28, hoe: 32, hoeSweep: 35 };
+
 /** Match projectile and extended-weapon contact distance to their on-screen travel. */
 export function fighterAttackRange(specialMove, normalMove, airborne = false) {
   const normalRange = normalMove === "kick" ? 24 : 19;
@@ -25,7 +27,8 @@ export function fighterAttackRange(specialMove, normalMove, airborne = false) {
     "fish", "fishstorm", "toad", "venom", "shield", "staff", "anchor", "chain",
     "jager", "amber", "artichokes",
   ]);
-  const weaponRange = specialMove === "scepter" ? 28 : longRangeMoves.has(specialMove) ? 70 : 58;
+
+  const weaponRange = closeRanges[specialMove] ?? (longRangeMoves.has(specialMove) ? 70 : 58);
   return (specialMove ? weaponRange : normalRange) + (airborne ? 7 : 0);
 }
 
@@ -89,4 +92,11 @@ export function advanceCombatStride({ velocity, held, input, airborne, retreatin
 /** Each pose spans 4.8 percent of the arena. Retreat plays the cycle backwards. */
 export function advanceWalkPhase(phase, signedTravel) {
   return ((phase + signedTravel / 4.8) % 4 + 4) % 4;
+}
+
+// The art and the contact test use the same endpoint, fixed when the swing begins.
+export function weaponEndpoint(move, origin, target, airborne) {
+  if (!["anchor", "hoe", "hoeSweep", "scepter"].includes(move)) return null;
+  const reach = fighterAttackRange(move, "punch", airborne);
+  return origin + Math.sign(target - origin) * Math.min(Math.abs(target - origin), reach);
 }

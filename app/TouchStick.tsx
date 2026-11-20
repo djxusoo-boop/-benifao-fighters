@@ -11,13 +11,14 @@ type Props = {
   label: string;
   hint?: string;
   className?: string;
+  fightStyle?: boolean;
 };
 
 const NEUTRAL: StickIntent = { left: false, right: false, up: false, down: false };
 
 // The same thumb stick as the fight mode, for every other mode. It always sits
 // bottom-left; the action buttons of each mode go bottom-right.
-export default function TouchStick({ onChange, label, hint, className = "" }: Props) {
+export default function TouchStick({ onChange, label, hint, className = "", fightStyle = false }: Props) {
   const baseRef = useRef<HTMLDivElement>(null);
   const trackingRef = useRef<(() => void) | null>(null);
   const intentRef = useRef<StickIntent>(NEUTRAL);
@@ -63,13 +64,16 @@ export default function TouchStick({ onChange, label, hint, className = "" }: Pr
     track(event.clientX, event.clientY);
   };
 
+  const baseClass = fightStyle ? "touch-joystick" : "mode-stick";
   return (
-    <div className={`mode-stick-wrap ${className}`}>
-      <div ref={baseRef} className="mode-stick" role="group" aria-label={label} onPointerDown={begin}>
-        <span className="mode-stick-arrows" aria-hidden="true"><i className="up">↑</i><i className="left">←</i><i className="right">→</i><i className="down">↓</i></span>
-        <span className="mode-stick-knob" style={{ "--kx": knob.x, "--ky": knob.y } as CSSProperties} aria-hidden="true" />
+    <div className={`${baseClass}-wrap ${className}`}>
+      <div ref={baseRef} className={baseClass} role="group" aria-label={label} onPointerDown={begin}>
+        <span className={`${baseClass}-arrows`} aria-hidden="true"><i className="up">↑</i><i className="left">←</i><i className="right">→</i><i className="down">↓</i></span>
+        <span className={fightStyle ? "touch-joystick-stick" : "mode-stick-knob"} style={fightStyle
+          ? { transform: `translate(${knob.x * 30}px, ${knob.y * 30}px)` }
+          : { "--kx": knob.x, "--ky": knob.y } as CSSProperties} aria-hidden="true" />
       </div>
-      {hint && <small className="mode-stick-hint">{hint}</small>}
+      {hint && <small className={fightStyle ? "touch-joystick-label" : "mode-stick-hint"}>{hint}</small>}
     </div>
   );
 }
