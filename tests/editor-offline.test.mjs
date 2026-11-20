@@ -21,12 +21,33 @@ test("the editor and the game keep separate offline navigation pages", async () 
   vm.runInNewContext(readFileSync(new URL("../public/sw.js", import.meta.url), "utf8"), { self, caches, fetch, URL, Response });
   async function navigate(path) {
     let response;
-    handlers.fetch({ request: { method: "GET", mode: "navigate", url: `https://game.test${path}` }, respondWith: (promise) => { response = promise; } });
-    return (await response).text();
+    const pending = [];
+    handlers.fetch({ request: { method: "GET", mode: "navigate", url: `https://game.test${path}` }, waitUntil: promise => pending.push(promise), respondWith: (promise) => { response = promise; } });
+    const body = await (await response).text();
+    await Promise.all(pending);
+    return body;
   }
   assert.equal(await navigate("/"), "game");
   assert.equal(await navigate("/editor.html"), "editor");
   online = false;
   assert.equal(await navigate("/"), "game");
   assert.equal(await navigate("/editor.html"), "editor");
+});
+
+test("a full cache cannot interrupt an online fight or discard the fresh page and scripts", async () => {
+  let handle;
+  const full = () => { throw new Error("QuotaExceededError"); };
+  const caches = { match: full, open: async () => ({ put: full }) };
+  const self = { location: { origin: "https://game.test" }, addEventListener(type, fn) { if (type === "fetch") handle = fn; } };
+  vm.runInNewContext(readFileSync(new URL("../public/sw.js", import.meta.url), "utf8"), {
+    self, caches, fetch: async () => new Response("fresh"), URL, Response,
+  });
+  for (const [path, mode] of [["/", "navigate"], ["/fight.js", "cors"], ["/assets/elchica.webp", "cors"]]) {
+    const pending = [];
+    let reply;
+    handle({ request: { method: "GET", mode, url: "https://game.test" + path },
+      waitUntil: task => pending.push(task), respondWith: task => { reply = task; } });
+    assert.equal(await (await reply).text(), "fresh");
+    await Promise.all(pending);
+  }
 });

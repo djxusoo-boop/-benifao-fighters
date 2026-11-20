@@ -23,7 +23,7 @@ const CORE_ASSETS = [
   "/assets/new-fighters/borja-idle.webp",
   "/assets/new-fighters/bacora-idle.webp",
   "/assets/new-fighters/bonviure-idle.webp",
-  "/assets/new-fighters/elchica-atlas.webp",
+  "/assets/new-fighters/elchica-rig-v21849-idle.webp",
   "/assets/new-fighters/ogalla-atlas.webp",
   "/prison-slug/assets/duo-dog.webp",
   "/prison-slug/assets/hoe-hero.webp",

@@ -176,7 +176,7 @@ const STAGES = [
 
 const GAME_TITLE = "HARDCORE FIGHTERS";
 const GAME_EDITION = "WEB · ARCADE EDITION";
-const GAME_VERSION = "V2.35.25";
+const GAME_VERSION = "V2.35.26";
 
 const ROUND_SECONDS = 99;
 const SUPER_MAX = 100;
@@ -308,7 +308,9 @@ const ARCADE_PICKUPS = [
 // fighter could turn invisible the first time a pose appeared while its PNG
 // was still downloading.
 const cssFramesFor = (fighter: string): string[] => {
-  if (typeof document === "undefined") return [];
+  // El Chica has a verified manifest. Scanning historical CSS also pulls in
+  // unused PNG copies of its attack strips and obsolete full-size atlases.
+  if (fighter === "elchica" || typeof document === "undefined") return [];
   const found = new Set<string>();
   const selectorMatch = new RegExp(`\\.${fighter}(?![\\w-])`);
   // File names carry the fighter id (bacora-kick-strip…, /ogalla/…), which also
