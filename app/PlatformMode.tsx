@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import type { PointerEvent as ReactPointerEvent } from "react";
 import ArcadeCrowd, { type CrowdCue } from "./ArcadeCrowd";
 import TouchStick from "./TouchStick";
+import { trackHeldPointer } from "./touch-joystick.mjs";
 import { canvasResolutionScale } from "./mobile-resources.mjs";
 import { RANGED_ATTACK_LABELS } from "./fighter-profiles";
 
@@ -649,6 +650,7 @@ export default function PlatformMode({ fighter, fighterName, soundOn, difficulty
   const inputRef = useRef({ left: false, right: false, jump: false });
   const jumpRef = useRef<() => void>(() => undefined);
   const stickJumpRef = useRef(false);
+  const jumpButtonTracking = useRef<(() => void) | null>(null);
   const attackRef = useRef<() => void>(() => undefined);
   const specialRef = useRef<() => void>(() => undefined);
   const onExitRef = useRef(onExit);
@@ -2361,6 +2363,9 @@ export default function PlatformMode({ fighter, fighterName, soundOn, difficulty
     window.addEventListener("keydown", handleKeyDown, { passive: false });
     window.addEventListener("keyup", handleKeyUp);
     const releaseInput = () => {
+      jumpButtonTracking.current?.();
+      jumpButtonTracking.current = null;
+      stickJumpRef.current = false;
       input.left = false;
       input.right = false;
       input.jump = false;
@@ -2387,9 +2392,16 @@ export default function PlatformMode({ fighter, fighterName, soundOn, difficulty
     };
   }, [campaign, difficulty, fighter, round, startLevel, status]);
 
-  const releaseJump = (event: ReactPointerEvent<HTMLButtonElement>) => {
+  const pressJump = (event: ReactPointerEvent<HTMLButtonElement>) => {
     event.preventDefault();
-    inputRef.current.jump = false;
+    if (jumpButtonTracking.current) return;
+    jumpButtonTracking.current = trackHeldPointer(event.currentTarget, event.pointerId, {
+      release: () => {
+        jumpButtonTracking.current = null;
+        if (!stickJumpRef.current) inputRef.current.jump = false;
+      },
+    });
+    jumpRef.current();
   };
 
   const launchLevel = (levelIndex: number) => {
@@ -2453,13 +2465,13 @@ export default function PlatformMode({ fighter, fighterName, soundOn, difficulty
           inputRef.current.left = intent.left;
           inputRef.current.right = intent.right;
           if (intent.up && !stickJumpRef.current) jumpRef.current();
-          if (!intent.up && stickJumpRef.current) inputRef.current.jump = false;
+          if (!intent.up && stickJumpRef.current && !jumpButtonTracking.current) inputRef.current.jump = false;
           stickJumpRef.current = intent.up;
         }} />
         <div className="platform-touch-actions">
           <button className="platform-attack-button" type="button" aria-label={`Ataque de ${fighterName}`} onPointerDown={(event) => { event.preventDefault(); attackRef.current(); }}>J<small>{ATTACK_LABELS[fighter][0]}</small></button>
           <button className="platform-special-button" type="button" aria-label={`Especial de ${fighterName}`} onPointerDown={(event) => { event.preventDefault(); specialRef.current(); }}>★<small>{ATTACK_LABELS[fighter][1]}</small></button>
-          <button className="platform-jump-button" type="button" aria-label="Saltar" onPointerDown={(event) => { event.preventDefault(); event.currentTarget.setPointerCapture?.(event.pointerId); jumpRef.current(); }} onPointerUp={releaseJump} onPointerCancel={releaseJump} onLostPointerCapture={() => { inputRef.current.jump = false; }}>↑<small>SALTO</small></button>
+          <button className="platform-jump-button" type="button" aria-label="Saltar" onPointerDown={pressJump}>↑<small>SALTO</small></button>
         </div>
       </div>
 

@@ -97,12 +97,9 @@ export default function FighterVisibilityGuard() {
     // disappearance used to pin an inline `animation:none`, which randomly
     // cancelled kicks (most noticeably Vanessa's).
     const invisibleChecks = new WeakMap<HTMLElement, number>();
-    let frame = 0;
-    let tick = 0;
+
     const check = () => {
-      frame = window.requestAnimationFrame(check);
-      tick += 1;
-      if (tick % 2) return;
+      if (document.hidden) return;
       const arena = document.querySelector(".arena.phase-fight, .arena.phase-ko, .arena.phase-intro");
       if (!arena) return;
       arena.querySelectorAll<HTMLElement>(":scope > .fighter").forEach((fighter) => {
@@ -127,7 +124,7 @@ export default function FighterVisibilityGuard() {
         invisibleChecks.set(fighter, misses);
         // A single layout/paint frame can transiently report no art. Wait long
         // enough to distinguish that from a real vanished fighter.
-        if (misses < 6) return;
+        if (misses < 3) return;
         const fallback = lastGood.get(fighter) ?? frames[0];
         if (!fallback || !isLoaded(fallback.url)) return;
         applyRescue(fighter, art, fallback);
@@ -138,8 +135,15 @@ export default function FighterVisibilityGuard() {
         }
       });
     };
-    frame = window.requestAnimationFrame(check);
-    return () => window.cancelAnimationFrame(frame);
+    // Three samples span 160 ms regardless of the display refresh rate.
+    const timer = window.setInterval(check, 80);
+    return () => {
+      window.clearInterval(timer);
+      document.querySelectorAll<HTMLElement>(".fighter.art-rescue").forEach(fighter => {
+        const art = fighter.querySelector<HTMLElement>(".fighter-art");
+        if (art) clearRescue(fighter, art);
+      });
+    };
   }, []);
   return null;
 }

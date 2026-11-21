@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import type { CSSProperties, MouseEvent as ReactMouseEvent, PointerEvent as ReactPointerEvent } from "react";
 import OnlineCount from "./OnlineCount";
@@ -176,7 +176,7 @@ const STAGES = [
 
 const GAME_TITLE = "HARDCORE FIGHTERS";
 const GAME_EDITION = "WEB · ARCADE EDITION";
-const GAME_VERSION = "V2.35.27";
+const GAME_VERSION = "V2.35.28";
 
 const ROUND_SECONDS = 99;
 const SUPER_MAX = 100;
@@ -307,38 +307,49 @@ const ARCADE_PICKUPS = [
 // pseudo-element layers). The hand-written frame list went out of date, so a
 // fighter could turn invisible the first time a pose appeared while its PNG
 // was still downloading.
-const cssFramesFor = (fighter: string): string[] => {
-  // El Chica has a verified manifest. Scanning historical CSS also pulls in
-  // unused PNG copies of its attack strips and obsolete full-size atlases.
-  if (fighter === "elchica" || typeof document === "undefined") return [];
-  const found = new Set<string>();
-  const selectorMatch = new RegExp(`\\.${fighter}(?![\\w-])`);
-  // File names carry the fighter id (bacora-kick-strip…, /ogalla/…), which also
-  // catches images used inside @keyframes and custom properties.
-  const urlMatch = new RegExp(`[/-]${fighter}(?![a-z])|/${fighter}-`, "i");
-  const collect = (cssText: string, bySelector: boolean) => {
-    for (const match of cssText.matchAll(/url\(["']?([^"')]+)["']?\)/g)) {
-      const url = match[1];
-      if (!(url.startsWith("/") || url.startsWith(location.origin))) continue;
-      if (bySelector || urlMatch.test(url)) found.add(url);
-    }
-  };
+type FrameRule = { selector: string; urls: string[] };
+const stylesheetFrames = new WeakMap<CSSStyleSheet, FrameRule[]>();
+
+function frameRulesForSheet(sheet: CSSStyleSheet): FrameRule[] {
+  // Game CSS is static. Vite replaces its stylesheet when edited. Leave
+  // arbitrary inline sheets uncached so later CSSOM edits remain visible.
+  const cacheable = Boolean(sheet.href || (sheet.ownerNode instanceof Element && sheet.ownerNode.hasAttribute("data-vite-dev-id")));
+  const cached = cacheable && stylesheetFrames.get(sheet);
+  if (cached) return cached;
+  const entries: FrameRule[] = [];
   const visit = (rules: CSSRuleList) => {
     for (const rule of Array.from(rules)) {
-      if (rule instanceof CSSStyleRule) {
-        const lobbyOnly = /\.(portrait|result-dancer-art|orb-|platform-|coop-)/.test(rule.selectorText) && !/\.fighter/.test(rule.selectorText);
-        collect(rule.cssText, selectorMatch.test(rule.selectorText) && !lobbyOnly);
-      } else if (typeof CSSKeyframesRule !== "undefined" && rule instanceof CSSKeyframesRule) {
-        collect(rule.cssText, false);
+      if (rule instanceof CSSStyleRule || (typeof CSSKeyframesRule !== "undefined" && rule instanceof CSSKeyframesRule)) {
+        const urls = [...rule.cssText.matchAll(/url\(["']?([^"')]+)["']?\)/g)]
+          .map(match => match[1])
+          .filter(url => (url.startsWith("/") || url.startsWith(location.origin)) && !/portrait|result|orb-|platform-|coop-|lobby|card/i.test(url));
+        if (!urls.length) continue;
+        let selector = rule instanceof CSSStyleRule ? rule.selectorText : "";
+        if (/\.(portrait|result-dancer-art|orb-|platform-|coop-)/.test(selector) && !/\.fighter/.test(selector)) selector = "";
+        entries.push({ selector, urls });
       } else if ("cssRules" in rule && (rule as CSSGroupingRule).cssRules) {
         visit((rule as CSSGroupingRule).cssRules);
       }
     }
   };
+  try { visit(sheet.cssRules); } catch { return entries; }
+  if (cacheable && entries.length) stylesheetFrames.set(sheet, entries);
+  return entries;
+}
+
+const cssFramesFor = (fighter: string): string[] => {
+  // El Chica has a verified manifest that excludes obsolete full-size atlases.
+  if (fighter === "elchica" || typeof document === "undefined") return [];
+  const found = new Set<string>();
+  const selectorMatch = new RegExp(`\\.${fighter}(?![\\w-])`);
+  const urlMatch = new RegExp(`[/-]${fighter}(?![a-z])|/${fighter}-`, "i");
   for (const sheet of Array.from(document.styleSheets)) {
-    try { visit(sheet.cssRules); } catch { /* Cross-origin sheets can't be read. */ }
+    for (const { selector, urls } of frameRulesForSheet(sheet)) {
+      const matches = selectorMatch.test(selector);
+      for (const url of urls) if (matches || urlMatch.test(url)) found.add(url);
+    }
   }
-  return [...found].filter((url) => !/portrait|result|orb-|platform-|coop-|lobby|card/i.test(url));
+  return [...found];
 };
 
 function SuperEffect({ fx, minimal = false }: { fx: NonNullable<SuperFx>; minimal?: boolean }) {
@@ -1091,7 +1102,9 @@ function Home() {
     document.title = `${GAME_TITLE} · ${GAME_VERSION} · ${phaseLabel}`;
   }, [cpuData.name, game.phase, playerData.name]);
 
-  useEffect(() => {
+  // Input can arrive as soon as the recovery pose is visible. Read the same
+  // state the player sees, including between commit and passive effects.
+  useLayoutEffect(() => {
     gameRef.current = game;
   }, [game]);
 
@@ -3498,7 +3511,7 @@ function Home() {
             {v.game.phase === "over" && <div className="online-round-call">{v.game.winner === "cpu" ? "¡HAS GANADO!" : v.game.winner === "draw" ? "EMPATE" : "FIN DEL COMBATE"}<small>Tu amigo puede iniciar la revancha.</small></div>}
           </section>;
         }} />
-      {onlineRole !== "guest" && <FighterVisibilityGuard />}
+      {onlineRole !== "guest" && (game.phase === "intro" || game.phase === "fight" || game.phase === "ko") && <FighterVisibilityGuard />}
       <AutoFullscreen />
       <GameDiagnostics open={diagnosticsOpen} onClose={() => setDiagnosticsOpen(false)} />
       <header className="topbar">

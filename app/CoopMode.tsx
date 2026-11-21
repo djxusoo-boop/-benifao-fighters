@@ -826,7 +826,6 @@ export default function CoopMode({ playerOne, playerTwo, aiPlayerTwo = false, so
 
   const tapAction = (event: ReactPointerEvent<HTMLButtonElement>, action: () => void) => {
     event.preventDefault();
-    event.currentTarget.setPointerCapture?.(event.pointerId);
     action();
   };
 

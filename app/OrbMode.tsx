@@ -756,7 +756,6 @@ export default function OrbMode({ fighter, fighterName, soundOn, difficulty, cam
 
   const beginTouch = (event: ReactPointerEvent<HTMLButtonElement>, action: () => void) => {
     event.preventDefault();
-    event.currentTarget.setPointerCapture?.(event.pointerId);
     action();
   };
 
